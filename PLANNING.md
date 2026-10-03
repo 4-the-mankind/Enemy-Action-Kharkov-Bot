@@ -1,0 +1,181 @@
+# PLANNING — EA Kharkov Bot
+
+Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour au fil de l'eau.
+
+**Statuts** : `[ ]` à faire · `[~]` en cours · `[x]` fait · `[!]` bloqué (raison indiquée).
+**Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
+**Charge IA** : léger · moyen · lourd.
+
+Mise à jour : 2026-10-03.
+
+---
+
+## 1. Objectif
+
+Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – German Solo*. Le joueur joue les Allemands sur le plateau réel et indique à l'application ce qui s'est passé. L'application applique la procédure soviétique et **affiche sur la carte** les déplacements et actions du bot, avec un **journal expliquant chaque décision**.
+
+- Court terme : **POC en 2-3 soirées** (voir §4, jalon M1).
+- Long terme : application web installable sur téléphone (**PWA**), sans serveur.
+
+---
+
+## 2. Décisions
+
+### Validées par le dev
+| # | Décision | Date |
+|---|---|---|
+| D1 | Les règles se lisent dans `docs/rules-german-solo.md` (index par numéro de ligne), pas dans le PDF. | 2026-10-03 |
+| D2 | Carte = image **PNG** haute résolution en fond, avec une **grille d'hexagones générée** par le programme et calée sur l'image. | 2026-10-03 |
+| D3 | Un clic sur la carte renvoie le **numéro de case**, ou le **côté de case** si on clique près d'un bord. | 2026-10-03 |
+| D4 | Numérotation des cases `CCRR` : `CC` = colonne, `RR` = ligne ; la toute première case est **0101** (1re colonne, 1re ligne), pas 0001. | 2026-10-03 |
+| D5 | La carte n'est pas un rectangle : le dev **peint les cases mortes** (non jouables). | 2026-10-03 |
+| D6 | Données au format **JSON**. | 2026-10-03 |
+| D7 | Projet sous **git** (dépôt initialisé). | 2026-10-03 |
+| D8 | **Tests de référence** : les exemples chiffrés du livret (p17, 18, 19, 24, 25, 32, 44…) sont rejoués et le résultat doit être identique au livre. | 2026-10-03 |
+
+### Proposées par défaut (non contestées ; le dev peut les remettre en cause)
+| # | Proposition |
+|---|---|
+| P1 | Moteur de décision **codé et déterministe** (pas un LLM). Chaque décision est tracée : méthode, préférence et départage utilisés. |
+| P2 | Stack : **TypeScript + Vite**, carte en **SVG** par-dessus la PNG, tests **Vitest**. Tout tourne dans le navigateur. |
+| P3 | **Paquet soviétique virtuel** : l'application tire les cartes E01-E22. Les cartes allemandes restent physiques. |
+| P4 | POC : le dev **saisit les résultats de combat** ; la simulation des jetons de combat vient plus tard. |
+| P5 | Parties sauvegardées dans le navigateur (IndexedDB), en phase 5. |
+| P6 | Modèle, effort, plugins et règles d'économie de tokens : voir §7. |
+
+---
+
+## 3. Conventions de données
+
+- **Case** : `"CCRR"` (chaîne de 4 chiffres). Voisinage et distances calculés par le code à partir de la grille.
+- **Côté de case** : paire des deux cases triées, `"0912-0913"`. Pour un bord de carte, l'autre case peut être hors grille ou morte.
+- **Orientation géographique (hypothèse à vérifier sur la PNG)** : d'après le livret (15.1 : numéros décroissants = du sud au nord, puis d'ouest en est ; Zaporozhe 3116 au sud ; Valuyki 0302 à l'est ; le joueur s'assoit côté ouest), `CC` augmente vers le **sud** et `RR` vers l'**ouest**. Cela compte pour les départages « le plus à l'ouest/est » et pour la direction W/S des marqueurs d'objectif.
+- **Fichiers prévus** (dossier `data/`) :
+  - `map-grid.json` : calage de la grille (orientation des hexagones, décalage des colonnes, origine, taille, nombre de colonnes et de lignes).
+  - `map-hexes.json` : par case : jouable ou morte, terrain, village, valeur en PV, propriétaire initial, cibles de front (V/S), case logistique (V/S), flèches (primaire/secondaire, conditionnelles V/S), bord de carte (soviétique/allemand), zone de déploiement allemande, position par rapport aux lignes (artillerie/soutien est, soutien ouest/limite proche, limite lointaine).
+  - `map-hexsides.json` : par côté : route, rivière mineure, Donets, Dniepr, Dniepr bloqué.
+  - `units.json` : désignation, camp, front/armée ou armée/corps, type, pas, force pleine et réduite, mouvement, sélecteur plein et réduit, case de départ ou tour d'entrée, pion « R ».
+  - `cards-soviet.json` : ID, valeur de commandement, Primary, tour d'entrée, liste ordonnée des commandes, tactiques.
+  - `terrain-effects.json` : coûts de mouvement et effets de combat (tableau des terrains de l'aide de jeu).
+  - `scenarios/*.json` : mise en place et ajustements (résultats de dé 1-10).
+- **État de partie** : un JSON sérialisable (tour, impulsion, positions, pas, marqueurs, propriété des villes, PV, cartes, objectifs).
+
+---
+
+## 4. Phases et tâches
+
+### Phase 0 — Fondations
+- [x] **0.1** Conversion du livret en `docs/rules-german-solo.md` — IA — fait
+- [x] **0.2** `git init` + `.gitignore` + premier commit — IA — fait
+- [x] **0.3** `PLANNING.md` + `CLAUDE.md` — IA — fait
+- [x] **0.4** Installer Node.js LTS — IA — fait : v24.21.0 via nvm (dans les commandes de l'IA : `source ~/.nvm/nvm.sh && …`)
+- [ ] **0.5** Déposer la carte PNG dans `assets/map/` — Dev
+- [ ] **0.6** Scans : planches de pions recto/verso, cartes soviétiques E01-E22, aides de jeu (tableau des terrains, événements et tactiques, résumé des activations soviétiques) — Dev
+- [ ] **0.7** Squelette d'application (Vite + TS + Vitest), structure `src/ data/ tools/ tests/` — IA — léger
+- [x] **0.8** Régler la propriété du dossier (voir §6, Q7) — Dev — fait
+
+### Phase 1 — Carte (POC, soirées 1-2)
+- [ ] **1.1** Outil de calage : afficher la PNG, choisir l'orientation des hexagones et le décalage, cliquer 2-3 centres connus (ex. 0101 et une case lointaine) → `map-grid.json` — IA — léger
+- [ ] **1.2** Grille superposée ; au survol et au clic : numéro de case, ou côté de case près d'un bord (D3) — IA — léger
+- [ ] **1.3** Éditeur à pinceaux : cases mortes, terrain, villages, PV, cibles V/S, logistique, bords de carte, zones de déploiement, flèches, côtés de case (routes, rivières), lignes ; export JSON ; annuler/refaire — IA — moyen
+- [ ] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA — léger/moyen
+- [ ] **1.5** Calques de debug activables : grille, numéros, terrain, côtés, flèches, cibles, lignes (plus tard : zones de contrôle, portée, ravitaillement) — IA — léger
+- [ ] **1.6** Annoter la **zone de l'exemple p17** (3ᵉ Armée blindée, tour 1, environ les cases 05xx-11xx) — Dev
+- [ ] **1.7** Annoter le reste de la carte (peut continuer en parallèle des phases suivantes) — Dev — gros morceau
+
+### Phase 2 — Unités et état (POC, soirée 2)
+- [ ] **2.1** Schéma `units.json` ; saisie des unités de l'exemple p17 (3T + Allemands voisins) — IA+Dev — léger
+- [ ] **2.2** État de partie + placement des pions par glisser-déposer sur la carte — IA — moyen
+- [ ] **2.3** Extraction de toutes les unités depuis les scans, avec un écran de vérification (image du pion à côté de ses données) — IA (extraction) + Dev (vérification) — léger
+
+### Phase 3 — Moteur POC (soirées 2-3) → jalon **M1 = POC**
+- [ ] **3.1** Géométrie : voisins, distance, côtés de case, exception du Dniepr bloqué — IA — léger
+- [ ] **3.2** Mouvement : coûts du tableau des terrains, routes, rivières, zones de contrôle, empilement ; cases atteignables ; « proximate » ; encerclé / presque encerclé — IA — moyen
+- [ ] **3.3** Méthodes de mouvement 9.21 (1-12) + restrictions 9.23 + départages 9.24 + préférences tactiques 9.25 + journal des décisions — IA — lourd
+- [ ] **3.4** Test de référence p17 : reproduire exactement les déplacements du livre — IA+Dev
+- [ ] **3.5** Affichage des mouvements du bot sur la carte (flèches) + panneau du journal — IA — léger
+
+**M1 atteint** quand le test 3.4 passe et que le résultat est visible sur la carte.
+
+### Phase 4 — Bot complet
+- [ ] **4.1** Cartes soviétiques en JSON ; choix carte de commandement / auxiliaire (8.1) ; commandes 8.11-8.13 — IA — moyen
+- [ ] **4.2** Objectifs de front et d'armée (9.1, tables de placement), armées avec objectif (9.26), unités non ravitaillées (9.27) — IA — moyen
+- [ ] **4.3** Ravitaillement (13.1-13.4), soutien (13.5), limite opérationnelle (9.8), méthodes 9.22 — IA — lourd
+- [ ] **4.4** Tests d'attaque (9.4), réserves en attaque (12.2) et en placement (9.5), retrait en réserve (9.6), positions améliorées (9.7) — IA — lourd
+- [ ] **4.5** Combat : saisie des résultats, puis côté soviétique : pertes, retraites, avances (12.53, 12.54, 12.7, 12.83) ; simulation des 60 jetons en option (données des jetons à fournir) — IA — moyen
+- [ ] **4.6** Garnisons (15), remplacements (16), événements (aide de jeu), victoire (17-18), boue (18.34) — IA — moyen
+- [ ] **4.7** Mise en place et ajustements (dé 1-10) : le dev relève les positions des schémas p48-50 — IA+Dev — léger
+- [ ] **4.8** Tests de référence p18, p19, p24, p25, p32, p44 — IA+Dev — moyen
+
+### Phase 5 — Jouabilité et PWA
+- [ ] **5.1** Saisie du tour allemand : déplacements, attaques, résultats, cartes allemandes jouées — IA — moyen
+- [ ] **5.2** Annuler, sauvegarde et reprise de partie (IndexedDB) — IA — léger
+- [ ] **5.3** Interface mobile, manifest et service worker (hors ligne) — IA — léger/moyen
+
+### Phase 6 — Optionnel
+- [ ] **6.1** Assistant IA (serveur MCP) qui explique les décisions du bot ou répond aux questions de règles à partir du journal et de `docs/` — IA — moyen
+
+---
+
+## 5. Prérequis à fournir par le dev
+- [ ] Carte PNG → `assets/map/` (0.5)
+- [ ] Scans des pions recto/verso → `assets/counters/`
+- [ ] Scans des cartes soviétiques E01-E22 → `assets/cards/`
+- [ ] Aides de jeu : tableau des terrains, événements et tactiques, activations soviétiques → `assets/aids/`
+- [ ] Positions des schémas d'ajustement de mise en place (p48-50), pour la phase 4.7
+- [ ] Réponses aux questions ouvertes (§6)
+
+---
+
+## 6. Questions ouvertes
+| # | Question | Statut |
+|---|---|---|
+| Q1 | Orientation des hexagones (côté plat ou pointe en haut) et colonnes décalées : sera visible sur la PNG. | ouverte |
+| Q2 | Orientation géographique de la numérotation (§3) : confirmer sur la PNG. | ouverte |
+| Q3 | Combat : jetons et dé physiques avec saisie des résultats, ou simulation complète par l'application ? (Proposition P4 pour le POC.) | ouverte |
+| Q4 | Usage : PC à côté du plateau d'abord, téléphone ensuite ? | ouverte |
+| Q5 | Incohérence du livret : Chuguev est en 1009 dans la liste des villes, mais en 1008 dans les ajustements « Raus Overrun » et « Voronezh Front Breakout ». | ouverte |
+| Q6 | Existe-t-il un module VASSAL du jeu ? Il pourrait fournir carte et pions déjà numérisés. | ouverte |
+| Q7 | Le dossier appartenait à l'utilisateur `claude` et git refusait de travailler. | réglée : propriétaire changé (2026-10-03) |
+
+---
+
+## 7. Outillage IA et économie de tokens
+
+### 7.1 Modèle et effort par type de tâche
+Changer de modèle **au début d'une nouvelle session**, pas en cours de route (le cache de la conversation est perdu à chaque changement de modèle).
+
+| Type de tâche | Tâches | Modèle | Effort |
+|---|---|---|---|
+| Discussion, planning, questions de règles simples | — | Sonnet 5 | moyen |
+| Squelette, outils de carte, interface, PWA | 0.7, 1.x, 2.2, 3.5, 5.x | Sonnet 5 | moyen |
+| Extraction des pions et cartes depuis les scans | 2.3, 4.1 | sous-agent Sonnet 5 | bas à moyen |
+| Géométrie, mouvement, ravitaillement | 3.1, 3.2, 4.3 | Opus 5.5 | élevé |
+| Cœur du bot : méthodes de mouvement, tests d'attaque, réserves, combat | 3.3, 4.2, 4.4, 4.5 | Opus 5.5 | très élevé |
+| Débogage d'un test de référence qui échoue | 3.4, 4.8 | Opus 5.5 | élevé |
+| Tâches mécaniques (renommer, reformater du JSON) | — | Haiku 4.5 | bas |
+
+L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher : l'application exacte des règles soviétiques.
+
+### 7.2 Plugins, skills, MCP
+- **Déjà disponibles, rien à installer :**
+  - navigateur intégré à l'application Claude, pour tester l'app : lire la page en texte plutôt qu'en capture d'écran, une capture coûte bien plus de tokens ;
+  - skills `run` (lancer l'app), `code-review` (relire les changements), `simplify` (simplifier le code), `fewer-permission-prompts` (autoriser une fois pour toutes les commandes courantes), `skill-creator`.
+- **Plugins proposés (à installer par le dev) :**
+  - `typescript-native-lsp` (communautaire) : erreurs TypeScript et navigation dans le code sans relire des fichiers entiers. Économise des tokens dès la phase 3.
+  - `frontend-design` (Anthropic) : qualité de l'interface (éditeur de carte, appli mobile). Phases 1 et 5.
+- **Skill projet à créer plus tard** (tâche 4.8) : `golden-test`, qui transforme un exemple du livret en test de référence. La procédure est répétitive, une skill évite de la réexpliquer.
+- **MCP** : aucun serveur externe nécessaire. Celui de la phase 6 serait le nôtre.
+
+### 7.3 Règles d'économie de tokens
+1. **Une session par bloc de tâches.** Mieux vaut repartir d'une session neuve qu'allonger une très longue conversation. `PLANNING.md` et `CLAUDE.md` suffisent pour reprendre le fil.
+2. **Règles** : lire une section via l'index de `docs/rules-german-solo.md`, jamais le PDF.
+3. **Images** : fournir des scans recadrés et éviter les captures d'écran répétées.
+4. **Extraction en masse** (scans) confiée à un sous-agent : les images restent hors de la conversation principale, seul le JSON revient.
+5. **Les tests de référence fixent le comportement** : une fois un test vert, plus besoin de relire la règle correspondante.
+6. **Le code cite la règle appliquée** (commentaire court, ex. `// 9.21 méthode 10`) : on retrouve le lien sans relire le livret.
+
+---
+
+## 8. Journal
+- **2026-10-03** — Lecture du livret et du « But du projet ». Livret converti en Markdown. Dépôt git initialisé. Décisions D1-D8. Planning créé. Propriété du dossier réglée, Node.js v24.21.0 installé via nvm, section §7 « Outillage IA » ajoutée.

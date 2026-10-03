@@ -1,0 +1,15 @@
+# dependencies / build
+node_modules/
+dist/
+coverage/
+.vite/
+
+# OS / Windows download artefacts
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+*.Zone.Identifier
+
+# local env
+.env
+.env.local
