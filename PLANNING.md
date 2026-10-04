@@ -72,61 +72,61 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 
 ### Phase 0 — Fondations
 
-- [x] **0.1** Conversion du livret en `docs/rules-german-solo.md` — IA — fait
-- [x] **0.2** `git init` + `.gitignore` + premier commit — IA — fait
-- [x] **0.3** `PLANNING.md` + `CLAUDE.md` — IA — fait
-- [x] **0.4** Installer Node.js LTS — IA — fait : v24.21.0 via nvm (dans les commandes de l'IA : `source ~/.nvm/nvm.sh && …`)
+- [x] **0.1** Conversion du livret en `docs/rules-german-solo.md` — IA (Sonnet 5, moyen) — fait
+- [x] **0.2** `git init` + `.gitignore` + premier commit — IA (Haiku 4.5, bas) — fait
+- [x] **0.3** `PLANNING.md` + `CLAUDE.md` — IA (Sonnet 5, moyen) — fait
+- [x] **0.4** Installer Node.js LTS — IA (Haiku 4.5, bas) — fait : v24.21.0 via nvm (dans les commandes de l'IA : `source ~/.nvm/nvm.sh && …`)
 - [ ] **0.5** Déposer la carte PNG dans `assets/map/` — Dev
 - [ ] **0.6** Images des pions (déjà séparées, D10) dans `assets/counters/` ; scans : cartes soviétiques E01-E22, aides de jeu (tableau des terrains, événements et tactiques, résumé des activations soviétiques) — Dev
-- [ ] **0.7** Squelette d'application (Vite + TS + Vitest), structure `src/ data/ tools/ tests/` — IA — léger
-- [x] **0.8** Régler la propriété du dossier (voir §6, Q7) — Dev — fait
+- [ ] **0.7** Squelette d'application (Vite + TS + Vitest), structure `src/ data/ tools/ tests/` — IA (Sonnet 5, moyen)
+- [x] **0.8** Régler la propriété du dossier (voir §6, Q7) — Dev (Haiku 4.5, bas) — fait
 
 ### Phase 1 — Carte (POC, soirées 1-2)
 
-- [ ] **1.1** Outil de calage (D9) : afficher la grille de lignes, puis régler la PNG dessous en CSS (position, largeur, hauteur) jusqu'à ce que les croisements de 4 lignes tombent au centre des cases imprimées → `map-grid.json`. Un background CSS ne tourne pas : si le scan est de travers, le redresser avant — IA — léger
-- [ ] **1.2** Grille superposée ; au survol et au clic : numéro de case, ou côté de case près d'un bord (D3) — IA — léger
-- [ ] **1.3** Éditeur à pinceaux : cases mortes, terrain, villages, PV, cibles V/S, logistique, bords de carte, zones de déploiement, flèches, côtés de case (routes, rivières), lignes ; export JSON ; annuler/refaire — IA — moyen
-- [ ] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA — léger/moyen
-- [ ] **1.5** Calques de debug activables : grille, numéros, terrain, côtés, flèches, cibles, lignes (plus tard : zones de contrôle, portée, ravitaillement) — IA — léger
+- [ ] **1.1** Outil de calage (D9) : afficher la grille de lignes, puis régler la PNG dessous en CSS (position, largeur, hauteur) jusqu'à ce que les croisements de 4 lignes tombent au centre des cases imprimées → `map-grid.json`. Un background CSS ne tourne pas : si le scan est de travers, le redresser avant — IA (Sonnet 5, moyen)
+- [ ] **1.2** Grille superposée ; au survol et au clic : numéro de case, ou côté de case près d'un bord (D3) — IA (Sonnet 5, moyen)
+- [ ] **1.3** Éditeur à pinceaux : cases mortes, terrain, villages, PV, cibles V/S, logistique, bords de carte, zones de déploiement, flèches, côtés de case (routes, rivières), lignes ; export JSON ; annuler/refaire — IA (Sonnet 5, moyen)
+- [ ] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA (Sonnet 5, moyen)
+- [ ] **1.5** Calques de debug activables : grille, numéros, terrain, côtés, flèches, cibles, lignes (plus tard : zones de contrôle, portée, ravitaillement) — IA (Sonnet 5, moyen)
 - [ ] **1.6** Annoter la **zone de l'exemple p17** (3ᵉ Armée blindée, tour 1, environ les cases 05xx-11xx) — Dev
 - [ ] **1.7** Annoter le reste de la carte (peut continuer en parallèle des phases suivantes) — Dev — gros morceau
 
 ### Phase 2 — Unités et état (POC, soirée 2)
 
-- [ ] **2.1** Schéma `units.json` ; saisie des unités de l'exemple p17 (3T + Allemands voisins) — IA+Dev — léger
-- [ ] **2.2** État de partie + placement des pions par glisser-déposer sur la carte — IA — moyen
-- [ ] **2.3** Extraction des données de toutes les unités depuis les images de pions (déjà séparées, D10), avec un écran de vérification (image du pion à côté de ses données) — IA (extraction) + Dev (vérification) — léger
+- [ ] **2.1** Schéma `units.json` ; saisie des unités de l'exemple p17 (3T + Allemands voisins) — IA+Dev (Sonnet 5, moyen)
+- [ ] **2.2** État de partie + placement des pions par glisser-déposer sur la carte — IA (Sonnet 5, moyen)
+- [ ] **2.3** Extraction des données de toutes les unités depuis les images de pions (déjà séparées, D10), avec un écran de vérification (image du pion à côté de ses données) — IA (sous-agent Sonnet 5, bas à moyen) + Dev (vérification)
 
 ### Phase 3 — Moteur POC (soirées 2-3) → jalon **M1 = POC**
 
-- [ ] **3.1** Géométrie : voisins, distance, côtés de case, exception du Dniepr bloqué — IA — léger
-- [ ] **3.2** Mouvement : coûts du tableau des terrains, routes, rivières, zones de contrôle, empilement ; cases atteignables ; « proximate » ; encerclé / presque encerclé — IA — moyen
-- [ ] **3.3** Méthodes de mouvement 9.21 (1-12) + restrictions 9.23 + départages 9.24 + préférences tactiques 9.25 + journal des décisions — IA — lourd
-- [ ] **3.4** Test de référence p17 : reproduire exactement les déplacements du livre — IA+Dev
-- [ ] **3.5** Affichage des mouvements du bot sur la carte (flèches) + panneau du journal — IA — léger
+- [ ] **3.1** Géométrie : voisins, distance, côtés de case, exception du Dniepr bloqué — IA (Opus 5.5, élevé)
+- [ ] **3.2** Mouvement : coûts du tableau des terrains, routes, rivières, zones de contrôle, empilement ; cases atteignables ; « proximate » ; encerclé / presque encerclé — IA (Opus 5.5, élevé)
+- [ ] **3.3** Méthodes de mouvement 9.21 (1-12) + restrictions 9.23 + départages 9.24 + préférences tactiques 9.25 + journal des décisions — IA (Opus 5.5, très élevé)
+- [ ] **3.4** Test de référence p17 : reproduire exactement les déplacements du livre — IA+Dev (Opus 5.5, élevé)
+- [ ] **3.5** Affichage des mouvements du bot sur la carte (flèches) + panneau du journal — IA (Sonnet 5, moyen)
 
 **M1 atteint** quand le test 3.4 passe et que le résultat est visible sur la carte.
 
 ### Phase 4 — Bot complet
 
-- [ ] **4.1** Cartes soviétiques en JSON ; choix carte de commandement / auxiliaire (8.1) ; commandes 8.11-8.13 — IA — moyen
-- [ ] **4.2** Objectifs de front et d'armée (9.1, tables de placement), armées avec objectif (9.26), unités non ravitaillées (9.27) — IA — moyen
-- [ ] **4.3** Ravitaillement (13.1-13.4), soutien (13.5), limite opérationnelle (9.8), méthodes 9.22 — IA — lourd
-- [ ] **4.4** Tests d'attaque (9.4), réserves en attaque (12.2) et en placement (9.5), retrait en réserve (9.6), positions améliorées (9.7) — IA — lourd
-- [ ] **4.5** Combat : saisie des résultats, puis côté soviétique : pertes, retraites, avances (12.53, 12.54, 12.7, 12.83) ; simulation des 60 jetons en option (données des jetons à fournir) — IA — moyen
-- [ ] **4.6** Garnisons (15), remplacements (16), événements (aide de jeu), victoire (17-18), boue (18.34) — IA — moyen
-- [ ] **4.7** Mise en place et ajustements (dé 1-10) : le dev relève les positions des schémas p48-50 — IA+Dev — léger
-- [ ] **4.8** Tests de référence p18, p19, p24, p25, p32, p44 — IA+Dev — moyen
+- [ ] **4.1** Cartes soviétiques en JSON ; choix carte de commandement / auxiliaire (8.1) ; commandes 8.11-8.13 — IA (sous-agent Sonnet 5, bas à moyen)
+- [ ] **4.2** Objectifs de front et d'armée (9.1, tables de placement), armées avec objectif (9.26), unités non ravitaillées (9.27) — IA (Opus 5.5, très élevé)
+- [ ] **4.3** Ravitaillement (13.1-13.4), soutien (13.5), limite opérationnelle (9.8), méthodes 9.22 — IA (Opus 5.5, élevé)
+- [ ] **4.4** Tests d'attaque (9.4), réserves en attaque (12.2) et en placement (9.5), retrait en réserve (9.6), positions améliorées (9.7) — IA (Opus 5.5, très élevé)
+- [ ] **4.5** Combat : saisie des résultats, puis côté soviétique : pertes, retraites, avances (12.53, 12.54, 12.7, 12.83) ; simulation des 60 jetons en option (données des jetons à fournir) — IA (Opus 5.5, très élevé)
+- [ ] **4.6** Garnisons (15), remplacements (16), événements (aide de jeu), victoire (17-18), boue (18.34) — IA (Opus 5.5, très élevé)
+- [ ] **4.7** Mise en place et ajustements (dé 1-10) : le dev relève les positions des schémas p48-50 — IA+Dev (Sonnet 5, moyen)
+- [ ] **4.8** Tests de référence p18, p19, p24, p25, p32, p44 — IA+Dev (Opus 5.5, élevé)
 
 ### Phase 5 — Jouabilité et PWA
 
-- [ ] **5.1** Saisie du tour allemand : déplacements, attaques, résultats, cartes allemandes jouées — IA — moyen
-- [ ] **5.2** Annuler, sauvegarde et reprise de partie (IndexedDB) — IA — léger
-- [ ] **5.3** Interface mobile, manifest et service worker (hors ligne) — IA — léger/moyen
+- [ ] **5.1** Saisie du tour allemand : déplacements, attaques, résultats, cartes allemandes jouées — IA (Sonnet 5, moyen)
+- [ ] **5.2** Annuler, sauvegarde et reprise de partie (IndexedDB) — IA (Sonnet 5, moyen)
+- [ ] **5.3** Interface mobile, manifest et service worker (hors ligne) — IA (Sonnet 5, moyen)
 
 ### Phase 6 — Optionnel
 
-- [ ] **6.1** Assistant IA (serveur MCP) qui explique les décisions du bot ou répond aux questions de règles à partir du journal et de `docs/` — IA — moyen
+- [ ] **6.1** Assistant IA (serveur MCP) qui explique les décisions du bot ou répond aux questions de règles à partir du journal et de `docs/` — IA (Sonnet 5, moyen)
 
 ---
 
@@ -201,3 +201,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-03** — Lecture du livret et du « But du projet ». Livret converti en Markdown. Dépôt git initialisé. Décisions D1-D8. Planning créé. Propriété du dossier réglée, Node.js v24.21.0 installé via nvm, section §7 « Outillage IA » ajoutée.
 - **2026-10-04** — Positionnement des pions : grille de lignes dont les croisements de 4 lignes sont les centres des cases, PNG calée dessous en CSS (D9, précise D2). Images des pions déjà séparées (D10). §3, §5, tâches 0.6, 1.1, 2.3 mis à jour ; Q8 ajoutée.
 - **2026-10-04** — Dev répond à Q1-Q6, Q8 : hexagones côté plat en haut (Q1) ; orientation géographique confirmée (Q2) ; joueur tire les chits et dé (Q3, P4 validée) ; PC d'abord, téléphone ensuite (Q4) ; module VASSAL source images (Q6) ; versos inclus, déduction par noms fichiers (Q8). Q5 réponse ultérieure.
+- **2026-10-04** — Ajouter modèle et effort (§7.1) en parenthèses dans chaque tâche des phases 0-6, pour autonomie des tâches.
