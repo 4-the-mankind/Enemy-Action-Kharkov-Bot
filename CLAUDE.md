@@ -10,3 +10,4 @@
 - Node.js est installé via nvm : dans les commandes shell, préfixer par `source ~/.nvm/nvm.sh && …`.
 - Modèle, effort et économie de tokens : `PLANNING.md` §7.
 - Git : ne commiter que sur demande du dev.
+- Toujours demander au dev la permission avant de commencer à éditer les fichiers / coder.
