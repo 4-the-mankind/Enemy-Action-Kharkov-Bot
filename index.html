@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EA Kharkov Bot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/ui/theme.css" />
+    <style>
+      body { display: grid; place-items: start center; padding: 48px 16px; }
+      main { width: min(560px, 100%); }
+      h1 { margin: 0 0 4px; font-size: 2rem; font-weight: 600; }
+      p { margin: 0 0 28px; color: var(--paper-dim); }
+      h2 { margin: 0 0 10px; font-size: 1.1rem; font-weight: 600; }
+      ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--feldgrau); }
+      li { border-bottom: 1px solid var(--feldgrau); }
+      a { display: block; padding: 12px 4px; color: var(--paper); text-decoration: none; }
+      a:hover { background: var(--feldgrau-deep); }
+      a span { display: block; color: var(--paper-dim); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>EA Kharkov Bot</h1>
+      <p>Bot soviétique d'Enemy Action: Kharkov, German Solo.</p>
+      <h2>Outils</h2>
+      <ul>
+        <li>
+          <a href="/src/tools/map-calibration/">
+            Calage de la carte
+            <span>Grille des cases, image de fond, enregistrement dans data/map-grid.json</span>
+          </a>
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

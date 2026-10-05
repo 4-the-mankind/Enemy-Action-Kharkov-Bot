@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "orientation": "flat",
+  "cols": 33,
+  "rows": 23,
+  "colStep": 165,
+  "rowStep": 190.53,
+  "evenColumnShift": 0.5,
+  "evenColumnShorter": true,
+  "background": {
+    "image": "assets/map/EAKh-GerSologamemap_50%b.png",
+    "x": -174,
+    "y": -214,
+    "scale": 1.368
+  }
+}

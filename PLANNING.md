@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-10-04.
+Mise à jour : 2026-10-05.
 
 ---
 
@@ -54,8 +54,21 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - **Case** : `"CCRR"` (chaîne de 4 chiffres). Voisinage et distances calculés par le code à partir de la grille.
 - **Côté de case** : paire des deux cases triées, `"0912-0913"`. Pour un bord de carte, l'autre case peut être hors grille ou morte.
 - **Orientation géographique (hypothèse à vérifier sur la PNG)** : d'après le livret (15.1 : numéros décroissants = du sud au nord, puis d'ouest en est ; Zaporozhe 3116 au sud ; Valuyki 0302 à l'est ; le joueur s'assoit côté ouest), `CC` augmente vers le **sud** et `RR` vers l'**ouest**. Cela compte pour les départages « le plus à l'ouest/est » et pour la direction W/S des marqueurs d'objectif.
+- **Arborescence du projet** :
+  ```
+  index.html                      accueil (liens vers les outils)
+  src/core/                       logique pure, partagée et testée (geometry.ts, map-grid.ts)
+  src/ui/                         styles communs (theme.css : feldgrau)
+  src/tools/<outil>/              un dossier par outil : index.html, main.ts, style.css
+  src/tools/map-calibration/      outil de calage de la carte (1.1)
+  server/                         API locale du serveur de dev (map-api.ts : lecture/écriture data/, import d'images)
+  tests/core/                     tests Vitest, même découpage que src/
+  data/                           données JSON (voir ci-dessous)
+  assets/                         images : map/, counters/, cards/
+  docs/                           règles en Markdown
+  ```
 - **Fichiers prévus** (dossier `data/`) :
-  - `map-grid.json` : grille de référence (D9) : orientation des hexagones, origine (centre de 0101 dans le repère de la grille), écart entre deux colonnes et entre deux lignes, sens du décalage des colonnes, nombre de colonnes et de lignes ; calage de la PNG sous la grille en CSS (`background-position`, `background-size` en largeur et hauteur).
+  - `map-grid.json` : grille de référence (D9) : orientation des hexagones, origine (centre de 0101 dans le repère de la grille), écart entre deux colonnes et entre deux lignes, sens du décalage des colonnes (`evenColumnShift`), colonnes paires « rentrées » avec une case de moins (`evenColumnShorter`, cas de la carte de Kharkov), nombre de colonnes et de lignes ; calage de la PNG sous la grille en CSS (`background-position`, `background-size` en largeur et hauteur).
     - Géométrie (hexagones côté plat en haut ; pointe en haut = rôles des verticales et horizontales inversés) : une verticale par colonne ; horizontales espacées d'une **demi-ligne** (les colonnes décalées tombent à mi-chemin) ; diagonales passant par les centres (±30° pour des hexagones réguliers). Les seuls croisements parasites sont vertical × horizontal (2 lignes) : diagonale × diagonale, diagonale × verticale et diagonale × horizontale tombent toujours sur un centre.
   - `map-hexes.json` : par case : jouable ou morte, terrain, village, valeur en PV, propriétaire initial, cibles de front (V/S), case logistique (V/S), flèches (primaire/secondaire, conditionnelles V/S), bord de carte (soviétique/allemand), zone de déploiement allemande, position par rapport aux lignes (artillerie/soutien est, soutien ouest/limite proche, limite lointaine).
   - `map-hexsides.json` : par côté : route, rivière mineure, Donets, Dniepr, Dniepr bloqué.
@@ -76,14 +89,15 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - [x] **0.2** `git init` + `.gitignore` + premier commit — IA (Haiku 4.5, bas) — fait
 - [x] **0.3** `PLANNING.md` + `CLAUDE.md` — IA (Sonnet 5, moyen) — fait
 - [x] **0.4** Installer Node.js LTS — IA (Haiku 4.5, bas) — fait : v24.21.0 via nvm (dans les commandes de l'IA : `source ~/.nvm/nvm.sh && …`)
-- [ ] **0.5** Déposer la carte PNG dans `assets/map/` — Dev
-- [ ] **0.6** Images des pions (déjà séparées, D10) dans `assets/counters/` ; scans : cartes soviétiques E01-E22, aides de jeu (tableau des terrains, événements et tactiques, résumé des activations soviétiques) — Dev
-- [ ] **0.7** Squelette d'application (Vite + TS + Vitest), structure `src/ data/ tools/ tests/` — IA (Sonnet 5, moyen)
+- [x] **0.5** Déposer la carte PNG dans `assets/map/` — Dev
+- [x] **0.6** Images des pions (déjà séparées, D10) dans `assets/counters/` ; scans : cartes soviétiques E01-E22, aides de jeu (tableau des terrains, événements et tactiques, résumé des activations soviétiques) — Dev
+- [x] **0.7** Squelette d'application (Vite + TS + Vitest), structure `src/ data/ tests/` — IA — fait : `npm run dev` (accessible sur le réseau local), `npm test`
 - [x] **0.8** Régler la propriété du dossier (voir §6, Q7) — Dev (Haiku 4.5, bas) — fait
 
 ### Phase 1 — Carte (POC, soirées 1-2)
 
-- [ ] **1.1** Outil de calage (D9) : afficher la grille de lignes, puis régler la PNG dessous en CSS (position, largeur, hauteur) jusqu'à ce que les croisements de 4 lignes tombent au centre des cases imprimées → `map-grid.json`. Un background CSS ne tourne pas : si le scan est de travers, le redresser avant — IA (Sonnet 5, moyen)
+- [~] **1.1** Outil de calage (D9) : afficher la grille de lignes, puis régler la PNG dessous en CSS (position, largeur, hauteur) jusqu'à ce que les croisements de 4 lignes tombent au centre des cases imprimées → `map-grid.json`. Un background CSS ne tourne pas : si le scan est de travers, le redresser avant — IA (Sonnet 5, moyen)
+  - Outil fait (`src/tools/map-calibration/`, `src/core/geometry.ts`) : colonnes/lignes +/−, écart des colonnes et hauteur des cases, décalage des colonnes paires, image (liste `assets/map/` ou import), position X/Y et échelle, flèches du clavier au pixel près, zoom/déplacement, case survolée, bouton « Enregistrer » → `data/map-grid.json`, import/export JSON, brouillon gardé dans le navigateur. Calage fait par le dev (33 × 23). **Reste : choisir « rentrées » et enregistrer.**
 - [ ] **1.2** Grille superposée ; au survol et au clic : numéro de case, ou côté de case près d'un bord (D3) — IA (Sonnet 5, moyen)
 - [ ] **1.3** Éditeur à pinceaux : cases mortes, terrain, villages, PV, cibles V/S, logistique, bords de carte, zones de déploiement, flèches, côtés de case (routes, rivières), lignes ; export JSON ; annuler/refaire — IA (Sonnet 5, moyen)
 - [ ] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA (Sonnet 5, moyen)
@@ -143,16 +157,16 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 
 ## 6. Questions ouvertes
 
-| #   | Question                                                                                                                                                 | Statut                                                                                                                                                    |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Q1  | Orientation des hexagones (côté plat ou pointe en haut) et colonnes décalées : sera visible sur la PNG.                                                  | **réglée** : côté plat en haut                                                                                                                            |
-| Q2  | Orientation géographique de la numérotation (§3) : confirmer sur la PNG.                                                                                 | **réglée** : compréhension correcte ; CC augmente vers le sud, RR vers l'ouest                                                                            |
-| Q3  | Combat : jetons et dé physiques avec saisie des résultats, ou simulation complète par l'application ? (Proposition P4 pour le POC.)                      | **réglée** : joueur tire les chits pour le bot ET retraite, avance après combat, hits. P4 confirmée.                                                     |
-| Q4  | Usage : PC à côté du plateau d'abord, téléphone ensuite ?                                                                                                | **réglée** : PC d'abord, téléphone ensuite                                                                                                                |
-| Q5  | Incohérence du livret : Chuguev est en 1009 dans la liste des villes, mais en 1008 dans les ajustements « Raus Overrun » et « Voronezh Front Breakout ». | Dev répond plus tard                                                                                                                                      |
-| Q6  | Existe-t-il un module VASSAL du jeu ? Il pourrait fournir carte et pions déjà numérisés.                                                                 | **réglée** : oui, module VASSAL existe ; images viennent de VASSAL                                                                                        |
-| Q7  | Le dossier appartenait à l'utilisateur `claude` et git refusait de travailler.                                                                           | réglée : propriétaire changé (2026-10-03)                                                                                                                 |
-| Q8  | Images des pions : les versos (face réduite) sont-ils inclus ? Quelle convention de nom de fichier ?                                                     | **réglée** : versos inclus ; déduire recto/verso par noms fichiers. Certaines unités : 3 steps (réduite = 2 steps) ou 1 step sans version réduite.        |
+| #   | Question                                                                                                                                                 | Statut                                                                                                                                             |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q1  | Orientation des hexagones (côté plat ou pointe en haut) et colonnes décalées : sera visible sur la PNG.                                                  | **réglée** : côté plat en haut                                                                                                                     |
+| Q2  | Orientation géographique de la numérotation (§3) : confirmer sur la PNG.                                                                                 | **réglée** : compréhension correcte ; CC augmente vers le sud, RR vers l'ouest                                                                     |
+| Q3  | Combat : jetons et dé physiques avec saisie des résultats, ou simulation complète par l'application ? (Proposition P4 pour le POC.)                      | **réglée** : joueur tire les chits pour le bot ET retraite, avance après combat, hits. P4 confirmée.                                               |
+| Q4  | Usage : PC à côté du plateau d'abord, téléphone ensuite ?                                                                                                | **réglée** : PC d'abord, téléphone ensuite                                                                                                         |
+| Q5  | Incohérence du livret : Chuguev est en 1009 dans la liste des villes, mais en 1008 dans les ajustements « Raus Overrun » et « Voronezh Front Breakout ». | Dev répond plus tard                                                                                                                               |
+| Q6  | Existe-t-il un module VASSAL du jeu ? Il pourrait fournir carte et pions déjà numérisés.                                                                 | **réglée** : oui, module VASSAL existe ; images viennent de VASSAL                                                                                 |
+| Q7  | Le dossier appartenait à l'utilisateur `claude` et git refusait de travailler.                                                                           | réglée : propriétaire changé (2026-10-03)                                                                                                          |
+| Q8  | Images des pions : les versos (face réduite) sont-ils inclus ? Quelle convention de nom de fichier ?                                                     | **réglée** : versos inclus ; déduire recto/verso par noms fichiers. Certaines unités : 3 steps (réduite = 2 steps) ou 1 step sans version réduite. |
 
 ---
 
@@ -202,3 +216,5 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-04** — Positionnement des pions : grille de lignes dont les croisements de 4 lignes sont les centres des cases, PNG calée dessous en CSS (D9, précise D2). Images des pions déjà séparées (D10). §3, §5, tâches 0.6, 1.1, 2.3 mis à jour ; Q8 ajoutée.
 - **2026-10-04** — Dev répond à Q1-Q6, Q8 : hexagones côté plat en haut (Q1) ; orientation géographique confirmée (Q2) ; joueur tire les chits et dé (Q3, P4 validée) ; PC d'abord, téléphone ensuite (Q4) ; module VASSAL source images (Q6) ; versos inclus, déduction par noms fichiers (Q8). Q5 réponse ultérieure.
 - **2026-10-04** — Ajouter modèle et effort (§7.1) en parenthèses dans chaque tâche des phases 0-6, pour autonomie des tâches.
+- **2026-10-05** — Squelette Vite + TS + Vitest (0.7). Outil de calage de la carte (1.1) : grille de lignes D9, hexagones et numéros, image de fond réglable, enregistrement dans `data/map-grid.json` ; couleurs feldgrau (choix du dev). Tests de géométrie : chaque centre = croisement des 4 lignes. Reste le calage par le dev.
+- **2026-10-05** — Calage enregistré par le dev. Option « colonnes paires rentrées » (une case de moins, `evenColumnShorter`). Import JSON et brouillon automatique dans le navigateur. Projet réorganisé en arborescence (`src/core`, `src/ui`, `src/tools/<outil>`, `server/`, `tests/core`) avec une page d'accueil.

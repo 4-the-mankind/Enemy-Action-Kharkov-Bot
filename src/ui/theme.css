@@ -1,0 +1,28 @@
+/* Thème commun des pages : feldgrau d'état-major allemand, rouge de carte d'état-major. */
+:root {
+  --feldgrau: #4d5d53;
+  --feldgrau-deep: #313b34;
+  --feldgrau-dark: #262e29;
+  --feldgrau-light: #6f7f72;
+  --paper: #e8e4d3;
+  --paper-dim: #b9b8a7;
+  --stab-red: #c0272d;
+  --line: #000;
+
+  --font: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--paper);
+  background: var(--feldgrau-dark);
+}
+
+:focus-visible { outline: 2px solid var(--paper); outline-offset: 1px; }
