@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_GRID, gridLines, hexAt, hexCenter, hexes, hexId, type MapGrid, type Point, type Segment } from "../../src/core/geometry";
+import {
+  DEFAULT_GRID, gridLines, hexAt, hexCenter, hexes, hexId, hexNeighbor, hexRadius, hexSideId,
+  pointerTarget, type MapGrid, type Point, type Segment,
+} from "../../src/core/geometry";
 
 const onSegment = (p: Point, s: Segment) => {
   const cross = (s.x2 - s.x1) * (p.y - s.y1) - (s.y2 - s.y1) * (p.x - s.x1);
@@ -73,5 +76,66 @@ describe("inset even columns", () => {
     for (const c of hexes(g))
       for (const fam of Object.values(lines))
         expect(fam.filter((s: Segment) => onSegment(c, s))).toHaveLength(1);
+  });
+});
+
+describe("neighbors and sides (D3)", () => {
+  for (const g of grids) {
+    const known = new Set(hexes(g).map((h) => h.id));
+
+    it(`each edge points to the geometrically adjacent cell (shift ${g.evenColumnShift})`, () => {
+      for (const h of hexes(g)) {
+        const center = hexCenter(g, h.col, h.row);
+        for (let edge = 0; edge < 6; edge++) {
+          const n = hexNeighbor(g, h.col, h.row, edge);
+          if (!known.has(hexId(n.col, n.row))) continue; // off-grid neighbor: nothing to compare
+          const nCenter = hexCenter(g, n.col, n.row);
+          const dist = Math.hypot(nCenter.x - center.x, nCenter.y - center.y);
+          const expected = edge === 1 || edge === 4
+            ? g.rowStep
+            : Math.hypot(g.colStep, g.rowStep / 2);
+          expect(dist).toBeCloseTo(expected, 5);
+        }
+      }
+    });
+
+    it(`opposite edges point back to each other (shift ${g.evenColumnShift})`, () => {
+      for (const h of hexes(g))
+        for (let edge = 0; edge < 6; edge++) {
+          const n = hexNeighbor(g, h.col, h.row, edge);
+          if (!known.has(hexId(n.col, n.row))) continue;
+          const back = hexNeighbor(g, n.col, n.row, (edge + 3) % 6);
+          expect([back.col, back.row]).toEqual([h.col, h.row]);
+        }
+    });
+  }
+
+  it("sorts the two cell ids (§3 convention)", () => {
+    expect(hexSideId(9, 12, 9, 13)).toBe("0912-0913");
+    expect(hexSideId(9, 13, 9, 12)).toBe("0912-0913");
+  });
+
+  it("reports the cell at its center, the side near an edge", () => {
+    const g = grids[0];
+    const center = hexCenter(g, 4, 3);
+    expect(pointerTarget(g, center)).toMatchObject({ kind: "hex", hex: { id: "0403" } });
+
+    const n = hexNeighbor(g, 4, 3, 1); // bottom edge
+    const mid = { x: (center.x + hexCenter(g, n.col, n.row).x) / 2, y: (center.y + hexCenter(g, n.col, n.row).y) / 2 };
+    const side = pointerTarget(g, mid);
+    expect(side).toMatchObject({ kind: "side", id: hexSideId(4, 3, n.col, n.row) });
+  });
+
+  it("the threshold controls how close to an edge counts as a side", () => {
+    const base = grids[0];
+    const center = hexCenter(base, 4, 3);
+    // Point near the right corner (close to the right-bottom edge, edge 0).
+    const p: Point = { x: center.x + hexRadius(base) * 0.9, y: center.y };
+
+    const narrow: MapGrid = { ...base, sideThreshold: 0.01 };
+    expect(pointerTarget(narrow, p)?.kind).toBe("hex");
+
+    const wide: MapGrid = { ...base, sideThreshold: 0.45 };
+    expect(pointerTarget(wide, p)?.kind).toBe("side");
   });
 });

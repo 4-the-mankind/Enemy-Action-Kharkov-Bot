@@ -23,6 +23,8 @@ export function parseMapGrid(raw: unknown): MapGrid {
   if (g.evenColumnShift !== 0.5 && g.evenColumnShift !== -0.5)
     throw new Error("\"evenColumnShift\" must be 0.5 or -0.5.");
   g.evenColumnShorter = g.evenColumnShorter === true;
+  if (!isNum(g.sideThreshold) || g.sideThreshold <= 0 || g.sideThreshold >= 0.5)
+    throw new Error("\"sideThreshold\" must be a number between 0 and 0.5.");
   for (const k of ["x", "y", "scale"] as const)
     if (!isNum(g.background[k])) throw new Error(`"background.${k}" must be a number.`);
   if (g.background.scale <= 0) throw new Error("\"background.scale\" must be positive.");

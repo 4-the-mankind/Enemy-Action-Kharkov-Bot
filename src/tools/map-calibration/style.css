@@ -39,6 +39,18 @@ h1 {
 }
 .file.dirty::after { content: " — modified, not saved"; color: #f0c674; }
 
+.tabs { display: flex; border-bottom: 1px solid var(--feldgrau); }
+.tab {
+  flex: 1;
+  background: var(--feldgrau-deep);
+  border: none;
+  border-radius: 0;
+  padding: 10px 8px;
+  color: var(--paper-dim);
+}
+.tab:hover { background: var(--feldgrau-dark); color: var(--paper); }
+.tab.active { background: var(--feldgrau-dark); color: var(--paper); box-shadow: inset 0 -2px 0 var(--stab-red); }
+
 .group {
   padding: 14px 18px 16px;
   border-bottom: 1px solid var(--feldgrau);
@@ -161,6 +173,11 @@ button:hover { background: var(--feldgrau-light); }
   vector-effect: non-scaling-stroke;
 }
 #grid .hexes polygon.hover { fill: rgb(192 39 45 / 0.18); }
+#grid .hexes polygon.pinned { stroke: var(--fluo-green); stroke-width: 3; fill: rgb(57 255 20 / 0.18); }
+#grid .overlay line { display: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+#grid .overlay line.visible { display: inline; }
+#grid .overlay #hoverEdge.visible { stroke: var(--stab-red); stroke-width: 5; }
+#grid .overlay #pinEdge.visible { stroke: var(--fluo-green); stroke-width: 5; }
 #grid .labels text {
   fill: var(--stab-red);
   font-family: var(--font);
@@ -181,6 +198,8 @@ button:hover { background: var(--feldgrau-light); }
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
+.readout p { margin: 0; }
+.readout #pinned { color: var(--paper-dim); }
 
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; }

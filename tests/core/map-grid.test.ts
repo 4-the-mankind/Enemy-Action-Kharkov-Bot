@@ -13,6 +13,8 @@ describe("reading map-grid.json", () => {
     expect(() => parseMapGrid({ cols: 0 })).toThrow("cols");
     expect(() => parseMapGrid({ evenColumnShift: 1 })).toThrow("evenColumnShift");
     expect(() => parseMapGrid({ background: { scale: "x" } })).toThrow("background.scale");
+    expect(() => parseMapGrid({ sideThreshold: 0 })).toThrow("sideThreshold");
+    expect(() => parseMapGrid({ sideThreshold: 0.5 })).toThrow("sideThreshold");
     expect(() => parseMapGrid("text")).toThrow();
   });
 });

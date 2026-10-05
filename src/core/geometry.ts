@@ -14,6 +14,8 @@ export interface MapGrid {
   evenColumnShift: 0.5 | -0.5;
   /** "Inset" even columns: one hex fewer (the last row does not exist). */
   evenColumnShorter?: boolean;
+  /** Distance to an edge, as a fraction of hexRadius, below which a point is "on a side" (D3). */
+  sideThreshold: number;
   background: {
     image: string | null;
     /** Position of the image's top-left pixel, in grid px. */
@@ -37,6 +39,7 @@ export const DEFAULT_GRID: MapGrid = {
   rowStep: 190.53,
   evenColumnShift: 0.5,
   evenColumnShorter: false,
+  sideThreshold: 0.3,
   background: { image: null, x: 0, y: 0, scale: 1 },
 };
 
@@ -55,7 +58,7 @@ export function origin(g: MapGrid): Point {
 }
 
 /** Half-row index: the horizontal line through the center (integer). */
-const halfRow = (g: MapGrid, col: number, row: number) =>
+export const halfRow = (g: MapGrid, col: number, row: number) =>
   2 * (row - 1) + (col % 2 === 0 ? 2 * g.evenColumnShift : 0);
 
 export function hexCenter(g: MapGrid, col: number, row: number): Point {
@@ -141,6 +144,60 @@ export function gridExtent(g: MapGrid): { width: number; height: number } {
   const lastCol = hexCenter(g, g.cols, 1).x;
   const ys = [1, 2].filter((c) => c <= g.cols).map((c) => hexCenter(g, c, g.rows).y);
   return { width: lastCol + o.x, height: Math.max(...ys) + g.rowStep / 2 };
+}
+
+/**
+ * Hex sharing a given edge of (col, row) (D3). Edge i runs between
+ * hexCorners()[i] and hexCorners()[(i+1)%6] (0 = right-bottom, going clockwise).
+ * The returned (col, row) may fall outside the grid (map edge) or on a dead hex.
+ */
+const EDGE_STEP: [number, number][] = [
+  [1, 1], [0, 2], [-1, 1], [-1, -1], [0, -2], [1, -1],
+];
+
+export function hexNeighbor(g: MapGrid, col: number, row: number, edge: number): { col: number; row: number } {
+  const [du, dk] = EDGE_STEP[edge];
+  const col2 = col + du;
+  const k2 = halfRow(g, col, row) + dk;
+  const offset2 = col2 % 2 === 0 ? 2 * g.evenColumnShift : 0;
+  return { col: col2, row: (k2 - offset2) / 2 + 1 };
+}
+
+/** Side identifier for two neighboring cells, sorted per convention §3: "CCRR-CCRR". */
+export function hexSideId(aCol: number, aRow: number, bCol: number, bRow: number): string {
+  const a = hexId(aCol, aRow), b = hexId(bCol, bRow);
+  return a < b ? `${a}-${b}` : `${b}-${a}`;
+}
+
+const distToSegment = (p: Point, a: Point, b: Point): number => {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2));
+  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+};
+
+export type PointerTarget =
+  | { kind: "hex"; hex: Hex }
+  | { kind: "side"; id: string; hex: Hex; neighbor: { col: number; row: number }; edge: number };
+
+/**
+ * What a point lands on: the hex itself, or a side when closer than
+ * sideThreshold (fraction of hexRadius) to one of its 6 edges (D3).
+ */
+export function pointerTarget(g: MapGrid, p: Point): PointerTarget | null {
+  const hex = hexAt(g, p);
+  if (!hex) return null;
+  const corners = hexCorners(g, hex);
+  let edge = 0, bestDist = Infinity;
+  for (let i = 0; i < 6; i++) {
+    const d = distToSegment(p, corners[i], corners[(i + 1) % 6]);
+    if (d < bestDist) { bestDist = d; edge = i; }
+  }
+  if (bestDist < hexRadius(g) * g.sideThreshold) {
+    const neighbor = hexNeighbor(g, hex.col, hex.row, edge);
+    return { kind: "side", id: hexSideId(hex.col, hex.row, neighbor.col, neighbor.row), hex, neighbor, edge };
+  }
+  return { kind: "hex", hex };
 }
 
 /** Hex whose center is closest to the point, or null outside the grid. */

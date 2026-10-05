@@ -20,6 +20,12 @@
         <p class="file" id="file-state">data/map-grid.json</p>
       </header>
 
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" data-tab="calibration" role="tab" aria-selected="true">Calibration</button>
+        <button type="button" class="tab" data-tab="clicks" role="tab" aria-selected="false">Clicks</button>
+      </div>
+
+      <div class="tab-panel" data-tab-panel="calibration">
       <section class="group" aria-labelledby="g-grid">
         <h2 id="g-grid">Grid</h2>
         <div class="counter">
@@ -92,6 +98,22 @@
         </div>
         <button type="button" id="fit" class="ghost">Show whole map</button>
       </section>
+      </div>
+
+      <div class="tab-panel" data-tab-panel="clicks" hidden>
+      <section class="group" aria-labelledby="g-clicks">
+        <h2 id="g-clicks">Edge detection (D3)</h2>
+        <div class="field wide">
+          <label for="sideThreshold">Edge threshold</label>
+          <input id="sideThreshold" type="range" min="5" max="45" step="1" />
+          <span class="unit" id="sideThresholdVal">30%</span>
+        </div>
+        <p class="hint">
+          Distance to a cell's edge (as a share of its radius) below which hovering or clicking
+          reports the side between two cells instead of the cell itself. Saved in map-grid.json.
+        </p>
+      </section>
+      </div>
 
       <footer class="actions">
         <button type="button" id="save" class="primary">Save</button>
@@ -111,7 +133,10 @@
         <div class="bg" id="bg"></div>
         <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
-      <div class="readout" id="readout">Hover over the map</div>
+      <div class="readout">
+        <p id="readout">Hover over the map</p>
+        <p id="pinned">No click yet</p>
+      </div>
     </main>
 
     <script type="module" src="./main.ts"></script>

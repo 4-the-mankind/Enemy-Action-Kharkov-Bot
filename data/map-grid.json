@@ -7,6 +7,7 @@
   "rowStep": 190.53,
   "evenColumnShift": 0.5,
   "evenColumnShorter": true,
+  "sideThreshold": 0.3,
   "background": {
     "image": "assets/map/EAKh-GerSologamemap_50%b.png",
     "x": -174,

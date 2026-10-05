@@ -1,7 +1,8 @@
 // Map calibration tool (task 1.1, D9): the line grid is the reference,
 // the background image is moved and scaled underneath it.
 import {
-  DEFAULT_GRID, gridExtent, gridLines, hexAt, hexCorners, hexes, type MapGrid, type Point,
+  DEFAULT_GRID, gridExtent, gridLines, hexCorners, hexes, pointerTarget,
+  type MapGrid, type Point, type PointerTarget,
 } from "../../core/geometry";
 import { parseMapGrid } from "../../core/map-grid";
 
@@ -25,7 +26,11 @@ let imageSize = { w: 0, h: 0 };
 const view = { tx: 40, ty: 40, z: 0.25 };
 const polygons = new Map<string, SVGPolygonElement>();
 let hovered: SVGPolygonElement | null = null;
+let pinnedPoly: SVGPolygonElement | null = null;
+let hoverEdgeEl: SVGLineElement | null = null;
+let pinEdgeEl: SVGLineElement | null = null;
 let userMovedView = false;
+let dragMoved = false;
 
 const viewport = $<HTMLElement>("viewport");
 const stage = $<HTMLDivElement>("stage");
@@ -60,11 +65,16 @@ function renderGrid() {
   svg.innerHTML =
     `<g class="hexes">${hexSvg}</g>` +
     `<g class="lines">${linesSvg}</g>` +
-    `<g class="labels" font-size="${fontSize}">${labelSvg}</g>`;
+    `<g class="labels" font-size="${fontSize}">${labelSvg}</g>` +
+    `<g class="overlay"><line id="hoverEdge"/><line id="pinEdge"/></g>`;
 
   polygons.clear();
   hovered = null;
+  pinnedPoly = null;
   svg.querySelectorAll<SVGPolygonElement>("polygon").forEach((p) => polygons.set(p.dataset.id!, p));
+  hoverEdgeEl = svg.querySelector("#hoverEdge");
+  pinEdgeEl = svg.querySelector("#pinEdge");
+  $("pinned").textContent = "No click yet";
   applyLayers();
 }
 
@@ -102,6 +112,9 @@ function syncInputs() {
   num("bgY").value = String(grid.background.y);
   num("bgScale").value = String(round2(grid.background.scale * 100));
   $<HTMLSelectElement>("image").value = grid.background.image ?? "";
+  const pct = Math.round(grid.sideThreshold * 100);
+  num("sideThreshold").value = String(pct);
+  $("sideThresholdVal").textContent = `${pct}%`;
 }
 
 function markDirty() {
@@ -222,6 +235,26 @@ document.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((btn) =>
 for (const id of ["showLines", "showHexes", "showLabels"]) num(id).addEventListener("change", applyLayers);
 num("bgOpacity").addEventListener("input", renderBg);
 
+num("sideThreshold").addEventListener("input", () => {
+  grid.sideThreshold = Number(num("sideThreshold").value) / 100;
+  $("sideThresholdVal").textContent = `${num("sideThreshold").value}%`;
+  markDirty();
+});
+
+// ---------- Tabs ----------
+
+document.querySelectorAll<HTMLButtonElement>(".tab").forEach((btn) =>
+  btn.addEventListener("click", () => {
+    document.querySelectorAll<HTMLButtonElement>(".tab").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-selected", String(b === btn));
+    });
+    document.querySelectorAll<HTMLElement>("[data-tab-panel]").forEach((p) => {
+      p.hidden = p.dataset.tabPanel !== btn.dataset.tab;
+    });
+  }),
+);
+
 // Arrow keys: move the image pixel by pixel (outside input fields).
 document.addEventListener("keydown", (e) => {
   const t = e.target as HTMLElement;
@@ -256,11 +289,60 @@ viewport.addEventListener("wheel", (e) => {
   applyView();
 }, { passive: false });
 
+function describe(target: PointerTarget | null): string {
+  if (!target) return "Outside grid";
+  return target.kind === "hex" ? `Hex ${target.hex.id}` : `Side ${target.id}`;
+}
+
+function edgeEndpoints(target: Extract<PointerTarget, { kind: "side" }>): [Point, Point] {
+  const corners = hexCorners(grid, target.hex);
+  return [corners[target.edge], corners[(target.edge + 1) % 6]];
+}
+
+function showHover(target: PointerTarget | null) {
+  const poly = target?.kind === "hex" ? polygons.get(target.hex.id) ?? null : null;
+  if (poly !== hovered) {
+    hovered?.classList.remove("hover");
+    poly?.classList.add("hover");
+    hovered = poly;
+  }
+  if (target?.kind === "side" && hoverEdgeEl) {
+    const [a, b] = edgeEndpoints(target);
+    hoverEdgeEl.setAttribute("x1", String(a.x));
+    hoverEdgeEl.setAttribute("y1", String(a.y));
+    hoverEdgeEl.setAttribute("x2", String(b.x));
+    hoverEdgeEl.setAttribute("y2", String(b.y));
+    hoverEdgeEl.classList.add("visible");
+  } else {
+    hoverEdgeEl?.classList.remove("visible");
+  }
+}
+
+function pin(target: PointerTarget | null) {
+  pinnedPoly?.classList.remove("pinned");
+  pinnedPoly = null;
+  pinEdgeEl?.classList.remove("visible");
+  if (!target) { $("pinned").textContent = "Last click: outside grid"; return; }
+  if (target.kind === "hex") {
+    pinnedPoly = polygons.get(target.hex.id) ?? null;
+    pinnedPoly?.classList.add("pinned");
+    $("pinned").textContent = `Last click: Hex ${target.hex.id}`;
+  } else {
+    const [a, b] = edgeEndpoints(target);
+    pinEdgeEl?.setAttribute("x1", String(a.x));
+    pinEdgeEl?.setAttribute("y1", String(a.y));
+    pinEdgeEl?.setAttribute("x2", String(b.x));
+    pinEdgeEl?.setAttribute("y2", String(b.y));
+    pinEdgeEl?.classList.add("visible");
+    $("pinned").textContent = `Last click: Side ${target.id}`;
+  }
+}
+
 let drag: { x: number; y: number; tx: number; ty: number } | null = null;
 viewport.addEventListener("pointerdown", (e) => {
   viewport.focus({ preventScroll: true });
   drag = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
-  userMovedView = true;
+  dragMoved = false;
   viewport.setPointerCapture(e.pointerId);
   viewport.classList.add("panning");
 });
@@ -269,20 +351,20 @@ viewport.addEventListener("pointermove", (e) => {
   if (drag) {
     view.tx = drag.tx + e.clientX - drag.x;
     view.ty = drag.ty + e.clientY - drag.y;
+    if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 3) { userMovedView = true; dragMoved = true; }
     applyView();
   }
   const p = toGrid(e.clientX, e.clientY);
-  const h = hexAt(grid, p);
-  const poly = h ? polygons.get(h.id) ?? null : null;
-  if (poly !== hovered) {
-    hovered?.classList.remove("hover");
-    poly?.classList.add("hover");
-    hovered = poly;
-  }
+  const target = pointerTarget(grid, p);
+  showHover(target);
   const img = grid.background.image
     ? ` · image pixel ${Math.round((p.x - grid.background.x) / grid.background.scale)}, ${Math.round((p.y - grid.background.y) / grid.background.scale)}`
     : "";
-  $("readout").textContent = (h ? `Hex ${h.id}` : "Outside grid") + img;
+  $("readout").textContent = describe(target) + img;
+});
+viewport.addEventListener("click", (e) => {
+  if (dragMoved) return;
+  pin(pointerTarget(grid, toGrid(e.clientX, e.clientY)));
 });
 
 function fit() {
