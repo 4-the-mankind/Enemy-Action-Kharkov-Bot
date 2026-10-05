@@ -206,7 +206,7 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 3. **Images** : fournir des scans recadrés et éviter les captures d'écran répétées.
 4. **Extraction en masse** (scans) confiée à un sous-agent : les images restent hors de la conversation principale, seul le JSON revient.
 5. **Les tests de référence fixent le comportement** : une fois un test vert, plus besoin de relire la règle correspondante.
-6. **Le code cite la règle appliquée** (commentaire court, ex. `// 9.21 méthode 10`) : on retrouve le lien sans relire le livret.
+6. **Le code cite la règle appliquée** (commentaire court en anglais, ex. `// 9.21 method 10`) : on retrouve le lien sans relire le livret.
 
 ---
 
@@ -218,3 +218,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-04** — Ajouter modèle et effort (§7.1) en parenthèses dans chaque tâche des phases 0-6, pour autonomie des tâches.
 - **2026-10-05** — Squelette Vite + TS + Vitest (0.7). Outil de calage de la carte (1.1) : grille de lignes D9, hexagones et numéros, image de fond réglable, enregistrement dans `data/map-grid.json` ; couleurs feldgrau (choix du dev). Tests de géométrie : chaque centre = croisement des 4 lignes. Reste le calage par le dev.
 - **2026-10-05** — Calage enregistré par le dev. Option « colonnes paires rentrées » (une case de moins, `evenColumnShorter`). Import JSON et brouillon automatique dans le navigateur. Projet réorganisé en arborescence (`src/core`, `src/ui`, `src/tools/<outil>`, `server/`, `tests/core`) avec une page d'accueil.
+- **2026-10-05** — Dépôt poussé sur GitHub (remote SSH, clé de déploiement). Règle ajoutée dans `CLAUDE.md` : code et interface en anglais ; outil de calage et tests traduits. Cadrage de la carte recalculé quand la zone d'affichage change de taille.

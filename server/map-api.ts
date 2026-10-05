@@ -1,4 +1,4 @@
-// Plugin Vite : API locale utilisée par les outils (serveur de développement uniquement).
+// Vite plugin: local API used by the tools (dev server only).
 import type { Plugin } from "vite";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -7,7 +7,7 @@ const root = path.resolve(import.meta.dirname, "..");
 const GRID_FILE = path.join(root, "data/map-grid.json");
 const MAP_DIR = path.join(root, "assets/map");
 
-/** Petite API locale : lecture / écriture de data/map-grid.json et des images de carte. */
+/** Small local API: read / write data/map-grid.json and the map images. */
 export function mapApi(): Plugin {
   return {
     name: "map-api",
@@ -28,7 +28,7 @@ export function mapApi(): Plugin {
           if (url.pathname === "/api/map-grid") {
             if (req.method === "GET") {
               try { return send(200, JSON.parse(await readFile(GRID_FILE, "utf8"))); }
-              catch { return send(404, { error: "data/map-grid.json n'existe pas encore" }); }
+              catch { return send(404, { error: "data/map-grid.json does not exist yet" }); }
             }
             if (req.method === "PUT") {
               const grid = JSON.parse((await body()).toString("utf8"));
@@ -44,7 +44,7 @@ export function mapApi(): Plugin {
             }
             if (req.method === "POST") {
               const name = path.basename(url.searchParams.get("name") ?? "");
-              if (!/\.(png|jpe?g|webp)$/i.test(name)) return send(400, { error: "Format accepté : PNG, JPEG ou WebP" });
+              if (!/\.(png|jpe?g|webp)$/i.test(name)) return send(400, { error: "Accepted formats: PNG, JPEG or WebP" });
               await mkdir(MAP_DIR, { recursive: true });
               await writeFile(path.join(MAP_DIR, name), await body());
               return send(200, { saved: `assets/map/${name}` });

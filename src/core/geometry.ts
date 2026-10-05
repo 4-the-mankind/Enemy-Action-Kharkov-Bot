@@ -1,25 +1,25 @@
-// Géométrie de la grille de référence (D9) : hexagones côté plat en haut (Q1).
-// Un centre de case = croisement d'une verticale, d'une horizontale et de 2 diagonales.
+// Reference grid geometry (D9): flat-top hexes (Q1).
+// A hex center = crossing of one vertical, one horizontal and 2 diagonal lines.
 
 export interface MapGrid {
   version: 1;
   orientation: "flat";
   cols: number;
   rows: number;
-  /** Écart horizontal entre deux colonnes (entre deux verticales), en px de grille. */
+  /** Horizontal distance between two columns (two vertical lines), in grid px. */
   colStep: number;
-  /** Écart vertical entre deux cases d'une même colonne, en px de grille. */
+  /** Vertical distance between two hexes of the same column, in grid px. */
   rowStep: number;
-  /** +0.5 : colonnes paires décalées d'une demi-case vers le bas ; -0.5 : vers le haut. */
+  /** +0.5: even columns shifted half a hex down; -0.5: up. */
   evenColumnShift: 0.5 | -0.5;
-  /** Colonnes paires « rentrées » : une case de moins (la dernière ligne n'existe pas). */
+  /** "Inset" even columns: one hex fewer (the last row does not exist). */
   evenColumnShorter?: boolean;
   background: {
     image: string | null;
-    /** Position du pixel en haut à gauche de l'image, en px de grille. */
+    /** Position of the image's top-left pixel, in grid px. */
     x: number;
     y: number;
-    /** Échelle de l'image (1 = taille réelle). */
+    /** Image scale (1 = actual size). */
     scale: number;
   };
 }
@@ -43,10 +43,10 @@ export const DEFAULT_GRID: MapGrid = {
 export const hexId = (col: number, row: number) =>
   String(col).padStart(2, "0") + String(row).padStart(2, "0");
 
-/** Rayon horizontal de l'hexagone (centre → sommet gauche/droit). */
+/** Horizontal hex radius (center → left/right corner). */
 export const hexRadius = (g: MapGrid) => (g.colStep * 2) / 3;
 
-/** Centre de 0101 : placé pour que toute la grille soit en coordonnées positives. */
+/** Center of 0101: placed so that the whole grid has positive coordinates. */
 export function origin(g: MapGrid): Point {
   return {
     x: hexRadius(g),
@@ -54,7 +54,7 @@ export function origin(g: MapGrid): Point {
   };
 }
 
-/** Indice de demi-ligne : l'horizontale qui passe par le centre (entier). */
+/** Half-row index: the horizontal line through the center (integer). */
 const halfRow = (g: MapGrid, col: number, row: number) =>
   2 * (row - 1) + (col % 2 === 0 ? 2 * g.evenColumnShift : 0);
 
@@ -66,7 +66,7 @@ export function hexCenter(g: MapGrid, col: number, row: number): Point {
   };
 }
 
-/** Nombre de cases dans une colonne. */
+/** Number of hexes in a column. */
 export const rowsInColumn = (g: MapGrid, col: number) =>
   g.evenColumnShorter && col % 2 === 0 ? g.rows - 1 : g.rows;
 
@@ -78,7 +78,7 @@ export function hexes(g: MapGrid): Hex[] {
   return out;
 }
 
-/** Sommets d'un hexagone côté plat en haut. */
+/** Corners of a flat-top hex. */
 export function hexCorners(g: MapGrid, c: Point): Point[] {
   const s = hexRadius(g), h = g.rowStep / 2;
   return [
@@ -99,9 +99,9 @@ export interface GridLines {
 }
 
 /**
- * Les 4 familles de lignes, chacune tracée du premier au dernier centre qu'elle traverse,
- * prolongée d'un demi-pas aux deux bouts. Repère : u = colonne - 1, k = demi-ligne.
- * Verticale : u constant ; horizontale : k constant ; diagonales : k - u et k + u constants.
+ * The 4 line families, each drawn from the first to the last center it crosses,
+ * extended by half a step at both ends. Frame: u = column - 1, k = half-row.
+ * Vertical: constant u; horizontal: constant k; diagonals: constant k - u and k + u.
  */
 export function gridLines(g: MapGrid): GridLines {
   const all = hexes(g);
@@ -118,7 +118,7 @@ export function gridLines(g: MapGrid): GridLines {
       const kv = key(h.col - 1, halfRow(g, h.col, h.row));
       (groups.get(kv) ?? groups.set(kv, []).get(kv)!).push(h);
     }
-    // Projection sur la direction de la ligne pour trouver les deux extrémités.
+    // Project onto the line direction to find both ends.
     const proj = (p: Point) => p.x * step.x + p.y * step.y;
     for (const pts of groups.values()) {
       let a = pts[0], b = pts[0];
@@ -135,7 +135,7 @@ export function gridLines(g: MapGrid): GridLines {
   return out;
 }
 
-/** Taille de la zone couverte par la grille (hexagones compris). */
+/** Size of the area covered by the grid (hexes included). */
 export function gridExtent(g: MapGrid): { width: number; height: number } {
   const o = origin(g);
   const lastCol = hexCenter(g, g.cols, 1).x;
@@ -143,7 +143,7 @@ export function gridExtent(g: MapGrid): { width: number; height: number } {
   return { width: lastCol + o.x, height: Math.max(...ys) + g.rowStep / 2 };
 }
 
-/** Case dont le centre est le plus proche du point, ou null hors de la grille. */
+/** Hex whose center is closest to the point, or null outside the grid. */
 export function hexAt(g: MapGrid, p: Point): Hex | null {
   const o = origin(g);
   const c0 = Math.round((p.x - o.x) / g.colStep) + 1;

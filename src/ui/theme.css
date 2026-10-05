@@ -1,4 +1,4 @@
-/* Thème commun des pages : feldgrau d'état-major allemand, rouge de carte d'état-major. */
+/* Shared page theme: German general staff feldgrau, staff-map red. */
 :root {
   --feldgrau: #4d5d53;
   --feldgrau-deep: #313b34;

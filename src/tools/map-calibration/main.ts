@@ -1,21 +1,21 @@
-// Outil de calage de la carte (tâche 1.1, D9) : la grille de lignes est la référence,
-// l'image de fond est déplacée et mise à l'échelle dessous.
+// Map calibration tool (task 1.1, D9): the line grid is the reference,
+// the background image is moved and scaled underneath it.
 import {
   DEFAULT_GRID, gridExtent, gridLines, hexAt, hexCorners, hexes, type MapGrid, type Point,
 } from "../../core/geometry";
 import { parseMapGrid } from "../../core/map-grid";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const RATIO = 2 / Math.sqrt(3); // hauteur / écart entre colonnes pour un hexagone régulier
+const RATIO = 2 / Math.sqrt(3); // height / column spacing for a regular hex
 const DRAFT_KEY = "ea-kharkov:map-grid-draft";
 
-// Brouillon dans le navigateur : les réglages non enregistrés survivent à un rechargement.
+// Browser draft: unsaved settings survive a page reload.
 const storage = {
   read(): unknown {
     try { const v = localStorage.getItem(DRAFT_KEY); return v ? JSON.parse(v) : null; } catch { return null; }
   },
   write(v: string | null) {
-    try { v === null ? localStorage.removeItem(DRAFT_KEY) : localStorage.setItem(DRAFT_KEY, v); } catch { /* stockage indisponible */ }
+    try { v === null ? localStorage.removeItem(DRAFT_KEY) : localStorage.setItem(DRAFT_KEY, v); } catch { /* storage unavailable */ }
   },
 };
 
@@ -25,6 +25,7 @@ let imageSize = { w: 0, h: 0 };
 const view = { tx: 40, ty: 40, z: 0.25 };
 const polygons = new Map<string, SVGPolygonElement>();
 let hovered: SVGPolygonElement | null = null;
+let userMovedView = false;
 
 const viewport = $<HTMLElement>("viewport");
 const stage = $<HTMLDivElement>("stage");
@@ -35,7 +36,7 @@ const num = (id: string) => $<HTMLInputElement>(id);
 const round2 = (v: number) => Math.round(v * 100) / 100;
 const imageUrl = (p: string) => "/" + p.split("/").map(encodeURIComponent).join("/");
 
-// ---------- Rendu ----------
+// ---------- Rendering ----------
 
 function renderGrid() {
   const { width, height } = gridExtent(grid);
@@ -123,7 +124,7 @@ function update({ grid: g = false, bg: b = false } = {}) {
   markDirty();
 }
 
-// ---------- Image de fond ----------
+// ---------- Background image ----------
 
 async function loadImage(path: string | null) {
   grid.background.image = path;
@@ -135,7 +136,7 @@ async function loadImage(path: string | null) {
     await img.decode();
     imageSize = { w: img.naturalWidth, h: img.naturalHeight };
   } catch {
-    status(`Impossible de lire ${path}. Vérifiez qu'il s'agit d'une image PNG, JPEG ou WebP.`, true);
+    status(`Cannot read ${path}. Check that it is a PNG, JPEG or WebP image.`, true);
   }
   update({ bg: true });
 }
@@ -143,7 +144,7 @@ async function loadImage(path: string | null) {
 async function refreshImageList() {
   const list: string[] = await fetch("/api/map-images").then((r) => r.json()).catch(() => []);
   const sel = $<HTMLSelectElement>("image");
-  sel.innerHTML = `<option value="">Aucune</option>` +
+  sel.innerHTML = `<option value="">None</option>` +
     list.map((p) => `<option value="${p}">${p.replace("assets/map/", "")}</option>`).join("");
   return list;
 }
@@ -156,7 +157,7 @@ $<HTMLInputElement>("upload").addEventListener("change", async (e) => {
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  status(`Import de ${file.name}…`);
+  status(`Importing ${file.name}…`);
   const res = await fetch(`/api/map-images?name=${encodeURIComponent(file.name)}`, { method: "POST", body: file });
   const out = await res.json();
   input.value = "";
@@ -165,7 +166,7 @@ $<HTMLInputElement>("upload").addEventListener("change", async (e) => {
   await loadImage(out.saved);
 });
 
-// ---------- Réglages ----------
+// ---------- Settings ----------
 
 function bindNumber(id: string, apply: (v: number) => void, opts: { grid?: boolean; bg?: boolean }) {
   num(id).addEventListener("input", () => {
@@ -204,7 +205,7 @@ num("regular").addEventListener("change", () => {
 
 $<HTMLSelectElement>("shift").addEventListener("change", (e) => {
   const v = (e.target as HTMLSelectElement).value;
-  // « Rentrées » : décalées d'une demi-case vers le bas, avec une case de moins.
+  // "Inset": shifted half a hex down, with one hex fewer.
   grid.evenColumnShorter = v === "inset";
   grid.evenColumnShift = v === "-0.5" ? -0.5 : 0.5;
   update({ grid: true });
@@ -221,7 +222,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((btn) =>
 for (const id of ["showLines", "showHexes", "showLabels"]) num(id).addEventListener("change", applyLayers);
 num("bgOpacity").addEventListener("input", renderBg);
 
-// Flèches : déplacer l'image au pixel près (hors champs de saisie).
+// Arrow keys: move the image pixel by pixel (outside input fields).
 document.addEventListener("keydown", (e) => {
   const t = e.target as HTMLElement;
   if (t.matches("input, select, textarea")) return;
@@ -237,7 +238,7 @@ document.addEventListener("keydown", (e) => {
   update({ bg: true });
 });
 
-// ---------- Navigation : molette = zoom, glisser = déplacer ----------
+// ---------- Navigation: wheel = zoom, drag = pan ----------
 
 const toGrid = (clientX: number, clientY: number): Point => {
   const r = viewport.getBoundingClientRect();
@@ -246,6 +247,7 @@ const toGrid = (clientX: number, clientY: number): Point => {
 
 viewport.addEventListener("wheel", (e) => {
   e.preventDefault();
+  userMovedView = true;
   const r = viewport.getBoundingClientRect();
   const p = toGrid(e.clientX, e.clientY);
   view.z = Math.min(8, Math.max(0.03, view.z * Math.exp(-e.deltaY * 0.0015)));
@@ -258,6 +260,7 @@ let drag: { x: number; y: number; tx: number; ty: number } | null = null;
 viewport.addEventListener("pointerdown", (e) => {
   viewport.focus({ preventScroll: true });
   drag = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
+  userMovedView = true;
   viewport.setPointerCapture(e.pointerId);
   viewport.classList.add("panning");
 });
@@ -277,9 +280,9 @@ viewport.addEventListener("pointermove", (e) => {
     hovered = poly;
   }
   const img = grid.background.image
-    ? ` · pixel de l'image ${Math.round((p.x - grid.background.x) / grid.background.scale)}, ${Math.round((p.y - grid.background.y) / grid.background.scale)}`
+    ? ` · image pixel ${Math.round((p.x - grid.background.x) / grid.background.scale)}, ${Math.round((p.y - grid.background.y) / grid.background.scale)}`
     : "";
-  $("readout").textContent = (h ? `Case ${h.id}` : "Hors grille") + img;
+  $("readout").textContent = (h ? `Hex ${h.id}` : "Outside grid") + img;
 });
 
 function fit() {
@@ -290,23 +293,26 @@ function fit() {
   const x1 = Math.max(width, hasImg ? b.x + imageSize.w * b.scale : 0);
   const y1 = Math.max(height, hasImg ? b.y + imageSize.h * b.scale : 0);
   const r = viewport.getBoundingClientRect();
+  if (!r.width || !r.height) return; // hidden viewport: the ResizeObserver will fit later
   view.z = Math.min(r.width / (x1 - x0), r.height / (y1 - y0)) * 0.95;
   view.tx = (r.width - (x1 - x0) * view.z) / 2 - x0 * view.z;
   view.ty = (r.height - (y1 - y0) * view.z) / 2 - y0 * view.z;
   applyView();
 }
-$("fit").addEventListener("click", fit);
+$("fit").addEventListener("click", () => { userMovedView = false; fit(); });
+// Keep the whole map in view when the window is resized, until the user zooms or pans.
+new ResizeObserver(() => { if (!userMovedView) fit(); }).observe(viewport);
 
-// ---------- Enregistrement ----------
+// ---------- Saving ----------
 
 $("save").addEventListener("click", async () => {
   const body = JSON.stringify(grid);
   const res = await fetch("/api/map-grid", { method: "PUT", body, headers: { "Content-Type": "application/json" } })
     .catch(() => null);
-  if (!res?.ok) return status("Échec de l'enregistrement : le serveur de développement est-il lancé ?", true);
+  if (!res?.ok) return status("Save failed: is the dev server running?", true);
   saved = JSON.stringify(grid);
   markDirty();
-  status("Enregistré dans data/map-grid.json");
+  status("Saved to data/map-grid.json");
 });
 
 $<HTMLInputElement>("import").addEventListener("change", async (e) => {
@@ -318,9 +324,9 @@ $<HTMLInputElement>("import").addEventListener("change", async (e) => {
     applyGrid(parseMapGrid(JSON.parse(await file.text())));
     await loadImage(grid.background.image);
     fit();
-    status(`${file.name} importé. Cliquez sur Enregistrer pour l'écrire dans data/map-grid.json.`);
+    status(`${file.name} imported. Click Save to write it to data/map-grid.json.`);
   } catch (err) {
-    status(`Import impossible : ${err instanceof SyntaxError ? "ce n'est pas un JSON valide." : (err as Error).message}`, true);
+    status(`Import failed: ${err instanceof SyntaxError ? "not valid JSON." : (err as Error).message}`, true);
   }
 });
 
@@ -332,7 +338,7 @@ $("download").addEventListener("click", () => {
   URL.revokeObjectURL(a.href);
 });
 
-// ---------- Démarrage ----------
+// ---------- Startup ----------
 
 function applyGrid(g: MapGrid) {
   grid = g;
@@ -344,14 +350,14 @@ async function init() {
   const images = await refreshImageList();
   const res = await fetch("/api/map-grid").catch(() => null);
   let loaded = structuredClone(DEFAULT_GRID);
-  let msg = "Nouveau calage : enregistrez pour créer data/map-grid.json";
+  let msg = "New calibration: save to create data/map-grid.json";
   if (res?.ok) {
     try {
       loaded = parseMapGrid(await res.json());
       saved = JSON.stringify(loaded);
-      msg = "data/map-grid.json chargé";
+      msg = "data/map-grid.json loaded";
     } catch (err) {
-      msg = `data/map-grid.json illisible : ${(err as Error).message}`;
+      msg = `data/map-grid.json unreadable: ${(err as Error).message}`;
     }
   } else {
     loaded.background.image = images[0] ?? null;
@@ -360,11 +366,11 @@ async function init() {
   if (draft) {
     try {
       const d = parseMapGrid(draft);
-      if (JSON.stringify(d) !== saved) { loaded = d; msg = "Modifications non enregistrées restaurées depuis le navigateur"; }
+      if (JSON.stringify(d) !== saved) { loaded = d; msg = "Unsaved changes restored from the browser"; }
     } catch { storage.write(null); }
   }
   applyGrid(loaded);
-  status(msg, msg.includes("illisible"));
+  status(msg, msg.includes("unreadable"));
   await loadImage(grid.background.image);
   fit();
 }

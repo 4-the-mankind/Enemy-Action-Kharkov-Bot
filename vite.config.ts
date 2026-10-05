@@ -6,7 +6,7 @@ const page = (p: string) => path.resolve(import.meta.dirname, p);
 
 export default defineConfig({
   plugins: [mapApi()],
-  // data/ et assets/ sont écrits par les outils : ne pas recharger la page à chaque enregistrement.
+  // data/ and assets/ are written by the tools: do not reload the page on every save.
   server: { host: true, port: 5173, watch: { ignored: ["**/data/**", "**/assets/**"] } },
   build: {
     rollupOptions: {

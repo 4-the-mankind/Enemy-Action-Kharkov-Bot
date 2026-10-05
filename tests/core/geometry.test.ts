@@ -21,8 +21,8 @@ const grids: MapGrid[] = [
   { ...DEFAULT_GRID, cols: 6, rows: 4, evenColumnShift: -0.5, rowStep: 150 },
 ];
 
-describe("grille de lignes (D9)", () => {
-  it("numérote les cases CCRR à partir de 0101", () => {
+describe("line grid (D9)", () => {
+  it("numbers hexes CCRR starting at 0101", () => {
     expect(hexId(1, 1)).toBe("0101");
     expect(hexId(31, 16)).toBe("3116");
   });
@@ -32,24 +32,24 @@ describe("grille de lignes (D9)", () => {
     const centers = hexes(g);
     const isCenter = (p: Point) => centers.some((c) => Math.hypot(c.x - p.x, c.y - p.y) < 1e-6);
 
-    it(`chaque centre est le croisement des 4 familles (décalage ${g.evenColumnShift})`, () => {
+    it(`every center is the crossing of the 4 families (shift ${g.evenColumnShift})`, () => {
       for (const c of centers)
         for (const fam of Object.values(lines))
           expect(fam.filter((s: Segment) => onSegment(c, s))).toHaveLength(1);
     });
 
-    it(`les croisements avec une diagonale tombent sur un centre (décalage ${g.evenColumnShift})`, () => {
+    it(`crossings with a diagonal fall on a center (shift ${g.evenColumnShift})`, () => {
       for (const d of [...lines.diagDown, ...lines.diagUp])
         for (const other of [...lines.vertical, ...lines.horizontal, ...lines.diagDown, ...lines.diagUp]) {
           if (other === d) continue;
           const p = intersect(d, other);
-          // Les prolongements d'un demi-pas aux extrémités peuvent se croiser hors de la grille.
+          // The half-step extensions at the ends may cross outside the grid.
           if (p && hexAt(g, p)) expect(isCenter(p)).toBe(true);
         }
     });
   }
 
-  it("retrouve la case sous un point", () => {
+  it("finds the hex under a point", () => {
     const g = grids[0];
     const c = hexCenter(g, 4, 3);
     expect(hexAt(g, { x: c.x + 10, y: c.y - 10 })?.id).toBe("0403");
@@ -57,18 +57,18 @@ describe("grille de lignes (D9)", () => {
   });
 });
 
-describe("colonnes paires rentrées", () => {
+describe("inset even columns", () => {
   const g: MapGrid = { ...DEFAULT_GRID, cols: 6, rows: 5, evenColumnShorter: true };
   const ids = new Set(hexes(g).map((h) => h.id));
 
-  it("une case de moins dans les colonnes paires", () => {
+  it("one hex fewer in even columns", () => {
     expect(ids.has("0105")).toBe(true);
     expect(ids.has("0204")).toBe(true);
     expect(ids.has("0205")).toBe(false);
     expect(hexAt(g, hexCenter(g, 2, 5))?.id).not.toBe("0205");
   });
 
-  it("chaque centre reste le croisement des 4 familles", () => {
+  it("every center is still the crossing of the 4 families", () => {
     const lines = gridLines(g);
     for (const c of hexes(g))
       for (const fam of Object.values(lines))

@@ -37,7 +37,7 @@ h1 {
   font-size: 0.85rem;
   color: var(--paper-dim);
 }
-.file.dirty::after { content: " — modifié, non enregistré"; color: #f0c674; }
+.file.dirty::after { content: " — modified, not saved"; color: #f0c674; }
 
 .group {
   padding: 14px 18px 16px;

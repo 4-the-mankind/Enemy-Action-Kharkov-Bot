@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calage de la carte — EA Kharkov</title>
+    <title>Map calibration — EA Kharkov</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,54 +16,54 @@
     <aside class="panel">
       <header class="panel-head">
         <a class="home" href="/">EA Kharkov Bot</a>
-        <h1>Calage de la carte</h1>
+        <h1>Map calibration</h1>
         <p class="file" id="file-state">data/map-grid.json</p>
       </header>
 
       <section class="group" aria-labelledby="g-grid">
-        <h2 id="g-grid">Grille</h2>
+        <h2 id="g-grid">Grid</h2>
         <div class="counter">
-          <label for="cols">Colonnes</label>
-          <button type="button" data-step="cols" data-delta="-1" aria-label="Retirer une colonne">−</button>
+          <label for="cols">Columns</label>
+          <button type="button" data-step="cols" data-delta="-1" aria-label="Remove a column">−</button>
           <input id="cols" type="number" min="1" max="99" />
-          <button type="button" data-step="cols" data-delta="1" aria-label="Ajouter une colonne">+</button>
+          <button type="button" data-step="cols" data-delta="1" aria-label="Add a column">+</button>
         </div>
         <div class="counter">
-          <label for="rows">Lignes</label>
-          <button type="button" data-step="rows" data-delta="-1" aria-label="Retirer une ligne">−</button>
+          <label for="rows">Rows</label>
+          <button type="button" data-step="rows" data-delta="-1" aria-label="Remove a row">−</button>
           <input id="rows" type="number" min="1" max="99" />
-          <button type="button" data-step="rows" data-delta="1" aria-label="Ajouter une ligne">+</button>
+          <button type="button" data-step="rows" data-delta="1" aria-label="Add a row">+</button>
         </div>
         <div class="field">
-          <label for="colStep">Écart entre colonnes</label>
+          <label for="colStep">Column spacing</label>
           <input id="colStep" type="number" min="10" step="0.1" /><span class="unit">px</span>
         </div>
         <div class="field">
-          <label for="rowStep">Hauteur d'une case</label>
+          <label for="rowStep">Hex height</label>
           <input id="rowStep" type="number" min="10" step="0.1" /><span class="unit">px</span>
         </div>
-        <label class="check"><input id="regular" type="checkbox" checked /> Hexagones réguliers</label>
+        <label class="check"><input id="regular" type="checkbox" checked /> Regular hexes</label>
         <div class="field wide">
-          <label for="shift">Colonnes paires</label>
+          <label for="shift">Even columns</label>
           <select id="shift">
-            <option value="0.5">décalées vers le bas</option>
-            <option value="-0.5">décalées vers le haut</option>
-            <option value="inset">rentrées (une case de moins)</option>
+            <option value="0.5">shifted down</option>
+            <option value="-0.5">shifted up</option>
+            <option value="inset">inset (one hex fewer)</option>
           </select>
         </div>
       </section>
 
       <section class="group" aria-labelledby="g-bg">
-        <h2 id="g-bg">Image de fond</h2>
+        <h2 id="g-bg">Background image</h2>
         <div class="field wide">
           <label for="image">Image</label>
           <select id="image"></select>
         </div>
         <label class="upload">
           <input id="upload" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span>Importer une image…</span>
+          <span>Import an image…</span>
         </label>
-        <p class="hint">Position du pixel en haut à gauche de l'image</p>
+        <p class="hint">Position of the image's top-left pixel</p>
         <div class="pair">
           <div class="field">
             <label for="bgX">X</label>
@@ -75,43 +75,43 @@
           </div>
         </div>
         <div class="field">
-          <label for="bgScale">Échelle</label>
+          <label for="bgScale">Scale</label>
           <input id="bgScale" type="number" min="1" step="0.1" /><span class="unit">%</span>
         </div>
-        <p class="hint">Flèches du clavier : déplacer l'image de 1 px (Maj : 10 px).</p>
+        <p class="hint">Arrow keys: move the image by 1 px (Shift: 10 px).</p>
       </section>
 
       <section class="group" aria-labelledby="g-view">
-        <h2 id="g-view">Affichage</h2>
-        <label class="check"><input id="showLines" type="checkbox" checked /> Lignes noires</label>
-        <label class="check"><input id="showHexes" type="checkbox" checked /> Hexagones</label>
-        <label class="check"><input id="showLabels" type="checkbox" checked /> Numéros des cases</label>
+        <h2 id="g-view">Display</h2>
+        <label class="check"><input id="showLines" type="checkbox" checked /> Black lines</label>
+        <label class="check"><input id="showHexes" type="checkbox" checked /> Hexes</label>
+        <label class="check"><input id="showLabels" type="checkbox" checked /> Hex numbers</label>
         <div class="field">
-          <label for="bgOpacity">Opacité de l'image</label>
+          <label for="bgOpacity">Image opacity</label>
           <input id="bgOpacity" type="range" min="0" max="100" value="100" />
         </div>
-        <button type="button" id="fit" class="ghost">Voir toute la carte</button>
+        <button type="button" id="fit" class="ghost">Show whole map</button>
       </section>
 
       <footer class="actions">
-        <button type="button" id="save" class="primary">Enregistrer</button>
+        <button type="button" id="save" class="primary">Save</button>
         <div class="pair">
           <label class="upload ghost-file">
             <input id="import" type="file" accept="application/json,.json" />
-            <span>Importer un JSON…</span>
+            <span>Import JSON…</span>
           </label>
-          <button type="button" id="download" class="ghost">Télécharger le JSON</button>
+          <button type="button" id="download" class="ghost">Download JSON</button>
         </div>
         <p class="status" id="status" role="status"></p>
       </footer>
     </aside>
 
-    <main class="viewport" id="viewport" tabindex="0" aria-label="Carte">
+    <main class="viewport" id="viewport" tabindex="0" aria-label="Map">
       <div class="stage" id="stage">
         <div class="bg" id="bg"></div>
         <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
-      <div class="readout" id="readout">Survolez la carte</div>
+      <div class="readout" id="readout">Hover over the map</div>
     </main>
 
     <script type="module" src="./main.ts"></script>
