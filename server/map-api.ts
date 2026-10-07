@@ -5,9 +5,11 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
 const GRID_FILE = path.join(root, "data/map-grid.json");
+const HEXES_FILE = path.join(root, "data/map-hexes.json");
+const SIDES_FILE = path.join(root, "data/map-hexsides.json");
 const MAP_DIR = path.join(root, "assets/map");
 
-/** Small local API: read / write data/map-grid.json and the map images. */
+/** Small local API: read / write the data/*.json files and the map images. */
 export function mapApi(): Plugin {
   return {
     name: "map-api",
@@ -24,19 +26,23 @@ export function mapApi(): Plugin {
           for await (const c of req) chunks.push(c as Buffer);
           return Buffer.concat(chunks);
         };
-        try {
-          if (url.pathname === "/api/map-grid") {
-            if (req.method === "GET") {
-              try { return send(200, JSON.parse(await readFile(GRID_FILE, "utf8"))); }
-              catch { return send(404, { error: "data/map-grid.json does not exist yet" }); }
-            }
-            if (req.method === "PUT") {
-              const grid = JSON.parse((await body()).toString("utf8"));
-              await mkdir(path.dirname(GRID_FILE), { recursive: true });
-              await writeFile(GRID_FILE, JSON.stringify(grid, null, 2) + "\n");
-              return send(200, { saved: "data/map-grid.json" });
-            }
+        // GET reads a data/*.json file (404 if absent); PUT overwrites it.
+        const jsonFile = async (file: string, relPath: string) => {
+          if (req.method === "GET") {
+            try { return send(200, JSON.parse(await readFile(file, "utf8"))); }
+            catch { return send(404, { error: `${relPath} does not exist yet` }); }
           }
+          if (req.method === "PUT") {
+            const data = JSON.parse((await body()).toString("utf8"));
+            await mkdir(path.dirname(file), { recursive: true });
+            await writeFile(file, JSON.stringify(data, null, 2) + "\n");
+            return send(200, { saved: relPath });
+          }
+        };
+        try {
+          if (url.pathname === "/api/map-grid") return await jsonFile(GRID_FILE, "data/map-grid.json");
+          if (url.pathname === "/api/map-hexes") return await jsonFile(HEXES_FILE, "data/map-hexes.json");
+          if (url.pathname === "/api/map-hexsides") return await jsonFile(SIDES_FILE, "data/map-hexsides.json");
           if (url.pathname === "/api/map-images") {
             if (req.method === "GET") {
               const files = (await readdir(MAP_DIR).catch(() => [])).filter((f) => /\.(png|jpe?g|webp)$/i.test(f));

@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         home: page("index.html"),
         mapCalibration: page("src/tools/map-calibration/index.html"),
+        mapPainter: page("src/tools/map-painter/index.html"),
       },
     },
   },

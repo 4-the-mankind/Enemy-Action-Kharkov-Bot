@@ -1,0 +1,1591 @@
+{
+  "version": 1,
+  "hexes": {
+    "1001": {
+      "mapEdge": "soviet"
+    },
+    "1002": {
+      "terrain": "woods"
+    },
+    "1005": {
+      "lineArtillery": "east"
+    },
+    "1006": {
+      "lineArtillery": "west"
+    },
+    "1007": {
+      "frontTarget": "voronezh"
+    },
+    "1009": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "1010": {
+      "logistics": "voronezh"
+    },
+    "1011": {
+      "logistics": "voronezh"
+    },
+    "1012": {
+      "logistics": "voronezh"
+    },
+    "1013": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "logistics": "voronezh"
+    },
+    "1014": {
+      "logistics": "voronezh",
+      "lineWest": "east"
+    },
+    "1015": {
+      "lineWest": "west"
+    },
+    "1020": {
+      "lineFar": "east"
+    },
+    "1021": {
+      "lineFar": "west"
+    },
+    "1022": {
+      "mapEdge": "german"
+    },
+    "1101": {
+      "mapEdge": "soviet"
+    },
+    "1103": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "1106": {
+      "frontTarget": "both",
+      "lineArtillery": "east"
+    },
+    "1107": {
+      "lineArtillery": "west"
+    },
+    "1109": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "1110": {
+      "terrain": "woods",
+      "logistics": "voronezh"
+    },
+    "1111": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "logistics": "voronezh"
+    },
+    "1112": {
+      "terrain": "woods",
+      "logistics": "voronezh"
+    },
+    "1113": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "logistics": "voronezh"
+    },
+    "1114": {
+      "terrain": "woods",
+      "logistics": "voronezh",
+      "lineWest": "east"
+    },
+    "1115": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "logistics": "voronezh",
+      "lineWest": "west"
+    },
+    "1116": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "1117": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "1120": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "lineFar": "east"
+    },
+    "1121": {
+      "lineFar": "west"
+    },
+    "1123": {
+      "mapEdge": "german"
+    },
+    "1201": {
+      "mapEdge": "soviet"
+    },
+    "1205": {
+      "lineArtillery": "east"
+    },
+    "1206": {
+      "lineArtillery": "west"
+    },
+    "1210": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "1211": {
+      "logistics": "voronezh"
+    },
+    "1212": {
+      "logistics": "voronezh"
+    },
+    "1213": {
+      "logistics": "voronezh"
+    },
+    "1214": {
+      "logistics": "voronezh",
+      "lineWest": "east"
+    },
+    "1215": {
+      "lineWest": "west"
+    },
+    "1218": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "1220": {
+      "lineFar": "east"
+    },
+    "1221": {
+      "terrain": "woods",
+      "lineFar": "west"
+    },
+    "1222": {
+      "mapEdge": "german"
+    },
+    "1301": {
+      "mapEdge": "soviet",
+      "edgeRoad": true
+    },
+    "1304": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "1305": {
+      "lineArtillery": "east"
+    },
+    "1306": {
+      "frontTarget": "southwest",
+      "lineArtillery": "west"
+    },
+    "1310": {
+      "terrain": "woods",
+      "frontTarget": "both"
+    },
+    "1311": {
+      "terrain": "broken",
+      "logistics": "voronezh"
+    },
+    "1312": {
+      "terrain": "woods",
+      "frontTarget": "both",
+      "logistics": "voronezh"
+    },
+    "1314": {
+      "lineWest": "east"
+    },
+    "1315": {
+      "terrain": "broken",
+      "frontTarget": "voronezh",
+      "lineWest": "west"
+    },
+    "1320": {
+      "lineFar": "east"
+    },
+    "1321": {
+      "terrain": "woods",
+      "lineFar": "west"
+    },
+    "1323": {
+      "mapEdge": "german"
+    },
+    "1401": {
+      "mapEdge": "soviet"
+    },
+    "1402": {
+      "frontTarget": "southwest"
+    },
+    "1404": {
+      "lineArtillery": "east"
+    },
+    "1405": {
+      "lineArtillery": "west"
+    },
+    "1407": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "1408": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "1411": {
+      "terrain": "woods",
+      "frontTarget": "both"
+    },
+    "1414": {
+      "lineWest": "east"
+    },
+    "1415": {
+      "lineWest": "west"
+    },
+    "1416": {
+      "frontTarget": "voronezh"
+    },
+    "1419": {
+      "frontTarget": "voronezh"
+    },
+    "1420": {
+      "lineFar": "east"
+    },
+    "1421": {
+      "terrain": "city",
+      "vp": 2,
+      "lineFar": "west"
+    },
+    "1422": {
+      "mapEdge": "german"
+    },
+    "1501": {
+      "mapEdge": "soviet"
+    },
+    "1505": {
+      "lineArtillery": "east"
+    },
+    "1506": {
+      "lineArtillery": "west"
+    },
+    "1514": {
+      "lineWest": "east"
+    },
+    "1515": {
+      "lineWest": "west"
+    },
+    "1520": {
+      "lineFar": "east"
+    },
+    "1521": {
+      "terrain": "woods",
+      "lineFar": "west"
+    },
+    "1523": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "1601": {
+      "terrain": "broken",
+      "mapEdge": "soviet"
+    },
+    "1602": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "1603": {
+      "terrain": "woods"
+    },
+    "1604": {
+      "terrain": "town",
+      "vp": 1,
+      "lineArtillery": "east"
+    },
+    "1605": {
+      "terrain": "woods",
+      "lineArtillery": "west"
+    },
+    "1606": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "1608": {
+      "frontTarget": "southwest"
+    },
+    "1610": {
+      "frontTarget": "southwest"
+    },
+    "1613": {
+      "frontTarget": "both",
+      "lineWest": "east"
+    },
+    "1614": {
+      "lineWest": "west"
+    },
+    "1615": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "1617": {
+      "frontTarget": "voronezh"
+    },
+    "1619": {
+      "frontTarget": "voronezh",
+      "lineFar": "east"
+    },
+    "1620": {
+      "lineFar": "west"
+    },
+    "1621": {
+      "terrain": "woods"
+    },
+    "1622": {
+      "mapEdge": "german"
+    },
+    "1701": {
+      "terrain": "woods",
+      "frontTarget": "southwest",
+      "mapEdge": "soviet"
+    },
+    "1702": {
+      "terrain": "woods"
+    },
+    "1703": {
+      "terrain": "woods"
+    },
+    "1704": {
+      "terrain": "broken"
+    },
+    "1705": {
+      "lineArtillery": "east"
+    },
+    "1706": {
+      "lineArtillery": "west"
+    },
+    "1714": {
+      "lineWest": "east"
+    },
+    "1715": {
+      "lineWest": "west"
+    },
+    "1720": {
+      "lineFar": "east"
+    },
+    "1721": {
+      "village": true,
+      "lineFar": "west"
+    },
+    "1723": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "1801": {
+      "terrain": "broken",
+      "mapEdge": "soviet"
+    },
+    "1802": {
+      "terrain": "city",
+      "vp": 2
+    },
+    "1803": {
+      "terrain": "broken"
+    },
+    "1804": {
+      "terrain": "broken",
+      "frontTarget": "southwest",
+      "logistics": "southwest",
+      "lineArtillery": "east"
+    },
+    "1805": {
+      "logistics": "southwest",
+      "lineArtillery": "west"
+    },
+    "1806": {
+      "logistics": "southwest"
+    },
+    "1808": {
+      "frontTarget": "southwest"
+    },
+    "1813": {
+      "frontTarget": "southwest",
+      "lineWest": "east"
+    },
+    "1814": {
+      "lineWest": "west"
+    },
+    "1815": {
+      "frontTarget": "both"
+    },
+    "1817": {
+      "terrain": "marsh"
+    },
+    "1819": {
+      "lineFar": "east"
+    },
+    "1820": {
+      "lineFar": "west"
+    },
+    "1822": {
+      "terrain": "woods",
+      "mapEdge": "german"
+    },
+    "1901": {
+      "mapEdge": "soviet",
+      "edgeRoad": true,
+      "lineArtillery": "east"
+    },
+    "1902": {
+      "lineArtillery": "east"
+    },
+    "1903": {
+      "lineArtillery": "east"
+    },
+    "1904": {
+      "terrain": "broken",
+      "frontTarget": "southwest",
+      "logistics": "southwest",
+      "lineArtillery": "east"
+    },
+    "1905": {
+      "logistics": "southwest",
+      "lineArtillery": "west"
+    },
+    "1906": {
+      "frontTarget": "southwest",
+      "logistics": "southwest"
+    },
+    "1907": {
+      "logistics": "southwest"
+    },
+    "1910": {
+      "terrain": "town"
+    },
+    "1912": {
+      "frontTarget": "southwest"
+    },
+    "1913": {
+      "lineWest": "east"
+    },
+    "1914": {
+      "lineWest": "west"
+    },
+    "1918": {
+      "frontTarget": "southwest"
+    },
+    "1919": {
+      "lineFar": "east"
+    },
+    "1920": {
+      "village": true,
+      "lineFar": "west"
+    },
+    "1923": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2001": {
+      "mapEdge": "german",
+      "lineArtillery": "west"
+    },
+    "2002": {
+      "terrain": "broken",
+      "frontTarget": "southwest",
+      "lineArtillery": "west"
+    },
+    "2003": {
+      "lineArtillery": "west"
+    },
+    "2004": {
+      "logistics": "southwest",
+      "lineArtillery": "west"
+    },
+    "2005": {
+      "logistics": "southwest"
+    },
+    "2006": {
+      "logistics": "southwest"
+    },
+    "2013": {
+      "lineWest": "east"
+    },
+    "2014": {
+      "frontTarget": "southwest",
+      "lineWest": "west"
+    },
+    "2019": {
+      "lineFar": "east"
+    },
+    "2020": {
+      "terrain": "marsh",
+      "lineFar": "west"
+    },
+    "2022": {
+      "mapEdge": "german"
+    },
+    "2101": {
+      "terrain": "broken",
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2102": {
+      "terrain": "city",
+      "vp": 2
+    },
+    "2103": {
+      "terrain": "broken",
+      "frontTarget": "southwest"
+    },
+    "2106": {
+      "frontTarget": "southwest"
+    },
+    "2109": {
+      "frontTarget": "southwest"
+    },
+    "2112": {
+      "frontTarget": "southwest"
+    },
+    "2113": {
+      "lineWest": "east"
+    },
+    "2114": {
+      "lineWest": "west"
+    },
+    "2115": {
+      "terrain": "broken"
+    },
+    "2117": {
+      "frontTarget": "southwest"
+    },
+    "2119": {
+      "frontTarget": "southwest",
+      "lineFar": "east"
+    },
+    "2120": {
+      "terrain": "town",
+      "vp": 1,
+      "lineFar": "west"
+    },
+    "2123": {
+      "mapEdge": "german"
+    },
+    "2201": {
+      "terrain": "broken",
+      "frontTarget": "southwest",
+      "mapEdge": "german"
+    },
+    "2207": {
+      "frontTarget": "southwest"
+    },
+    "2208": {
+      "lineWest": "east"
+    },
+    "2209": {
+      "lineWest": "east"
+    },
+    "2210": {
+      "frontTarget": "southwest",
+      "lineWest": "east"
+    },
+    "2211": {
+      "lineWest": "east"
+    },
+    "2212": {
+      "lineWest": "east"
+    },
+    "2213": {
+      "lineWest": "west"
+    },
+    "2214": {
+      "terrain": "broken"
+    },
+    "2215": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "2218": {
+      "lineFar": "east"
+    },
+    "2219": {
+      "lineFar": "west"
+    },
+    "2221": {
+      "terrain": "marsh"
+    },
+    "2222": {
+      "mapEdge": "german"
+    },
+    "2301": {
+      "vp": 1,
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2308": {
+      "lineWest": "east"
+    },
+    "2309": {
+      "terrain": "marsh",
+      "lineWest": "west"
+    },
+    "2310": {
+      "lineWest": "west"
+    },
+    "2311": {
+      "lineWest": "west"
+    },
+    "2312": {
+      "lineWest": "west"
+    },
+    "2313": {
+      "terrain": "marsh",
+      "lineWest": "west"
+    },
+    "2314": {
+      "terrain": "woods",
+      "frontTarget": "southwest"
+    },
+    "2318": {
+      "lineFar": "east"
+    },
+    "2319": {
+      "village": true,
+      "lineFar": "west"
+    },
+    "2321": {
+      "terrain": "marsh"
+    },
+    "2322": {
+      "terrain": "marsh"
+    },
+    "2323": {
+      "mapEdge": "german"
+    },
+    "2401": {
+      "mapEdge": "german"
+    },
+    "2402": {
+      "frontTarget": "southwest"
+    },
+    "2404": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "2406": {
+      "frontTarget": "southwest"
+    },
+    "2407": {
+      "lineWest": "east"
+    },
+    "2408": {
+      "frontTarget": "southwest",
+      "lineWest": "west"
+    },
+    "2410": {
+      "frontTarget": "southwest"
+    },
+    "2412": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "2415": {
+      "frontTarget": "southwest"
+    },
+    "2416": {
+      "terrain": "marsh"
+    },
+    "2417": {
+      "frontTarget": "southwest",
+      "lineFar": "east"
+    },
+    "2418": {
+      "lineFar": "west"
+    },
+    "2420": {
+      "terrain": "marsh"
+    },
+    "2422": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2501": {
+      "mapEdge": "german",
+      "lineWest": "east"
+    },
+    "2502": {
+      "lineWest": "east"
+    },
+    "2503": {
+      "lineWest": "east"
+    },
+    "2504": {
+      "lineWest": "east"
+    },
+    "2505": {
+      "lineWest": "east"
+    },
+    "2506": {
+      "lineWest": "east"
+    },
+    "2507": {
+      "lineWest": "east"
+    },
+    "2508": {
+      "lineWest": "west"
+    },
+    "2517": {
+      "lineFar": "east"
+    },
+    "2518": {
+      "terrain": "city",
+      "vp": 3,
+      "lineFar": "west"
+    },
+    "2520": {
+      "terrain": "city",
+      "vp": 2
+    },
+    "2521": {
+      "terrain": "broken"
+    },
+    "2523": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "2601": {
+      "mapEdge": "german",
+      "lineWest": "west"
+    },
+    "2602": {
+      "lineWest": "west"
+    },
+    "2603": {
+      "lineWest": "west"
+    },
+    "2604": {
+      "lineWest": "west"
+    },
+    "2605": {
+      "lineWest": "west"
+    },
+    "2606": {
+      "lineWest": "west"
+    },
+    "2607": {
+      "frontTarget": "southwest",
+      "lineWest": "west"
+    },
+    "2609": {
+      "frontTarget": "southwest"
+    },
+    "2611": {
+      "frontTarget": "southwest"
+    },
+    "2613": {
+      "frontTarget": "southwest"
+    },
+    "2615": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "2616": {
+      "lineFar": "east"
+    },
+    "2617": {
+      "lineFar": "west"
+    },
+    "2622": {
+      "mapEdge": "german"
+    },
+    "2701": {
+      "vp": 1,
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2702": {
+      "frontTarget": "southwest"
+    },
+    "2705": {
+      "frontTarget": "southwest"
+    },
+    "2708": {
+      "terrain": "broken"
+    },
+    "2716": {
+      "lineFar": "east"
+    },
+    "2717": {
+      "lineFar": "west"
+    },
+    "2721": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2722": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "2723": {
+      "mapEdge": "german"
+    },
+    "2801": {
+      "mapEdge": "german"
+    },
+    "2807": {
+      "frontTarget": "southwest"
+    },
+    "2809": {
+      "frontTarget": "southwest"
+    },
+    "2811": {
+      "lineFar": "east"
+    },
+    "2812": {
+      "frontTarget": "southwest",
+      "lineFar": "east"
+    },
+    "2813": {
+      "lineFar": "east"
+    },
+    "2814": {
+      "frontTarget": "southwest",
+      "lineFar": "east"
+    },
+    "2815": {
+      "lineFar": "east"
+    },
+    "2816": {
+      "lineFar": "west"
+    },
+    "2820": {
+      "mapEdge": "german"
+    },
+    "2821": {
+      "playable": false,
+      "edgeRoad": true
+    },
+    "2822": {
+      "playable": false
+    },
+    "2901": {
+      "mapEdge": "german"
+    },
+    "2902": {
+      "mapEdge": "german"
+    },
+    "2903": {
+      "mapEdge": "german"
+    },
+    "2904": {
+      "mapEdge": "german"
+    },
+    "2905": {
+      "mapEdge": "german"
+    },
+    "2906": {
+      "mapEdge": "german"
+    },
+    "2911": {
+      "village": true,
+      "lineFar": "east"
+    },
+    "2912": {
+      "lineFar": "west"
+    },
+    "2913": {
+      "lineFar": "west"
+    },
+    "2914": {
+      "lineFar": "west"
+    },
+    "2915": {
+      "lineFar": "west"
+    },
+    "2916": {
+      "lineFar": "west"
+    },
+    "2920": {
+      "terrain": "broken"
+    },
+    "2921": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "2922": {
+      "playable": false
+    },
+    "2923": {
+      "playable": false
+    },
+    "3001": {
+      "playable": false
+    },
+    "3002": {
+      "playable": false
+    },
+    "3003": {
+      "playable": false
+    },
+    "3004": {
+      "playable": false
+    },
+    "3005": {
+      "playable": false
+    },
+    "3006": {
+      "mapEdge": "german"
+    },
+    "3007": {
+      "village": true
+    },
+    "3009": {
+      "village": true
+    },
+    "3010": {
+      "lineFar": "east"
+    },
+    "3011": {
+      "lineFar": "west"
+    },
+    "3012": {
+      "village": true
+    },
+    "3014": {
+      "village": true
+    },
+    "3020": {
+      "mapEdge": "german"
+    },
+    "3021": {
+      "playable": false
+    },
+    "3022": {
+      "playable": false
+    },
+    "3101": {
+      "playable": false
+    },
+    "3102": {
+      "playable": false
+    },
+    "3103": {
+      "playable": false
+    },
+    "3104": {
+      "playable": false
+    },
+    "3105": {
+      "playable": false
+    },
+    "3106": {
+      "playable": false
+    },
+    "3107": {
+      "mapEdge": "german",
+      "lineFar": "east"
+    },
+    "3108": {
+      "lineFar": "east"
+    },
+    "3109": {
+      "lineFar": "east"
+    },
+    "3110": {
+      "lineFar": "east"
+    },
+    "3111": {
+      "lineFar": "west"
+    },
+    "3116": {
+      "terrain": "city",
+      "vp": 2
+    },
+    "3121": {
+      "mapEdge": "german"
+    },
+    "3122": {
+      "playable": false
+    },
+    "3123": {
+      "playable": false
+    },
+    "3201": {
+      "playable": false
+    },
+    "3202": {
+      "playable": false
+    },
+    "3203": {
+      "playable": false
+    },
+    "3204": {
+      "playable": false
+    },
+    "3205": {
+      "playable": false
+    },
+    "3206": {
+      "mapEdge": "german",
+      "lineFar": "west"
+    },
+    "3207": {
+      "lineFar": "west"
+    },
+    "3208": {
+      "lineFar": "west"
+    },
+    "3209": {
+      "lineFar": "west"
+    },
+    "3210": {
+      "lineFar": "west"
+    },
+    "3220": {
+      "mapEdge": "german"
+    },
+    "3221": {
+      "playable": false
+    },
+    "3222": {
+      "playable": false
+    },
+    "3301": {
+      "playable": false
+    },
+    "3302": {
+      "playable": false
+    },
+    "3303": {
+      "playable": false
+    },
+    "3304": {
+      "playable": false
+    },
+    "3305": {
+      "playable": false
+    },
+    "3306": {
+      "playable": false
+    },
+    "3307": {
+      "mapEdge": "german"
+    },
+    "3308": {
+      "mapEdge": "german"
+    },
+    "3309": {
+      "vp": 2,
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "3310": {
+      "mapEdge": "german"
+    },
+    "3311": {
+      "mapEdge": "german"
+    },
+    "3312": {
+      "mapEdge": "german"
+    },
+    "3313": {
+      "mapEdge": "german"
+    },
+    "3314": {
+      "vp": 1,
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "3315": {
+      "terrain": "marsh",
+      "mapEdge": "german"
+    },
+    "3316": {
+      "mapEdge": "german"
+    },
+    "3317": {
+      "mapEdge": "german"
+    },
+    "3318": {
+      "mapEdge": "german"
+    },
+    "3319": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "3320": {
+      "mapEdge": "german"
+    },
+    "3321": {
+      "mapEdge": "german"
+    },
+    "3322": {
+      "playable": false
+    },
+    "3323": {
+      "playable": false
+    },
+    "0202": {
+      "terrain": "broken"
+    },
+    "0105": {
+      "terrain": "broken",
+      "mapEdge": "soviet"
+    },
+    "0410": {
+      "terrain": "broken"
+    },
+    "0511": {
+      "terrain": "broken",
+      "frontTarget": "voronezh"
+    },
+    "0610": {
+      "terrain": "broken"
+    },
+    "0710": {
+      "terrain": "broken"
+    },
+    "0809": {
+      "terrain": "broken",
+      "frontTarget": "voronezh"
+    },
+    "0609": {
+      "terrain": "broken"
+    },
+    "0409": {
+      "terrain": "broken",
+      "frontTarget": "voronezh"
+    },
+    "0214": {
+      "terrain": "broken",
+      "lineWest": "east"
+    },
+    "0116": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0117": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0118": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0119": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0120": {
+      "terrain": "broken",
+      "mapEdge": "german",
+      "lineFar": "east"
+    },
+    "0216": {
+      "terrain": "broken"
+    },
+    "0217": {
+      "terrain": "broken"
+    },
+    "0218": {
+      "terrain": "broken",
+      "frontTarget": "voronezh"
+    },
+    "0318": {
+      "terrain": "broken"
+    },
+    "0319": {
+      "terrain": "broken"
+    },
+    "0419": {
+      "terrain": "broken"
+    },
+    "0220": {
+      "terrain": "broken",
+      "lineFar": "east"
+    },
+    "0320": {
+      "terrain": "broken",
+      "lineFar": "east"
+    },
+    "0321": {
+      "terrain": "broken",
+      "lineFar": "west"
+    },
+    "0620": {
+      "terrain": "broken",
+      "lineFar": "east"
+    },
+    "0821": {
+      "terrain": "broken",
+      "lineFar": "west"
+    },
+    "0614": {
+      "terrain": "broken",
+      "frontTarget": "voronezh",
+      "lineWest": "east"
+    },
+    "0715": {
+      "terrain": "broken",
+      "lineWest": "west"
+    },
+    "0815": {
+      "terrain": "broken",
+      "frontTarget": "voronezh",
+      "lineWest": "west"
+    },
+    "0915": {
+      "terrain": "broken",
+      "frontTarget": "voronezh",
+      "lineWest": "west"
+    },
+    "0222": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0323": {
+      "terrain": "broken",
+      "mapEdge": "german"
+    },
+    "0307": {
+      "terrain": "woods",
+      "lineArtillery": "west"
+    },
+    "0407": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "lineArtillery": "west"
+    },
+    "0208": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0309": {
+      "terrain": "woods"
+    },
+    "0408": {
+      "terrain": "woods"
+    },
+    "0908": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0909": {
+      "terrain": "woods"
+    },
+    "0913": {
+      "terrain": "woods",
+      "logistics": "voronezh"
+    },
+    "0812": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0712": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0811": {
+      "terrain": "woods"
+    },
+    "0903": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0503": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0315": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "lineWest": "west"
+    },
+    "0416": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0417": {
+      "terrain": "woods"
+    },
+    "0517": {
+      "terrain": "woods"
+    },
+    "0518": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0817": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0917": {
+      "terrain": "woods"
+    },
+    "0918": {
+      "terrain": "woods",
+      "frontTarget": "voronezh"
+    },
+    "0121": {
+      "terrain": "woods",
+      "mapEdge": "german",
+      "lineFar": "west"
+    },
+    "0322": {
+      "terrain": "woods"
+    },
+    "0422": {
+      "terrain": "woods",
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "0619": {
+      "terrain": "woods"
+    },
+    "0721": {
+      "terrain": "woods",
+      "lineFar": "west"
+    },
+    "0104": {
+      "terrain": "woods",
+      "frontTarget": "voronezh",
+      "mapEdge": "soviet"
+    },
+    "0302": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "0608": {
+      "terrain": "town",
+      "vp": 1
+    },
+    "0215": {
+      "terrain": "town",
+      "vp": 1,
+      "lineWest": "west"
+    },
+    "0720": {
+      "terrain": "town",
+      "vp": 1,
+      "lineFar": "east"
+    },
+    "0912": {
+      "terrain": "city",
+      "vp": 4
+    },
+    "0311": {
+      "terrain": "city",
+      "vp": 2
+    },
+    "0221": {
+      "terrain": "city",
+      "vp": 2,
+      "lineFar": "west"
+    },
+    "0914": {
+      "logistics": "voronezh",
+      "lineWest": "east"
+    },
+    "0114": {
+      "mapEdge": "soviet",
+      "lineWest": "east"
+    },
+    "0113": {
+      "mapEdge": "soviet"
+    },
+    "0112": {
+      "frontTarget": "voronezh",
+      "mapEdge": "soviet",
+      "edgeRoad": true
+    },
+    "0111": {
+      "mapEdge": "soviet"
+    },
+    "0110": {
+      "mapEdge": "soviet"
+    },
+    "0109": {
+      "mapEdge": "soviet"
+    },
+    "0108": {
+      "mapEdge": "soviet",
+      "edgeRoad": true,
+      "lineArtillery": "west"
+    },
+    "0107": {
+      "mapEdge": "soviet",
+      "lineArtillery": "east"
+    },
+    "0106": {
+      "mapEdge": "soviet"
+    },
+    "0103": {
+      "mapEdge": "soviet"
+    },
+    "0102": {
+      "mapEdge": "soviet"
+    },
+    "0101": {
+      "mapEdge": "soviet"
+    },
+    "0201": {
+      "mapEdge": "soviet"
+    },
+    "0301": {
+      "mapEdge": "soviet",
+      "edgeRoad": true
+    },
+    "0401": {
+      "mapEdge": "soviet"
+    },
+    "0501": {
+      "mapEdge": "soviet"
+    },
+    "0601": {
+      "mapEdge": "soviet"
+    },
+    "0701": {
+      "mapEdge": "soviet"
+    },
+    "0801": {
+      "mapEdge": "soviet"
+    },
+    "0901": {
+      "mapEdge": "soviet"
+    },
+    "0115": {
+      "mapEdge": "german",
+      "edgeRoad": true,
+      "lineWest": "west"
+    },
+    "0122": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "0123": {
+      "mapEdge": "german"
+    },
+    "0523": {
+      "mapEdge": "german"
+    },
+    "0622": {
+      "mapEdge": "german"
+    },
+    "0723": {
+      "mapEdge": "german"
+    },
+    "0822": {
+      "mapEdge": "german",
+      "edgeRoad": true
+    },
+    "0923": {
+      "mapEdge": "german"
+    },
+    "0306": {
+      "frontTarget": "voronezh",
+      "lineArtillery": "east"
+    },
+    "0604": {
+      "frontTarget": "voronezh"
+    },
+    "0702": {
+      "frontTarget": "voronezh"
+    },
+    "0210": {
+      "frontTarget": "voronezh"
+    },
+    "0313": {
+      "frontTarget": "voronezh"
+    },
+    "0520": {
+      "frontTarget": "voronezh",
+      "lineFar": "east"
+    },
+    "0513": {
+      "frontTarget": "voronezh"
+    },
+    "0709": {
+      "frontTarget": "voronezh"
+    },
+    "0706": {
+      "frontTarget": "voronezh",
+      "lineArtillery": "east"
+    },
+    "0905": {
+      "frontTarget": "voronezh"
+    },
+    "0421": {
+      "village": true,
+      "lineFar": "west"
+    },
+    "0921": {
+      "village": true,
+      "lineFar": "west"
+    },
+    "0206": {
+      "lineArtillery": "east"
+    },
+    "0406": {
+      "lineArtillery": "east"
+    },
+    "0506": {
+      "lineArtillery": "east"
+    },
+    "0606": {
+      "lineArtillery": "east"
+    },
+    "0805": {
+      "lineArtillery": "east"
+    },
+    "0906": {
+      "lineArtillery": "east"
+    },
+    "0207": {
+      "lineArtillery": "west"
+    },
+    "0507": {
+      "lineArtillery": "west"
+    },
+    "0607": {
+      "lineArtillery": "west"
+    },
+    "0707": {
+      "lineArtillery": "west"
+    },
+    "0806": {
+      "lineArtillery": "west"
+    },
+    "0907": {
+      "lineArtillery": "west"
+    },
+    "0314": {
+      "lineWest": "east"
+    },
+    "0414": {
+      "lineWest": "east"
+    },
+    "0514": {
+      "lineWest": "east"
+    },
+    "0714": {
+      "lineWest": "east"
+    },
+    "0814": {
+      "lineWest": "east"
+    },
+    "0415": {
+      "lineWest": "west"
+    },
+    "0515": {
+      "lineWest": "west"
+    },
+    "0615": {
+      "lineWest": "west"
+    },
+    "0420": {
+      "lineFar": "east"
+    },
+    "0820": {
+      "lineFar": "east"
+    },
+    "0920": {
+      "lineFar": "east"
+    },
+    "0521": {
+      "lineFar": "west"
+    },
+    "0621": {
+      "lineFar": "west"
+    }
+  }
+}

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map painter — EA Kharkov</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <aside class="panel">
+      <header class="panel-head">
+        <a class="home" href="/">EA Kharkov Bot</a>
+        <h1>Map painter</h1>
+        <p class="file" id="file-state">data/map-hexes.json · data/map-hexsides.json</p>
+      </header>
+
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" data-tab="hex" role="tab" aria-selected="true">Hexes</button>
+        <button type="button" class="tab" data-tab="side" role="tab" aria-selected="false">Sides</button>
+        <button type="button" class="tab" data-tab="view" role="tab" aria-selected="false">Display</button>
+      </div>
+
+      <div class="tab-panel" data-tab-panel="hex">
+        <section class="group" aria-labelledby="g-dead">
+          <h2 id="g-dead">Dead cells</h2>
+          <div class="swatches">
+            <button type="button" class="swatch dead-swatch" data-brush='{"kind":"hex","attr":"playable","value":false}'>Dead</button>
+          </div>
+        </section>
+
+        <section class="group" aria-labelledby="g-terrain">
+          <h2 id="g-terrain">Terrain</h2>
+          <div class="swatches" id="terrain-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-village">
+          <h2 id="g-village">Village</h2>
+          <div class="swatches">
+            <button type="button" class="swatch village-swatch" data-brush='{"kind":"hex","attr":"village","value":true}'>Village</button>
+          </div>
+        </section>
+
+        <section class="group" aria-labelledby="g-vp">
+          <h2 id="g-vp">Victory points</h2>
+          <div class="swatches" id="vp-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-front">
+          <h2 id="g-front">Front target</h2>
+          <p class="hint">Town, city or village hexes only.</p>
+          <div class="swatches" id="front-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-logi">
+          <h2 id="g-logi">Logistics hex</h2>
+          <div class="swatches" id="logistics-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-edge">
+          <h2 id="g-edge">Map edge</h2>
+          <div class="swatches" id="edge-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-supply">
+          <h2 id="g-supply">Supply entry</h2>
+          <p class="hint">Map-edge hex with a road leading off the map: a supply head for connected road hexes (13.1).</p>
+          <div class="swatches">
+            <button type="button" class="swatch edge-road-swatch" data-brush='{"kind":"hex","attr":"edgeRoad","value":true}'>Road off map</button>
+          </div>
+        </section>
+
+        <section class="group" aria-labelledby="g-lines">
+          <h2 id="g-lines">Lines (§3)</h2>
+          <p class="hint">Filled = west of the line, outline = east.</p>
+          <div class="line-row" data-line="lineArtillery">
+            <span class="line-label">Artillery / East</span>
+            <div class="swatches" data-line-swatches="lineArtillery"></div>
+          </div>
+          <div class="line-row" data-line="lineWest">
+            <span class="line-label">West</span>
+            <div class="swatches" data-line-swatches="lineWest"></div>
+          </div>
+          <div class="line-row" data-line="lineFar">
+            <span class="line-label">Far</span>
+            <div class="swatches" data-line-swatches="lineFar"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="tab-panel" data-tab-panel="side" hidden>
+        <section class="group" aria-labelledby="g-road">
+          <h2 id="g-road">Road</h2>
+          <div class="swatches">
+            <button type="button" class="swatch road-swatch" data-brush='{"kind":"side","attr":"road","value":true}'>Road</button>
+          </div>
+        </section>
+
+        <section class="group" aria-labelledby="g-river">
+          <h2 id="g-river">River</h2>
+          <div class="swatches" id="river-swatches"></div>
+        </section>
+
+        <section class="group" aria-labelledby="g-arrow">
+          <h2 id="g-arrow">Movement arrow</h2>
+          <p class="hint">
+            Most sides have no arrow at all. When a side does have one, it is always marked for a
+            front — there is no unmarked arrow. Click closer to the hex the move starts from.
+            One-way: the arrow does not allow the reverse move.
+          </p>
+          <div class="field wide">
+            <label for="arrowType">Type</label>
+            <select id="arrowType"></select>
+          </div>
+          <div class="field wide">
+            <label for="arrowFront">Front</label>
+            <select id="arrowFront"></select>
+          </div>
+          <button type="button" class="swatch arrow-swatch" id="arrow-brush">Paint arrow</button>
+        </section>
+      </div>
+
+      <div class="tab-panel" data-tab-panel="view" hidden>
+        <section class="group" aria-labelledby="g-view">
+          <h2 id="g-view">Background</h2>
+          <label class="check"><input id="showBg" type="checkbox" checked /> Map image</label>
+          <div class="field">
+            <label for="bgOpacity">Image opacity</label>
+            <input id="bgOpacity" type="range" min="0" max="100" value="100" />
+          </div>
+        </section>
+        <section class="group" aria-labelledby="g-grid2">
+          <h2 id="g-grid2">Grid</h2>
+          <label class="check"><input id="showGrid" type="checkbox" checked /> Hex outlines</label>
+          <label class="check"><input id="showLabels" type="checkbox" /> Hex numbers</label>
+          <button type="button" id="fit" class="ghost">Show whole map</button>
+        </section>
+      </div>
+
+      <footer class="actions">
+        <button type="button" id="undo" class="ghost">Undo</button>
+        <button type="button" id="redo" class="ghost">Redo</button>
+        <button type="button" id="save" class="primary">Save</button>
+        <div class="pair">
+          <label class="upload ghost-file">
+            <input id="importHexes" type="file" accept="application/json,.json" />
+            <span>Import hexes…</span>
+          </label>
+          <button type="button" id="downloadHexes" class="ghost">Download hexes</button>
+        </div>
+        <div class="pair">
+          <label class="upload ghost-file">
+            <input id="importSides" type="file" accept="application/json,.json" />
+            <span>Import sides…</span>
+          </label>
+          <button type="button" id="downloadSides" class="ghost">Download sides</button>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </footer>
+    </aside>
+
+    <main class="viewport" id="viewport" tabindex="0" aria-label="Map">
+      <div class="stage" id="stage">
+        <div class="bg" id="bg"></div>
+        <svg id="grid" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="readout">
+        <p id="readout">Hover over the map</p>
+        <p id="inspector">No cell or side under the pointer</p>
+      </div>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,327 @@
+@import "../../ui/theme.css";
+
+/* The panel has many more sections than map-calibration's: without this, a long
+   panel can make the document itself taller than the viewport and scrollable. */
+html { overflow: hidden; }
+
+body {
+  --panel-w: 320px;
+  display: grid;
+  grid-template-columns: var(--panel-w) 1fr;
+  overflow: hidden;
+}
+
+/* ---------- Panel ---------- */
+
+.panel {
+  /* min-height: 0 overrides the grid item's default min-height: auto, which would
+     otherwise let the panel's own content (many more sections than map-calibration's)
+     grow the row — and the whole document — past the viewport instead of scrolling
+     internally. */
+  min-height: 0;
+  background: var(--feldgrau-deep);
+  border-right: 3px solid var(--feldgrau);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-head {
+  padding: 18px 18px 14px;
+  background: var(--feldgrau);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.home { color: var(--paper-dim); font-size: 0.85rem; text-decoration: none; }
+.home:hover { color: var(--paper); text-decoration: underline; }
+
+.file {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+}
+.file.dirty::after { content: " — modified, not saved"; color: #f0c674; }
+
+.tabs { display: flex; border-bottom: 1px solid var(--feldgrau); }
+.tab {
+  flex: 1;
+  background: var(--feldgrau-deep);
+  border: none;
+  border-radius: 0;
+  padding: 10px 6px;
+  color: var(--paper-dim);
+}
+.tab:hover { background: var(--feldgrau-dark); color: var(--paper); }
+.tab.active { background: var(--feldgrau-dark); color: var(--paper); box-shadow: inset 0 -2px 0 var(--stab-red); }
+
+.group {
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--feldgrau);
+  display: grid;
+  gap: 8px;
+}
+
+h2 {
+  margin: 0 0 2px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--paper);
+}
+
+label { color: var(--paper-dim); }
+.hint { margin: 2px 0 0; font-size: 0.85rem; color: var(--paper-dim); }
+
+.field {
+  display: grid;
+  grid-template-columns: 1fr 84px 20px;
+  align-items: center;
+  gap: 6px;
+}
+.field.wide { grid-template-columns: auto 1fr; }
+.unit { color: var(--paper-dim); font-size: 0.85rem; }
+
+input[type="number"], select {
+  width: 100%;
+  font: inherit;
+  color: var(--paper);
+  background: var(--feldgrau-dark);
+  border: 1px solid var(--feldgrau-light);
+  border-radius: 2px;
+  padding: 3px 6px;
+  font-variant-numeric: tabular-nums;
+}
+input[type="range"] { grid-column: 2 / 4; accent-color: var(--paper-dim); }
+
+.check { display: flex; align-items: center; gap: 8px; color: var(--paper); }
+.check input { accent-color: var(--stab-red); margin: 0; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+  color: var(--paper);
+  background: var(--feldgrau);
+  border: 1px solid var(--feldgrau-light);
+  padding: 4px 10px;
+}
+button:hover { background: var(--feldgrau-light); }
+button:disabled { opacity: 0.4; cursor: default; }
+button:disabled:hover { background: var(--feldgrau); }
+
+.ghost { background: transparent; }
+.primary {
+  background: var(--paper);
+  color: var(--feldgrau-dark);
+  border-color: var(--paper);
+  font-weight: 600;
+}
+.primary:hover { background: #fff; }
+
+.upload input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.upload span {
+  display: block;
+  text-align: center;
+  border: 1px solid var(--feldgrau-light);
+  padding: 4px;
+  color: var(--paper);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.upload:hover span { border-color: var(--paper-dim); }
+.upload:focus-within span { outline: 2px solid var(--paper); outline-offset: 2px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+
+.actions {
+  margin-top: auto;
+  padding: 16px 18px 18px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+.actions .primary, .actions .status, .actions .pair { grid-column: 1 / 3; }
+.status { margin: 0; min-height: 1.4em; font-size: 0.9rem; color: var(--paper-dim); }
+.status.error { color: #ff8a80; }
+
+/* ---------- Brush swatches: the button's own look previews what it paints ---------- */
+
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  padding: 5px 9px;
+}
+.swatch::before {
+  content: "";
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid var(--paper-dim);
+  background: transparent;
+  flex: none;
+}
+.swatch.active { outline: 2px solid var(--paper); outline-offset: 1px; }
+
+.dead-swatch::before { background: repeating-linear-gradient(45deg, var(--paper-dim) 0 2px, transparent 2px 5px); }
+.village-swatch::before { background: var(--paper); border-color: var(--line); }
+.road-swatch::before { border-radius: 2px; background: var(--line); border: none; width: 16px; height: 3px; }
+.edge-road-swatch::before { border-radius: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 8px); border: none; width: 18px; height: 3px; }
+.arrow-swatch::before { border-radius: 0; width: 0; height: 0; border: 6px solid transparent; border-left-color: var(--paper); }
+
+[data-terrain="clear"]::before { background: transparent; }
+[data-terrain="broken"]::before { background: #b8a26a; }
+[data-terrain="marsh"]::before { background: #6f7d4a; }
+[data-terrain="woods"]::before { background: #2f3f28; }
+[data-terrain="town"]::before { background: #8a7d6e; }
+[data-terrain="city"]::before { background: #6b3a2e; }
+
+[data-vp]::before { background: var(--paper); border-color: var(--stab-red); }
+
+[data-front="voronezh"]::before, [data-logistics="voronezh"]::before { background: transparent; border-width: 3px; border-color: #d8c23a; }
+[data-front="southwest"]::before, [data-logistics="southwest"]::before { background: transparent; border-width: 3px; border-color: var(--stab-red); }
+[data-front="both"]::before { background: transparent; border-width: 3px; border-color: #8c6cae; }
+
+[data-edge="soviet"]::before { background: transparent; border-width: 3px; border-style: dashed; border-color: #3f6f8f; }
+[data-edge="german"]::before { background: transparent; border-width: 3px; border-style: dashed; border-color: var(--feldgrau-light); }
+
+[data-river="minor"]::before { border-radius: 2px; background: #3f6f8f; border: none; width: 16px; height: 2px; }
+[data-river="donets"]::before { border-radius: 2px; background: #3f6f8f; border: none; width: 16px; height: 4px; }
+[data-river="dniepr"]::before { border-radius: 2px; background: #3f6f8f; border: none; width: 16px; height: 6px; }
+[data-river="dnieprBlocked"]::before {
+  border-radius: 2px; border: none; width: 16px; height: 6px;
+  background:
+    repeating-linear-gradient(90deg, var(--stab-red) 0 3px, transparent 3px 6px),
+    #3f6f8f;
+}
+
+.line-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.line-label { font-size: 0.9rem; }
+[data-line-swatch="west"]::before { border-width: 3px; }
+[data-line-swatch="east"]::before { background: transparent; border-width: 1.5px; }
+.line-row[data-line="lineArtillery"] [data-line-swatch]::before { border-color: #d2691e; }
+.line-row[data-line="lineWest"] [data-line-swatch]::before { border-color: #2f8f8f; }
+.line-row[data-line="lineFar"] [data-line-swatch]::before { border-color: #6a5acd; }
+.line-row[data-line="lineArtillery"] [data-line-swatch="west"]::before { background: #d2691e; }
+.line-row[data-line="lineWest"] [data-line-swatch="west"]::before { background: #2f8f8f; }
+.line-row[data-line="lineFar"] [data-line-swatch="west"]::before { background: #6a5acd; }
+
+/* ---------- Map ---------- */
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, rgb(255 255 255 / 0.025) 14px 15px),
+    var(--feldgrau-dark);
+  touch-action: none;
+}
+.viewport.panning { cursor: grabbing; }
+.viewport:focus-visible { outline-offset: -3px; }
+
+.stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+
+.bg {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px var(--feldgrau);
+}
+
+#grid { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+#grid .hexes polygon.cell {
+  fill: transparent;
+  stroke: rgb(192 39 45 / 0.5);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+#grid .hexes polygon.cell.hover { stroke: var(--stab-red); stroke-width: 2; }
+#grid .hexes.hide-cells polygon.cell { display: none; }
+
+#grid .labels text {
+  fill: var(--stab-red);
+  font-family: var(--font);
+  font-weight: 600;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgb(255 255 255 / 0.6);
+  stroke-width: 2.5px;
+}
+
+#grid .overlay-edge { display: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+#grid .overlay-edge.visible { display: inline; }
+#grid #hoverEdge.visible { stroke: var(--fluo-green); stroke-width: 5; opacity: 0.7; }
+
+/* Per-hex data overlays: built once per hex, toggled by refreshHexVisual(). */
+.hex-overlay .dead { fill: none; stroke: none; }
+.hex-overlay .dead.on {
+  fill: var(--feldgrau-dark);
+  fill-opacity: 0.6;
+}
+.hex-overlay .terrain { fill: none; }
+.hex-overlay .terrain.on { fill-opacity: 0.32; }
+.hex-overlay .mapEdge { fill: none; stroke: none; stroke-width: 3; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; display: none; }
+.hex-overlay .mapEdge.on { display: inline; }
+.hex-overlay .frontTarget { fill: none; stroke: none; stroke-width: 3; vector-effect: non-scaling-stroke; display: none; }
+.hex-overlay .frontTarget.on { display: inline; }
+.hex-overlay .village { fill: var(--paper); stroke: var(--line); stroke-width: 1.5; display: none; }
+.hex-overlay .village.on { display: inline; }
+.hex-overlay .vpDot { fill: var(--paper); stroke: var(--stab-red); stroke-width: 1.5; display: none; }
+.hex-overlay .vpDot.on { display: inline; }
+.hex-overlay .vpText { fill: var(--feldgrau-dark); font-weight: 600; text-anchor: middle; dominant-baseline: central; display: none; }
+.hex-overlay .vpText.on { display: inline; }
+.hex-overlay .logi { stroke: none; display: none; }
+.hex-overlay .logi.on { display: inline; }
+.hex-overlay .lineDot { fill: none; stroke: none; stroke-width: 2; vector-effect: non-scaling-stroke; display: none; }
+.hex-overlay .lineDot.on { display: inline; }
+.hex-overlay .edgeRoadLine {
+  display: none;
+  stroke: var(--line);
+  stroke-width: 4;
+  stroke-dasharray: 6 4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.hex-overlay .edgeRoadLine.on { display: inline; }
+
+/* Per-side data overlays. */
+.side-overlay .road { stroke: var(--line); stroke-width: 4; stroke-linecap: round; display: none; vector-effect: non-scaling-stroke; }
+.side-overlay .road.on { display: inline; }
+.side-overlay .river { stroke: #3f6f8f; stroke-linecap: round; display: none; vector-effect: non-scaling-stroke; }
+.side-overlay .river.on { display: inline; }
+.side-overlay .riverTick { stroke: var(--stab-red); stroke-width: 2; display: none; vector-effect: non-scaling-stroke; }
+.side-overlay .riverTick.on { display: inline; }
+/* fill/stroke (filled primary vs. outline secondary) are set inline in main.ts: an
+   inline style always overrides a class rule here, so there is no point duplicating it. */
+.side-overlay .arrow { display: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.side-overlay .arrow.on { display: inline; }
+
+.readout {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: 420px;
+  padding: 6px 10px;
+  background: var(--feldgrau-deep);
+  border: 1px solid var(--feldgrau);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.readout p { margin: 0; }
+.readout #inspector { color: var(--paper-dim); margin-top: 2px; }
+
+@media (max-width: 760px) {
+  body { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; }
+  .panel { order: 2; border-right: 0; border-top: 3px solid var(--feldgrau); }
+}

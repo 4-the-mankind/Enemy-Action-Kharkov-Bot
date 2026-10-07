@@ -1,0 +1,8082 @@
+{
+  "version": 1,
+  "sides": {
+    "0301-0302": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0301",
+        "to": "0302",
+        "front": "both"
+      }
+    },
+    "0302-0303": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0302",
+        "to": "0303",
+        "front": "both"
+      }
+    },
+    "0203-0303": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0303",
+        "to": "0203",
+        "front": "both"
+      }
+    },
+    "0302-0402": {
+      "road": true
+    },
+    "0402-0403": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0402",
+        "to": "0403",
+        "front": "both"
+      }
+    },
+    "0203-0204": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0203",
+        "to": "0204",
+        "front": "both"
+      }
+    },
+    "0204-0205": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0204",
+        "to": "0205",
+        "front": "both"
+      }
+    },
+    "0106-0205": {
+      "road": true
+    },
+    "0106-0107": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0106",
+        "to": "0107",
+        "front": "both"
+      }
+    },
+    "0107-0108": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0107",
+        "to": "0108",
+        "front": "both"
+      }
+    },
+    "0108-0109": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0108",
+        "to": "0109",
+        "front": "both"
+      }
+    },
+    "0008-0108": {
+      "road": true
+    },
+    "0109-0209": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0109",
+        "to": "0209",
+        "front": "both"
+      }
+    },
+    "0209-0210": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0209",
+        "to": "0210",
+        "front": "both"
+      }
+    },
+    "0210-0311": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "0210",
+        "to": "0311",
+        "front": "both"
+      }
+    },
+    "0211-0311": {
+      "road": true
+    },
+    "0112-0211": {
+      "road": true
+    },
+    "0012-0112": {
+      "road": true
+    },
+    "0311-0411": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "0311",
+        "to": "0411",
+        "front": "both"
+      }
+    },
+    "0411-0512": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0411",
+        "to": "0512",
+        "front": "both"
+      }
+    },
+    "0512-0612": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0512",
+        "to": "0612",
+        "front": "both"
+      }
+    },
+    "0612-0712": {
+      "road": true
+    },
+    "0712-0812": {
+      "road": true
+    },
+    "0409-0410": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "0409",
+        "to": "0410",
+        "front": "both"
+      }
+    },
+    "0409-0509": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0509",
+        "to": "0409",
+        "front": "both"
+      }
+    },
+    "0509-0608": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0608",
+        "to": "0509",
+        "front": "both"
+      }
+    },
+    "0607-0608": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0607",
+        "to": "0608",
+        "front": "both"
+      }
+    },
+    "0606-0607": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0606",
+        "to": "0607",
+        "front": "both"
+      }
+    },
+    "0606-0706": {
+      "road": true
+    },
+    "0605-0706": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0605",
+        "to": "0706",
+        "front": "both"
+      }
+    },
+    "0505-0605": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0505",
+        "to": "0605",
+        "front": "both"
+      }
+    },
+    "0504-0505": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0504",
+        "to": "0505",
+        "front": "both"
+      }
+    },
+    "0403-0504": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "0403",
+        "to": "0504",
+        "front": "both"
+      }
+    },
+    "0706-0805": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "0805",
+        "to": "0706",
+        "front": "voronezh"
+      }
+    },
+    "0706-0806": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0706",
+        "to": "0806",
+        "front": "both"
+      }
+    },
+    "0805-0905": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0905",
+        "to": "0805",
+        "front": "both"
+      }
+    },
+    "0904-0905": {
+      "road": true
+    },
+    "0904-1003": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1003",
+        "to": "0904",
+        "front": "voronezh"
+      }
+    },
+    "1003-1103": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1103",
+        "to": "1003",
+        "front": "voronezh"
+      }
+    },
+    "1103-1202": {
+      "road": true
+    },
+    "1201-1202": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1201",
+        "to": "1202",
+        "front": "both"
+      }
+    },
+    "1201-1301": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1301",
+        "to": "1201",
+        "front": "both"
+      }
+    },
+    "1202-1303": {
+      "road": true
+    },
+    "1202-1203": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1202",
+        "to": "1203",
+        "front": "both"
+      }
+    },
+    "1203-1204": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1203",
+        "to": "1204",
+        "front": "both"
+      }
+    },
+    "1204-1205": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1204",
+        "to": "1205",
+        "front": "both"
+      }
+    },
+    "1106-1205": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1205",
+        "to": "1106",
+        "front": "both"
+      }
+    },
+    "1106-1107": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1106",
+        "to": "1107",
+        "front": "both"
+      }
+    },
+    "1107-1108": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1107",
+        "to": "1108",
+        "front": "both"
+      }
+    },
+    "1108-1109": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1108",
+        "to": "1109",
+        "front": "both"
+      }
+    },
+    "1108-1207": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1207",
+        "to": "1108",
+        "front": "both"
+      }
+    },
+    "1009-1109": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1109",
+        "to": "1009",
+        "front": "both"
+      }
+    },
+    "1009-1010": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1009",
+        "to": "1010",
+        "front": "both"
+      }
+    },
+    "1010-1011": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1010",
+        "to": "1011",
+        "front": "both"
+      }
+    },
+    "0912-1011": {
+      "road": true
+    },
+    "0911-0912": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0911",
+        "to": "0912",
+        "front": "both"
+      }
+    },
+    "0810-0911": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0810",
+        "to": "0911",
+        "front": "both"
+      }
+    },
+    "0809-0810": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0809",
+        "to": "0810",
+        "front": "both"
+      }
+    },
+    "0808-0809": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "0808",
+        "to": "0809",
+        "front": "both"
+      }
+    },
+    "0807-0808": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0807",
+        "to": "0808",
+        "front": "both"
+      }
+    },
+    "0806-0807": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0806",
+        "to": "0807",
+        "front": "voronezh"
+      }
+    },
+    "0711-0811": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0711",
+        "to": "0811",
+        "front": "both"
+      }
+    },
+    "0811-0912": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0811",
+        "to": "0912",
+        "front": "both"
+      }
+    },
+    "0912-1012": {
+      "road": true,
+      "river": "minor"
+    },
+    "0812-0912": {
+      "road": true
+    },
+    "0812-0813": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0812",
+        "to": "0813",
+        "front": "both"
+      }
+    },
+    "0714-0813": {
+      "road": true,
+      "river": "minor"
+    },
+    "0614-0714": {
+      "road": true
+    },
+    "0515-0614": {
+      "road": true
+    },
+    "0914-1013": {
+      "road": true
+    },
+    "0914-0915": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0914",
+        "to": "0915",
+        "front": "both"
+      }
+    },
+    "1013-1014": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1013",
+        "to": "1014",
+        "front": "both"
+      }
+    },
+    "1013-1113": {
+      "road": true
+    },
+    "1012-1013": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1012",
+        "to": "1013",
+        "front": "both"
+      }
+    },
+    "1012-1113": {
+      "road": true
+    },
+    "1113-1212": {
+      "road": true
+    },
+    "1113-1213": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1113",
+        "to": "1213",
+        "front": "both"
+      }
+    },
+    "1014-1115": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1014",
+        "to": "1115",
+        "front": "both"
+      }
+    },
+    "1213-1214": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1213",
+        "to": "1214",
+        "front": "both"
+      }
+    },
+    "1214-1315": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1214",
+        "to": "1315",
+        "front": "both"
+      }
+    },
+    "1115-1116": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1115",
+        "to": "1116",
+        "front": "both"
+      }
+    },
+    "1315-1414": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1315",
+        "to": "1414",
+        "front": "southwest"
+      }
+    },
+    "1212-1312": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1312",
+        "to": "1212",
+        "front": "voronezh"
+      }
+    },
+    "1211-1212": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1211",
+        "to": "1212",
+        "front": "both"
+      }
+    },
+    "1210-1211": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1210",
+        "to": "1211",
+        "front": "both"
+      }
+    },
+    "1312-1411": {
+      "road": true
+    },
+    "1011-1111": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1111",
+        "to": "1011",
+        "front": "both"
+      }
+    },
+    "1111-1210": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1210",
+        "to": "1111",
+        "front": "both"
+      }
+    },
+    "1210-1310": {
+      "road": true,
+      "river": "donets"
+    },
+    "1309-1310": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1309",
+        "to": "1310",
+        "front": "both"
+      }
+    },
+    "1309-1408": {
+      "road": true
+    },
+    "1407-1408": {
+      "road": true
+    },
+    "1406-1407": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1406",
+        "to": "1407",
+        "front": "both"
+      }
+    },
+    "1207-1307": {
+      "road": true
+    },
+    "1306-1307": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1306",
+        "to": "1307",
+        "front": "both"
+      }
+    },
+    "1306-1405": {
+      "road": true
+    },
+    "1405-1505": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1505",
+        "to": "1405",
+        "front": "both"
+      }
+    },
+    "1505-1604": {
+      "road": true
+    },
+    "1405-1406": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1405",
+        "to": "1406",
+        "front": "both"
+      }
+    },
+    "1407-1508": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1407",
+        "to": "1508",
+        "front": "southwest"
+      }
+    },
+    "1508-1607": {
+      "road": true
+    },
+    "1607-1707": {
+      "road": true
+    },
+    "1707-1806": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1707",
+        "to": "1806",
+        "front": "both"
+      }
+    },
+    "1303-1403": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1303",
+        "to": "1403",
+        "front": "both"
+      }
+    },
+    "1403-1504": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1403",
+        "to": "1504",
+        "front": "both"
+      }
+    },
+    "1504-1604": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1504",
+        "to": "1604",
+        "front": "both"
+      }
+    },
+    "1604-1704": {
+      "road": true,
+      "river": "donets"
+    },
+    "1604-1705": {
+      "road": true,
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1604",
+        "to": "1705",
+        "front": "both"
+      }
+    },
+    "1704-1803": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1704",
+        "to": "1803",
+        "front": "both"
+      }
+    },
+    "1802-1803": {
+      "road": true
+    },
+    "1802-1902": {
+      "road": true,
+      "river": "minor"
+    },
+    "1901-1902": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1901",
+        "to": "1902",
+        "front": "both"
+      }
+    },
+    "1802-1903": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1802",
+        "to": "1903",
+        "front": "both"
+      }
+    },
+    "1903-1904": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1903",
+        "to": "1904",
+        "front": "both"
+      }
+    },
+    "1904-1905": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1904",
+        "to": "1905",
+        "front": "both"
+      }
+    },
+    "1902-2001": {
+      "road": true
+    },
+    "2001-2102": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2001",
+        "to": "2102",
+        "front": "both"
+      }
+    },
+    "2101-2102": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2101",
+        "to": "2102",
+        "front": "both"
+      }
+    },
+    "2101-2200": {
+      "road": true
+    },
+    "1905-1906": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1905",
+        "to": "1906",
+        "front": "both"
+      }
+    },
+    "1806-1906": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1806",
+        "to": "1906",
+        "front": "both"
+      }
+    },
+    "1805-1906": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1805",
+        "to": "1906",
+        "front": "both"
+      }
+    },
+    "1906-2005": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1906",
+        "to": "2005",
+        "front": "both"
+      }
+    },
+    "1906-1907": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1906",
+        "to": "1907",
+        "front": "both"
+      }
+    },
+    "1907-2007": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1907",
+        "to": "2007",
+        "front": "both"
+      }
+    },
+    "2007-2008": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2007",
+        "to": "2008",
+        "front": "both"
+      }
+    },
+    "2008-2009": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2008",
+        "to": "2009",
+        "front": "both"
+      }
+    },
+    "1910-2009": {
+      "road": true
+    },
+    "1810-1910": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "1810",
+        "to": "1910",
+        "front": "both"
+      }
+    },
+    "1711-1810": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1711",
+        "to": "1810",
+        "front": "both"
+      }
+    },
+    "1610-1711": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1610",
+        "to": "1711",
+        "front": "both"
+      }
+    },
+    "1511-1610": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1511",
+        "to": "1610",
+        "front": "southwest"
+      }
+    },
+    "1411-1511": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1411",
+        "to": "1511",
+        "front": "both"
+      }
+    },
+    "2009-2110": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2009",
+        "to": "2110",
+        "front": "both"
+      }
+    },
+    "2110-2111": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2110",
+        "to": "2111",
+        "front": "both"
+      }
+    },
+    "2111-2211": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2111",
+        "to": "2211",
+        "front": "both"
+      }
+    },
+    "2211-2312": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2211",
+        "to": "2312",
+        "front": "both"
+      }
+    },
+    "2312-2412": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2312",
+        "to": "2412",
+        "front": "both"
+      }
+    },
+    "2411-2412": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2411",
+        "to": "2412",
+        "front": "both"
+      }
+    },
+    "2412-2413": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2412",
+        "to": "2413",
+        "front": "both"
+      }
+    },
+    "2411-2511": {
+      "road": true
+    },
+    "2510-2511": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2510",
+        "to": "2511",
+        "front": "both"
+      }
+    },
+    "2511-2611": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2511",
+        "to": "2611",
+        "front": "both"
+      }
+    },
+    "2509-2510": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2509",
+        "to": "2510",
+        "front": "both"
+      }
+    },
+    "2408-2509": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2408",
+        "to": "2509",
+        "front": "both"
+      }
+    },
+    "2407-2408": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2407",
+        "to": "2408",
+        "front": "both"
+      }
+    },
+    "2406-2407": {
+      "road": true
+    },
+    "2405-2406": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2405",
+        "to": "2406",
+        "front": "both"
+      }
+    },
+    "2404-2405": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2404",
+        "to": "2405",
+        "front": "both"
+      }
+    },
+    "2005-2106": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2005",
+        "to": "2106",
+        "front": "both"
+      }
+    },
+    "2106-2205": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2106",
+        "to": "2205",
+        "front": "both"
+      }
+    },
+    "2205-2305": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2205",
+        "to": "2305",
+        "front": "both"
+      }
+    },
+    "2305-2404": {
+      "road": true
+    },
+    "2403-2404": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2403",
+        "to": "2404",
+        "front": "both"
+      }
+    },
+    "2404-2504": {
+      "road": true
+    },
+    "2503-2504": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2503",
+        "to": "2504",
+        "front": "both"
+      }
+    },
+    "2402-2403": {
+      "road": true
+    },
+    "2402-2503": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "2402",
+        "to": "2503",
+        "front": "both"
+      }
+    },
+    "2401-2402": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2401",
+        "to": "2402",
+        "front": "both"
+      }
+    },
+    "2301-2401": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2301",
+        "to": "2401",
+        "front": "both"
+      }
+    },
+    "2701-2702": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2701",
+        "to": "2702",
+        "front": "both"
+      }
+    },
+    "2702-2703": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2702",
+        "to": "2703",
+        "front": "both"
+      }
+    },
+    "2703-2704": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2703",
+        "to": "2704",
+        "front": "both"
+      }
+    },
+    "2704-2804": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2704",
+        "to": "2804",
+        "front": "both"
+      }
+    },
+    "2804-2805": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2804",
+        "to": "2805",
+        "front": "both"
+      }
+    },
+    "2805-2806": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2805",
+        "to": "2806",
+        "front": "both"
+      }
+    },
+    "2806-2907": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2806",
+        "to": "2907",
+        "front": "both"
+      }
+    },
+    "2907-2908": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "2907",
+        "to": "2908",
+        "front": "both"
+      }
+    },
+    "2908-2909": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "2908",
+        "to": "2909",
+        "front": "both"
+      }
+    },
+    "2909-2910": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "2909",
+        "to": "2910",
+        "front": "both"
+      }
+    },
+    "2810-2910": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2810",
+        "to": "2910",
+        "front": "both"
+      }
+    },
+    "2711-2810": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2711",
+        "to": "2810",
+        "front": "both"
+      }
+    },
+    "2611-2711": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2611",
+        "to": "2711",
+        "front": "both"
+      }
+    },
+    "2910-2911": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2910",
+        "to": "2911",
+        "front": "both"
+      }
+    },
+    "2911-2912": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2911",
+        "to": "2912",
+        "front": "both"
+      }
+    },
+    "2912-2913": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2912",
+        "to": "2913",
+        "front": "both"
+      }
+    },
+    "2910-3009": {
+      "road": true
+    },
+    "3009-3109": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3009",
+        "to": "3109",
+        "front": "both"
+      }
+    },
+    "3109-3208": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3109",
+        "to": "3208",
+        "front": "both"
+      }
+    },
+    "3208-3309": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3208",
+        "to": "3309",
+        "front": "both"
+      }
+    },
+    "3309-3408": {
+      "road": true
+    },
+    "3309-3310": {
+      "road": true
+    },
+    "3310-3311": {
+      "road": true
+    },
+    "3211-3311": {
+      "road": true
+    },
+    "3112-3211": {
+      "road": true
+    },
+    "3112-3113": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3112",
+        "to": "3113",
+        "front": "both"
+      }
+    },
+    "3113-3213": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3113",
+        "to": "3213",
+        "front": "both"
+      }
+    },
+    "3114-3213": {
+      "road": true
+    },
+    "3114-3115": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3114",
+        "to": "3115",
+        "front": "both"
+      }
+    },
+    "3115-3214": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3115",
+        "to": "3214",
+        "front": "both"
+      }
+    },
+    "3115-3116": {
+      "road": true
+    },
+    "3015-3116": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3015",
+        "to": "3116",
+        "front": "both"
+      }
+    },
+    "3014-3015": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "3014",
+        "to": "3015",
+        "front": "both"
+      }
+    },
+    "2915-3015": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2915",
+        "to": "3015",
+        "front": "both"
+      }
+    },
+    "2815-2915": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2815",
+        "to": "2915",
+        "front": "both"
+      }
+    },
+    "2715-2815": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2715",
+        "to": "2815",
+        "front": "both"
+      }
+    },
+    "2615-2715": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2615",
+        "to": "2715",
+        "front": "both"
+      }
+    },
+    "2516-2615": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2516",
+        "to": "2615",
+        "front": "both"
+      }
+    },
+    "2415-2516": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2415",
+        "to": "2516",
+        "front": "both"
+      }
+    },
+    "2316-2415": {
+      "road": true
+    },
+    "2315-2316": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2315",
+        "to": "2316",
+        "front": "both"
+      }
+    },
+    "2314-2315": {
+      "road": true
+    },
+    "2314-2413": {
+      "road": true
+    },
+    "2316-2317": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2316",
+        "to": "2317",
+        "front": "both"
+      }
+    },
+    "2914-3014": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2914",
+        "to": "3014",
+        "front": "both"
+      }
+    },
+    "2913-2914": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2913",
+        "to": "2914",
+        "front": "both"
+      }
+    },
+    "3016-3116": {
+      "road": true,
+      "river": "dniepr"
+    },
+    "2917-3016": {
+      "road": true
+    },
+    "2817-2917": {
+      "road": true
+    },
+    "2718-2817": {
+      "road": true
+    },
+    "2617-2718": {
+      "road": true,
+      "river": "minor"
+    },
+    "2518-2617": {
+      "road": true
+    },
+    "2617-2618": {
+      "road": true
+    },
+    "2618-2719": {
+      "road": true
+    },
+    "3016-3117": {
+      "road": true
+    },
+    "3117-3118": {
+      "road": true
+    },
+    "3118-3218": {
+      "road": true
+    },
+    "3218-3319": {
+      "road": true
+    },
+    "2720-2721": {
+      "road": true
+    },
+    "2719-2720": {
+      "road": true
+    },
+    "2520-2521": {
+      "road": true
+    },
+    "2519-2520": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2519",
+        "to": "2520",
+        "front": "both"
+      }
+    },
+    "2521-2522": {
+      "road": true
+    },
+    "2422-2522": {
+      "road": true
+    },
+    "2422-2423": {
+      "road": true
+    },
+    "2518-2519": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2518",
+        "to": "2519",
+        "front": "both"
+      }
+    },
+    "3214-3314": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "3214",
+        "to": "3314",
+        "front": "both"
+      }
+    },
+    "1414-1515": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1414",
+        "to": "1515",
+        "front": "both"
+      }
+    },
+    "1515-1615": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1515",
+        "to": "1615",
+        "front": "both"
+      }
+    },
+    "1615-1715": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1615",
+        "to": "1715",
+        "front": "southwest"
+      }
+    },
+    "1715-1815": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1715",
+        "to": "1815",
+        "front": "both"
+      }
+    },
+    "1815-1916": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1815",
+        "to": "1916",
+        "front": "both"
+      }
+    },
+    "1916-2016": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1916",
+        "to": "2016",
+        "front": "both"
+      }
+    },
+    "2016-2116": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2016",
+        "to": "2116",
+        "front": "both"
+      }
+    },
+    "2116-2216": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2116",
+        "to": "2216",
+        "front": "both"
+      }
+    },
+    "2216-2317": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2216",
+        "to": "2317",
+        "front": "both"
+      }
+    },
+    "2317-2417": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2317",
+        "to": "2417",
+        "front": "both"
+      }
+    },
+    "2417-2518": {
+      "road": true,
+      "river": "dniepr",
+      "arrow": {
+        "type": "primary",
+        "from": "2417",
+        "to": "2518",
+        "front": "both"
+      }
+    },
+    "2319-2418": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2319",
+        "to": "2418",
+        "front": "both"
+      }
+    },
+    "2219-2319": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "2219",
+        "to": "2319",
+        "front": "both"
+      }
+    },
+    "2219-2220": {
+      "road": true
+    },
+    "2220-2221": {
+      "road": true,
+      "river": "minor"
+    },
+    "2122-2221": {
+      "road": true
+    },
+    "2022-2122": {
+      "road": true
+    },
+    "1923-2022": {
+      "road": true
+    },
+    "2417-2418": {
+      "road": true
+    },
+    "1615-1616": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1615",
+        "to": "1616",
+        "front": "voronezh"
+      }
+    },
+    "1616-1617": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1616",
+        "to": "1617",
+        "front": "voronezh"
+      }
+    },
+    "1518-1617": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1617",
+        "to": "1518",
+        "front": "voronezh"
+      }
+    },
+    "1518-1519": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1518",
+        "to": "1519",
+        "front": "both"
+      }
+    },
+    "1419-1519": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1519",
+        "to": "1419",
+        "front": "both"
+      }
+    },
+    "1319-1419": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1319",
+        "to": "1419",
+        "front": "both"
+      }
+    },
+    "1318-1319": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1318",
+        "to": "1319",
+        "front": "both"
+      }
+    },
+    "1217-1318": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1217",
+        "to": "1318",
+        "front": "both"
+      }
+    },
+    "1117-1217": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1117",
+        "to": "1217",
+        "front": "both"
+      }
+    },
+    "1116-1117": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1116",
+        "to": "1117",
+        "front": "both"
+      }
+    },
+    "1419-1420": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "1419",
+        "to": "1420",
+        "front": "both"
+      }
+    },
+    "1420-1521": {
+      "road": true
+    },
+    "1421-1521": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1521",
+        "to": "1421",
+        "front": "both"
+      }
+    },
+    "1421-1522": {
+      "road": true
+    },
+    "1522-1523": {
+      "road": true
+    },
+    "1522-1622": {
+      "road": true
+    },
+    "1622-1723": {
+      "road": true
+    },
+    "0722-0822": {
+      "road": true
+    },
+    "0721-0722": {
+      "road": true
+    },
+    "0720-0721": {
+      "road": true,
+      "river": "minor"
+    },
+    "0720-0819": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0819",
+        "to": "0720",
+        "front": "both"
+      }
+    },
+    "0818-0819": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0818",
+        "to": "0819",
+        "front": "both"
+      }
+    },
+    "0817-0818": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0817",
+        "to": "0818",
+        "front": "both"
+      }
+    },
+    "0816-0817": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0816",
+        "to": "0817",
+        "front": "both"
+      }
+    },
+    "0816-0916": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0916",
+        "to": "0816",
+        "front": "both"
+      }
+    },
+    "0915-0916": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0915",
+        "to": "0916",
+        "front": "both"
+      }
+    },
+    "0620-0721": {
+      "road": true
+    },
+    "0520-0620": {
+      "road": true
+    },
+    "0420-0520": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0520",
+        "to": "0420",
+        "front": "both"
+      }
+    },
+    "0321-0420": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0420",
+        "to": "0321",
+        "front": "both"
+      }
+    },
+    "0221-0321": {
+      "road": true,
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0321",
+        "to": "0221",
+        "front": "both"
+      }
+    },
+    "0122-0221": {
+      "road": true
+    },
+    "0221-0322": {
+      "road": true
+    },
+    "0322-0422": {
+      "road": true
+    },
+    "0115-0215": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0115",
+        "to": "0215",
+        "front": "both"
+      }
+    },
+    "0215-0315": {
+      "road": true
+    },
+    "0315-0414": {
+      "road": true,
+      "arrow": {
+        "type": "secondary",
+        "from": "0414",
+        "to": "0315",
+        "front": "both"
+      }
+    },
+    "0414-0515": {
+      "road": true,
+      "arrow": {
+        "type": "primary",
+        "from": "0414",
+        "to": "0515",
+        "front": "both"
+      }
+    },
+    "0203-0304": {
+      "river": "minor"
+    },
+    "0303-0304": {
+      "river": "minor"
+    },
+    "0303-0403": {
+      "river": "minor"
+    },
+    "0402-0503": {
+      "river": "minor"
+    },
+    "0502-0503": {
+      "river": "minor"
+    },
+    "0502-0602": {
+      "river": "minor"
+    },
+    "0601-0602": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0601",
+        "to": "0602",
+        "front": "both"
+      }
+    },
+    "0602-0702": {
+      "river": "minor"
+    },
+    "0702-0703": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0702",
+        "to": "0703",
+        "front": "both"
+      }
+    },
+    "0703-0802": {
+      "river": "minor"
+    },
+    "0802-0803": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0802",
+        "to": "0803",
+        "front": "both"
+      }
+    },
+    "0803-0903": {
+      "river": "minor"
+    },
+    "0903-0904": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0903",
+        "to": "0904",
+        "front": "both"
+      }
+    },
+    "0903-1003": {
+      "river": "minor"
+    },
+    "1002-1003": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1002",
+        "to": "1003",
+        "front": "both"
+      }
+    },
+    "1103-1104": {
+      "river": "minor"
+    },
+    "1103-1203": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1103",
+        "to": "1203",
+        "front": "southwest"
+      }
+    },
+    "1203-1303": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1303",
+        "to": "1203",
+        "front": "both"
+      }
+    },
+    "1303-1304": {
+      "river": "minor"
+    },
+    "1402-1403": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1402",
+        "to": "1403",
+        "front": "both"
+      }
+    },
+    "1403-1503": {
+      "river": "minor"
+    },
+    "1503-1504": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1503",
+        "to": "1504",
+        "front": "both"
+      }
+    },
+    "1504-1603": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1603",
+        "to": "1504",
+        "front": "both"
+      }
+    },
+    "1603-1604": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1603",
+        "to": "1604",
+        "front": "both"
+      }
+    },
+    "1702-1801": {
+      "river": "minor"
+    },
+    "1801-1802": {
+      "river": "minor"
+    },
+    "1902-1903": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1902",
+        "to": "1903",
+        "front": "both"
+      }
+    },
+    "1902-2002": {
+      "river": "minor"
+    },
+    "2001-2002": {
+      "river": "minor"
+    },
+    "2002-2102": {
+      "river": "minor"
+    },
+    "2604-2704": {
+      "river": "minor"
+    },
+    "2704-2705": {
+      "river": "minor"
+    },
+    "2705-2804": {
+      "river": "minor"
+    },
+    "2705-2805": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2705",
+        "to": "2805",
+        "front": "both"
+      }
+    },
+    "2706-2805": {
+      "river": "minor"
+    },
+    "2706-2806": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2706",
+        "to": "2806",
+        "front": "both"
+      }
+    },
+    "2707-2806": {
+      "river": "minor"
+    },
+    "2806-2807": {
+      "river": "minor"
+    },
+    "2807-2907": {
+      "river": "minor"
+    },
+    "2807-2908": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2807",
+        "to": "2908",
+        "front": "both"
+      }
+    },
+    "2808-2908": {
+      "river": "minor"
+    },
+    "2808-2909": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2808",
+        "to": "2909",
+        "front": "both"
+      }
+    },
+    "2809-2909": {
+      "river": "minor"
+    },
+    "2809-2910": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2809",
+        "to": "2910",
+        "front": "both"
+      }
+    },
+    "2809-2810": {
+      "river": "minor"
+    },
+    "2710-2810": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2710",
+        "to": "2810",
+        "front": "both"
+      }
+    },
+    "2710-2711": {
+      "river": "minor"
+    },
+    "2610-2711": {
+      "river": "minor"
+    },
+    "2611-2712": {
+      "river": "minor"
+    },
+    "2611-2612": {
+      "river": "minor"
+    },
+    "2512-2611": {
+      "river": "minor"
+    },
+    "2511-2512": {
+      "river": "minor"
+    },
+    "2411-2512": {
+      "river": "minor"
+    },
+    "2412-2512": {
+      "river": "minor"
+    },
+    "2412-2513": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "2412",
+        "to": "2513",
+        "front": "both"
+      }
+    },
+    "2313-2413": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2313",
+        "to": "2413",
+        "front": "both"
+      }
+    },
+    "2313-2314": {
+      "river": "minor"
+    },
+    "2213-2314": {
+      "river": "minor"
+    },
+    "2214-2314": {
+      "river": "minor"
+    },
+    "2214-2315": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2214",
+        "to": "2315",
+        "front": "both"
+      }
+    },
+    "2214-2215": {
+      "river": "minor"
+    },
+    "2115-2215": {
+      "river": "minor"
+    },
+    "2116-2215": {
+      "river": "minor"
+    },
+    "2215-2216": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "2215",
+        "to": "2216",
+        "front": "both"
+      }
+    },
+    "2216-2316": {
+      "river": "minor"
+    },
+    "2617-2717": {
+      "river": "minor"
+    },
+    "2618-2718": {
+      "river": "minor"
+    },
+    "2718-2719": {
+      "river": "minor"
+    },
+    "2719-2818": {
+      "river": "minor"
+    },
+    "2418-2419": {
+      "river": "minor"
+    },
+    "2319-2419": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "2319",
+        "to": "2419",
+        "front": "both"
+      }
+    },
+    "2320-2419": {
+      "river": "minor"
+    },
+    "2320-2420": {
+      "river": "minor"
+    },
+    "2321-2420": {
+      "river": "minor"
+    },
+    "2321-2421": {
+      "river": "minor"
+    },
+    "2321-2322": {
+      "river": "minor"
+    },
+    "2221-2321": {
+      "river": "minor"
+    },
+    "2121-2221": {
+      "river": "minor"
+    },
+    "2121-2122": {
+      "river": "minor"
+    },
+    "2021-2121": {
+      "river": "minor"
+    },
+    "2020-2021": {
+      "river": "minor"
+    },
+    "1921-2020": {
+      "river": "minor"
+    },
+    "1920-1921": {
+      "river": "minor"
+    },
+    "1820-1920": {
+      "river": "minor"
+    },
+    "1819-1920": {
+      "river": "minor"
+    },
+    "1819-1919": {
+      "river": "minor"
+    },
+    "1818-1919": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1818",
+        "to": "1919",
+        "front": "both"
+      }
+    },
+    "1818-1918": {
+      "river": "minor"
+    },
+    "1817-1918": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1817",
+        "to": "1918",
+        "front": "both"
+      }
+    },
+    "1817-1917": {
+      "river": "minor"
+    },
+    "1816-1817": {
+      "river": "minor"
+    },
+    "1717-1816": {
+      "river": "minor"
+    },
+    "1716-1717": {
+      "river": "minor"
+    },
+    "1616-1716": {
+      "river": "minor"
+    },
+    "1615-1716": {
+      "river": "minor"
+    },
+    "1614-1615": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1614",
+        "to": "1615",
+        "front": "voronezh"
+      }
+    },
+    "1816-1917": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1816",
+        "to": "1917",
+        "front": "both"
+      }
+    },
+    "1816-1916": {
+      "river": "minor"
+    },
+    "1915-1916": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1915",
+        "to": "1916",
+        "front": "both"
+      }
+    },
+    "1915-2015": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1915",
+        "to": "2015",
+        "front": "both"
+      }
+    },
+    "1915-2014": {
+      "river": "minor"
+    },
+    "1914-2014": {
+      "river": "minor"
+    },
+    "1914-2013": {
+      "river": "minor"
+    },
+    "1913-2013": {
+      "river": "minor"
+    },
+    "1913-2012": {
+      "river": "minor"
+    },
+    "2309-2408": {
+      "river": "minor"
+    },
+    "2408-2409": {
+      "river": "minor"
+    },
+    "2409-2509": {
+      "river": "minor"
+    },
+    "2409-2510": {
+      "river": "minor"
+    },
+    "2410-2510": {
+      "river": "minor"
+    },
+    "2410-2511": {
+      "river": "minor"
+    },
+    "2410-2411": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "2410",
+        "to": "2411",
+        "front": "both"
+      }
+    },
+    "2311-2411": {
+      "river": "minor"
+    },
+    "2312-2411": {
+      "river": "minor"
+    },
+    "2313-2412": {
+      "river": "minor"
+    },
+    "3113-3212": {
+      "river": "minor"
+    },
+    "3112-3212": {
+      "river": "minor"
+    },
+    "3212-3213": {
+      "river": "minor"
+    },
+    "3213-3313": {
+      "river": "minor"
+    },
+    "3213-3314": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "3213",
+        "to": "3314",
+        "front": "both"
+      }
+    },
+    "1608-1609": {
+      "river": "minor"
+    },
+    "1608-1709": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1608",
+        "to": "1709",
+        "front": "both"
+      }
+    },
+    "1608-1708": {
+      "river": "minor"
+    },
+    "1607-1708": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1607",
+        "to": "1708",
+        "front": "both"
+      }
+    },
+    "1707-1708": {
+      "river": "minor"
+    },
+    "1707-1807": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1707",
+        "to": "1807",
+        "front": "both"
+      }
+    },
+    "1706-1806": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1706",
+        "to": "1806",
+        "front": "both"
+      }
+    },
+    "1706-1805": {
+      "river": "minor"
+    },
+    "1705-1706": {
+      "river": "minor"
+    },
+    "0408-0508": {
+      "river": "minor"
+    },
+    "0408-0509": {
+      "river": "minor"
+    },
+    "0613-0614": {
+      "river": "minor"
+    },
+    "0613-0714": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0613",
+        "to": "0714",
+        "front": "both"
+      }
+    },
+    "0713-0714": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "0713",
+        "to": "0714",
+        "front": "both"
+      }
+    },
+    "0813-0814": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "0813",
+        "to": "0814",
+        "front": "both"
+      }
+    },
+    "0813-0914": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0813",
+        "to": "0914",
+        "front": "both"
+      }
+    },
+    "0913-0914": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0913",
+        "to": "0914",
+        "front": "both"
+      }
+    },
+    "0913-1013": {
+      "river": "minor"
+    },
+    "0913-1012": {
+      "river": "minor"
+    },
+    "1011-1012": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1011",
+        "to": "1012",
+        "front": "both"
+      }
+    },
+    "1011-1112": {
+      "river": "minor"
+    },
+    "1010-1111": {
+      "river": "minor"
+    },
+    "1010-1110": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1110",
+        "to": "1010",
+        "front": "both"
+      }
+    },
+    "1009-1110": {
+      "river": "minor"
+    },
+    "1112-1212": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1112",
+        "to": "1212",
+        "front": "southwest"
+      }
+    },
+    "1112-1211": {
+      "river": "minor"
+    },
+    "1111-1211": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "1111",
+        "to": "1211",
+        "front": "both"
+      }
+    },
+    "1210-1311": {
+      "river": "minor"
+    },
+    "0519-0618": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "0618",
+        "to": "0519",
+        "front": "both"
+      }
+    },
+    "0618-0619": {
+      "river": "minor"
+    },
+    "0619-0719": {
+      "river": "minor"
+    },
+    "0619-0720": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "0619",
+        "to": "0720",
+        "front": "both"
+      }
+    },
+    "0620-0720": {
+      "river": "minor"
+    },
+    "0618-0719": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0618",
+        "to": "0719",
+        "front": "both"
+      }
+    },
+    "0618-0718": {
+      "river": "minor"
+    },
+    "0617-0618": {
+      "river": "minor",
+      "arrow": {
+        "type": "secondary",
+        "from": "0617",
+        "to": "0618",
+        "front": "both"
+      }
+    },
+    "0518-0617": {
+      "river": "minor"
+    },
+    "0517-0617": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0517",
+        "to": "0617",
+        "front": "both"
+      }
+    },
+    "0517-0616": {
+      "river": "minor"
+    },
+    "0919-1018": {
+      "river": "minor"
+    },
+    "1018-1019": {
+      "river": "minor"
+    },
+    "1019-1119": {
+      "river": "minor"
+    },
+    "1019-1120": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1019",
+        "to": "1120",
+        "front": "both"
+      }
+    },
+    "1020-1120": {
+      "river": "minor"
+    },
+    "1120-1121": {
+      "river": "minor"
+    },
+    "1121-1220": {
+      "river": "minor"
+    },
+    "1121-1221": {
+      "river": "minor"
+    },
+    "1121-1122": {
+      "river": "minor"
+    },
+    "1021-1121": {
+      "river": "minor"
+    },
+    "1020-1021": {
+      "river": "minor"
+    },
+    "0921-1021": {
+      "river": "minor"
+    },
+    "0921-0922": {
+      "river": "minor"
+    },
+    "0821-0921": {
+      "river": "minor"
+    },
+    "0820-0821": {
+      "river": "minor"
+    },
+    "0721-0820": {
+      "river": "minor"
+    },
+    "0422-0523": {
+      "river": "minor"
+    },
+    "0422-0522": {
+      "river": "minor"
+    },
+    "0421-0422": {
+      "river": "minor"
+    },
+    "0322-0421": {
+      "river": "minor"
+    },
+    "0321-0322": {
+      "river": "minor"
+    },
+    "0220-0221": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0220",
+        "to": "0221",
+        "front": "both"
+      }
+    },
+    "0121-0221": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0121",
+        "to": "0221",
+        "front": "both"
+      }
+    },
+    "0121-0122": {
+      "river": "minor"
+    },
+    "1220-1221": {
+      "river": "minor"
+    },
+    "1221-1321": {
+      "river": "minor"
+    },
+    "1321-1322": {
+      "river": "minor"
+    },
+    "1321-1421": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1321",
+        "to": "1421",
+        "front": "both"
+      }
+    },
+    "1420-1421": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "1420",
+        "to": "1421",
+        "front": "both"
+      }
+    },
+    "1521-1522": {
+      "river": "minor"
+    },
+    "1521-1621": {
+      "river": "minor"
+    },
+    "1620-1621": {
+      "river": "minor"
+    },
+    "1621-1721": {
+      "river": "minor"
+    },
+    "1721-1722": {
+      "river": "minor"
+    },
+    "1722-1821": {
+      "river": "minor"
+    },
+    "1722-1822": {
+      "river": "minor"
+    },
+    "1723-1822": {
+      "river": "minor"
+    },
+    "0110-0111": {
+      "river": "minor",
+      "arrow": {
+        "type": "primary",
+        "from": "0110",
+        "to": "0111",
+        "front": "both"
+      }
+    },
+    "0111-0210": {
+      "river": "minor"
+    },
+    "0210-0211": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "0210",
+        "to": "0211",
+        "front": "both"
+      }
+    },
+    "0310-0311": {
+      "river": "donets"
+    },
+    "0310-0410": {
+      "river": "donets"
+    },
+    "0409-0510": {
+      "river": "donets"
+    },
+    "0509-0510": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "0509",
+        "to": "0510",
+        "front": "both"
+      }
+    },
+    "0509-0609": {
+      "river": "donets"
+    },
+    "0608-0609": {
+      "river": "donets"
+    },
+    "0609-0709": {
+      "river": "donets"
+    },
+    "0709-0710": {
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "0709",
+        "to": "0710",
+        "front": "both"
+      }
+    },
+    "0709-0809": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "0709",
+        "to": "0809",
+        "front": "both"
+      }
+    },
+    "0808-0909": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "0808",
+        "to": "0909",
+        "front": "both"
+      }
+    },
+    "0808-0908": {
+      "river": "donets"
+    },
+    "0807-0908": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "0807",
+        "to": "0908",
+        "front": "both"
+      }
+    },
+    "0907-0908": {
+      "river": "donets"
+    },
+    "0908-1007": {
+      "river": "donets"
+    },
+    "1007-1008": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "1007",
+        "to": "1008",
+        "front": "both"
+      }
+    },
+    "1008-1108": {
+      "river": "donets"
+    },
+    "1008-1109": {
+      "river": "donets"
+    },
+    "1109-1110": {
+      "river": "donets"
+    },
+    "1110-1209": {
+      "river": "donets"
+    },
+    "1209-1210": {
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1209",
+        "to": "1210",
+        "front": "both"
+      }
+    },
+    "1310-1311": {
+      "river": "donets"
+    },
+    "1310-1410": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "1310",
+        "to": "1410",
+        "front": "both"
+      }
+    },
+    "1310-1409": {
+      "river": "donets"
+    },
+    "1309-1409": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "1309",
+        "to": "1409",
+        "front": "both"
+      }
+    },
+    "1408-1409": {
+      "river": "donets"
+    },
+    "1408-1509": {
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1408",
+        "to": "1509",
+        "front": "both"
+      }
+    },
+    "1408-1508": {
+      "river": "donets"
+    },
+    "1407-1507": {
+      "river": "donets"
+    },
+    "1406-1507": {
+      "river": "donets"
+    },
+    "1406-1506": {
+      "river": "donets"
+    },
+    "1405-1506": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "1405",
+        "to": "1506",
+        "front": "both"
+      }
+    },
+    "1505-1506": {
+      "river": "donets"
+    },
+    "1506-1605": {
+      "river": "donets"
+    },
+    "1506-1606": {
+      "river": "donets"
+    },
+    "1507-1606": {
+      "river": "donets"
+    },
+    "1606-1607": {
+      "river": "donets"
+    },
+    "1606-1707": {
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1606",
+        "to": "1707",
+        "front": "both"
+      }
+    },
+    "1606-1706": {
+      "river": "donets"
+    },
+    "1605-1706": {
+      "river": "donets",
+      "arrow": {
+        "type": "primary",
+        "from": "1605",
+        "to": "1706",
+        "front": "both"
+      }
+    },
+    "1605-1705": {
+      "river": "donets"
+    },
+    "1603-1704": {
+      "river": "donets"
+    },
+    "1603-1703": {
+      "river": "donets"
+    },
+    "1602-1703": {
+      "river": "donets"
+    },
+    "1602-1702": {
+      "river": "donets"
+    },
+    "1601-1702": {
+      "river": "donets"
+    },
+    "1701-1702": {
+      "river": "donets"
+    },
+    "1701-1801": {
+      "river": "donets",
+      "arrow": {
+        "type": "secondary",
+        "from": "1701",
+        "to": "1801",
+        "front": "both"
+      }
+    },
+    "2317-2416": {
+      "river": "dniepr"
+    },
+    "2416-2417": {
+      "river": "dniepr"
+    },
+    "2417-2517": {
+      "river": "dniepr",
+      "arrow": {
+        "type": "primary",
+        "from": "2517",
+        "to": "2417",
+        "front": "both"
+      }
+    },
+    "2418-2518": {
+      "river": "dniepr"
+    },
+    "2418-2519": {
+      "river": "dniepr",
+      "arrow": {
+        "type": "primary",
+        "from": "2418",
+        "to": "2519",
+        "front": "both"
+      }
+    },
+    "2419-2519": {
+      "river": "dniepr",
+      "arrow": {
+        "type": "primary",
+        "from": "2419",
+        "to": "2519",
+        "front": "both"
+      }
+    },
+    "2419-2520": {
+      "river": "dniepr"
+    },
+    "2420-2520": {
+      "river": "dnieprBlocked"
+    },
+    "2420-2521": {
+      "river": "dnieprBlocked"
+    },
+    "2421-2521": {
+      "river": "dnieprBlocked"
+    },
+    "2421-2522": {
+      "river": "dnieprBlocked"
+    },
+    "2421-2422": {
+      "river": "dnieprBlocked"
+    },
+    "2322-2422": {
+      "river": "dnieprBlocked"
+    },
+    "2323-2422": {
+      "river": "dnieprBlocked"
+    },
+    "2517-2518": {
+      "river": "dniepr"
+    },
+    "2517-2617": {
+      "river": "dnieprBlocked"
+    },
+    "2616-2617": {
+      "river": "dnieprBlocked"
+    },
+    "2616-2717": {
+      "river": "dnieprBlocked"
+    },
+    "2716-2717": {
+      "river": "dnieprBlocked"
+    },
+    "2717-2816": {
+      "river": "dnieprBlocked"
+    },
+    "2816-2817": {
+      "river": "dnieprBlocked"
+    },
+    "2816-2917": {
+      "river": "dnieprBlocked"
+    },
+    "2916-2917": {
+      "river": "dniepr"
+    },
+    "2916-3016": {
+      "river": "dniepr"
+    },
+    "3015-3016": {
+      "river": "dniepr"
+    },
+    "3116-3117": {
+      "river": "dniepr"
+    },
+    "3116-3216": {
+      "river": "dniepr"
+    },
+    "3215-3216": {
+      "river": "dniepr"
+    },
+    "3215-3316": {
+      "river": "dnieprBlocked"
+    },
+    "3315-3316": {
+      "river": "dnieprBlocked"
+    },
+    "0101-0201": {
+      "arrow": {
+        "type": "primary",
+        "from": "0101",
+        "to": "0201",
+        "front": "both"
+      }
+    },
+    "0201-0302": {
+      "arrow": {
+        "type": "primary",
+        "from": "0201",
+        "to": "0302",
+        "front": "both"
+      }
+    },
+    "0102-0103": {
+      "arrow": {
+        "type": "primary",
+        "from": "0102",
+        "to": "0103",
+        "front": "both"
+      }
+    },
+    "0103-0203": {
+      "arrow": {
+        "type": "primary",
+        "from": "0103",
+        "to": "0203",
+        "front": "both"
+      }
+    },
+    "0202-0203": {
+      "arrow": {
+        "type": "primary",
+        "from": "0202",
+        "to": "0203",
+        "front": "both"
+      }
+    },
+    "0104-0204": {
+      "arrow": {
+        "type": "primary",
+        "from": "0104",
+        "to": "0204",
+        "front": "both"
+      }
+    },
+    "0105-0106": {
+      "arrow": {
+        "type": "primary",
+        "from": "0105",
+        "to": "0106",
+        "front": "both"
+      }
+    },
+    "0205-0206": {
+      "arrow": {
+        "type": "primary",
+        "from": "0205",
+        "to": "0206",
+        "front": "both"
+      }
+    },
+    "0206-0207": {
+      "arrow": {
+        "type": "primary",
+        "from": "0206",
+        "to": "0207",
+        "front": "both"
+      }
+    },
+    "0108-0207": {
+      "arrow": {
+        "type": "primary",
+        "from": "0207",
+        "to": "0108",
+        "front": "both"
+      }
+    },
+    "0208-0209": {
+      "arrow": {
+        "type": "primary",
+        "from": "0208",
+        "to": "0209",
+        "front": "both"
+      }
+    },
+    "0111-0112": {
+      "arrow": {
+        "type": "primary",
+        "from": "0111",
+        "to": "0112",
+        "front": "both"
+      }
+    },
+    "0112-0113": {
+      "arrow": {
+        "type": "primary",
+        "from": "0112",
+        "to": "0113",
+        "front": "both"
+      }
+    },
+    "0113-0114": {
+      "arrow": {
+        "type": "primary",
+        "from": "0113",
+        "to": "0114",
+        "front": "both"
+      }
+    },
+    "0114-0115": {
+      "arrow": {
+        "type": "primary",
+        "from": "0114",
+        "to": "0115",
+        "front": "both"
+      }
+    },
+    "0116-0117": {
+      "arrow": {
+        "type": "primary",
+        "from": "0116",
+        "to": "0117",
+        "front": "both"
+      }
+    },
+    "0117-0217": {
+      "arrow": {
+        "type": "primary",
+        "from": "0117",
+        "to": "0217",
+        "front": "both"
+      }
+    },
+    "0118-0218": {
+      "arrow": {
+        "type": "primary",
+        "from": "0118",
+        "to": "0218",
+        "front": "both"
+      }
+    },
+    "0217-0218": {
+      "arrow": {
+        "type": "primary",
+        "from": "0217",
+        "to": "0218",
+        "front": "both"
+      }
+    },
+    "0119-0219": {
+      "arrow": {
+        "type": "primary",
+        "from": "0119",
+        "to": "0219",
+        "front": "both"
+      }
+    },
+    "0218-0219": {
+      "arrow": {
+        "type": "primary",
+        "from": "0218",
+        "to": "0219",
+        "front": "both"
+      }
+    },
+    "0219-0220": {
+      "arrow": {
+        "type": "primary",
+        "from": "0219",
+        "to": "0220",
+        "front": "both"
+      }
+    },
+    "0120-0220": {
+      "arrow": {
+        "type": "primary",
+        "from": "0120",
+        "to": "0220",
+        "front": "both"
+      }
+    },
+    "0320-0321": {
+      "arrow": {
+        "type": "primary",
+        "from": "0320",
+        "to": "0321",
+        "front": "both"
+      }
+    },
+    "0319-0320": {
+      "arrow": {
+        "type": "primary",
+        "from": "0319",
+        "to": "0320",
+        "front": "both"
+      }
+    },
+    "0318-0418": {
+      "arrow": {
+        "type": "primary",
+        "from": "0318",
+        "to": "0418",
+        "front": "both"
+      }
+    },
+    "0317-0318": {
+      "arrow": {
+        "type": "primary",
+        "from": "0317",
+        "to": "0318",
+        "front": "both"
+      }
+    },
+    "0216-0217": {
+      "arrow": {
+        "type": "primary",
+        "from": "0216",
+        "to": "0217",
+        "front": "both"
+      }
+    },
+    "0215-0316": {
+      "arrow": {
+        "type": "primary",
+        "from": "0215",
+        "to": "0316",
+        "front": "both"
+      }
+    },
+    "0316-0317": {
+      "arrow": {
+        "type": "primary",
+        "from": "0316",
+        "to": "0317",
+        "front": "both"
+      }
+    },
+    "0315-0316": {
+      "arrow": {
+        "type": "primary",
+        "from": "0315",
+        "to": "0316",
+        "front": "both"
+      }
+    },
+    "0214-0215": {
+      "arrow": {
+        "type": "primary",
+        "from": "0214",
+        "to": "0215",
+        "front": "both"
+      }
+    },
+    "0114-0213": {
+      "arrow": {
+        "type": "primary",
+        "from": "0213",
+        "to": "0114",
+        "front": "both"
+      }
+    },
+    "0212-0213": {
+      "arrow": {
+        "type": "primary",
+        "from": "0212",
+        "to": "0213",
+        "front": "both"
+      }
+    },
+    "0211-0212": {
+      "arrow": {
+        "type": "primary",
+        "from": "0211",
+        "to": "0212",
+        "front": "both"
+      }
+    },
+    "0210-0310": {
+      "arrow": {
+        "type": "primary",
+        "from": "0310",
+        "to": "0210",
+        "front": "both"
+      }
+    },
+    "0309-0310": {
+      "arrow": {
+        "type": "primary",
+        "from": "0309",
+        "to": "0310",
+        "front": "both"
+      }
+    },
+    "0208-0308": {
+      "arrow": {
+        "type": "primary",
+        "from": "0308",
+        "to": "0208",
+        "front": "both"
+      }
+    },
+    "0307-0308": {
+      "arrow": {
+        "type": "primary",
+        "from": "0307",
+        "to": "0308",
+        "front": "both"
+      }
+    },
+    "0206-0306": {
+      "arrow": {
+        "type": "primary",
+        "from": "0306",
+        "to": "0206",
+        "front": "both"
+      }
+    },
+    "0205-0305": {
+      "arrow": {
+        "type": "primary",
+        "from": "0305",
+        "to": "0205",
+        "front": "both"
+      }
+    },
+    "0204-0304": {
+      "arrow": {
+        "type": "primary",
+        "from": "0304",
+        "to": "0204",
+        "front": "both"
+      }
+    },
+    "0401-0402": {
+      "arrow": {
+        "type": "primary",
+        "from": "0401",
+        "to": "0402",
+        "front": "both"
+      }
+    },
+    "0403-0404": {
+      "arrow": {
+        "type": "primary",
+        "from": "0403",
+        "to": "0404",
+        "front": "both"
+      }
+    },
+    "0404-0405": {
+      "arrow": {
+        "type": "primary",
+        "from": "0404",
+        "to": "0405",
+        "front": "both"
+      }
+    },
+    "0405-0506": {
+      "arrow": {
+        "type": "primary",
+        "from": "0405",
+        "to": "0506",
+        "front": "both"
+      }
+    },
+    "0406-0507": {
+      "arrow": {
+        "type": "primary",
+        "from": "0406",
+        "to": "0507",
+        "front": "both"
+      }
+    },
+    "0407-0508": {
+      "arrow": {
+        "type": "primary",
+        "from": "0407",
+        "to": "0508",
+        "front": "both"
+      }
+    },
+    "0408-0409": {
+      "arrow": {
+        "type": "primary",
+        "from": "0408",
+        "to": "0409",
+        "front": "both"
+      }
+    },
+    "0410-0411": {
+      "arrow": {
+        "type": "primary",
+        "from": "0410",
+        "to": "0411",
+        "front": "both"
+      }
+    },
+    "0311-0312": {
+      "arrow": {
+        "type": "primary",
+        "from": "0311",
+        "to": "0312",
+        "front": "both"
+      }
+    },
+    "0312-0313": {
+      "arrow": {
+        "type": "primary",
+        "from": "0312",
+        "to": "0313",
+        "front": "both"
+      }
+    },
+    "0313-0314": {
+      "arrow": {
+        "type": "primary",
+        "from": "0313",
+        "to": "0314",
+        "front": "both"
+      }
+    },
+    "0412-0413": {
+      "arrow": {
+        "type": "primary",
+        "from": "0412",
+        "to": "0413",
+        "front": "both"
+      }
+    },
+    "0413-0414": {
+      "arrow": {
+        "type": "primary",
+        "from": "0413",
+        "to": "0414",
+        "front": "both"
+      }
+    },
+    "0314-0414": {
+      "arrow": {
+        "type": "primary",
+        "from": "0314",
+        "to": "0414",
+        "front": "both"
+      }
+    },
+    "0415-0516": {
+      "arrow": {
+        "type": "primary",
+        "from": "0415",
+        "to": "0516",
+        "front": "both"
+      }
+    },
+    "0317-0416": {
+      "arrow": {
+        "type": "primary",
+        "from": "0416",
+        "to": "0317",
+        "front": "both"
+      }
+    },
+    "0417-0418": {
+      "arrow": {
+        "type": "primary",
+        "from": "0417",
+        "to": "0418",
+        "front": "both"
+      }
+    },
+    "0418-0519": {
+      "arrow": {
+        "type": "primary",
+        "from": "0418",
+        "to": "0519",
+        "front": "both"
+      }
+    },
+    "0419-0420": {
+      "arrow": {
+        "type": "primary",
+        "from": "0419",
+        "to": "0420",
+        "front": "both"
+      }
+    },
+    "0519-0520": {
+      "arrow": {
+        "type": "primary",
+        "from": "0519",
+        "to": "0520",
+        "front": "both"
+      }
+    },
+    "0520-0619": {
+      "arrow": {
+        "type": "primary",
+        "from": "0619",
+        "to": "0520",
+        "front": "both"
+      }
+    },
+    "0617-0718": {
+      "arrow": {
+        "type": "primary",
+        "from": "0617",
+        "to": "0718",
+        "front": "both"
+      }
+    },
+    "0616-0617": {
+      "arrow": {
+        "type": "primary",
+        "from": "0616",
+        "to": "0617",
+        "front": "both"
+      }
+    },
+    "0516-0616": {
+      "arrow": {
+        "type": "primary",
+        "from": "0516",
+        "to": "0616",
+        "front": "both"
+      }
+    },
+    "0615-0616": {
+      "arrow": {
+        "type": "primary",
+        "from": "0615",
+        "to": "0616",
+        "front": "both"
+      }
+    },
+    "0515-0516": {
+      "arrow": {
+        "type": "primary",
+        "from": "0515",
+        "to": "0516",
+        "front": "both"
+      }
+    },
+    "0514-0515": {
+      "arrow": {
+        "type": "primary",
+        "from": "0514",
+        "to": "0515",
+        "front": "both"
+      }
+    },
+    "0614-0615": {
+      "arrow": {
+        "type": "primary",
+        "from": "0614",
+        "to": "0615",
+        "front": "both"
+      }
+    },
+    "0513-0514": {
+      "arrow": {
+        "type": "primary",
+        "from": "0513",
+        "to": "0514",
+        "front": "both"
+      }
+    },
+    "0511-0512": {
+      "arrow": {
+        "type": "primary",
+        "from": "0511",
+        "to": "0512",
+        "front": "both"
+      }
+    },
+    "0410-0510": {
+      "arrow": {
+        "type": "primary",
+        "from": "0510",
+        "to": "0410",
+        "front": "both"
+      }
+    },
+    "0508-0608": {
+      "arrow": {
+        "type": "primary",
+        "from": "0508",
+        "to": "0608",
+        "front": "both"
+      }
+    },
+    "0507-0607": {
+      "arrow": {
+        "type": "primary",
+        "from": "0507",
+        "to": "0607",
+        "front": "both"
+      }
+    },
+    "0506-0606": {
+      "arrow": {
+        "type": "primary",
+        "from": "0506",
+        "to": "0606",
+        "front": "both"
+      }
+    },
+    "0503-0504": {
+      "arrow": {
+        "type": "primary",
+        "from": "0503",
+        "to": "0504",
+        "front": "both"
+      }
+    },
+    "0402-0502": {
+      "arrow": {
+        "type": "primary",
+        "from": "0502",
+        "to": "0402",
+        "front": "both"
+      }
+    },
+    "0501-0502": {
+      "arrow": {
+        "type": "primary",
+        "from": "0501",
+        "to": "0502",
+        "front": "both"
+      }
+    },
+    "0602-0603": {
+      "arrow": {
+        "type": "primary",
+        "from": "0602",
+        "to": "0603",
+        "front": "both"
+      }
+    },
+    "0603-0604": {
+      "arrow": {
+        "type": "primary",
+        "from": "0603",
+        "to": "0604",
+        "front": "both"
+      }
+    },
+    "0604-0605": {
+      "arrow": {
+        "type": "primary",
+        "from": "0604",
+        "to": "0605",
+        "front": "both"
+      }
+    },
+    "0609-0610": {
+      "arrow": {
+        "type": "primary",
+        "from": "0609",
+        "to": "0610",
+        "front": "both"
+      }
+    },
+    "0610-0611": {
+      "arrow": {
+        "type": "primary",
+        "from": "0610",
+        "to": "0611",
+        "front": "both"
+      }
+    },
+    "0611-0612": {
+      "arrow": {
+        "type": "primary",
+        "from": "0611",
+        "to": "0612",
+        "front": "both"
+      }
+    },
+    "0612-0713": {
+      "arrow": {
+        "type": "primary",
+        "from": "0612",
+        "to": "0713",
+        "front": "both"
+      }
+    },
+    "0714-0814": {
+      "arrow": {
+        "type": "primary",
+        "from": "0714",
+        "to": "0814",
+        "front": "both"
+      }
+    },
+    "0715-0716": {
+      "arrow": {
+        "type": "primary",
+        "from": "0715",
+        "to": "0716",
+        "front": "both"
+      }
+    },
+    "0716-0717": {
+      "arrow": {
+        "type": "primary",
+        "from": "0716",
+        "to": "0717",
+        "front": "both"
+      }
+    },
+    "0717-0718": {
+      "arrow": {
+        "type": "primary",
+        "from": "0717",
+        "to": "0718",
+        "front": "both"
+      }
+    },
+    "0718-0719": {
+      "arrow": {
+        "type": "primary",
+        "from": "0718",
+        "to": "0719",
+        "front": "both"
+      }
+    },
+    "0719-0720": {
+      "arrow": {
+        "type": "primary",
+        "from": "0719",
+        "to": "0720",
+        "front": "both"
+      }
+    },
+    "0919-1019": {
+      "arrow": {
+        "type": "primary",
+        "from": "0919",
+        "to": "1019",
+        "front": "both"
+      }
+    },
+    "0918-1018": {
+      "arrow": {
+        "type": "primary",
+        "from": "0918",
+        "to": "1018",
+        "front": "both"
+      }
+    },
+    "0917-1017": {
+      "arrow": {
+        "type": "primary",
+        "from": "0917",
+        "to": "1017",
+        "front": "both"
+      }
+    },
+    "0815-0816": {
+      "arrow": {
+        "type": "primary",
+        "from": "0815",
+        "to": "0816",
+        "front": "both"
+      }
+    },
+    "0814-0815": {
+      "arrow": {
+        "type": "primary",
+        "from": "0814",
+        "to": "0815",
+        "front": "both"
+      }
+    },
+    "0713-0813": {
+      "arrow": {
+        "type": "primary",
+        "from": "0713",
+        "to": "0813",
+        "front": "both"
+      }
+    },
+    "0712-0713": {
+      "arrow": {
+        "type": "primary",
+        "from": "0712",
+        "to": "0713",
+        "front": "both"
+      }
+    },
+    "0710-0711": {
+      "arrow": {
+        "type": "primary",
+        "from": "0710",
+        "to": "0711",
+        "front": "both"
+      }
+    },
+    "0708-0808": {
+      "arrow": {
+        "type": "primary",
+        "from": "0708",
+        "to": "0808",
+        "front": "both"
+      }
+    },
+    "0707-0708": {
+      "arrow": {
+        "type": "primary",
+        "from": "0707",
+        "to": "0708",
+        "front": "both"
+      }
+    },
+    "0705-0706": {
+      "arrow": {
+        "type": "primary",
+        "from": "0705",
+        "to": "0706",
+        "front": "both"
+      }
+    },
+    "0704-0705": {
+      "arrow": {
+        "type": "primary",
+        "from": "0704",
+        "to": "0705",
+        "front": "both"
+      }
+    },
+    "0703-0704": {
+      "arrow": {
+        "type": "primary",
+        "from": "0703",
+        "to": "0704",
+        "front": "both"
+      }
+    },
+    "0701-0702": {
+      "arrow": {
+        "type": "primary",
+        "from": "0701",
+        "to": "0702",
+        "front": "both"
+      }
+    },
+    "0801-0802": {
+      "arrow": {
+        "type": "primary",
+        "from": "0801",
+        "to": "0802",
+        "front": "both"
+      }
+    },
+    "0803-0804": {
+      "arrow": {
+        "type": "primary",
+        "from": "0803",
+        "to": "0804",
+        "front": "both"
+      }
+    },
+    "0804-0805": {
+      "arrow": {
+        "type": "primary",
+        "from": "0804",
+        "to": "0805",
+        "front": "both"
+      }
+    },
+    "0805-0806": {
+      "arrow": {
+        "type": "primary",
+        "from": "0805",
+        "to": "0806",
+        "front": "both"
+      }
+    },
+    "0807-0907": {
+      "arrow": {
+        "type": "primary",
+        "from": "0907",
+        "to": "0807",
+        "front": "voronezh"
+      }
+    },
+    "0907-1007": {
+      "arrow": {
+        "type": "primary",
+        "from": "0907",
+        "to": "1007",
+        "front": "southwest"
+      }
+    },
+    "0806-0907": {
+      "arrow": {
+        "type": "primary",
+        "from": "0806",
+        "to": "0907",
+        "front": "southwest"
+      }
+    },
+    "0909-0910": {
+      "arrow": {
+        "type": "primary",
+        "from": "0909",
+        "to": "0910",
+        "front": "both"
+      }
+    },
+    "0910-0911": {
+      "arrow": {
+        "type": "primary",
+        "from": "0910",
+        "to": "0911",
+        "front": "both"
+      }
+    },
+    "1017-1018": {
+      "arrow": {
+        "type": "primary",
+        "from": "1017",
+        "to": "1018",
+        "front": "both"
+      }
+    },
+    "1016-1017": {
+      "arrow": {
+        "type": "primary",
+        "from": "1016",
+        "to": "1017",
+        "front": "both"
+      }
+    },
+    "1015-1016": {
+      "arrow": {
+        "type": "primary",
+        "from": "1015",
+        "to": "1016",
+        "front": "both"
+      }
+    },
+    "1008-1009": {
+      "arrow": {
+        "type": "primary",
+        "from": "1008",
+        "to": "1009",
+        "front": "both"
+      }
+    },
+    "1007-1108": {
+      "arrow": {
+        "type": "primary",
+        "from": "1007",
+        "to": "1108",
+        "front": "both"
+      }
+    },
+    "0806-0906": {
+      "arrow": {
+        "type": "primary",
+        "from": "0906",
+        "to": "0806",
+        "front": "both"
+      }
+    },
+    "1006-1107": {
+      "arrow": {
+        "type": "primary",
+        "from": "1006",
+        "to": "1107",
+        "front": "both"
+      }
+    },
+    "1005-1006": {
+      "arrow": {
+        "type": "primary",
+        "from": "1005",
+        "to": "1006",
+        "front": "both"
+      }
+    },
+    "1004-1005": {
+      "arrow": {
+        "type": "primary",
+        "from": "1004",
+        "to": "1005",
+        "front": "both"
+      }
+    },
+    "1003-1004": {
+      "arrow": {
+        "type": "primary",
+        "from": "1003",
+        "to": "1004",
+        "front": "both"
+      }
+    },
+    "0802-0902": {
+      "arrow": {
+        "type": "primary",
+        "from": "0902",
+        "to": "0802",
+        "front": "both"
+      }
+    },
+    "0901-0902": {
+      "arrow": {
+        "type": "primary",
+        "from": "0901",
+        "to": "0902",
+        "front": "both"
+      }
+    },
+    "1001-1102": {
+      "arrow": {
+        "type": "primary",
+        "from": "1001",
+        "to": "1102",
+        "front": "both"
+      }
+    },
+    "1101-1102": {
+      "arrow": {
+        "type": "primary",
+        "from": "1101",
+        "to": "1102",
+        "front": "both"
+      }
+    },
+    "1102-1103": {
+      "arrow": {
+        "type": "primary",
+        "from": "1102",
+        "to": "1103",
+        "front": "both"
+      }
+    },
+    "1104-1105": {
+      "arrow": {
+        "type": "primary",
+        "from": "1104",
+        "to": "1105",
+        "front": "both"
+      }
+    },
+    "1105-1106": {
+      "arrow": {
+        "type": "primary",
+        "from": "1105",
+        "to": "1106",
+        "front": "both"
+      }
+    },
+    "1110-1210": {
+      "arrow": {
+        "type": "primary",
+        "from": "1110",
+        "to": "1210",
+        "front": "both"
+      }
+    },
+    "1212-1313": {
+      "arrow": {
+        "type": "primary",
+        "from": "1212",
+        "to": "1313",
+        "front": "southwest"
+      }
+    },
+    "1012-1112": {
+      "arrow": {
+        "type": "primary",
+        "from": "1112",
+        "to": "1012",
+        "front": "voronezh"
+      }
+    },
+    "1212-1213": {
+      "arrow": {
+        "type": "primary",
+        "from": "1212",
+        "to": "1213",
+        "front": "voronezh"
+      }
+    },
+    "1114-1214": {
+      "arrow": {
+        "type": "primary",
+        "from": "1114",
+        "to": "1214",
+        "front": "southwest"
+      }
+    },
+    "1118-1119": {
+      "arrow": {
+        "type": "primary",
+        "from": "1118",
+        "to": "1119",
+        "front": "both"
+      }
+    },
+    "1119-1219": {
+      "arrow": {
+        "type": "primary",
+        "from": "1119",
+        "to": "1219",
+        "front": "both"
+      }
+    },
+    "1018-1119": {
+      "arrow": {
+        "type": "primary",
+        "from": "1018",
+        "to": "1119",
+        "front": "both"
+      }
+    },
+    "1219-1320": {
+      "arrow": {
+        "type": "primary",
+        "from": "1219",
+        "to": "1320",
+        "front": "both"
+      }
+    },
+    "1220-1320": {
+      "arrow": {
+        "type": "primary",
+        "from": "1220",
+        "to": "1320",
+        "front": "both"
+      }
+    },
+    "1320-1420": {
+      "arrow": {
+        "type": "primary",
+        "from": "1320",
+        "to": "1420",
+        "front": "both"
+      }
+    },
+    "1420-1520": {
+      "arrow": {
+        "type": "primary",
+        "from": "1520",
+        "to": "1420",
+        "front": "both"
+      }
+    },
+    "1418-1419": {
+      "arrow": {
+        "type": "primary",
+        "from": "1418",
+        "to": "1419",
+        "front": "both"
+      }
+    },
+    "1216-1217": {
+      "arrow": {
+        "type": "primary",
+        "from": "1216",
+        "to": "1217",
+        "front": "both"
+      }
+    },
+    "1215-1216": {
+      "arrow": {
+        "type": "primary",
+        "from": "1215",
+        "to": "1216",
+        "front": "both"
+      }
+    },
+    "1208-1309": {
+      "arrow": {
+        "type": "primary",
+        "from": "1208",
+        "to": "1309",
+        "front": "both"
+      }
+    },
+    "1107-1206": {
+      "arrow": {
+        "type": "primary",
+        "from": "1206",
+        "to": "1107",
+        "front": "voronezh"
+      }
+    },
+    "1206-1307": {
+      "arrow": {
+        "type": "primary",
+        "from": "1206",
+        "to": "1307",
+        "front": "southwest"
+      }
+    },
+    "1302-1303": {
+      "arrow": {
+        "type": "primary",
+        "from": "1302",
+        "to": "1303",
+        "front": "both"
+      }
+    },
+    "1403-1404": {
+      "arrow": {
+        "type": "primary",
+        "from": "1403",
+        "to": "1404",
+        "front": "both"
+      }
+    },
+    "1304-1404": {
+      "arrow": {
+        "type": "primary",
+        "from": "1304",
+        "to": "1404",
+        "front": "both"
+      }
+    },
+    "1404-1405": {
+      "arrow": {
+        "type": "primary",
+        "from": "1404",
+        "to": "1405",
+        "front": "both"
+      }
+    },
+    "1305-1405": {
+      "arrow": {
+        "type": "primary",
+        "from": "1305",
+        "to": "1405",
+        "front": "both"
+      }
+    },
+    "1401-1402": {
+      "arrow": {
+        "type": "primary",
+        "from": "1401",
+        "to": "1402",
+        "front": "both"
+      }
+    },
+    "1501-1502": {
+      "arrow": {
+        "type": "primary",
+        "from": "1501",
+        "to": "1502",
+        "front": "both"
+      }
+    },
+    "1502-1503": {
+      "arrow": {
+        "type": "primary",
+        "from": "1502",
+        "to": "1503",
+        "front": "both"
+      }
+    },
+    "1307-1308": {
+      "arrow": {
+        "type": "primary",
+        "from": "1307",
+        "to": "1308",
+        "front": "both"
+      }
+    },
+    "1308-1309": {
+      "arrow": {
+        "type": "primary",
+        "from": "1308",
+        "to": "1309",
+        "front": "both"
+      }
+    },
+    "1211-1311": {
+      "arrow": {
+        "type": "primary",
+        "from": "1311",
+        "to": "1211",
+        "front": "voronezh"
+      }
+    },
+    "1311-1410": {
+      "arrow": {
+        "type": "primary",
+        "from": "1311",
+        "to": "1410",
+        "front": "southwest"
+      }
+    },
+    "1313-1413": {
+      "arrow": {
+        "type": "primary",
+        "from": "1313",
+        "to": "1413",
+        "front": "both"
+      }
+    },
+    "1312-1412": {
+      "arrow": {
+        "type": "primary",
+        "from": "1312",
+        "to": "1412",
+        "front": "southwest"
+      }
+    },
+    "1314-1414": {
+      "arrow": {
+        "type": "primary",
+        "from": "1314",
+        "to": "1414",
+        "front": "both"
+      }
+    },
+    "1315-1316": {
+      "arrow": {
+        "type": "primary",
+        "from": "1315",
+        "to": "1316",
+        "front": "voronezh"
+      }
+    },
+    "1316-1317": {
+      "arrow": {
+        "type": "primary",
+        "from": "1316",
+        "to": "1317",
+        "front": "voronezh"
+      }
+    },
+    "1512-1513": {
+      "arrow": {
+        "type": "primary",
+        "from": "1512",
+        "to": "1513",
+        "front": "voronezh"
+      }
+    },
+    "1511-1512": {
+      "arrow": {
+        "type": "primary",
+        "from": "1511",
+        "to": "1512",
+        "front": "voronezh"
+      }
+    },
+    "1510-1511": {
+      "arrow": {
+        "type": "primary",
+        "from": "1510",
+        "to": "1511",
+        "front": "voronezh"
+      }
+    },
+    "1509-1510": {
+      "arrow": {
+        "type": "primary",
+        "from": "1509",
+        "to": "1510",
+        "front": "voronezh"
+      }
+    },
+    "1617-1718": {
+      "arrow": {
+        "type": "primary",
+        "from": "1617",
+        "to": "1718",
+        "front": "southwest"
+      }
+    },
+    "1616-1717": {
+      "arrow": {
+        "type": "primary",
+        "from": "1616",
+        "to": "1717",
+        "front": "southwest"
+      }
+    },
+    "1316-1416": {
+      "arrow": {
+        "type": "primary",
+        "from": "1316",
+        "to": "1416",
+        "front": "southwest"
+      }
+    },
+    "1614-1715": {
+      "arrow": {
+        "type": "primary",
+        "from": "1614",
+        "to": "1715",
+        "front": "southwest"
+      }
+    },
+    "1512-1612": {
+      "arrow": {
+        "type": "primary",
+        "from": "1512",
+        "to": "1612",
+        "front": "southwest"
+      }
+    },
+    "1510-1610": {
+      "arrow": {
+        "type": "primary",
+        "from": "1510",
+        "to": "1610",
+        "front": "southwest"
+      }
+    },
+    "1509-1609": {
+      "arrow": {
+        "type": "primary",
+        "from": "1509",
+        "to": "1609",
+        "front": "southwest"
+      }
+    },
+    "1308-1407": {
+      "arrow": {
+        "type": "primary",
+        "from": "1407",
+        "to": "1308",
+        "front": "voronezh"
+      }
+    },
+    "1218-1319": {
+      "arrow": {
+        "type": "primary",
+        "from": "1218",
+        "to": "1319",
+        "front": "both"
+      }
+    },
+    "1317-1417": {
+      "arrow": {
+        "type": "primary",
+        "from": "1317",
+        "to": "1417",
+        "front": "both"
+      }
+    },
+    "1417-1418": {
+      "arrow": {
+        "type": "primary",
+        "from": "1417",
+        "to": "1418",
+        "front": "both"
+      }
+    },
+    "1416-1517": {
+      "arrow": {
+        "type": "primary",
+        "from": "1416",
+        "to": "1517",
+        "front": "both"
+      }
+    },
+    "1517-1617": {
+      "arrow": {
+        "type": "primary",
+        "from": "1517",
+        "to": "1617",
+        "front": "both"
+      }
+    },
+    "1519-1618": {
+      "arrow": {
+        "type": "primary",
+        "from": "1618",
+        "to": "1519",
+        "front": "both"
+      }
+    },
+    "1619-1719": {
+      "arrow": {
+        "type": "primary",
+        "from": "1719",
+        "to": "1619",
+        "front": "both"
+      }
+    },
+    "1619-1620": {
+      "arrow": {
+        "type": "primary",
+        "from": "1619",
+        "to": "1620",
+        "front": "both"
+      }
+    },
+    "1521-1620": {
+      "arrow": {
+        "type": "primary",
+        "from": "1620",
+        "to": "1521",
+        "front": "both"
+      }
+    },
+    "1415-1516": {
+      "arrow": {
+        "type": "primary",
+        "from": "1415",
+        "to": "1516",
+        "front": "both"
+      }
+    },
+    "1516-1616": {
+      "arrow": {
+        "type": "primary",
+        "from": "1516",
+        "to": "1616",
+        "front": "both"
+      }
+    },
+    "1717-1718": {
+      "arrow": {
+        "type": "primary",
+        "from": "1717",
+        "to": "1718",
+        "front": "both"
+      }
+    },
+    "1718-1818": {
+      "arrow": {
+        "type": "primary",
+        "from": "1718",
+        "to": "1818",
+        "front": "both"
+      }
+    },
+    "1612-1713": {
+      "arrow": {
+        "type": "primary",
+        "from": "1612",
+        "to": "1713",
+        "front": "both"
+      }
+    },
+    "1713-1714": {
+      "arrow": {
+        "type": "primary",
+        "from": "1713",
+        "to": "1714",
+        "front": "both"
+      }
+    },
+    "1613-1714": {
+      "arrow": {
+        "type": "primary",
+        "from": "1613",
+        "to": "1714",
+        "front": "both"
+      }
+    },
+    "1712-1812": {
+      "arrow": {
+        "type": "primary",
+        "from": "1712",
+        "to": "1812",
+        "front": "both"
+      }
+    },
+    "1812-1813": {
+      "arrow": {
+        "type": "primary",
+        "from": "1812",
+        "to": "1813",
+        "front": "both"
+      }
+    },
+    "1611-1712": {
+      "arrow": {
+        "type": "primary",
+        "from": "1611",
+        "to": "1712",
+        "front": "both"
+      }
+    },
+    "1710-1810": {
+      "arrow": {
+        "type": "primary",
+        "from": "1710",
+        "to": "1810",
+        "front": "both"
+      }
+    },
+    "1609-1710": {
+      "arrow": {
+        "type": "primary",
+        "from": "1609",
+        "to": "1710",
+        "front": "both"
+      }
+    },
+    "1709-1809": {
+      "arrow": {
+        "type": "primary",
+        "from": "1709",
+        "to": "1809",
+        "front": "both"
+      }
+    },
+    "1708-1709": {
+      "arrow": {
+        "type": "primary",
+        "from": "1708",
+        "to": "1709",
+        "front": "both"
+      }
+    },
+    "1508-1509": {
+      "arrow": {
+        "type": "primary",
+        "from": "1508",
+        "to": "1509",
+        "front": "both"
+      }
+    },
+    "1507-1607": {
+      "arrow": {
+        "type": "primary",
+        "from": "1507",
+        "to": "1607",
+        "front": "both"
+      }
+    },
+    "1506-1507": {
+      "arrow": {
+        "type": "primary",
+        "from": "1506",
+        "to": "1507",
+        "front": "both"
+      }
+    },
+    "1705-1805": {
+      "arrow": {
+        "type": "primary",
+        "from": "1705",
+        "to": "1805",
+        "front": "both"
+      }
+    },
+    "1704-1804": {
+      "arrow": {
+        "type": "primary",
+        "from": "1704",
+        "to": "1804",
+        "front": "both"
+      }
+    },
+    "1804-1805": {
+      "arrow": {
+        "type": "primary",
+        "from": "1804",
+        "to": "1805",
+        "front": "both"
+      }
+    },
+    "1803-1904": {
+      "arrow": {
+        "type": "primary",
+        "from": "1803",
+        "to": "1904",
+        "front": "both"
+      }
+    },
+    "1503-1602": {
+      "arrow": {
+        "type": "primary",
+        "from": "1602",
+        "to": "1503",
+        "front": "both"
+      }
+    },
+    "1502-1601": {
+      "arrow": {
+        "type": "primary",
+        "from": "1601",
+        "to": "1502",
+        "front": "both"
+      }
+    },
+    "1601-1701": {
+      "arrow": {
+        "type": "primary",
+        "from": "1701",
+        "to": "1601",
+        "front": "both"
+      }
+    },
+    "1801-1902": {
+      "arrow": {
+        "type": "primary",
+        "from": "1801",
+        "to": "1902",
+        "front": "both"
+      }
+    },
+    "1702-1802": {
+      "arrow": {
+        "type": "primary",
+        "from": "1702",
+        "to": "1802",
+        "front": "both"
+      }
+    },
+    "1703-1803": {
+      "arrow": {
+        "type": "primary",
+        "from": "1703",
+        "to": "1803",
+        "front": "both"
+      }
+    },
+    "2102-2202": {
+      "arrow": {
+        "type": "primary",
+        "from": "2102",
+        "to": "2202",
+        "front": "both"
+      }
+    },
+    "2201-2302": {
+      "arrow": {
+        "type": "primary",
+        "from": "2201",
+        "to": "2302",
+        "front": "both"
+      }
+    },
+    "2002-2003": {
+      "arrow": {
+        "type": "primary",
+        "from": "2002",
+        "to": "2003",
+        "front": "both"
+      }
+    },
+    "2003-2004": {
+      "arrow": {
+        "type": "primary",
+        "from": "2003",
+        "to": "2004",
+        "front": "both"
+      }
+    },
+    "2103-2203": {
+      "arrow": {
+        "type": "primary",
+        "from": "2103",
+        "to": "2203",
+        "front": "both"
+      }
+    },
+    "2004-2005": {
+      "arrow": {
+        "type": "primary",
+        "from": "2004",
+        "to": "2005",
+        "front": "both"
+      }
+    },
+    "1806-1907": {
+      "arrow": {
+        "type": "primary",
+        "from": "1806",
+        "to": "1907",
+        "front": "both"
+      }
+    },
+    "2006-2007": {
+      "arrow": {
+        "type": "primary",
+        "from": "2006",
+        "to": "2007",
+        "front": "both"
+      }
+    },
+    "1807-1808": {
+      "arrow": {
+        "type": "primary",
+        "from": "1807",
+        "to": "1808",
+        "front": "both"
+      }
+    },
+    "1908-1909": {
+      "arrow": {
+        "type": "primary",
+        "from": "1908",
+        "to": "1909",
+        "front": "both"
+      }
+    },
+    "1909-2009": {
+      "arrow": {
+        "type": "primary",
+        "from": "1909",
+        "to": "2009",
+        "front": "both"
+      }
+    },
+    "1809-1910": {
+      "arrow": {
+        "type": "primary",
+        "from": "1809",
+        "to": "1910",
+        "front": "both"
+      }
+    },
+    "1810-1911": {
+      "arrow": {
+        "type": "primary",
+        "from": "1810",
+        "to": "1911",
+        "front": "both"
+      }
+    },
+    "1410-1511": {
+      "arrow": {
+        "type": "primary",
+        "from": "1410",
+        "to": "1511",
+        "front": "both"
+      }
+    },
+    "1409-1510": {
+      "arrow": {
+        "type": "primary",
+        "from": "1409",
+        "to": "1510",
+        "front": "both"
+      }
+    },
+    "1919-2019": {
+      "arrow": {
+        "type": "primary",
+        "from": "1919",
+        "to": "2019",
+        "front": "both"
+      }
+    },
+    "2019-2120": {
+      "arrow": {
+        "type": "primary",
+        "from": "2019",
+        "to": "2120",
+        "front": "both"
+      }
+    },
+    "2018-2119": {
+      "arrow": {
+        "type": "primary",
+        "from": "2018",
+        "to": "2119",
+        "front": "both"
+      }
+    },
+    "1918-2018": {
+      "arrow": {
+        "type": "primary",
+        "from": "1918",
+        "to": "2018",
+        "front": "both"
+      }
+    },
+    "2017-2118": {
+      "arrow": {
+        "type": "primary",
+        "from": "2017",
+        "to": "2118",
+        "front": "both"
+      }
+    },
+    "1917-2017": {
+      "arrow": {
+        "type": "primary",
+        "from": "1917",
+        "to": "2017",
+        "front": "both"
+      }
+    },
+    "1716-1815": {
+      "arrow": {
+        "type": "primary",
+        "from": "1716",
+        "to": "1815",
+        "front": "both"
+      }
+    },
+    "1814-1815": {
+      "arrow": {
+        "type": "primary",
+        "from": "1814",
+        "to": "1815",
+        "front": "both"
+      }
+    },
+    "1714-1715": {
+      "arrow": {
+        "type": "primary",
+        "from": "1714",
+        "to": "1715",
+        "front": "both"
+      }
+    },
+    "1813-1814": {
+      "arrow": {
+        "type": "primary",
+        "from": "1813",
+        "to": "1814",
+        "front": "both"
+      }
+    },
+    "1914-1915": {
+      "arrow": {
+        "type": "primary",
+        "from": "1914",
+        "to": "1915",
+        "front": "both"
+      }
+    },
+    "2015-2116": {
+      "arrow": {
+        "type": "primary",
+        "from": "2015",
+        "to": "2116",
+        "front": "both"
+      }
+    },
+    "2014-2015": {
+      "arrow": {
+        "type": "primary",
+        "from": "2014",
+        "to": "2015",
+        "front": "both"
+      }
+    },
+    "2013-2014": {
+      "arrow": {
+        "type": "primary",
+        "from": "2013",
+        "to": "2014",
+        "front": "both"
+      }
+    },
+    "1913-1914": {
+      "arrow": {
+        "type": "primary",
+        "from": "1913",
+        "to": "1914",
+        "front": "both"
+      }
+    },
+    "1811-1912": {
+      "arrow": {
+        "type": "primary",
+        "from": "1811",
+        "to": "1912",
+        "front": "both"
+      }
+    },
+    "1912-2012": {
+      "arrow": {
+        "type": "primary",
+        "from": "1912",
+        "to": "2012",
+        "front": "both"
+      }
+    },
+    "1911-2011": {
+      "arrow": {
+        "type": "primary",
+        "from": "1911",
+        "to": "2011",
+        "front": "both"
+      }
+    },
+    "2011-2112": {
+      "arrow": {
+        "type": "primary",
+        "from": "2011",
+        "to": "2112",
+        "front": "both"
+      }
+    },
+    "2012-2013": {
+      "arrow": {
+        "type": "primary",
+        "from": "2012",
+        "to": "2013",
+        "front": "both"
+      }
+    },
+    "2010-2111": {
+      "arrow": {
+        "type": "primary",
+        "from": "2010",
+        "to": "2111",
+        "front": "both"
+      }
+    },
+    "1910-2010": {
+      "arrow": {
+        "type": "primary",
+        "from": "1910",
+        "to": "2010",
+        "front": "both"
+      }
+    },
+    "1808-1809": {
+      "arrow": {
+        "type": "primary",
+        "from": "1808",
+        "to": "1809",
+        "front": "both"
+      }
+    },
+    "2104-2204": {
+      "arrow": {
+        "type": "primary",
+        "from": "2104",
+        "to": "2204",
+        "front": "both"
+      }
+    },
+    "2105-2205": {
+      "arrow": {
+        "type": "primary",
+        "from": "2105",
+        "to": "2205",
+        "front": "both"
+      }
+    },
+    "2107-2207": {
+      "arrow": {
+        "type": "primary",
+        "from": "2107",
+        "to": "2207",
+        "front": "both"
+      }
+    },
+    "2108-2208": {
+      "arrow": {
+        "type": "primary",
+        "from": "2108",
+        "to": "2208",
+        "front": "both"
+      }
+    },
+    "2208-2209": {
+      "arrow": {
+        "type": "primary",
+        "from": "2208",
+        "to": "2209",
+        "front": "both"
+      }
+    },
+    "2109-2209": {
+      "arrow": {
+        "type": "primary",
+        "from": "2109",
+        "to": "2209",
+        "front": "both"
+      }
+    },
+    "2210-2211": {
+      "arrow": {
+        "type": "primary",
+        "from": "2210",
+        "to": "2211",
+        "front": "both"
+      }
+    },
+    "2209-2210": {
+      "arrow": {
+        "type": "primary",
+        "from": "2209",
+        "to": "2210",
+        "front": "both"
+      }
+    },
+    "2112-2212": {
+      "arrow": {
+        "type": "primary",
+        "from": "2112",
+        "to": "2212",
+        "front": "both"
+      }
+    },
+    "2212-2312": {
+      "arrow": {
+        "type": "primary",
+        "from": "2212",
+        "to": "2312",
+        "front": "both"
+      }
+    },
+    "2113-2213": {
+      "arrow": {
+        "type": "primary",
+        "from": "2113",
+        "to": "2213",
+        "front": "both"
+      }
+    },
+    "2213-2214": {
+      "arrow": {
+        "type": "primary",
+        "from": "2213",
+        "to": "2214",
+        "front": "both"
+      }
+    },
+    "2114-2115": {
+      "arrow": {
+        "type": "primary",
+        "from": "2114",
+        "to": "2115",
+        "front": "both"
+      }
+    },
+    "2115-2116": {
+      "arrow": {
+        "type": "primary",
+        "from": "2115",
+        "to": "2116",
+        "front": "both"
+      }
+    },
+    "2217-2318": {
+      "arrow": {
+        "type": "primary",
+        "from": "2217",
+        "to": "2318",
+        "front": "both"
+      }
+    },
+    "2218-2318": {
+      "arrow": {
+        "type": "primary",
+        "from": "2218",
+        "to": "2318",
+        "front": "both"
+      }
+    },
+    "2117-2217": {
+      "arrow": {
+        "type": "primary",
+        "from": "2117",
+        "to": "2217",
+        "front": "both"
+      }
+    },
+    "2118-2119": {
+      "arrow": {
+        "type": "primary",
+        "from": "2118",
+        "to": "2119",
+        "front": "both"
+      }
+    },
+    "2119-2219": {
+      "arrow": {
+        "type": "primary",
+        "from": "2119",
+        "to": "2219",
+        "front": "both"
+      }
+    },
+    "2318-2417": {
+      "arrow": {
+        "type": "primary",
+        "from": "2318",
+        "to": "2417",
+        "front": "both"
+      }
+    },
+    "2316-2416": {
+      "arrow": {
+        "type": "primary",
+        "from": "2416",
+        "to": "2316",
+        "front": "both"
+      }
+    },
+    "2414-2515": {
+      "arrow": {
+        "type": "primary",
+        "from": "2414",
+        "to": "2515",
+        "front": "both"
+      }
+    },
+    "2515-2615": {
+      "arrow": {
+        "type": "primary",
+        "from": "2515",
+        "to": "2615",
+        "front": "both"
+      }
+    },
+    "2517-2616": {
+      "arrow": {
+        "type": "primary",
+        "from": "2616",
+        "to": "2517",
+        "front": "both"
+      }
+    },
+    "2614-2715": {
+      "arrow": {
+        "type": "primary",
+        "from": "2614",
+        "to": "2715",
+        "front": "both"
+      }
+    },
+    "2514-2614": {
+      "arrow": {
+        "type": "primary",
+        "from": "2514",
+        "to": "2614",
+        "front": "both"
+      }
+    },
+    "2413-2514": {
+      "arrow": {
+        "type": "primary",
+        "from": "2413",
+        "to": "2514",
+        "front": "both"
+      }
+    },
+    "2513-2613": {
+      "arrow": {
+        "type": "primary",
+        "from": "2513",
+        "to": "2613",
+        "front": "both"
+      }
+    },
+    "2613-2614": {
+      "arrow": {
+        "type": "primary",
+        "from": "2613",
+        "to": "2614",
+        "front": "both"
+      }
+    },
+    "2311-2312": {
+      "arrow": {
+        "type": "primary",
+        "from": "2311",
+        "to": "2312",
+        "front": "both"
+      }
+    },
+    "2310-2311": {
+      "arrow": {
+        "type": "primary",
+        "from": "2310",
+        "to": "2311",
+        "front": "both"
+      }
+    },
+    "2309-2310": {
+      "arrow": {
+        "type": "primary",
+        "from": "2309",
+        "to": "2310",
+        "front": "both"
+      }
+    },
+    "2409-2410": {
+      "arrow": {
+        "type": "primary",
+        "from": "2409",
+        "to": "2410",
+        "front": "both"
+      }
+    },
+    "2308-2408": {
+      "arrow": {
+        "type": "primary",
+        "from": "2308",
+        "to": "2408",
+        "front": "both"
+      }
+    },
+    "2207-2308": {
+      "arrow": {
+        "type": "primary",
+        "from": "2207",
+        "to": "2308",
+        "front": "both"
+      }
+    },
+    "2307-2407": {
+      "arrow": {
+        "type": "primary",
+        "from": "2307",
+        "to": "2407",
+        "front": "both"
+      }
+    },
+    "2206-2307": {
+      "arrow": {
+        "type": "primary",
+        "from": "2206",
+        "to": "2307",
+        "front": "both"
+      }
+    },
+    "2306-2406": {
+      "arrow": {
+        "type": "primary",
+        "from": "2306",
+        "to": "2406",
+        "front": "both"
+      }
+    },
+    "2305-2405": {
+      "arrow": {
+        "type": "primary",
+        "from": "2305",
+        "to": "2405",
+        "front": "both"
+      }
+    },
+    "2204-2305": {
+      "arrow": {
+        "type": "primary",
+        "from": "2204",
+        "to": "2305",
+        "front": "both"
+      }
+    },
+    "2304-2404": {
+      "arrow": {
+        "type": "primary",
+        "from": "2304",
+        "to": "2404",
+        "front": "both"
+      }
+    },
+    "2203-2304": {
+      "arrow": {
+        "type": "primary",
+        "from": "2203",
+        "to": "2304",
+        "front": "both"
+      }
+    },
+    "2303-2403": {
+      "arrow": {
+        "type": "primary",
+        "from": "2303",
+        "to": "2403",
+        "front": "both"
+      }
+    },
+    "2202-2303": {
+      "arrow": {
+        "type": "primary",
+        "from": "2202",
+        "to": "2303",
+        "front": "both"
+      }
+    },
+    "2302-2402": {
+      "arrow": {
+        "type": "primary",
+        "from": "2302",
+        "to": "2402",
+        "front": "both"
+      }
+    },
+    "2401-2501": {
+      "arrow": {
+        "type": "primary",
+        "from": "2501",
+        "to": "2401",
+        "front": "both"
+      }
+    },
+    "2502-2503": {
+      "arrow": {
+        "type": "primary",
+        "from": "2502",
+        "to": "2503",
+        "front": "both"
+      }
+    },
+    "2504-2604": {
+      "arrow": {
+        "type": "primary",
+        "from": "2504",
+        "to": "2604",
+        "front": "both"
+      }
+    },
+    "2505-2605": {
+      "arrow": {
+        "type": "primary",
+        "from": "2505",
+        "to": "2605",
+        "front": "both"
+      }
+    },
+    "2506-2606": {
+      "arrow": {
+        "type": "primary",
+        "from": "2506",
+        "to": "2606",
+        "front": "both"
+      }
+    },
+    "2507-2607": {
+      "arrow": {
+        "type": "primary",
+        "from": "2507",
+        "to": "2607",
+        "front": "both"
+      }
+    },
+    "2508-2509": {
+      "arrow": {
+        "type": "primary",
+        "from": "2508",
+        "to": "2509",
+        "front": "both"
+      }
+    },
+    "2512-2612": {
+      "arrow": {
+        "type": "primary",
+        "from": "2512",
+        "to": "2612",
+        "front": "both"
+      }
+    },
+    "2610-2611": {
+      "arrow": {
+        "type": "primary",
+        "from": "2610",
+        "to": "2611",
+        "front": "both"
+      }
+    },
+    "2609-2710": {
+      "arrow": {
+        "type": "primary",
+        "from": "2609",
+        "to": "2710",
+        "front": "both"
+      }
+    },
+    "2608-2709": {
+      "arrow": {
+        "type": "primary",
+        "from": "2608",
+        "to": "2709",
+        "front": "both"
+      }
+    },
+    "2607-2608": {
+      "arrow": {
+        "type": "primary",
+        "from": "2607",
+        "to": "2608",
+        "front": "both"
+      }
+    },
+    "2606-2707": {
+      "arrow": {
+        "type": "primary",
+        "from": "2606",
+        "to": "2707",
+        "front": "both"
+      }
+    },
+    "2605-2706": {
+      "arrow": {
+        "type": "primary",
+        "from": "2605",
+        "to": "2706",
+        "front": "both"
+      }
+    },
+    "2604-2705": {
+      "arrow": {
+        "type": "primary",
+        "from": "2604",
+        "to": "2705",
+        "front": "both"
+      }
+    },
+    "2603-2704": {
+      "arrow": {
+        "type": "primary",
+        "from": "2603",
+        "to": "2704",
+        "front": "both"
+      }
+    },
+    "2602-2703": {
+      "arrow": {
+        "type": "primary",
+        "from": "2602",
+        "to": "2703",
+        "front": "both"
+      }
+    },
+    "2601-2702": {
+      "arrow": {
+        "type": "primary",
+        "from": "2601",
+        "to": "2702",
+        "front": "both"
+      }
+    },
+    "2801-2802": {
+      "arrow": {
+        "type": "primary",
+        "from": "2801",
+        "to": "2802",
+        "front": "both"
+      }
+    },
+    "2901-2902": {
+      "arrow": {
+        "type": "primary",
+        "from": "2901",
+        "to": "2902",
+        "front": "both"
+      }
+    },
+    "2902-2903": {
+      "arrow": {
+        "type": "primary",
+        "from": "2902",
+        "to": "2903",
+        "front": "both"
+      }
+    },
+    "2903-2904": {
+      "arrow": {
+        "type": "primary",
+        "from": "2903",
+        "to": "2904",
+        "front": "both"
+      }
+    },
+    "2802-2803": {
+      "arrow": {
+        "type": "primary",
+        "from": "2802",
+        "to": "2803",
+        "front": "both"
+      }
+    },
+    "2803-2804": {
+      "arrow": {
+        "type": "primary",
+        "from": "2803",
+        "to": "2804",
+        "front": "both"
+      }
+    },
+    "2904-2905": {
+      "arrow": {
+        "type": "primary",
+        "from": "2904",
+        "to": "2905",
+        "front": "both"
+      }
+    },
+    "2905-2906": {
+      "arrow": {
+        "type": "primary",
+        "from": "2905",
+        "to": "2906",
+        "front": "both"
+      }
+    },
+    "2906-3006": {
+      "arrow": {
+        "type": "primary",
+        "from": "2906",
+        "to": "3006",
+        "front": "both"
+      }
+    },
+    "2707-2807": {
+      "arrow": {
+        "type": "primary",
+        "from": "2707",
+        "to": "2807",
+        "front": "both"
+      }
+    },
+    "2708-2808": {
+      "arrow": {
+        "type": "primary",
+        "from": "2708",
+        "to": "2808",
+        "front": "both"
+      }
+    },
+    "2709-2809": {
+      "arrow": {
+        "type": "primary",
+        "from": "2709",
+        "to": "2809",
+        "front": "both"
+      }
+    },
+    "2811-2912": {
+      "arrow": {
+        "type": "primary",
+        "from": "2811",
+        "to": "2912",
+        "front": "both"
+      }
+    },
+    "2712-2812": {
+      "arrow": {
+        "type": "primary",
+        "from": "2712",
+        "to": "2812",
+        "front": "both"
+      }
+    },
+    "2612-2613": {
+      "arrow": {
+        "type": "primary",
+        "from": "2612",
+        "to": "2613",
+        "front": "both"
+      }
+    },
+    "2713-2714": {
+      "arrow": {
+        "type": "primary",
+        "from": "2713",
+        "to": "2714",
+        "front": "both"
+      }
+    },
+    "2714-2814": {
+      "arrow": {
+        "type": "primary",
+        "from": "2714",
+        "to": "2814",
+        "front": "both"
+      }
+    },
+    "2813-2914": {
+      "arrow": {
+        "type": "primary",
+        "from": "2813",
+        "to": "2914",
+        "front": "both"
+      }
+    },
+    "2812-2913": {
+      "arrow": {
+        "type": "primary",
+        "from": "2812",
+        "to": "2913",
+        "front": "both"
+      }
+    },
+    "2814-2915": {
+      "arrow": {
+        "type": "primary",
+        "from": "2814",
+        "to": "2915",
+        "front": "both"
+      }
+    },
+    "2716-2816": {
+      "arrow": {
+        "type": "primary",
+        "from": "2716",
+        "to": "2816",
+        "front": "both"
+      }
+    },
+    "2816-2916": {
+      "arrow": {
+        "type": "primary",
+        "from": "2816",
+        "to": "2916",
+        "front": "both"
+      }
+    },
+    "2916-3015": {
+      "arrow": {
+        "type": "primary",
+        "from": "2916",
+        "to": "3015",
+        "front": "both"
+      }
+    },
+    "3013-3014": {
+      "arrow": {
+        "type": "primary",
+        "from": "3013",
+        "to": "3014",
+        "front": "both"
+      }
+    },
+    "3116-3215": {
+      "arrow": {
+        "type": "primary",
+        "from": "3116",
+        "to": "3215",
+        "front": "both"
+      }
+    },
+    "3214-3215": {
+      "arrow": {
+        "type": "primary",
+        "from": "3215",
+        "to": "3214",
+        "front": "both"
+      }
+    },
+    "3012-3113": {
+      "arrow": {
+        "type": "primary",
+        "from": "3012",
+        "to": "3113",
+        "front": "both"
+      }
+    },
+    "3212-3313": {
+      "arrow": {
+        "type": "primary",
+        "from": "3212",
+        "to": "3313",
+        "front": "both"
+      }
+    },
+    "3313-3314": {
+      "arrow": {
+        "type": "primary",
+        "from": "3313",
+        "to": "3314",
+        "front": "both"
+      }
+    },
+    "3312-3313": {
+      "arrow": {
+        "type": "primary",
+        "from": "3312",
+        "to": "3313",
+        "front": "both"
+      }
+    },
+    "3311-3312": {
+      "arrow": {
+        "type": "primary",
+        "from": "3311",
+        "to": "3312",
+        "front": "both"
+      }
+    },
+    "3211-3312": {
+      "arrow": {
+        "type": "primary",
+        "from": "3211",
+        "to": "3312",
+        "front": "both"
+      }
+    },
+    "3210-3211": {
+      "arrow": {
+        "type": "primary",
+        "from": "3210",
+        "to": "3211",
+        "front": "both"
+      }
+    },
+    "3111-3211": {
+      "arrow": {
+        "type": "primary",
+        "from": "3111",
+        "to": "3211",
+        "front": "both"
+      }
+    },
+    "3011-3112": {
+      "arrow": {
+        "type": "primary",
+        "from": "3011",
+        "to": "3112",
+        "front": "both"
+      }
+    },
+    "3010-3111": {
+      "arrow": {
+        "type": "primary",
+        "from": "3010",
+        "to": "3111",
+        "front": "both"
+      }
+    },
+    "3110-3209": {
+      "arrow": {
+        "type": "primary",
+        "from": "3110",
+        "to": "3209",
+        "front": "both"
+      }
+    },
+    "3209-3309": {
+      "arrow": {
+        "type": "primary",
+        "from": "3209",
+        "to": "3309",
+        "front": "both"
+      }
+    },
+    "3308-3309": {
+      "arrow": {
+        "type": "primary",
+        "from": "3308",
+        "to": "3309",
+        "front": "both"
+      }
+    },
+    "3307-3308": {
+      "arrow": {
+        "type": "primary",
+        "from": "3307",
+        "to": "3308",
+        "front": "both"
+      }
+    },
+    "3207-3208": {
+      "arrow": {
+        "type": "primary",
+        "from": "3207",
+        "to": "3208",
+        "front": "both"
+      }
+    },
+    "3206-3207": {
+      "arrow": {
+        "type": "primary",
+        "from": "3206",
+        "to": "3207",
+        "front": "both"
+      }
+    },
+    "3107-3207": {
+      "arrow": {
+        "type": "primary",
+        "from": "3107",
+        "to": "3207",
+        "front": "both"
+      }
+    },
+    "3108-3208": {
+      "arrow": {
+        "type": "primary",
+        "from": "3108",
+        "to": "3208",
+        "front": "both"
+      }
+    },
+    "3008-3109": {
+      "arrow": {
+        "type": "primary",
+        "from": "3008",
+        "to": "3109",
+        "front": "both"
+      }
+    },
+    "2909-3009": {
+      "arrow": {
+        "type": "primary",
+        "from": "2909",
+        "to": "3009",
+        "front": "both"
+      }
+    },
+    "2908-3008": {
+      "arrow": {
+        "type": "primary",
+        "from": "2908",
+        "to": "3008",
+        "front": "both"
+      }
+    },
+    "3007-3108": {
+      "arrow": {
+        "type": "primary",
+        "from": "3007",
+        "to": "3108",
+        "front": "both"
+      }
+    },
+    "3006-3107": {
+      "arrow": {
+        "type": "primary",
+        "from": "3006",
+        "to": "3107",
+        "front": "both"
+      }
+    },
+    "2907-3007": {
+      "arrow": {
+        "type": "primary",
+        "from": "2907",
+        "to": "3007",
+        "front": "both"
+      }
+    },
+    "0304-0305": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0304",
+        "to": "0305",
+        "front": "both"
+      }
+    },
+    "0305-0306": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0305",
+        "to": "0306",
+        "front": "both"
+      }
+    },
+    "0306-0405": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0405",
+        "to": "0306",
+        "front": "both"
+      }
+    },
+    "0306-0406": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0306",
+        "to": "0406",
+        "front": "both"
+      }
+    },
+    "0106-0206": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0106",
+        "to": "0206",
+        "front": "both"
+      }
+    },
+    "0105-0205": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0105",
+        "to": "0205",
+        "front": "both"
+      }
+    },
+    "0109-0110": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0109",
+        "to": "0110",
+        "front": "both"
+      }
+    },
+    "0110-0210": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0110",
+        "to": "0210",
+        "front": "both"
+      }
+    },
+    "0111-0211": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0111",
+        "to": "0211",
+        "front": "both"
+      }
+    },
+    "0211-0312": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0211",
+        "to": "0312",
+        "front": "both"
+      }
+    },
+    "0112-0212": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0112",
+        "to": "0212",
+        "front": "both"
+      }
+    },
+    "0113-0213": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0113",
+        "to": "0213",
+        "front": "both"
+      }
+    },
+    "0212-0313": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0212",
+        "to": "0313",
+        "front": "both"
+      }
+    },
+    "0213-0314": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0213",
+        "to": "0314",
+        "front": "both"
+      }
+    },
+    "0116-0216": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0116",
+        "to": "0216",
+        "front": "both"
+      }
+    },
+    "0216-0317": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0216",
+        "to": "0317",
+        "front": "both"
+      }
+    },
+    "0418-0419": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0418",
+        "to": "0419",
+        "front": "both"
+      }
+    },
+    "0313-0413": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0313",
+        "to": "0413",
+        "front": "both"
+      }
+    },
+    "0312-0412": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0312",
+        "to": "0412",
+        "front": "both"
+      }
+    },
+    "0309-0409": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0309",
+        "to": "0409",
+        "front": "both"
+      }
+    },
+    "0308-0309": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0308",
+        "to": "0309",
+        "front": "both"
+      }
+    },
+    "0404-0505": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0404",
+        "to": "0505",
+        "front": "both"
+      }
+    },
+    "0505-0506": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0505",
+        "to": "0506",
+        "front": "both"
+      }
+    },
+    "0506-0507": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0506",
+        "to": "0507",
+        "front": "both"
+      }
+    },
+    "0507-0508": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0507",
+        "to": "0508",
+        "front": "both"
+      }
+    },
+    "0508-0509": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0508",
+        "to": "0509",
+        "front": "both"
+      }
+    },
+    "0510-0511": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0510",
+        "to": "0511",
+        "front": "both"
+      }
+    },
+    "0411-0412": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0411",
+        "to": "0412",
+        "front": "both"
+      }
+    },
+    "0412-0513": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0412",
+        "to": "0513",
+        "front": "both"
+      }
+    },
+    "0413-0514": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0413",
+        "to": "0514",
+        "front": "both"
+      }
+    },
+    "0518-0519": {
+      "arrow": {
+        "type": "primary",
+        "from": "0518",
+        "to": "0519",
+        "front": "both"
+      }
+    },
+    "0616-0717": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0616",
+        "to": "0717",
+        "front": "both"
+      }
+    },
+    "0615-0716": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0615",
+        "to": "0716",
+        "front": "both"
+      }
+    },
+    "0716-0816": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0716",
+        "to": "0816",
+        "front": "both"
+      }
+    },
+    "0515-0615": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0515",
+        "to": "0615",
+        "front": "both"
+      }
+    },
+    "0614-0715": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0614",
+        "to": "0715",
+        "front": "both"
+      }
+    },
+    "0513-0613": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0513",
+        "to": "0613",
+        "front": "both"
+      }
+    },
+    "0612-0613": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0612",
+        "to": "0613",
+        "front": "both"
+      }
+    },
+    "0512-0513": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0512",
+        "to": "0513",
+        "front": "both"
+      }
+    },
+    "0511-0611": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0511",
+        "to": "0611",
+        "front": "both"
+      }
+    },
+    "0609-0710": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0609",
+        "to": "0710",
+        "front": "both"
+      }
+    },
+    "0610-0711": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0610",
+        "to": "0711",
+        "front": "both"
+      }
+    },
+    "0607-0708": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0607",
+        "to": "0708",
+        "front": "both"
+      }
+    },
+    "0608-0708": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0708",
+        "to": "0608",
+        "front": "both"
+      }
+    },
+    "0606-0707": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0606",
+        "to": "0707",
+        "front": "both"
+      }
+    },
+    "0605-0606": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0605",
+        "to": "0606",
+        "front": "both"
+      }
+    },
+    "0504-0604": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0504",
+        "to": "0604",
+        "front": "both"
+      }
+    },
+    "0603-0704": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0603",
+        "to": "0704",
+        "front": "both"
+      }
+    },
+    "0604-0705": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0604",
+        "to": "0705",
+        "front": "both"
+      }
+    },
+    "0703-0803": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0703",
+        "to": "0803",
+        "front": "both"
+      }
+    },
+    "0705-0804": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0804",
+        "to": "0705",
+        "front": "voronezh"
+      }
+    },
+    "0905-1004": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1004",
+        "to": "0905",
+        "front": "voronezh"
+      }
+    },
+    "0804-0904": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0904",
+        "to": "0804",
+        "front": "both"
+      }
+    },
+    "0905-0906": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0905",
+        "to": "0906",
+        "front": "both"
+      }
+    },
+    "0906-1006": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0906",
+        "to": "1006",
+        "front": "both"
+      }
+    },
+    "0707-0807": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0707",
+        "to": "0807",
+        "front": "both"
+      }
+    },
+    "0809-0910": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0809",
+        "to": "0910",
+        "front": "both"
+      }
+    },
+    "0710-0810": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0710",
+        "to": "0810",
+        "front": "both"
+      }
+    },
+    "0814-0915": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0814",
+        "to": "0915",
+        "front": "both"
+      }
+    },
+    "0915-1015": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0915",
+        "to": "1015",
+        "front": "both"
+      }
+    },
+    "0916-1016": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0916",
+        "to": "1016",
+        "front": "both"
+      }
+    },
+    "0718-0817": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0817",
+        "to": "0718",
+        "front": "both"
+      }
+    },
+    "0918-0919": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0918",
+        "to": "0919",
+        "front": "both"
+      }
+    },
+    "0818-0919": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0818",
+        "to": "0919",
+        "front": "both"
+      }
+    },
+    "0819-0919": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0919",
+        "to": "0819",
+        "front": "both"
+      }
+    },
+    "1016-1117": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1016",
+        "to": "1117",
+        "front": "both"
+      }
+    },
+    "1015-1116": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1015",
+        "to": "1116",
+        "front": "both"
+      }
+    },
+    "1114-1115": {
+      "arrow": {
+        "type": "primary",
+        "from": "1114",
+        "to": "1115",
+        "front": "both"
+      }
+    },
+    "0910-1010": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0910",
+        "to": "1010",
+        "front": "both"
+      }
+    },
+    "1109-1209": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1109",
+        "to": "1209",
+        "front": "both"
+      }
+    },
+    "1208-1209": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1208",
+        "to": "1209",
+        "front": "both"
+      }
+    },
+    "1108-1208": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1108",
+        "to": "1208",
+        "front": "southwest"
+      }
+    },
+    "1207-1208": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1207",
+        "to": "1208",
+        "front": "both"
+      }
+    },
+    "1006-1007": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1006",
+        "to": "1007",
+        "front": "both"
+      }
+    },
+    "0908-1008": {
+      "arrow": {
+        "type": "primary",
+        "from": "0908",
+        "to": "1008",
+        "front": "both"
+      }
+    },
+    "1005-1106": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1005",
+        "to": "1106",
+        "front": "both"
+      }
+    },
+    "1302-1402": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1302",
+        "to": "1402",
+        "front": "both"
+      }
+    },
+    "1305-1404": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1404",
+        "to": "1305",
+        "front": "both"
+      }
+    },
+    "1504-1505": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1504",
+        "to": "1505",
+        "front": "both"
+      }
+    },
+    "1204-1305": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1204",
+        "to": "1305",
+        "front": "southwest"
+      }
+    },
+    "1307-1407": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1307",
+        "to": "1407",
+        "front": "southwest"
+      }
+    },
+    "1306-1406": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1306",
+        "to": "1406",
+        "front": "both"
+      }
+    },
+    "1205-1206": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1205",
+        "to": "1206",
+        "front": "both"
+      }
+    },
+    "1305-1306": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1305",
+        "to": "1306",
+        "front": "both"
+      }
+    },
+    "1507-1508": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1507",
+        "to": "1508",
+        "front": "both"
+      }
+    },
+    "1409-1410": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1409",
+        "to": "1410",
+        "front": "both"
+      }
+    },
+    "1313-1314": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1313",
+        "to": "1314",
+        "front": "both"
+      }
+    },
+    "1412-1513": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1412",
+        "to": "1513",
+        "front": "both"
+      }
+    },
+    "1413-1514": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1413",
+        "to": "1514",
+        "front": "both"
+      }
+    },
+    "1513-1613": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1513",
+        "to": "1613",
+        "front": "both"
+      }
+    },
+    "1612-1613": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1612",
+        "to": "1613",
+        "front": "both"
+      }
+    },
+    "1611-1612": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1611",
+        "to": "1612",
+        "front": "both"
+      }
+    },
+    "1610-1611": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1610",
+        "to": "1611",
+        "front": "both"
+      }
+    },
+    "1613-1614": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1613",
+        "to": "1614",
+        "front": "both"
+      }
+    },
+    "1514-1515": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1514",
+        "to": "1515",
+        "front": "both"
+      }
+    },
+    "1413-1414": {
+      "arrow": {
+        "type": "primary",
+        "from": "1413",
+        "to": "1414",
+        "front": "both"
+      }
+    },
+    "1412-1413": {
+      "arrow": {
+        "type": "primary",
+        "from": "1412",
+        "to": "1413",
+        "front": "both"
+      }
+    },
+    "1513-1514": {
+      "arrow": {
+        "type": "primary",
+        "from": "1513",
+        "to": "1514",
+        "front": "both"
+      }
+    },
+    "1514-1614": {
+      "arrow": {
+        "type": "primary",
+        "from": "1514",
+        "to": "1614",
+        "front": "both"
+      }
+    },
+    "1215-1316": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1215",
+        "to": "1316",
+        "front": "both"
+      }
+    },
+    "1216-1317": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1216",
+        "to": "1317",
+        "front": "both"
+      }
+    },
+    "1317-1318": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1317",
+        "to": "1318",
+        "front": "both"
+      }
+    },
+    "1118-1217": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1217",
+        "to": "1118",
+        "front": "both"
+      }
+    },
+    "1318-1418": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1318",
+        "to": "1418",
+        "front": "both"
+      }
+    },
+    "1417-1518": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1417",
+        "to": "1518",
+        "front": "both"
+      }
+    },
+    "1517-1518": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1517",
+        "to": "1518",
+        "front": "both"
+      }
+    },
+    "1516-1517": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1516",
+        "to": "1517",
+        "front": "both"
+      }
+    },
+    "1415-1416": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1415",
+        "to": "1416",
+        "front": "both"
+      }
+    },
+    "1416-1417": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1416",
+        "to": "1417",
+        "front": "both"
+      }
+    },
+    "1518-1618": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1518",
+        "to": "1618",
+        "front": "both"
+      }
+    },
+    "1519-1520": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1519",
+        "to": "1520",
+        "front": "both"
+      }
+    },
+    "1618-1619": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1618",
+        "to": "1619",
+        "front": "both"
+      }
+    },
+    "1718-1719": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1718",
+        "to": "1719",
+        "front": "both"
+      }
+    },
+    "1319-1320": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1319",
+        "to": "1320",
+        "front": "both"
+      }
+    },
+    "1716-1816": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1716",
+        "to": "1816",
+        "front": "both"
+      }
+    },
+    "1714-1814": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1714",
+        "to": "1814",
+        "front": "both"
+      }
+    },
+    "1713-1813": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1713",
+        "to": "1813",
+        "front": "both"
+      }
+    },
+    "1813-1914": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1813",
+        "to": "1914",
+        "front": "both"
+      }
+    },
+    "1812-1913": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1812",
+        "to": "1913",
+        "front": "both"
+      }
+    },
+    "1712-1713": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1712",
+        "to": "1713",
+        "front": "both"
+      }
+    },
+    "1711-1811": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1711",
+        "to": "1811",
+        "front": "both"
+      }
+    },
+    "1811-1812": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1811",
+        "to": "1812",
+        "front": "both"
+      }
+    },
+    "1710-1711": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1710",
+        "to": "1711",
+        "front": "both"
+      }
+    },
+    "1709-1710": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1709",
+        "to": "1710",
+        "front": "both"
+      }
+    },
+    "1809-1810": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1809",
+        "to": "1810",
+        "front": "both"
+      }
+    },
+    "1909-1910": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1909",
+        "to": "1910",
+        "front": "both"
+      }
+    },
+    "1808-1909": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1808",
+        "to": "1909",
+        "front": "both"
+      }
+    },
+    "1708-1808": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1708",
+        "to": "1808",
+        "front": "both"
+      }
+    },
+    "1807-1908": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1807",
+        "to": "1908",
+        "front": "both"
+      }
+    },
+    "1908-2008": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1908",
+        "to": "2008",
+        "front": "both"
+      }
+    },
+    "1607-1608": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1607",
+        "to": "1608",
+        "front": "both"
+      }
+    },
+    "1907-1908": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1907",
+        "to": "1908",
+        "front": "both"
+      }
+    },
+    "1905-2005": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1905",
+        "to": "2005",
+        "front": "both"
+      }
+    },
+    "2004-2105": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2004",
+        "to": "2105",
+        "front": "both"
+      }
+    },
+    "2006-2107": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2006",
+        "to": "2107",
+        "front": "both"
+      }
+    },
+    "2003-2104": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2003",
+        "to": "2104",
+        "front": "both"
+      }
+    },
+    "2104-2105": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2104",
+        "to": "2105",
+        "front": "both"
+      }
+    },
+    "1903-2003": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1903",
+        "to": "2003",
+        "front": "both"
+      }
+    },
+    "1803-1804": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1803",
+        "to": "1804",
+        "front": "both"
+      }
+    },
+    "1804-1905": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1804",
+        "to": "1905",
+        "front": "both"
+      }
+    },
+    "2103-2104": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2103",
+        "to": "2104",
+        "front": "both"
+      }
+    },
+    "2101-2201": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2101",
+        "to": "2201",
+        "front": "both"
+      }
+    },
+    "2201-2202": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2201",
+        "to": "2202",
+        "front": "both"
+      }
+    },
+    "2202-2203": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2202",
+        "to": "2203",
+        "front": "both"
+      }
+    },
+    "2203-2204": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2203",
+        "to": "2204",
+        "front": "both"
+      }
+    },
+    "2301-2302": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2301",
+        "to": "2302",
+        "front": "both"
+      }
+    },
+    "2302-2303": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2302",
+        "to": "2303",
+        "front": "both"
+      }
+    },
+    "2303-2304": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2303",
+        "to": "2304",
+        "front": "both"
+      }
+    },
+    "2304-2305": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2304",
+        "to": "2305",
+        "front": "both"
+      }
+    },
+    "2403-2504": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2403",
+        "to": "2504",
+        "front": "both"
+      }
+    },
+    "2504-2505": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2504",
+        "to": "2505",
+        "front": "both"
+      }
+    },
+    "2503-2603": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2503",
+        "to": "2603",
+        "front": "both"
+      }
+    },
+    "2502-2602": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2502",
+        "to": "2602",
+        "front": "both"
+      }
+    },
+    "2501-2601": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2501",
+        "to": "2601",
+        "front": "both"
+      }
+    },
+    "2601-2602": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2601",
+        "to": "2602",
+        "front": "both"
+      }
+    },
+    "2602-2603": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2602",
+        "to": "2603",
+        "front": "both"
+      }
+    },
+    "2405-2506": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2405",
+        "to": "2506",
+        "front": "both"
+      }
+    },
+    "2505-2506": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2505",
+        "to": "2506",
+        "front": "both"
+      }
+    },
+    "2507-2508": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2507",
+        "to": "2508",
+        "front": "both"
+      }
+    },
+    "2406-2507": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2406",
+        "to": "2507",
+        "front": "both"
+      }
+    },
+    "2407-2508": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2407",
+        "to": "2508",
+        "front": "both"
+      }
+    },
+    "2508-2608": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2508",
+        "to": "2608",
+        "front": "both"
+      }
+    },
+    "2306-2307": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2306",
+        "to": "2307",
+        "front": "both"
+      }
+    },
+    "2206-2207": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2206",
+        "to": "2207",
+        "front": "both"
+      }
+    },
+    "2307-2308": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2307",
+        "to": "2308",
+        "front": "both"
+      }
+    },
+    "2106-2206": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2106",
+        "to": "2206",
+        "front": "both"
+      }
+    },
+    "2008-2109": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2008",
+        "to": "2109",
+        "front": "both"
+      }
+    },
+    "2109-2110": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2109",
+        "to": "2110",
+        "front": "both"
+      }
+    },
+    "2110-2210": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2110",
+        "to": "2210",
+        "front": "both"
+      }
+    },
+    "2209-2310": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2209",
+        "to": "2310",
+        "front": "both"
+      }
+    },
+    "2210-2311": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2210",
+        "to": "2311",
+        "front": "both"
+      }
+    },
+    "2010-2011": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2010",
+        "to": "2011",
+        "front": "both"
+      }
+    },
+    "2009-2010": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2009",
+        "to": "2010",
+        "front": "both"
+      }
+    },
+    "1911-1912": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1911",
+        "to": "1912",
+        "front": "both"
+      }
+    },
+    "2011-2012": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2011",
+        "to": "2012",
+        "front": "both"
+      }
+    },
+    "2012-2113": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2012",
+        "to": "2113",
+        "front": "both"
+      }
+    },
+    "2112-2113": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2112",
+        "to": "2113",
+        "front": "both"
+      }
+    },
+    "2111-2112": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2111",
+        "to": "2112",
+        "front": "both"
+      }
+    },
+    "2211-2212": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2211",
+        "to": "2212",
+        "front": "both"
+      }
+    },
+    "2212-2213": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2212",
+        "to": "2213",
+        "front": "both"
+      }
+    },
+    "2113-2114": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2113",
+        "to": "2114",
+        "front": "both"
+      }
+    },
+    "1916-1917": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1916",
+        "to": "1917",
+        "front": "both"
+      }
+    },
+    "2318-2418": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2318",
+        "to": "2418",
+        "front": "both"
+      }
+    },
+    "2216-2217": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2216",
+        "to": "2217",
+        "front": "both"
+      }
+    },
+    "2315-2415": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2315",
+        "to": "2415",
+        "front": "both"
+      }
+    },
+    "2414-2415": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2414",
+        "to": "2415",
+        "front": "both"
+      }
+    },
+    "2513-2514": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2513",
+        "to": "2514",
+        "front": "both"
+      }
+    },
+    "2612-2713": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2612",
+        "to": "2713",
+        "front": "both"
+      }
+    },
+    "2712-2713": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2712",
+        "to": "2713",
+        "front": "both"
+      }
+    },
+    "2713-2813": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2713",
+        "to": "2813",
+        "front": "both"
+      }
+    },
+    "2714-2715": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2714",
+        "to": "2715",
+        "front": "both"
+      }
+    },
+    "2613-2714": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2613",
+        "to": "2714",
+        "front": "both"
+      }
+    },
+    "2813-2814": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2813",
+        "to": "2814",
+        "front": "both"
+      }
+    },
+    "2812-2813": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2812",
+        "to": "2813",
+        "front": "both"
+      }
+    },
+    "2811-2812": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2811",
+        "to": "2812",
+        "front": "both"
+      }
+    },
+    "2512-2513": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2512",
+        "to": "2513",
+        "front": "both"
+      }
+    },
+    "2609-2610": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2609",
+        "to": "2610",
+        "front": "both"
+      }
+    },
+    "2509-2609": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2509",
+        "to": "2609",
+        "front": "both"
+      }
+    },
+    "2608-2609": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2608",
+        "to": "2609",
+        "front": "both"
+      }
+    },
+    "2709-2710": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2709",
+        "to": "2710",
+        "front": "both"
+      }
+    },
+    "2708-2709": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2708",
+        "to": "2709",
+        "front": "both"
+      }
+    },
+    "2808-2809": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2808",
+        "to": "2809",
+        "front": "both"
+      }
+    },
+    "2807-2808": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2807",
+        "to": "2808",
+        "front": "both"
+      }
+    },
+    "2606-2607": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2606",
+        "to": "2607",
+        "front": "both"
+      }
+    },
+    "2605-2606": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2605",
+        "to": "2606",
+        "front": "both"
+      }
+    },
+    "2706-2707": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2706",
+        "to": "2707",
+        "front": "both"
+      }
+    },
+    "2705-2706": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2705",
+        "to": "2706",
+        "front": "both"
+      }
+    },
+    "2910-3010": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2910",
+        "to": "3010",
+        "front": "both"
+      }
+    },
+    "2911-3011": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2911",
+        "to": "3011",
+        "front": "both"
+      }
+    },
+    "2912-3012": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2912",
+        "to": "3012",
+        "front": "both"
+      }
+    },
+    "2913-3013": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2913",
+        "to": "3013",
+        "front": "both"
+      }
+    },
+    "2915-3014": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2915",
+        "to": "3014",
+        "front": "both"
+      }
+    },
+    "3014-3115": {
+      "arrow": {
+        "type": "secondary",
+        "from": "3014",
+        "to": "3115",
+        "front": "both"
+      }
+    },
+    "1605-1606": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1605",
+        "to": "1606",
+        "front": "both"
+      }
+    },
+    "1904-2004": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1904",
+        "to": "2004",
+        "front": "both"
+      }
+    },
+    "2401-2502": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2401",
+        "to": "2502",
+        "front": "both"
+      }
+    },
+    "2404-2505": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2404",
+        "to": "2505",
+        "front": "both"
+      }
+    },
+    "1411-1512": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1411",
+        "to": "1512",
+        "front": "both"
+      }
+    },
+    "1115-1215": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1115",
+        "to": "1215",
+        "front": "both"
+      }
+    },
+    "1214-1215": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1214",
+        "to": "1215",
+        "front": "both"
+      }
+    },
+    "1116-1216": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1116",
+        "to": "1216",
+        "front": "southwest"
+      }
+    },
+    "1213-1314": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1213",
+        "to": "1314",
+        "front": "southwest"
+      }
+    },
+    "2215-2316": {
+      "arrow": {
+        "type": "primary",
+        "from": "2215",
+        "to": "2316",
+        "front": "both"
+      }
+    },
+    "2016-2017": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2016",
+        "to": "2017",
+        "front": "both"
+      }
+    },
+    "2117-2118": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2117",
+        "to": "2118",
+        "front": "both"
+      }
+    },
+    "2017-2018": {
+      "arrow": {
+        "type": "secondary",
+        "from": "2017",
+        "to": "2018",
+        "front": "both"
+      }
+    },
+    "1917-1918": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1917",
+        "to": "1918",
+        "front": "both"
+      }
+    },
+    "1120-1220": {
+      "arrow": {
+        "type": "primary",
+        "from": "1120",
+        "to": "1220",
+        "front": "both"
+      }
+    },
+    "0315-0415": {
+      "arrow": {
+        "type": "secondary",
+        "from": "0315",
+        "to": "0415",
+        "front": "both"
+      }
+    },
+    "1218-1219": {
+      "arrow": {
+        "type": "secondary",
+        "from": "1218",
+        "to": "1219",
+        "front": "both"
+      }
+    }
+  }
+}
