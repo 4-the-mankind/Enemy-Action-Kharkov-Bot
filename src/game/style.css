@@ -1,0 +1,243 @@
+@import "../ui/theme.css";
+
+/* Game page: the map fills the screen; the rail on the right is the staff table.
+   Overlays are acetate sheets laid on the map: a laid sheet sits flush, a lifted one
+   slides out to the right. */
+
+:root {
+  --rail-w: 296px;
+  --acetate: rgb(232 228 211 / 0.07);
+  --acetate-edge: rgb(232 228 211 / 0.22);
+  --slip: #ece6cf;
+  --slip-ink: #262e29;
+  --slip-dim: #5c6359;
+}
+
+html { overflow: hidden; }
+
+body {
+  display: grid;
+  grid-template-columns: 1fr var(--rail-w);
+  overflow: hidden;
+}
+
+kbd {
+  font: inherit;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.5em;
+  padding: 0 4px;
+  text-align: center;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  opacity: 0.6;
+}
+
+/* ---------- Map ---------- */
+
+.map-area { position: relative; min-width: 0; min-height: 0; }
+
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: default;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, rgb(255 255 255 / 0.025) 14px 15px),
+    var(--feldgrau-dark);
+  touch-action: none;
+}
+.viewport.panning { cursor: grabbing; }
+.viewport:focus-visible { outline: 2px solid var(--paper-dim); outline-offset: -2px; }
+
+.stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+
+.bg {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px var(--feldgrau), 0 10px 40px rgb(0 0 0 / 0.45);
+  transition: opacity 160ms ease;
+}
+.bg.off { opacity: 0; }
+
+.map-svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.map-svg * { vector-effect: non-scaling-stroke; }
+
+/* Layer contents (see src/game/map/layers/). */
+[data-layer="grid"] .cell { fill: none; stroke: rgb(192 39 45 / 0.5); stroke-width: 1; }
+[data-layer="grid"] .cell.dead {
+  fill: var(--feldgrau-dark);
+  fill-opacity: 0.55;
+  stroke: rgb(192 39 45 / 0.25);
+}
+
+[data-layer="ids"] text {
+  fill: var(--stab-red);
+  font-family: var(--font);
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: rgb(255 255 255 / 0.65);
+  stroke-width: 2.5px;
+}
+
+[data-layer="terrain"] .tint { fill-opacity: 0.38; }
+[data-layer="terrain"] .village { fill: var(--paper); stroke: var(--line); stroke-width: 1.5; }
+
+[data-layer="sides"] .road { stroke: #5a3a1e; stroke-width: 3; stroke-linecap: round; stroke-opacity: 0.85; }
+[data-layer="sides"] .river { stroke: #3f6f8f; stroke-linecap: round; }
+[data-layer="sides"] .blocked { stroke: var(--stab-red); stroke-width: 2; }
+
+[data-layer="arrows"] .arrow { stroke-width: 2; stroke-linejoin: round; }
+
+[data-layer="targets"] .front { fill: none; stroke-width: 3; }
+[data-layer="targets"] circle.vp { fill: var(--paper); stroke: var(--stab-red); stroke-width: 1.5; }
+[data-layer="targets"] text.vp {
+  fill: var(--feldgrau-dark);
+  font-family: var(--font);
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Grease-pencil look: thick, slightly translucent, round ends so the side
+   segments read as one continuous stroke. */
+[data-layer="lines"] .map-line line { stroke-width: 6; stroke-linecap: round; stroke-opacity: 0.85; }
+
+[data-layer="edges"] .map-edge { fill: none; stroke-width: 3; stroke-dasharray: 5 4; }
+[data-layer="edges"] .edge-road { stroke: var(--line); stroke-width: 4; stroke-dasharray: 6 4; stroke-linecap: round; }
+
+/* Pointer plane. */
+.hover-hex { fill: rgb(57 255 20 / 0.08); stroke: var(--fluo-green); stroke-width: 2; }
+.hover-side { stroke: var(--fluo-green); stroke-width: 6; stroke-linecap: round; opacity: 0.8; }
+
+/* ---------- Inspector: a paper slip clipped to the map ---------- */
+
+.inspector {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  width: min(300px, calc(100% - 28px));
+  padding: 10px 14px 12px;
+  color: var(--slip-ink);
+  background: var(--slip);
+  border-left: 4px solid var(--feldgrau);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.inspector.pinned { border-left-color: var(--stab-red); }
+.insp-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.insp-pin { font-size: 0.8rem; font-weight: 400; color: var(--stab-red); }
+.insp-empty { margin: 4px 0 0; color: var(--slip-dim); font-size: 0.9rem; }
+.inspector dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 14px;
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgb(38 46 41 / 0.2);
+  font-size: 0.9rem;
+}
+.inspector dt { color: var(--slip-dim); }
+.inspector dd { margin: 0; }
+
+/* ---------- Rail ---------- */
+
+.rail {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden; /* lifted sheets slide out past the right edge */
+  display: flex;
+  flex-direction: column;
+  background: var(--feldgrau-deep);
+  border-left: 3px solid var(--feldgrau);
+}
+
+.rail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 18px 14px;
+  background: var(--feldgrau);
+}
+h1 { margin: 0; font-size: 1.45rem; font-weight: 600; letter-spacing: -0.01em; }
+.home { color: var(--paper-dim); font-size: 0.85rem; text-decoration: none; }
+.home:hover { color: var(--paper); text-decoration: underline; }
+
+.rail-section { padding: 16px 0 14px 18px; border-bottom: 1px solid var(--feldgrau); }
+h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.hint { margin: 2px 18px 12px 0; font-size: 0.85rem; color: var(--paper-dim); }
+
+/* An overlay sheet. Lifted (off): pushed right, dim, ink stripe faded.
+   Laid (on): flush with the rail's edge, acetate sheen, ink stripe full. */
+.sheets { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.sheet {
+  --ink: var(--paper);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px 8px 0;
+  font: inherit;
+  text-align: left;
+  color: var(--paper-dim);
+  background: transparent;
+  border: 1px solid transparent;
+  border-right: 0;
+  border-radius: 3px 0 0 3px;
+  cursor: pointer;
+  transform: translateX(14px);
+  transition: transform 140ms ease-out, background-color 140ms, color 140ms;
+}
+.sheet-ink { align-self: stretch; background: var(--ink); opacity: 0.3; border-radius: 0 2px 2px 0; }
+.sheet:hover { color: var(--paper); }
+.sheet:hover .sheet-ink { opacity: 0.6; }
+.sheet[aria-pressed="true"] {
+  transform: none;
+  color: var(--paper);
+  background: linear-gradient(100deg, var(--acetate) 0 60%, rgb(232 228 211 / 0.11) 60% 64%, var(--acetate) 64%);
+  border-color: var(--acetate-edge);
+}
+.sheet[aria-pressed="true"] .sheet-ink { opacity: 1; }
+
+.view-controls { display: flex; flex-wrap: wrap; gap: 8px; padding-right: 18px; }
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  cursor: pointer;
+  color: var(--paper);
+  background: var(--feldgrau);
+  border: 1px solid var(--feldgrau-light);
+  border-radius: 2px;
+  padding: 5px 10px;
+}
+.switch:hover { background: var(--feldgrau-light); }
+.switch[aria-pressed="false"] { background: transparent; color: var(--paper-dim); }
+
+.status { margin: auto 0 0; padding: 14px 18px 18px; min-height: 1.4em; font-size: 0.9rem; color: var(--paper-dim); }
+.status.error { color: #ff8a80; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .bg { transition: none; }
+}
+
+@media (max-width: 760px) {
+  body { grid-template-columns: 1fr; grid-template-rows: 60vh 1fr; }
+  .rail { border-left: 0; border-top: 3px solid var(--feldgrau); }
+  .inspector { width: auto; right: 14px; }
+}

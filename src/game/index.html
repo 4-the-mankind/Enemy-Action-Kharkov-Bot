@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Situation map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="map-area">
+      <div id="viewport" class="viewport" tabindex="0" aria-label="Game map: drag to pan, wheel or + and - to zoom, 0 to fit"></div>
+      <aside id="inspector" class="inspector" aria-live="polite"></aside>
+    </main>
+
+    <aside class="rail">
+      <header class="rail-head">
+        <h1>Situation map</h1>
+        <a class="home" href="/">Home</a>
+      </header>
+
+      <section class="rail-section" aria-labelledby="layers-title">
+        <h2 id="layers-title">Overlays</h2>
+        <p class="hint">Lay a sheet on the map to check what the bot reads from it.</p>
+        <ul id="layers" class="sheets"></ul>
+      </section>
+
+      <section class="rail-section view-controls" aria-label="View">
+        <button type="button" id="toggleImage" class="switch" aria-pressed="true" aria-keyshortcuts="m">
+          Printed map <kbd>M</kbd>
+        </button>
+        <button type="button" id="fit" class="switch" aria-keyshortcuts="0">Fit map <kbd>0</kbd></button>
+      </section>
+
+      <p id="status" class="status" role="status"></p>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

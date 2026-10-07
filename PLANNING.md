@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-10-05.
+Mise à jour : 2026-10-07.
 
 ---
 
@@ -35,6 +35,10 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 | D8  | **Tests de référence** : les exemples chiffrés du livret (p17, 18, 19, 24, 25, 32, 44…) sont rejoués et le résultat doit être identique au livre.                                                                                                                                                                     | 2026-10-03 |
 | D9  | Grille de **lignes** (verticales, horizontales, 2 diagonales) : un **centre de case = croisement des 4 lignes** ; les croisements de 2 lignes ne représentent rien. La grille est la référence, la PNG est calée **dessous en CSS** (position, taille). L'image d'une unité est **centrée sur le centre de sa case**. | 2026-10-04 |
 | D10 | Les **images des pions sont déjà séparées** (une image par pion) : aucun découpage de planche à faire.                                                                                                                                                                                                                | 2026-10-04 |
+| D11 | **Page de jeu distincte des outils** (`src/game/`, « Situation map ») : elle lit les données de carte en lecture seule et accueille pions, mouvements du bot et analyses. Architecture en §3.                                                                                                                       | 2026-10-07 |
+| D12 | **Contrat UI ↔ moteur** : pas de serveur ; le moteur (`src/engine/`, TypeScript pur, testé) expose `step(state, command) → { state, events }`. `command` = saisie du joueur (déplacement, attaque, coups tirés, réponse à une question, `RunBotImpulse`) ; `events` = liste ordonnée (`CardDrawn`, `UnitMoved` avec chemin, `DecisionTraced`, `AskPlayer`…) que l'UI **joue** avec animations et verse au journal. L'UI ne calcule rien ; annuler = historique des `state`. Contrat défini en 2.2, moteur développé par les tests (phase 3), UI enrichie ensuite. | 2026-10-07 |
+| D13 | **Cible d'interface** validée par le dev (maquettes v1-v4, 2026-10-07) : voir §3bis.                                                                                                                                                                                                                              | 2026-10-07 |
+| D14 | **Pas de suivi des activations allemandes** ni de bouton « fin d'impulsion » : le joueur gère ses activations sur le plateau ; cliquer « Run bot impulse » vaut fin de son impulsion. Les cartes allemandes jouées ne sont pas saisies (sauf tactiques de combat pendant un combat, et événements via les tags). | 2026-10-07 |
 
 ### Proposées par défaut (non contestées ; le dev peut les remettre en cause)
 
@@ -57,10 +61,18 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - **Arborescence du projet** :
   ```
   index.html                      accueil (liens vers les outils)
-  src/core/                       logique pure, partagée et testée (geometry.ts, map-grid.ts)
-  src/ui/                         styles communs (theme.css : feldgrau)
+  src/core/                       logique pure, partagée et testée (geometry.ts, map-grid.ts, map-hexes.ts, map-hexsides.ts, map-sides.ts)
+  src/ui/                         commun aux pages : theme.css (feldgrau), map-symbols.ts (couleurs et libellés des données de carte)
+  src/game/                       page de jeu « Situation map » (lit data/ en lecture seule, jamais l'API d'écriture) :
+    main.ts                         câblage seulement, aucune logique
+    data/map-data.ts                chargement de map-grid/map-hexes/map-hexsides via fetch("/data/*.json")
+    map/map-view.ts                 viewport (pan, zoom, ajuster) + plans SVG empilés : data → units → moves → pointer
+    map/layer-stack.ts              montage des calques, rendu au premier affichage, on/off mémorisé (localStorage)
+    map/layers/<calque>.ts          un fichier par calque (contrat layer.ts), liste ordonnée dans layers/index.ts
+    panels/                         panneaux : layers-panel.ts (feuilles d'acétate, touches 1-8), inspector.ts (survol)
   src/tools/<outil>/              un dossier par outil : index.html, main.ts, style.css
   src/tools/map-calibration/      outil de calage de la carte (1.1)
+  src/tools/map-painter/          éditeur à pinceaux (1.3)
   server/                         API locale du serveur de dev (map-api.ts : lecture/écriture data/, import d'images)
   tests/core/                     tests Vitest, même découpage que src/
   data/                           données JSON (voir ci-dessous)
@@ -96,6 +108,29 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 
 ---
 
+## 3bis. Cible d'interface de la page de jeu (D13)
+
+Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que les brancher.
+
+- **A — Barre de tour** (haut) : tour courant / total, impulsion, chip « VP n » + **petite étiquette colorée de l'issue si les VP restent ainsi** (verte = victoire allemande, rouge = défaite, avec le niveau : tactique, opérationnelle, stratégique ; seuils 18.1/18.2 du livret, campagne = calendrier, cf. §5), propriétaire de Kharkov (18.35). Boutons **Undo** et **Run bot impulse** (ce dernier vaut fin de l'impulsion allemande, D14).
+- **H — Tags d'état** (sous la barre A) : conditions qui influencent le bot ou les choix du joueur, chacune avec l'icône du marqueur (`assets/counters/others/` : `frozengrnd`, `ltmudgrnd`, `hvymudgrnd`, `sovietnkvdops`, `sovietfwrdsupp`…), nom et durée. Posés par le moteur (sol d'après le calendrier, NKVD via STAVKA, soutien avancé…) ou ajoutés par le joueur (« Add event »). Font partie de l'état de partie ; le journal cite le tag qui a pesé sur une décision ; survol = effet + règle.
+- **B — Carte** (centre) : plans `data` → `units` → `moves` → `pointer`. Animations franches : pion qui avance case par case sur le chemin du moteur, retournement du pion à la perte de pas, placement des réserves. Réglage vitesse / passer ; coupées si « réduire les animations ».
+- **G — Analyse du ravitaillement** : deux boutons sur la carte, « Soviet supply » et « German supply », **cumulables** ; tracent en pointillé animé le chemin de chaque unité jusqu'à sa source (bord ami ou entrée de route, 13.1), couleur du camp ; unités non ravitaillées estompées, bord en tirets ; l'inspecteur explique la raison.
+- **C — Inspecteur** (bas gauche) : données de la case/du côté + pile de pions (désignation, pas, ravitaillement).
+- **D — Rail droit à onglets** :
+  - **Bot** : carte soviétique tirée **face visible (image du scan)**, posée sur les tranches des cartes restantes (nombre de tranches selon la pioche, « n cards left ») ; animation de pioche (glisse depuis le paquet puis se retourne). Valeur de commandement, front Primary, liste ordonnée des commandes, commande en cours en évidence.
+  - **E — « Why this move »** : méthode, préférence, départage, chacun avec son numéro de règle ; « Replay move ». Un clic sur une ligne du journal affiche la même explication.
+  - **Log** : journal complet. **Overlays** : feuilles d'acétate (existant, 1.5).
+- **F — Barre du tour allemand** (bas) : rappel « glisser les pions pour les déplacer » et **un seul bouton « Attack a hex »**. Pendant une impulsion soviétique, elle affiche les questions du bot au joueur.
+- **I — Feuille de combat** (remplace temporairement le contenu du rail ; étapes = séquence 12.0, donc numérotées) :
+  - attaque allemande : 1. **sélectionner les attaquants** (clic sur les pions, ou sur une case pour toute la pile ; re-clic pour retirer) ; 2. **cliquer la case attaquée** → vérification (case occupée par des Soviétiques, chaque attaquant adjacent, pas dispersé ni isolé, au moins un ravitaillé — 12.1), sinon message précis (« GD is not adjacent to 1210 ») ; flèches attaquants → cible ; 3. tactiques allemandes jouées (cases à cocher) ; 4. carte soviétique tirée par le bot ; 5. nombre de jetons indiqué (requis / maximum), saisie des coups des deux camps (− / +), « Resolve combat » ; 6. le bot applique ses coups (12.53) ; 7. le joueur applique les siens ; 8. avance (glisser ou « Skip »). Échap / Cancel annule avant la saisie des coups.
+  - attaque soviétique : même feuille ; le bot place ses réserves, tire sa carte, puis s'arrête sur les questions (`AskPlayer`) : tes tactiques, coups tirés, application de tes coups ; il termine par ses pertes et son test d'avance (12.83).
+  - l'appli ne suit pas les activations (D14) : attaque par une unité non activée ou ayant déjà attaqué = responsabilité du joueur.
+- **L — Menu contextuel des pions (façon VASSAL, clic droit)** : **Remove step** (le pion se retourne), **Eliminate** (seulement sur le dernier pas), **Disperse stack** (proposé seulement si légal : défenseur = 2 coups par retraite de 2 cases + dispersion ; attaquant = jusqu'à 2 coups au-delà du premier, 12.52) ; retraite et avance par glisser-déposer, cases interdites refusées. En combat, la feuille décompte les coups restants ; hors combat, le menu sert de correction manuelle.
+- **Téléphone** (5.3) : barre A sur une ligne, carte plein écran, rail D en panneau remontant du bas, barres A et F fusionnées.
+
+---
+
 ## 4. Phases et tâches
 
 ### Phase 0 — Fondations
@@ -114,15 +149,15 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - [x] **1.1** Outil de calage (D9) : afficher la grille de lignes, puis régler la PNG dessous en CSS (position, largeur, hauteur) jusqu'à ce que les croisements de 4 lignes tombent au centre des cases imprimées → `map-grid.json`. Un background CSS ne tourne pas : si le scan est de travers, le redresser avant — IA (Sonnet 5, moyen) — fait, calage dev validé (33 × 23, colonnes paires rentrées)
 - [x] **1.2** Grille superposée ; au survol et au clic : numéro de case, ou côté de case près d'un bord (D3) — IA (Sonnet 5, moyen) — fait, intégré dans `map-calibration` (pas de nouvel outil) : onglet « Clicks » avec curseur de seuil (`sideThreshold`, enregistré dans `map-grid.json`), survol = case ou côté affiché en continu, clic = fige la sélection avec surbrillance distincte. Nouvelles primitives `src/core/geometry.ts` : `hexNeighbor`, `hexSideId`, `pointerTarget`, testées.
 - [x] **1.3** Éditeur à pinceaux : cases mortes, terrain, villages, PV, cibles V/S, logistique, bords de carte, flèches (dirigées, sur côté de case), côtés de case (routes, rivières), lignes ; export JSON ; annuler/refaire — IA (Sonnet 5, moyen) — fait : outil `map-painter` (onglets Hexes/Sides/Display), données dans `data/map-hexes.json` et `data/map-hexsides.json` (schémas `src/core/map-hexes.ts`, `src/core/map-hexsides.ts`, testés). Pas de zone de déploiement allemande (hors scope, cf. §8 2026-10-06).
-- [ ] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA (Sonnet 5, moyen)
-- [ ] **1.5** Calques de debug activables : grille, numéros, terrain, côtés, flèches, cibles, lignes (plus tard : zones de contrôle, portée, ravitaillement) — IA (Sonnet 5, moyen)
+- [x] **1.4** (Optionnel) Pré-remplissage du terrain d'après la couleur au centre de chaque case, puis correction au pinceau — IA (Sonnet 5, moyen) — **abandonnée** : le dev a peint toute la carte à la main (1.7)
+- [x] **1.5** Calques de debug activables : grille, numéros, terrain, côtés, flèches, cibles, lignes (plus tard : zones de contrôle, portée, ravitaillement) — IA (Sonnet 5, moyen) — fait : nouvelle page de jeu `src/game/` (« Situation map »), distincte des outils, qui lit les données de la carte en lecture seule. 8 calques (grille + cases mortes, numéros, terrain + villages, routes et rivières, flèches, objectifs VP/cible/logistique, lignes, bords de carte + entrées de ravitaillement), touches 1-8, M = carte imprimée, 0 = ajuster. Inspecteur en bas à gauche : données de la case ou du côté survolé ; clic = épingler, Échap = relâcher.
 - [ ] **1.6** Annoter la **zone de l'exemple p17** (3ᵉ Armée blindée, tour 1, environ les cases 05xx-11xx) — Dev
 - [ ] **1.7** Annoter le reste de la carte (peut continuer en parallèle des phases suivantes) — Dev — gros morceau
 
 ### Phase 2 — Unités et état (POC, soirée 2)
 
-- [ ] **2.1** Schéma `units.json` ; saisie des unités de l'exemple p17 (3T + Allemands voisins) — IA+Dev (Sonnet 5, moyen)
-- [ ] **2.2** État de partie + placement des pions par glisser-déposer sur la carte — IA (Sonnet 5, moyen)
+- [ ] **2.1** Schéma `units.json` ; saisie des unités de l'exemple p17 (3T + Allemands voisins). Pour les unités allemandes, garder le **corps et l'armée** (informatif, utile pour les événements ; pas de suivi des activations, D14) — IA+Dev (Sonnet 5, moyen)
+- [ ] **2.2** État de partie + **contrat `step(state, command) → {state, events}` (D12)** + plan `units` : placement des pions par glisser-déposer sur la carte, pile de pions dans l'inspecteur — IA (Sonnet 5, moyen)
 - [ ] **2.3** Extraction des données de toutes les unités depuis les images de pions (déjà séparées, D10), avec un écran de vérification (image du pion à côté de ses données) — IA (sous-agent Sonnet 5, bas à moyen) + Dev (vérification)
 
 ### Phase 3 — Moteur POC (soirées 2-3) → jalon **M1 = POC**
@@ -131,7 +166,7 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - [ ] **3.2** Mouvement : coûts du tableau des terrains, routes, rivières, zones de contrôle, empilement ; cases atteignables ; « proximate » ; encerclé / presque encerclé — IA (Opus 5.5, élevé)
 - [ ] **3.3** Méthodes de mouvement 9.21 (1-12) + restrictions 9.23 + départages 9.24 + préférences tactiques 9.25 + journal des décisions — IA (Opus 5.5, très élevé)
 - [ ] **3.4** Test de référence p17 : reproduire exactement les déplacements du livre — IA+Dev (Opus 5.5, élevé)
-- [ ] **3.5** Affichage des mouvements du bot sur la carte (flèches) + panneau du journal — IA (Sonnet 5, moyen)
+- [ ] **3.5** Lecteur d'events : animation des mouvements du bot case par case, rail D (onglets Bot / Log / Overlays), carte tirée sur la pioche, panneau « Why this move » (§3bis) — IA (Sonnet 5, moyen)
 
 **M1 atteint** quand le test 3.4 passe et que le résultat est visible sur la carte.
 
@@ -140,15 +175,17 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - [ ] **4.1** Cartes soviétiques en JSON ; choix carte de commandement / auxiliaire (8.1) ; commandes 8.11-8.13 — IA (sous-agent Sonnet 5, bas à moyen)
 - [ ] **4.2** Objectifs de front et d'armée (9.1, tables de placement), armées avec objectif (9.26), unités non ravitaillées (9.27) — IA (Opus 5.5, très élevé)
 - [ ] **4.3** Ravitaillement (13.1-13.4), soutien (13.5), limite opérationnelle (9.8), méthodes 9.22 — IA (Opus 5.5, élevé)
+- [ ] **4.3b** Analyse du ravitaillement à l'écran (G, §3bis) : boutons Soviet / German cumulables, chemins animés, unités non ravitaillées marquées, explication dans l'inspecteur — IA (Sonnet 5, moyen)
 - [ ] **4.4** Tests d'attaque (9.4), réserves en attaque (12.2) et en placement (9.5), retrait en réserve (9.6), positions améliorées (9.7) — IA (Opus 5.5, très élevé)
 - [ ] **4.5** Combat : saisie des résultats, puis côté soviétique : pertes, retraites, avances (12.53, 12.54, 12.7, 12.83) ; simulation des 60 jetons en option (données des jetons à fournir) — IA (Opus 5.5, très élevé)
 - [ ] **4.6** Garnisons (15), remplacements (16), événements (aide de jeu), victoire (17-18), boue (18.34) — IA (Opus 5.5, très élevé)
+- [ ] **4.6b** Tags d'état (H) et issue de la partie dans la barre A (§3bis) : tags posés par le moteur ou ajoutés par le joueur, cités dans le journal — IA (Sonnet 5, moyen)
 - [ ] **4.7** Mise en place et ajustements (dé 1-10) : le dev relève les positions des schémas p48-50 — IA+Dev (Sonnet 5, moyen)
 - [ ] **4.8** Tests de référence p18, p19, p24, p25, p32, p44 — IA+Dev (Opus 5.5, élevé)
 
 ### Phase 5 — Jouabilité et PWA
 
-- [ ] **5.1** Saisie du tour allemand : déplacements, attaques, résultats, cartes allemandes jouées — IA (Sonnet 5, moyen)
+- [ ] **5.1** Saisie du tour allemand (§3bis, D14) : déplacements par glisser-déposer, flux « Attack a hex » (attaquants → case → feuille de combat I), menu contextuel des pions (L), questions du bot pendant ses attaques. Pas de saisie des cartes allemandes ni des activations — IA (Sonnet 5, moyen)
 - [ ] **5.2** Annuler, sauvegarde et reprise de partie (IndexedDB) — IA (Sonnet 5, moyen)
 - [ ] **5.3** Interface mobile, manifest et service worker (hors ligne) — IA (Sonnet 5, moyen)
 
@@ -165,6 +202,8 @@ Automatiser le bot soviétique (« paper AI ») d'*Enemy Action: Kharkov – Ger
 - [x] Scans des cartes soviétiques E01-E22 → `assets/cards/`
 - [ ] Aides de jeu : tableau des terrains, événements et tactiques, activations soviétiques → `assets/aids/`
 - [ ] Positions des schémas d'ajustement de mise en place (p48-50), pour la phase 4.7
+- [ ] **Seuils de victoire de la campagne** par tour (imprimés sur le calendrier de l'aide de jeu, 18.35), pour l'étiquette d'issue de la barre A (4.6b)
+- [ ] Liste des **événements** (aide de jeu « événements et tactiques ») et de leurs effets, pour les tags d'état (4.6b)
 - [ ] Réponses aux questions ouvertes (§6)
 
 ---
@@ -246,3 +285,5 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-05** — Squelette Vite + TS + Vitest (0.7). Outil de calage de la carte (1.1) : grille de lignes D9, hexagones et numéros, image de fond réglable, enregistrement dans `data/map-grid.json` ; couleurs feldgrau (choix du dev). Tests de géométrie : chaque centre = croisement des 4 lignes. Reste le calage par le dev.
 - **2026-10-05** — Calage enregistré par le dev. Option « colonnes paires rentrées » (une case de moins, `evenColumnShorter`). Import JSON et brouillon automatique dans le navigateur. Projet réorganisé en arborescence (`src/core`, `src/ui`, `src/tools/<outil>`, `server/`, `tests/core`) avec une page d'accueil.
 - **2026-10-05** — Dépôt poussé sur GitHub (remote SSH, clé de déploiement). Règle ajoutée dans `CLAUDE.md` : code et interface en anglais ; outil de calage et tests traduits. Cadrage de la carte recalculé quand la zone d'affichage change de taille.
+- **2026-10-07** — 1.4 abandonnée (carte déjà peinte à la main). 1.5 faite sur une **nouvelle page de jeu** `src/game/` (pas dans les outils) : c'est la carte qui accueillera les pions (2.2) et l'animation des mouvements du bot (3.5). Architecture prévue pour grossir (§3) : viewport et plans SVG fixes (data → units → moves → pointer), un fichier par calque derrière un contrat commun, panneaux séparés, `main.ts` limité au câblage. Code partagé sorti du painter (le painter importe désormais `src/core/map-sides.ts` et `src/ui/map-symbols.ts`, comportement inchangé). Lecture des données en fichiers statiques `/data/*.json` (et non `/api/…`) pour rester compatible avec la PWA sans serveur — **à prévoir en 5.3** : copier `data/` et `assets/` dans le build. Différences d'affichage par rapport au painter : routes tracées de centre à centre (réseau lisible) et lignes physiques tracées le long des côtés où les cases passent d'est à ouest (au lieu de points par case). Tests `tests/core/map-sides.test.ts` ajoutés (29 tests verts). Vérifié dans le navigateur intégré (calques, survol case et côté, épinglage, mise en page téléphone sans défilement horizontal). Config de lancement `game` (port 5174) ajoutée dans `.claude/launch.json`, le 5173 étant occupé par une autre session.
+- **2026-10-07** — Cible d'interface de la page de jeu définie avec le dev par maquettes successives (v1 à v4) et consignée en §3bis (D13). Décisions : contrat UI ↔ moteur `step(state, command) → {state, events}` sans serveur, l'UI joue les events avec animations (D12) ; pas de suivi des activations allemandes ni de bouton « fin d'impulsion », « Run bot impulse » en tient lieu, pas de saisie des cartes allemandes jouées (D14) ; corps et armée des unités allemandes conservés à titre informatif pour les événements (2.1). Retenus : VP en simple chip + étiquette colorée de l'issue si les VP restent ainsi ; tags d'état (sol gelé, boue, NKVD, soutien avancé…) ; carte soviétique tirée face visible sur les tranches de la pioche, animations franches (pioche, mouvements, retournement) ; flux d'attaque : sélectionner les attaquants → cliquer la case (vérification et message précis, pas de cibles clignotantes) → feuille de combat ; résultats par menu contextuel façon VASSAL (Remove step / Eliminate / Disperse stack) ; analyse du ravitaillement Soviet / German cumulable. Tâches 2.1, 2.2, 3.5, 5.1 précisées ; 4.3b et 4.6b ajoutées ; deux prérequis ajoutés (seuils de victoire de la campagne, liste des événements).

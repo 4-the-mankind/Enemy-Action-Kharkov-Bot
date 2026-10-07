@@ -12,6 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: page("index.html"),
+        game: page("src/game/index.html"),
         mapCalibration: page("src/tools/map-calibration/index.html"),
         mapPainter: page("src/tools/map-painter/index.html"),
       },

@@ -16,6 +16,11 @@ import {
   ARROW_FRONTS, ARROW_TYPES, DEFAULT_SIDE, EMPTY_SIDES, RIVERS, parseMapHexSides, resolveSide,
   type Arrow, type ArrowFront, type ArrowType, type MapHexSides, type River, type SideData,
 } from "../../core/map-hexsides";
+import { allSides, arrowPolygon, isOffMapEdge } from "../../core/map-sides";
+import {
+  ARROW_FRONT_COLOR, EDGE_COLOR, FRONT_COLOR, LINE_LABEL, LINE_COLOR, LOGI_COLOR, RIVER_WIDTH, TERRAIN_COLOR,
+  label, riverLabel,
+} from "../../ui/map-symbols";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -38,25 +43,6 @@ type SideBrush =
   | { kind: "side"; attr: "arrow"; value: { type: ArrowType; front: ArrowFront } };
 
 type Brush = HexBrush | SideBrush;
-
-const LINE_LABEL: Record<(typeof LINE_KEYS)[number], string> = {
-  lineArtillery: "Artillery/East",
-  lineWest: "West",
-  lineFar: "Far",
-};
-const LINE_COLOR: Record<(typeof LINE_KEYS)[number], string> = {
-  lineArtillery: "#d2691e",
-  lineWest: "#2f8f8f",
-  lineFar: "#6a5acd",
-};
-const TERRAIN_COLOR: Record<Terrain, string | null> = {
-  clear: null, broken: "#b8a26a", marsh: "#6f7d4a", woods: "#2f3f28", town: "#8a7d6e", city: "#6b3a2e",
-};
-const FRONT_COLOR: Record<Front, string> = { voronezh: "#d8c23a", southwest: "#c0272d", both: "#8c6cae" };
-const LOGI_COLOR: Record<Logistics, string> = { voronezh: "#d8c23a", southwest: "#c0272d" };
-const EDGE_COLOR: Record<MapEdgeSide, string> = { soviet: "#3f6f8f", german: "#6f7f72" };
-const ARROW_FRONT_COLOR: Record<ArrowFront, string> = { voronezh: "#d8c23a", southwest: "#c0272d", both: "#8c6cae" };
-const RIVER_WIDTH: Record<River, number> = { minor: 2, donets: 4, dniepr: 6, dnieprBlocked: 6 };
 
 // ---------- State ----------
 
@@ -119,53 +105,6 @@ function ringPoints(corners: Point[], c: Point, f: number): Point[] {
 
 function pointsAttr(pts: Point[]): string {
   return pts.map((p) => `${p.x},${p.y}`).join(" ");
-}
-
-/** Every side with both hexes inside the grid, visited once. */
-function allSides(g: MapGrid, all: Hex[]): { id: string; a: Hex; b: Hex; edge: number }[] {
-  const byId = new Map(all.map((h) => [h.id, h]));
-  const seen = new Set<string>();
-  const out: { id: string; a: Hex; b: Hex; edge: number }[] = [];
-  for (const h of all) {
-    for (let edge = 0; edge < 6; edge++) {
-      const n = hexNeighbor(g, h.col, h.row, edge);
-      const nb = byId.get(hexId(n.col, n.row));
-      if (!nb) continue;
-      const id = hexSideId(h.col, h.row, n.col, n.row);
-      if (seen.has(id)) continue;
-      seen.add(id);
-      out.push({ id, a: h, b: nb, edge });
-    }
-  }
-  return out;
-}
-
-/**
- * Whether a hex's edge borders "off the map": no neighbor in the grid at all, or a
- * dead (non-playable) neighbor. Dead hexes stand for the area beyond the printed,
- * non-rectangular map (D5), so they count as off-map exactly like a missing neighbor —
- * this lets a road-off-map marker sit next to a dead hex, not just the grid's rectangle.
- */
-function isOffMapEdge(g: MapGrid, col: number, row: number, edge: number, idSet: Set<string>): boolean {
-  const n = hexNeighbor(g, col, row, edge);
-  const nid = hexId(n.col, n.row);
-  if (!idSet.has(nid)) return true;
-  return !resolveHex(hexData, nid).playable;
-}
-
-/** A thin dart/arrow polygon from "from" to "to", crossing their shared edge. */
-function arrowPolygon(g: MapGrid, from: Point, to: Point): Point[] {
-  const r = hexRadius(g);
-  const dx = to.x - from.x, dy = to.y - from.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len, uy = dy / len;
-  const px = -uy, py = ux;
-  const mid = lerp(from, to, 0.5);
-  const half = r * 0.42;
-  const width = r * 0.14;
-  const tip = pt(mid.x + ux * half, mid.y + uy * half);
-  const backCenter = pt(mid.x - ux * half * 0.6, mid.y - uy * half * 0.6);
-  return [tip, pt(backCenter.x + px * width, backCenter.y + py * width), pt(backCenter.x - px * width, backCenter.y - py * width)];
 }
 
 // ---------- Default-value map, for pruning sparse storage ----------
@@ -326,7 +265,7 @@ function refreshHexVisual(id: string) {
 
   const col = Number(id.slice(0, 2)), row = Number(id.slice(2));
   for (let e = 0; e < 6; e++)
-    refs.edgeRoadLines[e].classList.toggle("on", d.edgeRoad && isOffMapEdge(grid, col, row, e, gridIdSet));
+    refs.edgeRoadLines[e].classList.toggle("on", d.edgeRoad && isOffMapEdge(grid, hexData, col, row, e, gridIdSet));
 
   refs.frontTarget.classList.toggle("on", !!d.frontTarget);
   if (d.frontTarget) refs.frontTarget.style.stroke = FRONT_COLOR[d.frontTarget];
@@ -430,13 +369,6 @@ function buildPalette() {
     .map((t) => `<option value="${t}">${t === "primary" ? "Primary (filled)" : "Secondary (outline)"}</option>`).join("");
   $<HTMLSelectElement>("arrowFront").innerHTML = ARROW_FRONTS
     .map((f) => `<option value="${f}">${f === "both" ? "Both (marked)" : `${label(f)} only`}</option>`).join("");
-}
-
-function label(v: string): string {
-  return v === "southwest" ? "Southwest" : v === "voronezh" ? "Voronezh" : v === "both" ? "Both" : v === "soviet" ? "Soviet" : "German";
-}
-function riverLabel(r: River): string {
-  return r === "minor" ? "Minor river" : r === "donets" ? "Donets" : r === "dniepr" ? "Dniepr" : "Dniepr (blocked)";
 }
 
 function arrowBrushValue(): { type: ArrowType; front: ArrowFront } {
