@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "source": "Player aid 'Combat Tactics' (assets/scans/combat tactics.png). Text verbatim; game-turn badges written as [GT n] like docs/rules-german-solo.md.",
+  "tactics": [
+    {
+      "id": "german-airpower-artillery",
+      "side": "german",
+      "name": "Airpower and Artillery",
+      "text": "Airpower and Artillery aid the attacker or defender, each time the tactic is named on a drawn combat chit."
+    },
+    {
+      "id": "german-assault-coordination",
+      "side": "german",
+      "name": "Assault Coordination",
+      "use": "attack",
+      "text": "(attacker only). All German units adjacent to the defender's hex participate in the attack, even if not activated, excluding dispersed and isolated units and units that already attacked this activation. Units that participate via Assault Coordination can't advance after combat."
+    },
+    {
+      "id": "german-battlefield-replacements",
+      "side": "german",
+      "name": "Battlefield Replacements",
+      "use": "defense",
+      "text": "(defender only). Flip one defending one-step infantry unit to its two-step side before drawing combat chits OR reduce defender hits by one after combat chit draws."
+    },
+    {
+      "id": "german-combat-engineer",
+      "side": "german",
+      "name": "Combat Engineer",
+      "defense": "Place an IP marker on the defending units. Not allowed if defending in a hex with a town or city, or if the attacker played the Combat Engineers tactic in this combat.",
+      "attack": "Add one to the attacker's combat strength and, if there is an IP marker in the defender's hex, remove it prior to resolving combat. The defender can't apply the Combat Engineers combat tactic in this combat."
+    },
+    {
+      "id": "german-intelligence",
+      "side": "german",
+      "name": "Intelligence",
+      "text": "After all combat chits are drawn and revealed in the combat, remove one chit of your choice before applying results. You may also, at your option, replace the removed chit with another chit drawn from the cup."
+    },
+    {
+      "id": "german-panzer-battalion",
+      "side": "german",
+      "name": "Panzer Battalion",
+      "text": "Add 2 to the combat strength of a German attack; add 1 to strength of German defense. This adds armor to German units in the combat if they do not already possess armor. One attacking German infantry unit may advance after combat as if it were a mech unit."
+    },
+    {
+      "id": "german-pull-out",
+      "side": "german",
+      "name": "Pull Out",
+      "use": "defense",
+      "text": "(defender only). Prior to combat resolution, retreat the defending stack two hexes, in accordance with the retreat rules, but do not place Dispersed markers. The retreat must end in a hex in German supply. The attack is considered resolved and the attackers may advance after combat. Discard all Soviet cards containing combat tactics applied to this combat. Can't be applied if any defending units are dispersed or isolated."
+    },
+    {
+      "id": "german-screen",
+      "side": "german",
+      "name": "Screen",
+      "use": "defense",
+      "text": "(defender only). Reduce the maximum allowed combat chit draws by two."
+    },
+    {
+      "id": "german-reinforce-battle",
+      "side": "german",
+      "name": "Reinforce Battle",
+      "text": "Select one active or inactive stack that did not move or attack in the current activation that could reach the combat in a single move to participate in the combat. The selected units must be supplied, undispersed and in the same army as a unit in the combat. A defending unit adjacent to an active enemy unit can't reinforce. A reinforcing attacking unit/stack moves adjacent to the hex under attack if not already there, and may split up. A reinforcing defending unit/stack moves into the hex with the defending units. Obey stacking limits."
+    },
+    {
+      "id": "soviet-airpower-artillery",
+      "side": "soviet",
+      "name": "Airpower and Artillery",
+      "text": "Airpower and Artillery aid when attacking or defending, each time the tactic is named on a drawn combat chit.",
+      "restriction": "[GT 1-2] Artillery does not apply in the Artillery Barrage zone."
+    },
+    {
+      "id": "soviet-assault-coordination",
+      "side": "soviet",
+      "name": "Assault Coordination (AC)",
+      "attack": "In a Soviet attack, all non active Soviet units adjacent to the defender's hex participate in the attack. Exclude dispersed and isolated units and units that already attacked this activation. Units that participate via AC can't advance after combat. If no units are added via AC, add two combat chit draws for this combat tactic, instead of one, and reduce attacker hits by one.",
+      "restriction": "Does not apply when Soviets are defending."
+    },
+    {
+      "id": "soviet-battlefield-replacements",
+      "side": "soviet",
+      "name": "Battlefield Replacements",
+      "defense": "Flip one defending Soviet one-step infantry unit to its two-step side. Prefer the lowest numbered unit. If none, instead reduce defender hits by one.",
+      "restriction": "Does not apply when Soviets are attacking."
+    },
+    {
+      "id": "soviet-combat-engineer",
+      "side": "soviet",
+      "name": "Combat Engineer",
+      "attack": "If the defender's hex has an IP marker, remove it prior to resolving combat. If no IP is present and the defender is not in a town or city, instead increase the attacker's strength by 2. The defender can't play the Combat Engineers combat tactic in this combat.",
+      "defense": "Place an IP marker on the defending units.",
+      "restriction": "Does not apply when the defender (German or Soviet) is in a hex with a town, city or IP."
+    },
+    {
+      "id": "soviet-fixed-artillery",
+      "side": "soviet",
+      "name": "Fixed Artillery",
+      "text": "Functions like the artillery combat tactic if the defender's hex (German or Soviet) is in the Soviet Artillery Barrage zone as extended by the current Fixed Artillery Range (FAR) listed on the calendar.",
+      "restriction": "Does not apply when the defender is beyond FAR or [GT 1-2] in the Artillery Barrage zone."
+    },
+    {
+      "id": "soviet-intelligence",
+      "side": "soviet",
+      "name": "Intelligence",
+      "attack": "The Soviet Command Value is considered to be 5. You can't play combat tactics to aid German defense. If the printed Soviet CV is 4 or 5, increase German hits by one.",
+      "defense": "The German Command Value is considered to be 1. Cancel any German combat tactics applied to this combat (return cards you played as tactics to your hand). If the printed German CV is 1 or 2, decrease hits incurred by Soviets by one."
+    },
+    {
+      "id": "soviet-nkvd",
+      "side": "soviet",
+      "name": "NKVD",
+      "attack": "Increase hits incurred by the defender by one. NKVD combat chits apply.",
+      "defense": "Decrease hits incurred by the defender by one. Soviet units can't retreat. NKVD combat chits apply."
+    },
+    {
+      "id": "soviet-partisans",
+      "side": "soviet",
+      "name": "Partisans",
+      "attack": "If attacking a city hex, reduce Soviet hits by one AND increase German hits by one. If attacking a woods or town hex, increase German hits by one. You can't play the Reinforce Battle combat tactic to aid German defense.",
+      "attackRestriction": "Does not apply to a Soviet attack against a defender in a hex other than city, town or woods.",
+      "defense": "If defending in a city hex, reduce Soviet hits by one AND increase German hits by one. If in a woods or town hex, reduce Soviet hits by one. If in hex other than city, town or woods, reduce German maximum combat chit draw by one."
+    },
+    {
+      "id": "soviet-reinforce-battle",
+      "side": "soviet",
+      "name": "Reinforce Battle",
+      "text": "Select an active or inactive on-map Soviet unit/stack that could reach the combat in a single movement to participate in the combat. A unit/stack is eligible if it is in the same Front as a defending or attacking unit, and did not move or attack in the current activation, and is not adjacent to an active German unit. The movement restrictions of 9.23 apply to reinforcing units.",
+      "restriction": "Does not apply if no Soviet units are eligible to reinforce.",
+      "attack": "The unit/stack moves adjacent to the hex under attack if not already there, and may split up. Obey stacking limits and the tactical adjustments of 9.25. If more than one stack can reach the combat, prefer a) the stack that will cause surround; b) the stack with the greatest strength; c) the stack with the lowest numbered unit. Reinforcing units can't advance after combat.",
+      "defense": "The unit/stack moves into the defending units' hex. Obey stacking limits. If more than one stack can reach the combat, choose the stack with the lowest numbered unit."
+    },
+    {
+      "id": "soviet-rifle-brigade",
+      "side": "soviet",
+      "name": "Rifle Brigade",
+      "text": "Increase Soviet combat strength by two when attacking. Reduce total hits incurred by the Soviets in the combat by one when attacking or defending."
+    },
+    {
+      "id": "soviet-tank-brigade",
+      "side": "soviet",
+      "name": "Tank Brigade",
+      "text": "Increase Soviet combat strength by two when attacking. Soviet units in the combat are considered to possess armor if they do not already. Reduce total hits incurred by the Soviets in the combat by one when attacking or defending."
+    }
+  ]
+}

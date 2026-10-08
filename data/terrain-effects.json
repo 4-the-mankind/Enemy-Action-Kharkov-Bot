@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "source": "Player aid 'Terrain Effects Chart' (transcribed by dev in assets/scans/terrain charts.md). Typos fixed. MP costs: normal / lightMud; Heavy Mud turns (GT 7-13) have no normal movement (18.34).",
+  "inHex": {
+    "clear": { "mp": { "inf": 1, "mech": 1 } },
+    "broken": { "mp": { "inf": 1, "mech": 2 } },
+    "woods": { "mp": { "inf": 2, "mech": 3 } },
+    "marsh": {
+      "mp": { "inf": 2, "mech": 4 },
+      "effects": "Combat strength of Mech units defending in, or attacking into or from is halved, rounded down."
+    },
+    "road": {
+      "mp": { "inf": 1, "mech": 1, "germanMechStrategic": 0.5 },
+      "effects": "Use road cost instead of hex cost when entering via road hexside. Cost for German Mech units conducting strategic movement is 1/2MP. Use other terrain in hex for combat effects."
+    },
+    "town": {
+      "mp": { "inf": 1, "mech": 1 },
+      "effects": "Defenders can't be flanked. Defender hits reduced by one. Improved Positions not allowed."
+    },
+    "city": {
+      "mp": { "inf": 1, "mech": 1 },
+      "effects": "Defenders can't be flanked. Defender hits reduced by one. Improved Positions not allowed."
+    },
+    "village": {
+      "note": "Not on the chart: no terrain effect, use the other terrain in the hex (dev, 2026-10-08)."
+    }
+  },
+  "hexside": {
+    "minorRiver": {
+      "mpAdd": { "normal": { "inf": 0, "mech": 1 }, "lightMud": { "inf": 1, "mech": 2 } },
+      "effects": "Cost is to cross hexside. Use cost after slash in light mud game turns."
+    },
+    "donets": {
+      "mpAdd": { "normal": { "inf": 1, "mech": 2 }, "lightMud": { "inf": 2, "mech": 3 } },
+      "effects": "Cost is to cross hexside. Use cost after slash in light mud game turns. If all units attack across Donets hexsides, defender hits are reduced by one."
+    },
+    "dniepr": {
+      "mpAdd": "entireMovementAllowance",
+      "effects": "Entire Movement Allowance. Strength of units attacking across Dniepr hexside is halved (rounded down). If all units attack across Dniepr hexsides, reduce defender hits by one.",
+      "note": "Crossing is only possible for a unit that has not yet moved this activation; it stops right after crossing (dev, 2026-10-08)."
+    },
+    "dnieprBlocked": {
+      "mpAdd": "prohibited",
+      "effects": "Blocked Dniepr hexside prevents movement, attack, advance, retreat, supply trace."
+    }
+  },
+  "markers": {
+    "enemyZoc": {
+      "mpAdd": { "exit": 1 },
+      "effects": "+1 to exit. Must stop move upon entering. Unit moving from hex in enemy ZOC can't move directly to hex in EZOC. Exceptions: German map-edge move (10.7); Soviet urban infiltration (9.2, method 1)."
+    },
+    "improvedPosition": {
+      "note": "No movement effect (dev, 2026-10-08)."
+    }
+  }
+}

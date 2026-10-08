@@ -26,7 +26,7 @@ Conventions: `[GT 5+]` = game-turn badge (rule applies on GT 5 and later; `[GT 1
 - **18. SCENARIOS** L2459 — 18.1 L2461 · 18.2 L2476 · 18.3 L2494 · 18.31 L2496 · 18.32 L2500 · 18.33 L2504 · 18.34 L2515 · 18.35 L2541
 - **SET-UP ADJUSTMENTS (German Solo Game)** L2553 — D1,2: Raus Overrun L2574 · D3,4: Slavyansk Liberated L2588 · D5,6: Bloody Izyum (historical start) L2601 · D7,8: Voronezh Front Breakout L2615 · D9,10: Drive on the Donets L2627
 - **TOWN AND CITY GAZETTEER** L2640
-- **SEQUENCE OF PLAY SUMMARY (back cover, 4.0)** L2671
+- **SEQUENCE OF PLAY SUMMARY (back cover, 4.0)** L2671 · **ERRATA (German Solo)** L2756
 
 
 <!-- p3 -->
@@ -483,7 +483,7 @@ Several German command cards allow you to activate an ad-hoc Kampfgruppe (litera
 >
 > Example of German Corps Activation by Army Card:
 >
-> You play the 4th Panzer Army command card which allows you to activate any Corps in that Army. You choose the LVII Panzer Corps. All the units of that corps on the map are activated. This includes dispersed and out of supply units in the activated formation. Depicted units of the IISS and Corps Raus are not activated. The IISS is in the 4th Panzer Army but the activation only affects the selected corps, the LVII.
+> You play the 4th Panzer Army command card which allows you to activate any Corps in that Army. You choose the LVII Panzer Corps. All the units of that corps on the map are activated. This includes dispersed and out of supply units in the activated formation. Depicted units of the IISS and Corps Raus are not activated. The IISS is in the 4th Panzer Army but the activation only affects the selected corps, the LVII. **[Errata]** Last sentence should read: “IISS and Corps Raus are in 4th Panzer Army for command purposes but only the LVII Panzer Corps is activated.”
 >
 > Activating a German Kampfgruppe (6.2):
 >
@@ -782,7 +782,7 @@ A given unit moves only by one method per activation. Some movement methods spec
 
 **[GT 1-4] USE THROUGHOUT GAME-TURNS 1-4 · [GT 5-7] USE IF FRONT OBJECTIVE IN PLAY**
 
-Use the movement methods of 9.21 throughout Game-turns 1 to 4. Use these methods from Game-turn 5 onward, only if the active front’s Objective Marker is in play.
+Use the movement methods of 9.21 throughout Game-turns 1 to 4. Use these methods from Game-turn 5 onward, only if the active front’s Objective Marker is in play. **[Errata]** These movement methods are used throughout Game-turns 1-4 even if the Front objective marker has been removed from play.
 
 ##### 1. ▼ TAKE VP HEX
 
@@ -2574,11 +2574,11 @@ After making all adjustments, shuffle together the remaining initial Soviet card
 ### Die Result 1,2: Raus Overrun
 
 - Place Raus units 586/320 & 587/320 in the German Eliminated Units Box.
-- Adjust the hex locations of nine boxed units as shown.
+- Adjust the hex locations of nine boxed units as shown. **[Errata]** The two German units that start in hexes 1903 and 1904 should be shown in those hexes.
 - Remove a step and place a dispersed marker on Raus unit 585/320.
 - Remove one step each from the three Soviet units shown.
 - Place the two Popov reserve units for Turn 1 in hex 1504.
-- Place the Voronezh Front Objective West marker in Chuguev (hex 1008) and the Southwest Front Objective West marker in hex 1608 (not shown).
+- Place the Voronezh Front Objective West marker in Chuguev (hex 1008) and the Southwest Front Objective West marker in hex 1608 (not shown). **[Errata]** The town of Chuguev is in hex 1009, not 1008.
 - Place Soviet cards e03, e11, e17 and e20 in the Soviet discard pile.
 
 **Report:** Mobile Group Popov (e17) attacks 1402 with Assault Coordination (e07, returned to deck) and also attacks 1503 with Airpower (e20). Next, 6th Army (auxiliary card e11) attacks 1203 with a Tank Brigade (e03). All attacks use artillery barrage.
@@ -2601,7 +2601,7 @@ After making all adjustments, shuffle together the remaining initial Soviet card
 ### Die Result 5,6: Bloody Izyum (historical start)
 
 - Place 587/320/Raus in the German Eliminated Units Box.
-- Adjust the hex locations of the five boxed units as shown.
+- Adjust the hex locations of the five boxed units as shown. **[Errata]** The German unit in hex 1604 should be unit 387-/III (reduced). The three German units that start in hex 2001 should be shown in that hex.
 - Place the two Popov reserve units for Turn 1 in hex 1403 and 1603.
 - Remove one step each from the four Soviet units and three German units shown
 - Place a dispersed marker on unit 586/320/Raus.
@@ -2619,7 +2619,7 @@ After making all adjustments, shuffle together the remaining initial Soviet card
 - Place the 40th Army reserve unit for Turn 1 in hex 0205.
 - Remove one step each from the three Soviet units shown.
 - Remove a step and place a dispersed marker on Gre/GD/XLVIII. Place a dispersed marker on 417/168/Raus.
-- Place the Voronezh Front Objective West marker in Chuguev (hex 1008) and the Southwest Front Objective West marker in hex 1410 (not shown).
+- Place the Voronezh Front Objective West marker in Chuguev (hex 1008) and the Southwest Front Objective West marker in hex 1410 (not shown). **[Errata, same error as Raus Overrun — confirmed by dev 2026-10-08]** The town of Chuguev is in hex 1009, not 1008.
 - Place Soviet cards e04, e05, e11, e19 and e22 in the Soviet discard pile.
 
 **Report:** 40th Army (e04) attacks 0205 with STAVKA’s combat tactics (e22). Then 3rd Tank Army (auxiliary card e05) attacks 0604 with NKVD (e19) and 0803 with no tactic (e11 gives additional combat chit). All attacks use artillery barrage.
@@ -2750,3 +2750,21 @@ III. SUPPLY PHASE: Skip entirely. Except remove OOS and isolated markers from un
 IV. COMMAND PHASE. Skip entirely. Instead assign each side two infantry replacement steps, per 16.1 and 18.34.
 
 V. END OF TURN PHASE. As in SOP, but no Victory check.
+
+<!-- errata sheet (assets/scans/errata.jpg) -->
+
+## ERRATA (German Solo)
+
+Official errata, also inserted inline as **[Errata]** at the end of the affected lines.
+
+### GS Rules
+
+- Page 11, **Example of German Corps Activation by Army Card**: Last sentence should read “IISS and Corps Raus are in 4th Panzer Army for command purposes but only the LVII Panzer Corps is activated.” (→ L486)
+- Page 16, **9.21 Soviet Movement Methods A**. These movement methods are used throughout Game-turns 1-4 even if the Front objective marker has been removed from play. (→ L785)
+- Page 48, ***Raus Overrun***: The town of Chuguev is in hex 1009, not 1008. The two German units that start in hexes 1903 and 1904 should be shown in those hexes. (→ L2577, L2581)
+- Page 49, ***Bloody Izyum***: The German unit in hex 1604 should be unit 387-/III (reduced). The three German units that start in hex 2001 should be shown in that hex. (→ L2604)
+
+### GS Player Aids
+
+- **Soviet Activation Step 2, Method 3 Open Supply Line**: Applies on Game Turn 3 and after. (Rulebook 9.21 method 3 at L799 already reads [GT 3+].)
+- **Soviet Activation Step 3**, first bullet after chart should begin “Attack if ≥ 3:1 or ...” (Rulebook 9.4 at L1190 already reads “equal to or greater than 3:1”.)

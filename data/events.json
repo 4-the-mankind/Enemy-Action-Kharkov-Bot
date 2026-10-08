@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "source": "Player aid 'Command Events / Special Events' (assets/scans/command events and special events.png). Text verbatim except obvious typos fixed; game-turn badges written as [GT n] and in 'turns'.",
+  "events": [
+    {
+      "id": "german-air-interdiction",
+      "side": "german",
+      "kind": "command",
+      "name": "Air Interdiction",
+      "text": "Remove a Soviet Forward Support marker of your choice from the map."
+    },
+    {
+      "id": "german-air-supply",
+      "side": "german",
+      "kind": "command",
+      "name": "Air Supply",
+      "text": "Place all German units in one hex in full supply."
+    },
+    {
+      "id": "german-any-command-event",
+      "side": "german",
+      "kind": "command",
+      "name": "Any Command Event",
+      "text": "Choose and implement a command event of your choice. Special events can't be chosen."
+    },
+    {
+      "id": "german-engineers",
+      "side": "german",
+      "kind": "command",
+      "name": "Engineers",
+      "text": "In 3 non-town/non-city hexes, in any combination:",
+      "options": [
+        "place an IP on a supplied German unit/stack, or",
+        "remove an IP from a Soviet unit adjacent to a German unit."
+      ]
+    },
+    {
+      "id": "german-over-extended",
+      "side": "german",
+      "kind": "command",
+      "name": "Over Extended",
+      "turns": "5+",
+      "text": "Place Dispersed markers on all Soviet units in three hexes not in Soviet support."
+    },
+    {
+      "id": "german-okw-expedites",
+      "side": "german",
+      "kind": "special",
+      "name": "OKW Expedites",
+      "turns": "4",
+      "text": "German units (not cards) scheduled to become available as reserves on Turn 6 are instead available on Turn 5."
+    },
+    {
+      "id": "german-stavka-confused",
+      "side": "german",
+      "kind": "special",
+      "name": "STAVKA Confused",
+      "turns": "5-6",
+      "text": "Discard cards from the Soviet draw pile until cards with a total command value of at least 4 have been discarded."
+    },
+    {
+      "id": "soviet-air-supply",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Air Supply",
+      "text": "In one hex within the operational limit, place all out of supply or isolated Soviet units in full supply. Prefer a) units with the most total steps; b) units with the most total strength; c) an isolated stack; d) units in lowest-numbered hex.",
+      "restriction": "Does not apply if no Soviet units are OOS or isolated."
+    },
+    {
+      "id": "soviet-engineers",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Engineers",
+      "text": "In three different hexes in Soviet Support:",
+      "options": [
+        "remove a German IP from a hex of your choice adjacent to a supplied Soviet unit. If this can't be done, then instead ...",
+        "place an IP on an IP-eligible supplied Soviet unit to which a supplied German unit is proximate. Prefer a) adjacent to German unit; b) Soviet unit with highest selector."
+      ],
+      "restriction": "Does not apply if fewer than three hexes qualify."
+    },
+    {
+      "id": "soviet-command-delay",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Command Delay",
+      "text": "If this card is the current Auxiliary card and there are four or more cards in the Soviet draw pile, return this card to the draw pile and shuffle.",
+      "restriction": "Does not apply if not the Auxiliary card or if there are less than four cards in the Soviet draw pile."
+    },
+    {
+      "id": "soviet-forward-support",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Forward Support",
+      "text": "Place a Forward Support marker in a hex located outside of but adjacent to the current Soviet support zone. Doing so puts all hexes within five hexes of the Forward Support marker in Soviet support. Prefer the placement hex that a) puts the most supplied and currently unsupported Soviet units in support; b) is southernmost; c) is westernmost.",
+      "restriction": "Does not apply if less than 2 units would be put in support, or if both Forward Support markers are in play, or if the Soviet deck is empty."
+    },
+    {
+      "id": "soviet-garrison-front",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Garrison Front",
+      "text": "Place Garrison markers in hexes targeted for the Front named in the event, per the process and requirements of 15.1. Consider only Soviet units in the named front when checking for Soviet proximity to a Garrison placement hex.",
+      "restriction": "Does not apply if no garrison markers can be newly placed."
+    },
+    {
+      "id": "soviet-partisan-uprisings",
+      "side": "soviet",
+      "kind": "command",
+      "name": "Partisan Uprisings",
+      "text": "In all town and city hexes, place dispersed markers on all non-dispersed German units to which Soviet units are proximate.",
+      "restriction": "Does not apply if the Soviet deck is empty, or if only one hex other than Kharkov qualifies, or if no hexes qualify."
+    },
+    {
+      "id": "soviet-expedited-reserves",
+      "side": "soviet",
+      "kind": "special",
+      "name": "Expedited Reserves",
+      "turns": "9-10",
+      "text": "Soviet units scheduled to be placed in the Reserve Units box on the next game turn enter now. Immediately place those units in the Reserve units box.",
+      "restriction": "Does not apply if the Soviet draw pile has less than four cards."
+    },
+    {
+      "id": "soviet-hitler-distracts",
+      "side": "soviet",
+      "kind": "special",
+      "name": "Hitler Distracts",
+      "turns": "6",
+      "text": "Efforts to protect Hitler when visiting the front distracts Army Group South. You must discard cards from the German hand with a total command value of at least 6."
+    },
+    {
+      "id": "soviet-nkvd-operations",
+      "side": "soviet",
+      "kind": "special",
+      "name": "NKVD Operations",
+      "turns": "1-2",
+      "text": "Assign two hits to the German unit/stack adjacent to Soviet units with the most total Soviet Combat Strength, as if combat occurred. You choose German target if more than one unit/stack qualifies. Do not reduce hits in a city/town hex. Then remove one step total from those adjacent Soviet units, per 12.6. Finally, if your units retreated, conduct advance after combat with those Soviet units."
+    }
+  ]
+}
