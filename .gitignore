@@ -13,3 +13,5 @@ Thumbs.db
 # local env
 .env
 .env.local
+
+assets/scans/
