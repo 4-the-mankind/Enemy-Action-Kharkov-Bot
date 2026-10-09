@@ -3444,7 +3444,7 @@
       "movementValue": 6,
       "steps": 2,
       "entryHex": null,
-      "entryTurn": null,
+      "entryTurn": 3,
       "notUsedInSolo": false,
       "front": "southwest",
       "isReducedReplacement": false,

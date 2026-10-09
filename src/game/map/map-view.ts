@@ -1,26 +1,34 @@
 // The game map viewport: background image, one SVG in grid coordinates split into
 // fixed planes, pan/zoom, and pointer → hex/side resolution (D3).
-import { pointerTarget, type MapGrid, type Point, type PointerTarget } from "../../core/geometry";
+import { hexAt, pointerTarget, type Hex, type MapGrid, type Point, type PointerTarget } from "../../core/geometry";
 
 /**
  * Stacking order, bottom to top. Every feature draws into one plane, so adding a
  * layer never changes what covers what.
  *  - data:    debug layers over the printed map (grid, terrain, arrows, lines…)
+ *  - marks:   hovered, pinned and drop-target hexes, under the counters they hold
  *  - units:   counters (task 2.2)
  *  - moves:   bot movement paths and animations (task 3.5)
- *  - pointer: hover and selection highlights
+ *  - pointer: highlights that must cover everything
  */
-export const PLANES = ["data", "units", "moves", "pointer"] as const;
+export const PLANES = ["data", "marks", "units", "moves", "pointer"] as const;
 export type Plane = (typeof PLANES)[number];
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const MIN_ZOOM = 0.03, MAX_ZOOM = 8;
 /** Pointer travel (px) below which a press counts as a click, not a pan. */
 const CLICK_SLOP = 4;
+/** Press time (ms) on a counter before it is lifted for a drag (D17): a shorter press is a click. */
+export const HOLD_MS = 250;
+
+/** What a click landed on besides the hex: a counter (data-unit), and whether Ctrl/Cmd was held. */
+export interface ClickInfo { unit: string | null; toggle: boolean }
 
 export interface MapViewEvents {
   hover?: (target: PointerTarget | null) => void;
-  click?: (target: PointerTarget) => void;
+  click?: (target: PointerTarget, info: ClickInfo) => void;
+  /** A counter held HOLD_MS without moving: the drag controller takes over the pointer. */
+  lift?: (unit: string, at: { clientX: number; clientY: number }) => void;
 }
 
 export class MapView {
@@ -114,11 +122,26 @@ export class MapView {
     return this.grid ? pointerTarget(this.grid, this.toGrid(clientX, clientY)) : null;
   }
 
+  /** Hex under a client point (sides ignored), or null outside the grid. */
+  hexAtClient(clientX: number, clientY: number): Hex | null {
+    return this.grid ? hexAt(this.grid, this.toGrid(clientX, clientY)) : null;
+  }
+
+  contains(el: Element | null): boolean { return !!el && this.viewport.contains(el); }
+
   private apply() {
     this.stage.style.transform = `translate(${this.view.tx}px, ${this.view.ty}px) scale(${this.view.z})`;
   }
 
-  /** Wheel = zoom; drag (any button) = pan; a press without travel = click. */
+  /** Pans by a screen distance (arrow keys). */
+  panBy(dx: number, dy: number) {
+    this.view.tx += dx;
+    this.view.ty += dy;
+    this.userMoved = true;
+    this.apply();
+  }
+
+  /** Wheel = zoom; drag (any button) = pan; a press without travel = click; a counter held still = lift. */
   private wireNavigation() {
     const vp = this.viewport;
     vp.addEventListener("wheel", (e) => {
@@ -127,17 +150,30 @@ export class MapView {
     }, { passive: false });
     vp.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    let drag: { x: number; y: number; tx: number; ty: number; moved: boolean } | null = null;
+    let drag: { x: number; y: number; tx: number; ty: number; moved: boolean; unit: string | null; hold?: number } | null = null;
+    let last = { clientX: 0, clientY: 0 };
     vp.addEventListener("pointerdown", (e) => {
       vp.focus({ preventScroll: true });
-      drag = { x: e.clientX, y: e.clientY, tx: this.view.tx, ty: this.view.ty, moved: false };
+      const unit = e.button === 0 ? (e.target as Element).closest<SVGElement>("[data-unit]")?.dataset.unit ?? null : null;
+      drag = { x: e.clientX, y: e.clientY, tx: this.view.tx, ty: this.view.ty, moved: false, unit };
+      last = { clientX: e.clientX, clientY: e.clientY };
       vp.setPointerCapture(e.pointerId);
+      if (unit && this.events.lift) {
+        drag.hold = window.setTimeout(() => {
+          if (!drag || drag.moved) return;
+          drag = null;
+          vp.releasePointerCapture(e.pointerId);
+          this.events.lift!(unit, last);
+        }, HOLD_MS);
+      }
     });
     vp.addEventListener("pointermove", (e) => {
+      last = { clientX: e.clientX, clientY: e.clientY };
       if (drag) {
         const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
         if (!drag.moved && Math.abs(dx) + Math.abs(dy) > CLICK_SLOP) {
           drag.moved = true;
+          clearTimeout(drag.hold);
           this.userMoved = true;
           vp.classList.add("panning");
         }
@@ -151,9 +187,10 @@ export class MapView {
       this.events.hover?.(this.targetAt(e.clientX, e.clientY));
     });
     vp.addEventListener("pointerup", (e) => {
+      if (drag) clearTimeout(drag.hold);
       if (drag && !drag.moved && e.button === 0) {
         const t = this.targetAt(e.clientX, e.clientY);
-        if (t) this.events.click?.(t);
+        if (t) this.events.click?.(t, { unit: drag.unit, toggle: e.ctrlKey || e.metaKey });
       }
       drag = null;
       vp.classList.remove("panning");

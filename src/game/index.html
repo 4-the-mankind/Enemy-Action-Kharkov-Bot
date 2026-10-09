@@ -13,31 +13,67 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <aside id="unitsDossier" class="dossier left" aria-label="Units">
+      <div class="dossier-body units-body">
+        <header class="panel-head">
+          <h1>Units</h1>
+        </header>
+        <section id="setup" class="setup" aria-label="Set up"></section>
+        <div id="groups" class="groups"></div>
+      </div>
+      <nav class="folder-tabs" role="tablist" aria-label="Units panel">
+        <button type="button" class="fold-btn" data-fold aria-label="Fold the units panel" title="Fold the units panel">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+        </button>
+        <button type="button" class="folder-tab" role="tab" data-tab="units">Units</button>
+      </nav>
+    </aside>
+
     <main class="map-area">
-      <div id="viewport" class="viewport" tabindex="0" aria-label="Game map: drag to pan, wheel or + and - to zoom, 0 to fit"></div>
+      <div id="viewport" class="viewport" tabindex="0" aria-label="Game map: drag or arrow keys to pan, wheel or + and - to zoom, 0 to fit"></div>
       <aside id="inspector" class="inspector" aria-live="polite"></aside>
     </main>
 
-    <aside class="rail">
-      <header class="rail-head">
-        <h1>Situation map</h1>
-        <a class="home" href="/">Home</a>
-      </header>
-
-      <section class="rail-section" aria-labelledby="layers-title">
-        <h2 id="layers-title">Overlays</h2>
-        <p class="hint">Lay a sheet on the map to check what the bot reads from it.</p>
-        <ul id="layers" class="sheets"></ul>
-      </section>
-
-      <section class="rail-section view-controls" aria-label="View">
-        <button type="button" id="toggleImage" class="switch" aria-pressed="true" aria-keyshortcuts="m">
-          Printed map <kbd>M</kbd>
+    <aside id="railDossier" class="dossier right" aria-label="Bot, log and overlays">
+      <nav class="folder-tabs" role="tablist" aria-label="Rail">
+        <button type="button" class="fold-btn" data-fold aria-label="Fold the rail" title="Fold the rail">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
         </button>
-        <button type="button" id="fit" class="switch" aria-keyshortcuts="0">Fit map <kbd>0</kbd></button>
-      </section>
+        <button type="button" class="folder-tab" role="tab" data-tab="bot">Bot</button>
+        <button type="button" class="folder-tab" role="tab" data-tab="log">Log</button>
+        <button type="button" class="folder-tab" role="tab" data-tab="overlays">Overlays</button>
+      </nav>
+      <div class="dossier-body rail">
+        <header class="panel-head">
+          <h1>Situation map</h1>
+          <a class="home" href="/">Home</a>
+        </header>
 
-      <p id="status" class="status" role="status"></p>
+        <section data-tabpanel="bot" class="rail-section" aria-label="Bot">
+          <p class="hint">No Soviet card drawn yet. The bot's card and orders show here during its impulses.</p>
+        </section>
+
+        <section data-tabpanel="log" class="rail-section log-section" aria-label="Log">
+          <div class="log-tools">
+            <button type="button" id="undo" class="switch" aria-keyshortcuts="Control+Z" disabled>Undo <kbd>Ctrl</kbd> + <kbd>Z</kbd></button>
+          </div>
+          <p class="hint">Undo takes back the last action and removes it from the log. Arrow keys move the map.</p>
+          <ol id="log" class="log"></ol>
+        </section>
+
+        <section data-tabpanel="overlays" class="rail-section" aria-label="Overlays">
+          <p class="hint">Lay a sheet on the map to check what the bot reads from it.</p>
+          <ul id="layers" class="sheets"></ul>
+          <div class="view-controls">
+            <button type="button" id="toggleImage" class="switch" aria-pressed="true" aria-keyshortcuts="m">
+              Printed map <kbd>M</kbd>
+            </button>
+            <button type="button" id="fit" class="switch" aria-keyshortcuts="0">Fit map <kbd>0</kbd></button>
+          </div>
+        </section>
+
+        <p id="status" class="status" role="status"></p>
+      </div>
     </aside>
 
     <script type="module" src="./main.ts"></script>

@@ -1,6 +1,6 @@
 // Inspector: the engine data of the hex or side under the pointer, bottom-left of the
-// map, with a highlight on the map. A click pins the current target; a second click
-// on it, or Escape, releases it.
+// map, with a highlight on the map, then the stack of counters on that hex (2.2).
+// A click pins the current target; a second click on it, or Escape, releases it.
 import { hexCorners, type PointerTarget } from "../../core/geometry";
 import { LINE_KEYS, resolveHex } from "../../core/map-hexes";
 import { resolveSide } from "../../core/map-hexsides";
@@ -38,19 +38,27 @@ function sideRows(data: MapData, id: string): Row[] {
 const sameTarget = (a: PointerTarget | null, b: PointerTarget | null) =>
   !!a && !!b && a.kind === b.kind && (a.kind === "side" ? a.id === (b as typeof a).id : a.hex.id === b.hex.id);
 
-export function mountInspector(root: HTMLElement, view: MapView, data: MapData) {
+/** Extra content under the hex rows: the stack of counters, interactive when pinned. */
+export type StackRenderer = (hexId: string, pinned: boolean) => HTMLElement | null;
+
+export function mountInspector(root: HTMLElement, view: MapView, data: MapData, stack?: StackRenderer) {
   const ns = "http://www.w3.org/2000/svg";
   const hexMark = document.createElementNS(ns, "polygon");
   const sideMark = document.createElementNS(ns, "line");
   hexMark.classList.add("hover-hex");
   sideMark.classList.add("hover-side");
-  view.plane("pointer").append(hexMark, sideMark);
+  view.plane("marks").append(hexMark, sideMark);
 
   let pinned: PointerTarget | null = null;
+  let shown: PointerTarget | null = null;
+  const pinListeners: (() => void)[] = [];
 
   const show = (t: PointerTarget | null) => {
+    shown = t;
     root.classList.toggle("pinned", !!pinned);
     hexMark.style.display = t ? "" : "none";
+    hexMark.classList.toggle("pinned", !!pinned);
+    sideMark.classList.toggle("pinned", !!pinned);
     sideMark.style.display = t?.kind === "side" ? "" : "none";
     if (!t) {
       root.innerHTML = `<p class="insp-title">Point at a hex or a hex side</p>`;
@@ -74,15 +82,30 @@ export function mountInspector(root: HTMLElement, view: MapView, data: MapData) 
       (set.length
         ? `<dl>${set.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`
         : `<p class="insp-empty">No data painted here</p>`);
+    const extra = t.kind === "hex" ? stack?.(t.hex.id, !!pinned) : null;
+    if (extra) root.append(extra);
   };
+  const setPin = (t: PointerTarget | null) => { pinned = t; pinListeners.forEach((f) => f()); };
 
   show(null);
   return {
     hover(t: PointerTarget | null) { if (!pinned) show(t); },
     click(t: PointerTarget) {
-      pinned = sameTarget(pinned, t) ? null : t;
+      setPin(sameTarget(pinned, t) ? null : t);
       show(t);
     },
-    release() { if (pinned) { pinned = null; show(null); } },
+    /** Pins a hex without toggling (a click on a counter, a drop). */
+    pinHex(id: string) {
+      const hex = data.hexById.get(id);
+      if (!hex) return;
+      const t: PointerTarget = { kind: "hex", hex };
+      if (!sameTarget(pinned, t)) setPin(t);
+      show(t);
+    },
+    pinnedHex(): string | null { return pinned?.kind === "hex" ? pinned.hex.id : null; },
+    release() { if (pinned) { setPin(null); show(null); } },
+    /** Redraws the current content (after a state or selection change). */
+    refresh() { show(pinned ?? shown); },
+    onPinChange(f: () => void) { pinListeners.push(f); },
   };
 }
