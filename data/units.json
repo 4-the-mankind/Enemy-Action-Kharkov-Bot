@@ -1,0 +1,3549 @@
+{
+  "version": 1,
+  "units": [
+    {
+      "id": "germ_1-lah-IISS_mech",
+      "side": "german",
+      "designation": "1 LAH IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_1-lah-IISS_mech-frt.png",
+        "back": "germ_1-lah-IISS_mech-back.png",
+        "reduced": "germ_1-lah-IISS_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "22",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "12",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_1-tot-IISS_armor",
+      "side": "german",
+      "designation": "1 Tot IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "07",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_1-tot-IISS_armor-frt.png",
+        "back": "germ_1-tot-IISS_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_106-15-LVII_inf",
+      "side": "german",
+      "designation": "106 15 LVII",
+      "armyOrCorps": "LVII",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "14",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_106-15-LVII_inf-frt.png",
+        "back": "germ_106-15-LVII_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_11-6p-XLVIII_armor",
+      "side": "german",
+      "designation": "11 6P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_11-6p-XLVIII_armor-frt.png",
+        "back": "germ_11-6p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_110-11p-XLVIII_armor",
+      "side": "german",
+      "designation": "110 11P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "07",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_110-11p-XLVIII_armor-frt.png",
+        "back": "germ_110-11p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_111-11p-XLVIII_armor",
+      "side": "german",
+      "designation": "111 11P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "08",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_111-11p-XLVIII_armor-frt.png",
+        "back": "germ_111-11p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_114-6p-XLVIII_armor",
+      "side": "german",
+      "designation": "114 6P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_114-6p-XLVIII_armor-frt.png",
+        "back": "germ_114-6p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_126-23p-LVII_armor",
+      "side": "german",
+      "designation": "126 23P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 9,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_126-23p-LVII_armor-frt.png",
+        "back": "germ_126-23p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "10",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_128-23p-LVIII_armor",
+      "side": "german",
+      "designation": "128 23P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 9,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_128-23p-LVIII_armor-frt.png",
+        "back": "germ_128-23p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "09",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_15-11p-XLVIII_armor",
+      "side": "german",
+      "designation": "15 11P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "09",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_15-11p-XLVIII_armor-frt.png",
+        "back": "germ_15-11p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "13",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_164-57-Raus_infantry",
+      "side": "german",
+      "designation": "164 57 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "09",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 7,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_164-57-Raus_infantry-frt.png",
+        "back": "germ_164-57-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "21",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_167-Raus_inf",
+      "side": "german",
+      "designation": "167 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 8,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_167-Raus_inf-frt.png",
+        "back": "germ_167-Raus_inf-back.png",
+        "reduced": "germ_167-Raus_inf-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "05",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_199-57-Raus_infantry",
+      "side": "german",
+      "designation": "199 57 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 7,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_199-57-Raus_infantry-frt.png",
+        "back": "germ_199-57-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "20",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_2-lah-IISS_arm",
+      "side": "german",
+      "designation": "2 LAH IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_2-lah-IISS_arm-frt.png",
+        "back": "germ_2-lah-IISS_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_201-23p-LVII_armor",
+      "side": "german",
+      "designation": "201 23P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 9,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_201-23p-LVII_armor-frt.png",
+        "back": "germ_201-23p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_217-57-Raus_infantry",
+      "side": "german",
+      "designation": "217 57 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "11",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 7,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_217-57-Raus_infantry-frt.png",
+        "back": "germ_217-57-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "22",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_25-7P-XLCorps_arm",
+      "side": "german",
+      "designation": "25 7P XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "2001",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_25-7P-XLCorps_arm-frt.png",
+        "back": "germ_25-7P-XLCorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "12",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_255-Raus_infantry",
+      "side": "german",
+      "designation": "255 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 9,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_255-Raus_infantry-frt.png",
+        "back": "germ_255-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_27-19P-IIICorps_arm",
+      "side": "german",
+      "designation": "27 19P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "1802",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_27-19P-IIICorps_arm-frt.png",
+        "back": "germ_27-19P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_298-LVII_inf",
+      "side": "german",
+      "designation": "298 LVII",
+      "armyOrCorps": "LVII",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1003",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_298-LVII_inf-frt.png",
+        "back": "germ_298-LVII_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_3-3P-IIICorps_arm",
+      "side": "german",
+      "designation": "3 3P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_3-3P-IIICorps_arm-frt.png",
+        "back": "germ_3-3P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_3-tot-IISS_armor",
+      "side": "german",
+      "designation": "3 Tot IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "08",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_3-tot-IISS_armor-frt.png",
+        "back": "germ_3-tot-IISS_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_332-Raus_infantry",
+      "side": "german",
+      "designation": "332 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_332-Raus_infantry-frt.png",
+        "back": "germ_332-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_335-IIICorps_inf",
+      "side": "german",
+      "designation": "335 - III",
+      "armyOrCorps": "III",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1903",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_335-IIICorps_inf-frt.png",
+        "back": "germ_335-IIICorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_387-IIICorps_inf",
+      "side": "german",
+      "designation": "387- III",
+      "armyOrCorps": "III",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "07",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1604",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_387-IIICorps_inf-frt.png",
+        "back": "germ_387-IIICorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_39-17p-LVII_armor",
+      "side": "german",
+      "designation": "39 17P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_39-17p-LVII_armor-frt.png",
+        "back": "germ_39-17p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "08",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_4-6p-XLVIII_armor",
+      "side": "german",
+      "designation": "4 6P XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "05",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_4-6p-XLVIII_armor-frt.png",
+        "back": "germ_4-6p-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_40-17p-LVII_armor",
+      "side": "german",
+      "designation": "40 17P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 2,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_40-17p-LVII_armor-frt.png",
+        "back": "germ_40-17p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "17",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_417-168-Raus_infantry",
+      "side": "german",
+      "designation": "417 168 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0205",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_417-168-Raus_infantry-frt.png",
+        "back": "germ_417-168-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "23",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_429-168-Raus_inf",
+      "side": "german",
+      "designation": "429 168 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 1,
+      "entryHex": "0205",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_429-168-Raus_inf.png",
+        "back": null,
+        "reduced": null
+      },
+      "backFace": null,
+      "reducedFace": null
+    },
+    {
+      "id": "germ_442-168-Raus_inf",
+      "side": "german",
+      "designation": "442 168 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "13",
+      "movementValue": 4,
+      "steps": 1,
+      "entryHex": "0206",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_442-168-Raus_inf.png",
+        "back": null,
+        "reduced": null
+      },
+      "backFace": null,
+      "reducedFace": null
+    },
+    {
+      "id": "germ_5-3P-IIICorps_arm",
+      "side": "german",
+      "designation": "5 3P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "05",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_5-3P-IIICorps_arm-frt.png",
+        "back": "germ_5-3P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_543-387-IIICorps_inf",
+      "side": "german",
+      "designation": "543 387 III",
+      "armyOrCorps": "III",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "09",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_543-387-IIICorps_inf-frt.png",
+        "back": "germ_543-387-IIICorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "20",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_585-320-Raus_inf",
+      "side": "german",
+      "designation": "585 320 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1203",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_585-320-Raus_inf-frt.png",
+        "back": "germ_585-320-Raus_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_586-320-Raus_inf",
+      "side": "german",
+      "designation": "586 320 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "07",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1402",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_586-320-Raus_inf-frt.png",
+        "back": "germ_586-320-Raus_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_587-320-Raus_infantry",
+      "side": "german",
+      "designation": "587 320 Raus",
+      "armyOrCorps": "Raus",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "04",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1503",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_587-320-Raus_infantry-frt.png",
+        "back": "germ_587-320-Raus_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_6-3P-IIICorps_arm",
+      "side": "german",
+      "designation": "6 3P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_6-3P-IIICorps_arm-frt.png",
+        "back": "germ_6-3P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_6-7P-XLCorps_arm",
+      "side": "german",
+      "designation": "6 7P XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "05",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "2001",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_6-7P-XLCorps_arm-frt.png",
+        "back": "germ_6-7P-XLCorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_63-17p-LVII_armor",
+      "side": "german",
+      "designation": "63 17P LVII",
+      "armyOrCorps": "LVII",
+      "type": "mechanized",
+      "combatValue": 2,
+      "selector": "07",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_63-17p-LVII_armor-frt.png",
+        "back": "germ_63-17p-LVII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_679-333-XLCorps_inf",
+      "side": "german",
+      "designation": "679 333 XL",
+      "armyOrCorps": "XL",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_679-333-XLCorps_inf-frt.png",
+        "back": "germ_679-333-XLCorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_680-333-XLCorps_inf",
+      "side": "german",
+      "designation": "680 333 XL",
+      "armyOrCorps": "XL",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "09",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_680-333-XLCorps_inf-frt.png",
+        "back": "germ_680-333-XLCorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_681-333-XLCorps_inf",
+      "side": "german",
+      "designation": "681 333 XL",
+      "armyOrCorps": "XL",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_681-333-XLCorps_inf-frt.png",
+        "back": "germ_681-333-XLCorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_684-335-IIICorps_inf",
+      "side": "german",
+      "designation": "684 335 III",
+      "armyOrCorps": "III",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_684-335-IIICorps_inf-frt.png",
+        "back": "germ_684-335-IIICorps_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_7-7P-XLCorps_arm",
+      "side": "german",
+      "designation": "7 7P XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "2001",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_7-7P-XLCorps_arm-frt.png",
+        "back": "germ_7-7P-XLCorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_73-19P-IIICorps_arm",
+      "side": "german",
+      "designation": "73 19P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "1804",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_73-19P-IIICorps_arm-frt.png",
+        "back": "germ_73-19P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "12",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_74-19P-IIICorps_arm",
+      "side": "german",
+      "designation": "74 19P III",
+      "armyOrCorps": "III",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "1904",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_74-19P-IIICorps_arm-frt.png",
+        "back": "germ_74-19P-IIICorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "13",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_81-15-LVII_inf",
+      "side": "german",
+      "designation": "81 15 LVII",
+      "armyOrCorps": "LVII",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_81-15-LVII_inf-frt.png",
+        "back": "germ_81-15-LVII_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_88-15-LVII_inf",
+      "side": "german",
+      "designation": "88 15 LVII",
+      "armyOrCorps": "LVII",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "13",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_88-15-LVII_inf-frt.png",
+        "back": "germ_88-15-LVII_inf-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "20",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_ah-lah-IISS_mech",
+      "side": "german",
+      "designation": "AH LAH IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_ah-lah-IISS_mech-frt.png",
+        "back": "germ_ah-lah-IISS_mech-back.png",
+        "reduced": "germ_ah-lah-IISS_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "21",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "13",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_df-dr-IISS_mech",
+      "side": "german",
+      "designation": "DF DR IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_df-dr-IISS_mech-frt.png",
+        "back": "germ_df-dr-IISS_mech-back.png",
+        "reduced": "germ_df-dr-IISS_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "10",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_dl-dr-IISS_mech",
+      "side": "german",
+      "designation": "DL DR IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "05",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_dl-dr-IISS_mech-frt.png",
+        "back": "germ_dl-dr-IISS_mech-back.png",
+        "reduced": "germ_dl-dr-IISS_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "23",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_Fus-Grd-XLVIII_armor",
+      "side": "german",
+      "designation": "Fus GD XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0604",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_Fus-Grd-XLVIII_armor-frt.png",
+        "back": "germ_Fus-Grd-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "12",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_Gre-Grd-XLVIII_armor",
+      "side": "german",
+      "designation": "Gre GD XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0803",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_Gre-Grd-XLVIII_armor-frt.png",
+        "back": "germ_Gre-Grd-XLVIII_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_lg-dr-IISS_armor",
+      "side": "german",
+      "designation": "LG DR IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "09",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_lg-dr-IISS_armor-frt.png",
+        "back": "germ_lg-dr-IISS_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_pangd-XLVIII_mech",
+      "side": "german",
+      "designation": "Pan GD XLVIII",
+      "armyOrCorps": "XLVIII",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": "0404",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_pangd-XLVIII_mech-frt.png",
+        "back": "germ_pangd-XLVIII_mech-back.png",
+        "reduced": "germ_pangd-XLVIII_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "10",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_SS RegimentGerm-XLCorps_inf",
+      "side": "german",
+      "designation": "Ger Wik XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_SS RegimentGerm-XLCorps_inf-frt.png",
+        "back": "germ_SS RegimentGerm-XLCorps_inf-back.png",
+        "reduced": "germ_SS RegimentGerm-XLCorps_inf-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "07",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "germ_SSReg. Westland-XLCorps_arm",
+      "side": "german",
+      "designation": "Wes Wik XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_SSReg. Westland-XLCorps_arm-frt.png",
+        "back": "germ_SSReg. Westland-XLCorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_SSReg.Nordland-XLCorps_arm",
+      "side": "german",
+      "designation": "Nor Wik XL",
+      "armyOrCorps": "XL",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_SSReg.Nordland-XLCorps_arm-frt.png",
+        "back": "germ_SSReg.Nordland-XLCorps_arm-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "13",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "germ_tot-tot-IISS_mech",
+      "side": "german",
+      "designation": "Tot Tot IISS",
+      "armyOrCorps": "IISS",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 6,
+      "notUsedInSolo": false,
+      "front": null,
+      "isReducedReplacement": false,
+      "images": {
+        "front": "germ_tot-tot-IISS_mech-frt.png",
+        "back": "germ_tot-tot-IISS_mech-back.png",
+        "reduced": "germ_tot-tot-IISS_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "20",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "14",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_10-Popov_mech",
+      "side": "soviet",
+      "designation": "10 Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": "1701",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_10-Popov_mech-frt.png",
+        "back": "sov_10-Popov_mech-back.png",
+        "reduced": "sov_10-Popov_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "22",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "13",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_100-40th_infantry",
+      "side": "soviet",
+      "designation": "100 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "0105",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_100-40th_infantry-frt.png",
+        "back": "sov_100-40th_infantry-back.png",
+        "reduced": "sov_100-40th_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "10",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_106-6th_infantry",
+      "side": "soviet",
+      "designation": "106 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "13",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1302",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_106-6th_infantry-frt.png",
+        "back": "sov_106-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "21",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_107-40th_infantry",
+      "side": "soviet",
+      "designation": "107 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 2,
+      "notUsedInSolo": true,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_107-40th_infantry-frt.png",
+        "back": "sov_107-40th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_111-3rdT_infantry",
+      "side": "soviet",
+      "designation": "111 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "15",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1002",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_111-3rdT_infantry-frt.png",
+        "back": "sov_111-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "30",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_11C-3rdT_cav",
+      "side": "soviet",
+      "designation": "11C 3T",
+      "armyOrCorps": "3T",
+      "type": "cavalry",
+      "combatValue": 2,
+      "selector": "22",
+      "movementValue": 5,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 11,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_11C-3rdT_cav-frt.png",
+        "back": "sov_11C-3rdT_cav-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "32",
+        "movementValue": 5,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_152-6th_infantry",
+      "side": "soviet",
+      "designation": "152 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "11",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_152-6th_infantry-frt.png",
+        "back": "sov_152-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "20",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_160-3rdT_infantry",
+      "side": "soviet",
+      "designation": "160 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "24",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0703",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_160-3rdT_infantry-frt.png",
+        "back": "sov_160-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "33",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_161-69th_infantry",
+      "side": "soviet",
+      "designation": "161 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0104",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_161-69th_infantry-frt.png",
+        "back": "sov_161-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_172-6th_infantry",
+      "side": "soviet",
+      "designation": "172 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1202",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_172-6th_infantry-frt.png",
+        "back": "sov_172-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_173-6th_infantry",
+      "side": "soviet",
+      "designation": "173 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_173-6th_infantry-frt.png",
+        "back": "sov_173-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "22",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_18-Popov_armor",
+      "side": "soviet",
+      "designation": "18 Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_18-Popov_armor-frt.png",
+        "back": "sov_18-Popov_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "16",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_180-69th_infantry",
+      "side": "soviet",
+      "designation": "180 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "14",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0403",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_180-69th_infantry-frt.png",
+        "back": "sov_180-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "20",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_183-40th_infantry",
+      "side": "soviet",
+      "designation": "183 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "06",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": true,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_183-40th_infantry-frt.png",
+        "back": "sov_183-40th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_184-3rdT_infantry",
+      "side": "soviet",
+      "designation": "184 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "09",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0702",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_184-3rdT_infantry-frt.png",
+        "back": "sov_184-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "25",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_195-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "195 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1702",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_195-1stGuards_infantry-frt.png",
+        "back": "sov_195-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_19G-3rdT_infantry",
+      "side": "soviet",
+      "designation": "19G 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 11,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_19G-3rdT_infantry-frt.png",
+        "back": "sov_19G-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "28",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_1GC-3rdT_armor",
+      "side": "soviet",
+      "designation": "1GC 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 6,
+      "selector": "02",
+      "movementValue": 7,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_1GC-3rdT_armor-frt.png",
+        "back": "sov_1GC-3rdT_armor-back.png",
+        "reduced": "sov_1GC-3rdT_armor-red.png"
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "14",
+        "movementValue": 7,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 4,
+        "selector": "07",
+        "movementValue": 7,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_2-1stGuards_mech",
+      "side": "soviet",
+      "designation": "2 1G",
+      "armyOrCorps": "1G",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_2-1stGuards_mech-frt.png",
+        "back": "sov_2-1stGuards_mech-back.png",
+        "reduced": "sov_2-1stGuards_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "09",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "08",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_206-40th_infantry",
+      "side": "soviet",
+      "designation": "206 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": true,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_206-40th_infantry-frt.png",
+        "back": "sov_206-40th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_20G-6th_infantry",
+      "side": "soviet",
+      "designation": "20G 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "06",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_20G-6th_infantry-frt.png",
+        "back": "sov_20G-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_219-69th_infantry",
+      "side": "soviet",
+      "designation": "219 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "11",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0204",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_219-69th_infantry-frt.png",
+        "back": "sov_219-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_25-Popov_armor",
+      "side": "soviet",
+      "designation": "25 Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 6,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_25-Popov_armor-frt.png",
+        "back": "sov_25-Popov_armor-back.png",
+        "reduced": "sov_25-Popov_armor-red.png"
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "15",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 4,
+        "selector": "12",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_253-3rdT_infantry",
+      "side": "soviet",
+      "designation": "253 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "21",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 11,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_253-3rdT_infantry-frt.png",
+        "back": "sov_253-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "34",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_259-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "259 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 2,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_259-1stGuards_infantry-frt.png",
+        "back": "sov_259-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "12",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_25G-3rdT_infantry",
+      "side": "soviet",
+      "designation": "25G 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "23",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_25G-3rdT_infantry-frt.png",
+        "back": "sov_25G-3rdT_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "31",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_263-6th_infantry",
+      "side": "soviet",
+      "designation": "263 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_263-6th_infantry-frt.png",
+        "back": "sov_263-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_267-6th_infantry",
+      "side": "soviet",
+      "designation": "267 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "07",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1302",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_267-6th_infantry-frt.png",
+        "back": "sov_267-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_270-69th_infantry",
+      "side": "soviet",
+      "designation": "270 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "13",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0304",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_270-69th_infantry-frt.png",
+        "back": "sov_270-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_2GC-Popov_armor",
+      "side": "soviet",
+      "designation": "2GC Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 2,
+      "selector": "21",
+      "movementValue": 7,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 5,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_2GC-Popov_armor-frt.png",
+        "back": "sov_2GC-Popov_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "28",
+        "movementValue": 7,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_3-Popov_armor",
+      "side": "soviet",
+      "designation": "3 Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 6,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": "1502",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_3-Popov_armor-frt.png",
+        "back": "sov_3-Popov_armor-back.png",
+        "reduced": "sov_3-Popov_armor-red.png"
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "14",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 4,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_303-69th_infantry",
+      "side": "soviet",
+      "designation": "303 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_303-69th_infantry-frt.png",
+        "back": "sov_303-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_305-40th_infantry",
+      "side": "soviet",
+      "designation": "305 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_305-40th_infantry-frt.png",
+        "back": "sov_305-40th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_309-40th_infantry",
+      "side": "soviet",
+      "designation": "309 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "0105",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_309-40th_infantry-frt.png",
+        "back": "sov_309-40th_infantry-back.png",
+        "reduced": "sov_309-40th_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "09",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_340-40th_infantry",
+      "side": "soviet",
+      "designation": "340 40",
+      "armyOrCorps": "40",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_340-40th_infantry-frt.png",
+        "back": "sov_340-40th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "13",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_350-6th_infantry",
+      "side": "soviet",
+      "designation": "350 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1103",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_350-6th_infantry-frt.png",
+        "back": "sov_350-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_35G-Popov_infantry",
+      "side": "soviet",
+      "designation": "35G Popov",
+      "armyOrCorps": "Popov",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "07",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "1704",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_35G-Popov_infantry-frt.png",
+        "back": "sov_35G-Popov_infantry-back.png",
+        "reduced": "sov_35G-Popov_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "24",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_37-69th_infantry",
+      "side": "soviet",
+      "designation": "37 69",
+      "armyOrCorps": "69",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "12",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "0204",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_37-69th_infantry-frt.png",
+        "back": "sov_37-69th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_38G-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "38G 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 2,
+      "selector": "11",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_38G-1stGuards_infantry-frt.png",
+        "back": "sov_38G-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 1,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_41G-Popov_infantry",
+      "side": "soviet",
+      "designation": "41G Popov",
+      "armyOrCorps": "Popov",
+      "type": "infantry",
+      "combatValue": 5,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 1,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_41G-Popov_infantry-frt.png",
+        "back": "sov_41G-Popov_infantry-back.png",
+        "reduced": "sov_41G-Popov_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "25",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_44G-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "44G 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 8,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_44G-1stGuards_infantry-frt.png",
+        "back": "sov_44G-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "15",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_48G-3rdT_infantry",
+      "side": "soviet",
+      "designation": "48G 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 5,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "0603",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_48G-3rdT_infantry-frt.png",
+        "back": "sov_48G-3rdT_infantry-back.png",
+        "reduced": "sov_48G-3rdT_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "27",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_50G-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "50G 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "05",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_50G-1stGuards_infantry-frt.png",
+        "back": "sov_50G-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "14",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_50G-Popov_infantry",
+      "side": "soviet",
+      "designation": "50G Popov",
+      "armyOrCorps": "Popov",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 10,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_50G-Popov_infantry-frt.png",
+        "back": "sov_50G-Popov_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "27",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_52-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "52 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "02",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1801",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_52-1stGuards_infantry-frt.png",
+        "back": "sov_52-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "13",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_57G-Popov_infantry",
+      "side": "soviet",
+      "designation": "57G Popov",
+      "armyOrCorps": "Popov",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "1603",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_57G-Popov_infantry-frt.png",
+        "back": "sov_57G-Popov_infantry-back.png",
+        "reduced": "sov_57G-Popov_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "26",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "19",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_58G-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "58G 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "07",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 8,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_58G-1stGuards_infantry-frt.png",
+        "back": "sov_58G-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_5G-40th_mech",
+      "side": "soviet",
+      "designation": "5G 40",
+      "armyOrCorps": "40",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 3,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_5G-40th_mech-frt.png",
+        "back": "sov_5G-40th_mech-back.png",
+        "reduced": "sov_5G-40th_mech-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "07",
+        "movementValue": 6,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_6-6th_infantry",
+      "side": "soviet",
+      "designation": "6 6",
+      "armyOrCorps": "6",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "08",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": "1202",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_6-6th_infantry-frt.png",
+        "back": "sov_6-6th_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "16",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_62G-3rdT_infantry",
+      "side": "soviet",
+      "designation": "62G 3T",
+      "armyOrCorps": "3T",
+      "type": "infantry",
+      "combatValue": 4,
+      "selector": "10",
+      "movementValue": 4,
+      "steps": 3,
+      "entryHex": "0903",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_62G-3rdT_infantry-frt.png",
+        "back": "sov_62G-3rdT_infantry-back.png",
+        "reduced": "sov_62G-3rdT_infantry-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "26",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_6GC-3rdT_armor",
+      "side": "soviet",
+      "designation": "6GC 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "08",
+      "movementValue": 7,
+      "steps": 3,
+      "entryHex": "1001",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_6GC-3rdT_armor-frt.png",
+        "back": "sov_6GC-3rdT_armor-back.png",
+        "reduced": "sov_6GC-3rdT_armor-red.png"
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "29",
+        "movementValue": 7,
+        "steps": 1
+      },
+      "reducedFace": {
+        "combatValue": 3,
+        "selector": "13",
+        "movementValue": 7,
+        "steps": 2
+      }
+    },
+    {
+      "id": "sov_78G-1stGuards_infantry",
+      "side": "soviet",
+      "designation": "78G 1G",
+      "armyOrCorps": "1G",
+      "type": "infantry",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 4,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 4,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_78G-1stGuards_infantry-frt.png",
+        "back": "sov_78G-1stGuards_infantry-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "17",
+        "movementValue": 4,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A-2G-40th_armor",
+      "side": "soviet",
+      "designation": "A/2G 69",
+      "armyOrCorps": "69",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 11,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A-2G-40th_armor-frt.png",
+        "back": "sov_A-2G-40th_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "08",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A12-3rdT_mech",
+      "side": "soviet",
+      "designation": "A/12 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0902",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A12-3rdT_mech-frt.png",
+        "back": "sov_A12-3rdT_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "11",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A15-3rdT_armor",
+      "side": "soviet",
+      "designation": "A/15 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0602",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A15-3rdT_armor-frt.png",
+        "back": "sov_A15-3rdT_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "19",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A1G-6th_armor",
+      "side": "soviet",
+      "designation": "A/1G 6",
+      "armyOrCorps": "6",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "01",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 3,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A1G-6th_armor-frt.png",
+        "back": "sov_A1G-6th_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "09",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A3G-69th_mech",
+      "side": "soviet",
+      "designation": "A3G 69",
+      "armyOrCorps": "69",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 12,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A3G-69th_mech-frt.png",
+        "back": "sov_A3G-69th_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "06",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_A4G-Popov_armor",
+      "side": "soviet",
+      "designation": "A/4G Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "1601",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_A4G-Popov_armor-frt.png",
+        "back": "sov_A4G-Popov_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "20",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B12-3rdT_armor",
+      "side": "soviet",
+      "designation": "B/12 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0902",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B12-3rdT_armor-frt.png",
+        "back": "sov_B12-3rdT_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "18",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B15-3rdT_mech",
+      "side": "soviet",
+      "designation": "B/15 3T",
+      "armyOrCorps": "3T",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "06",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "0602",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B15-3rdT_mech-frt.png",
+        "back": "sov_B15-3rdT_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "20",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B1G-6th_armcav",
+      "side": "soviet",
+      "designation": "B/1G 6",
+      "armyOrCorps": "6",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "02",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B1G-6th_armcav-frt.png",
+        "back": "sov_B1G-6th_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "10",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B2G-69th_mech",
+      "side": "soviet",
+      "designation": "B/2G 69",
+      "armyOrCorps": "69",
+      "type": "mechanized",
+      "combatValue": 5,
+      "selector": "03",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 11,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B2G-69th_mech-frt.png",
+        "back": "sov_B2G-69th_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 3,
+        "selector": "07",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B3G-69th_armor",
+      "side": "soviet",
+      "designation": "B/3G 69",
+      "armyOrCorps": "69",
+      "type": "mechanized",
+      "combatValue": 4,
+      "selector": "04",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": null,
+      "entryTurn": 12,
+      "notUsedInSolo": false,
+      "front": "voronezh",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B3G-69th_armor-frt.png",
+        "back": "sov_B3G-69th_armor-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "09",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    },
+    {
+      "id": "sov_B4G-Popov_mech",
+      "side": "soviet",
+      "designation": "B/4G Popov",
+      "armyOrCorps": "Popov",
+      "type": "mechanized",
+      "combatValue": 3,
+      "selector": "09",
+      "movementValue": 6,
+      "steps": 2,
+      "entryHex": "1601",
+      "entryTurn": null,
+      "notUsedInSolo": false,
+      "front": "southwest",
+      "isReducedReplacement": false,
+      "images": {
+        "front": "sov_B4G-Popov_mech-frt.png",
+        "back": "sov_B4G-Popov_mech-back.png",
+        "reduced": null
+      },
+      "backFace": {
+        "combatValue": 2,
+        "selector": "23",
+        "movementValue": 6,
+        "steps": 1
+      },
+      "reducedFace": null
+    }
+  ]
+}
