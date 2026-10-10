@@ -30,9 +30,11 @@ export function createCounterMenu(session: GameSession): CounterMenu {
     if (!u || !s || s.at === "eliminated") return;
     const last = !engine.nextFace(id, s.face);
     const onMap = isHex(s.at);
+    // Before Start every correction is locked: the menu says why instead of acting.
+    const lock = engine.locked(state);
     const item = (action: string, label: string, enabled: boolean, title = "") =>
-      `<button type="button" role="menuitem" data-action="${action}"${enabled ? "" : " disabled"}${title ? ` title="${title}"` : ""}>${label}</button>`;
-    menu.innerHTML = `<div class="menu-head">${u.designation}</div>` +
+      `<button type="button" role="menuitem" data-action="${action}"${enabled && !lock ? "" : " disabled"}${title ? ` title="${title}"` : ""}>${label}</button>`;
+    menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${lock}</p>` : "") +
       item("step", "Remove step", !last, last ? "Single step left: eliminate it instead" : "") +
       item("eliminate", "Eliminate", last, last ? "" : "Only on the last step") +
       item("disperse", s.dispersed ? "Remove Dispersed marker" : "Place Dispersed marker", onMap, onMap ? "" : "Only on the map");

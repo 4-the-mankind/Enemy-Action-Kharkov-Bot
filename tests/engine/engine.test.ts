@@ -25,7 +25,8 @@ const sample = [
   unit("notSolo", "soviet", { turn: 2 }, { notUsedInSolo: true }),
 ];
 const engine = createEngine({ units: sample, playableHexes: new Set(["0105", "0204", "0305"]) });
-const setUp = (): GameState => engine.step(emptyState(), { type: "SetUpTurn1" }).state;
+/** A game in progress: booklet set-up, Start pressed (the adjustment is tested elsewhere). */
+const setUp = (): GameState => ({ ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true });
 
 describe("Set up turn 1", () => {
   it("places the booklet set-up of every unit used in solo (reference: data/units.json)", () => {
@@ -107,7 +108,7 @@ describe("MoveUnits", () => {
     expect(r.state).toBe(s);
     expect(r.events[0]).toMatchObject({ type: "CommandRejected", command: "MoveUnits" });
     expect(engine.whyNotMove(s, ["s1"], "0999")).toBe("0999 is not a playable hex.");
-    expect(engine.whyNotMove(emptyState(), ["s1"], "0105")).toBe("s1 is not in play.");
+    expect(engine.whyNotMove({ ...emptyState(), started: true }, ["s1"], "0105")).toBe("s1 is not in play.");
   });
 
   it("restacks a unit within its hex only, up, down, to the top or the bottom", () => {
@@ -139,7 +140,7 @@ describe("Set-up adjustment commands (2.4)", () => {
     unit("sRes", "soviet", { turn: 1 }),
   ];
   const eng = createEngine({ units, playableHexes: new Set(["0105", "0204", "0305"]) });
-  const start = () => eng.step(emptyState(), { type: "SetUpTurn1" }).state;
+  const start = () => ({ ...eng.step(emptyState(), { type: "SetUpTurn1" }).state, started: true });
 
   it("starts with 2 Soviet VP, an empty discard and no objective marker", () => {
     expect(start()).toMatchObject({ vp: 2, sovietDiscard: [], objectives: {} });

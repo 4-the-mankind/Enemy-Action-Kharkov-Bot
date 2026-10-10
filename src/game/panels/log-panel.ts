@@ -6,7 +6,7 @@ import type { GameSession } from "../state/session";
 const where = (at: Location) =>
   isHex(at) ? at : at === "reserve" ? "the reserve" : at === "reinforcements" ? "the reinforcements" : "the eliminated units";
 
-function describe(e: GameEvent, engine: Engine): { html: string; refused?: boolean } | null {
+function describe(e: GameEvent, engine: Engine): { html: string; refused?: boolean } {
   const name = (id: string) => engine.unit(id)?.designation ?? id;
   switch (e.type) {
     case "SetUpApplied":
@@ -38,6 +38,10 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       const marker = `${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${e.face === "west" ? "West" : "South"}`;
       return { html: e.at ? `<b>${marker}</b> placed in ${e.at}.` : `<b>${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective</b> removed.` };
     }
+    case "SetUpAdjustmentApplied":
+      return { html: `<b>Set-up adjustment ${e.id.replace("-", ",")}: ${e.name}</b> (${e.roll ? `die roll ${e.roll}` : "chosen"}${e.replaces ? `, replaces ${e.replaces}` : ""}), played by the bot in place of its first impulse (p48-50). ${e.commands} actions:` };
+    case "GameStarted":
+      return { html: "<b>Turn 1 begins</b> with the first German impulse (p48). Your counters are free to move." };
     case "CommandRejected":
       return { html: `<b>Not done:</b> ${e.reason}`, refused: true };
   }
@@ -58,10 +62,20 @@ export function mountLogPanel(root: HTMLElement, session: GameSession) {
   session.subscribe((_, events, undo) => {
     if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
     const lines: HTMLLIElement[] = [];
-    for (const e of events) {
+    // A set-up adjustment is one step: its own actions are listed under it, in play order.
+    const grouped = events[0]?.type === "SetUpAdjustmentApplied";
+    let anchor: HTMLLIElement | null = null;
+    for (const [i, e] of events.entries()) {
       const line = describe(e, session.engine);
-      if (!line) continue;
-      const li = add(line.html, line.refused ? "fresh refused" : "fresh");
+      const cls = (line.refused ? "fresh refused" : "fresh") + (grouped && i > 0 ? " sub" : "");
+      let li: HTMLLIElement;
+      if (grouped && anchor) {
+        li = document.createElement("li");
+        li.innerHTML = line.html;
+        li.className = cls;
+        anchor.after(li);
+      } else li = add(line.html, cls);
+      if (grouped) anchor = li;
       if (!line.refused) lines.push(li);
     }
     if (lines.length) steps.push(lines);

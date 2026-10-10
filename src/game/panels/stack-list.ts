@@ -16,20 +16,22 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
     const ids = state.order.filter((id) => state.units[id].at === hexId).reverse();
     if (!ids.length) return null;
 
+    // Before Start (locked) the stack is read only: no selection, no drag, no restack.
+    const lock = engine.locked(state), selectable = pinned && !lock;
     const box = document.createElement("div");
     box.className = "stack";
     const all = ids.every((id) => selection.has(id));
     box.innerHTML = `<div class="stack-head"><span>${ids.length > 1 ? `Stack of ${ids.length}` : "Counter"}</span>` +
-      (pinned && ids.length > 1 ? `<button type="button" class="linkbtn" data-all>${all ? "Clear selection" : "Select all"}</button>` : "") + `</div>`;
+      (selectable && ids.length > 1 ? `<button type="button" class="linkbtn" data-all>${all ? "Clear selection" : "Select all"}</button>` : "") + `</div>`;
     const list = document.createElement("ul");
-    const arrows = pinned && ids.length > 1;
+    const arrows = selectable && ids.length > 1;
     ids.forEach((id, k) => {
       const u = engine.unit(id)!, s = state.units[id], selected = selection.has(id);
       const steps = (s.face === "back" ? u.backFace?.steps : s.face === "reduced" ? u.reducedFace?.steps : u.steps) ?? u.steps;
       const li = document.createElement("li");
       li.className = selected ? "selected" : "";
       li.dataset.unit = id;
-      li.innerHTML = (pinned ? `<span class="tick" aria-hidden="true">${selected ? "✓" : ""}</span>` : "") +
+      li.innerHTML = (selectable ? `<span class="tick" aria-hidden="true">${selected ? "✓" : ""}</span>` : "") +
         `<img src="${faceImage(u, s.face)}" alt="">` +
         `<span class="stack-name">${u.designation}<small>${u.armyOrCorps}, ${u.side === "soviet" ? "Soviet" : "German"}</small></span>` +
         `<span class="pips" title="${steps} steps">${"<i></i>".repeat(steps)}</span>` +
@@ -38,7 +40,7 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
           `<button type="button" data-restack="up" ${k === 0 ? "disabled" : ""} aria-label="Move ${u.designation} up the stack" title="Up the stack"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4"/></svg></button>` +
           `<button type="button" data-restack="down" ${k === ids.length - 1 ? "disabled" : ""} aria-label="Move ${u.designation} down the stack" title="Down the stack"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button></span>` : "");
       li.addEventListener("contextmenu", (e) => { e.preventDefault(); menu.open(id, e); });
-      if (pinned) {
+      if (selectable) {
         li.setAttribute("role", "checkbox");
         li.setAttribute("aria-checked", String(selected));
         holdToDrag(li, HOLD_MS, (at) => drag.begin(selection.has(id) ? selection.list() : [id], at), () => selection.toggle(id));
@@ -58,7 +60,7 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
       list.append(li);
     });
     box.append(list);
-    if (pinned) box.insertAdjacentHTML("beforeend", `<p class="insp-hint">Click to select, hold to drag.</p>`);
+    if (pinned) box.insertAdjacentHTML("beforeend", `<p class="insp-hint">${lock ?? "Click to select, hold to drag."}</p>`);
     box.querySelector("[data-all]")?.addEventListener("click", () => selection.set(all ? [] : ids));
     return box;
   };

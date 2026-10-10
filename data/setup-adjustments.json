@@ -103,7 +103,7 @@
           "type": "PlaceObjective",
           "front": "voronezh",
           "face": "west",
-          "at": "1008"
+          "at": "1009"
         },
         {
           "type": "PlaceObjective",
@@ -372,13 +372,13 @@
         {
           "type": "PlaceObjective",
           "front": "voronezh",
-          "face": "west",
+          "face": "south",
           "at": "0608"
         },
         {
           "type": "PlaceObjective",
           "front": "southwest",
-          "face": "west",
+          "face": "south",
           "at": "1410"
         },
         {
@@ -602,7 +602,7 @@
           "type": "PlaceObjective",
           "front": "voronezh",
           "face": "west",
-          "at": "1008"
+          "at": "1009"
         },
         {
           "type": "PlaceObjective",

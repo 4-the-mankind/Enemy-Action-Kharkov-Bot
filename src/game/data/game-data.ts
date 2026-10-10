@@ -1,12 +1,14 @@
 // Read-only game data for the game page: units (2.3) and the turn calendar, read as
 // static files like the map data (PWA without server, phase 5).
 import { parseUnits, type Unit } from "../../core/units";
+import { parseSetupAdjustments, type RecordedAdjustment } from "../../engine/setup-adjustments";
 
 export interface CalendarTurn { turn: number; dates: string }
 
 export interface GameData {
   units: Unit[];
   calendar: CalendarTurn[];
+  adjustments: RecordedAdjustment[];
 }
 
 async function fetchJson(path: string): Promise<unknown> {
@@ -26,8 +28,9 @@ function parseCalendar(raw: unknown): CalendarTurn[] {
 }
 
 export async function loadGameData(): Promise<GameData> {
-  const [units, calendar] = await Promise.all([fetchJson("/data/units.json"), fetchJson("/data/calendar.json")]);
-  return { units: parseUnits(units).units, calendar: parseCalendar(calendar) };
+  const [units, calendar, adjustments] = await Promise.all(
+    ["/data/units.json", "/data/calendar.json", "/data/setup-adjustments.json"].map(fetchJson));
+  return { units: parseUnits(units).units, calendar: parseCalendar(calendar), adjustments: parseSetupAdjustments(adjustments).adjustments };
 }
 
 /** URL of a counter image from units.json (file name in assets/counters/units/). */

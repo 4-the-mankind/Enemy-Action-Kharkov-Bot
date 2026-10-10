@@ -53,6 +53,13 @@ export interface GameState {
   sovietDiscard: string[];
   /** Front Objective markers on the map (placement only; their logic comes in 4.2). */
   objectives: Partial<Record<ObjectiveFront, ObjectiveMarker>>;
+  /** Set-up adjustment played after "Set up turn 1" (p48-50), with the die result when rolled. */
+  adjustment?: { id: string; roll?: number };
+  /**
+   * True once the player pressed Start after the set-up adjustment: the first German impulse
+   * of turn 1 begins (p48). Until then the player's commands are locked; the bot plays.
+   */
+  started: boolean;
 }
 
 export type Command =
@@ -69,7 +76,11 @@ export type Command =
   /** Moves a unit within its hex's stack: one level up or down, or to the top or bottom. */
   | { type: "Restack"; unit: string; to: StackMove }
   /** Places a Front Objective marker on a hex, or removes it (at null). */
-  | { type: "PlaceObjective"; front: ObjectiveFront; face: ObjectiveFace; at: string | null };
+  | { type: "PlaceObjective"; front: ObjectiveFront; face: ObjectiveFace; at: string | null }
+  /** Plays a recorded set-up adjustment as the bot (p48-50, D15): chosen, or picked by a die roll (1-10). */
+  | { type: "ApplySetUpAdjustment"; id: string; roll?: number }
+  /** Ends the set-up: the game starts with the first German impulse of turn 1 (p48). */
+  | { type: "StartGame" };
 
 export type GameEvent =
   | { type: "SetUpApplied"; placed: string[]; reserve: string[]; reinforcements: string[] }
@@ -81,6 +92,9 @@ export type GameEvent =
   | { type: "VictoryPointsSet"; from: number; to: number }
   | { type: "SovietCardDiscarded"; card: string; discarded: boolean }
   | { type: "ObjectivePlaced"; front: ObjectiveFront; face: ObjectiveFace; at: string | null }
+  /** Followed by the events of each command it played. */
+  | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
+  | { type: "GameStarted" }
   | { type: "CommandRejected"; command: Command["type"]; reason: string };
 
 export interface StepResult {
@@ -92,4 +106,4 @@ export interface StepResult {
 export const START_VP = 2;
 
 export const emptyState = (): GameState =>
-  ({ version: 1, turn: 1, setUp: false, units: {}, order: [], vp: START_VP, sovietDiscard: [], objectives: {} });
+  ({ version: 1, turn: 1, setUp: false, units: {}, order: [], vp: START_VP, sovietDiscard: [], objectives: {}, started: false });

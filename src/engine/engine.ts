@@ -2,6 +2,7 @@
 // Every rule lives here, so the UI can ask before acting (canMove) and the step
 // function refuses what it would allow anyway.
 import type { Unit } from "../core/units";
+import type { RecordedAdjustment } from "./setup-adjustments";
 import {
   emptyState, isHex, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState, type Location,
   type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult,
@@ -11,12 +12,16 @@ export interface EngineData {
   units: Unit[];
   /** Playable hex ids (dead hexes excluded, D5). */
   playableHexes: Set<string>;
+  /** Recorded set-up adjustments (data/setup-adjustments.json, D15). */
+  adjustments?: RecordedAdjustment[];
 }
 
 export interface Engine {
   step(state: GameState, command: Command, actor?: Actor): StepResult;
   /** Why this actor (the player by default) may not move these units there, or null if the move is allowed. */
   whyNotMove(state: GameState, units: string[], to: Location, actor?: Actor): string | null;
+  /** Why the actor (the player by default) may not act on the units at all yet, or null. */
+  locked(state: GameState, actor?: Actor): string | null;
   /** True if the actor may pick up this unit at all (Soviet reserves are placed by the bot, D17). */
   canLift(state: GameState, unitId: string, actor?: Actor): boolean;
   /** Face the unit shows after losing one step, or null if it is on its last step. */
@@ -45,8 +50,16 @@ export function createEngine(data: EngineData): Engine {
     return { state, events: [{ type: "SetUpApplied", placed, reserve, reinforcements }] };
   }
 
+  // Until Start, the set-up belongs to the booklet and the bot (p48): the player only watches.
+  function locked(state: GameState, actor: Actor = "player"): string | null {
+    if (actor === "bot" || state.started) return null;
+    return state.setUp ? "Press Start to begin turn 1." : "Set up turn 1 first.";
+  }
+
   function whyNotMove(state: GameState, ids: string[], to: Location, actor: Actor = "player"): string | null {
     if (!ids.length) return "No unit to move.";
+    const lock = locked(state, actor);
+    if (lock) return lock;
     if (isHex(to)) {
       if (!data.playableHexes.has(to)) return `${to} is not a playable hex.`;
     } else if (to !== "reserve" && to !== "reinforcements" && to !== "eliminated") {
@@ -170,7 +183,46 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, order }, events: [{ type: "UnitRestacked", unit: id, at: s.at, to }] };
   }
 
+  // Set-up adjustments (p48-50): roll the die or choose, then follow the depiction in its
+  // entirety. Played as the bot, all or nothing, so a single undo takes it back.
+  function applySetUpAdjustment(state: GameState, id: string, roll: number | undefined): StepResult {
+    const type = "ApplySetUpAdjustment";
+    if (!state.setUp) return reject(state, type, "Set up turn 1 first.");
+    if (state.started) return reject(state, type, "The game has started: the set-up adjustment can no longer change.");
+    const a = data.adjustments?.find((x) => x.id === id);
+    if (!a) return reject(state, type, `Unknown set-up adjustment "${id}".`);
+    if (roll !== undefined && !a.die.includes(roll)) return reject(state, type, `A roll of ${roll} does not select ${a.name}.`);
+    // Another choice before Start: back to the booklet set-up first (nothing else can have
+    // changed since, the player being locked until Start).
+    const replaced = state.adjustment && data.adjustments?.find((x) => x.id === state.adjustment!.id);
+    let next = replaced ? setUpTurn1().state : state;
+    const events: GameEvent[] = [];
+    for (const [k, c] of a.commands.entries()) {
+      const r = step(next, c, "bot");
+      const refused = r.events.find((e) => e.type === "CommandRejected");
+      if (refused) return reject(state, type, `${a.name} cannot be played on this map (step ${k + 1}: ${refused.reason})`);
+      next = r.state;
+      events.push(...r.events);
+    }
+    next = { ...next, adjustment: roll === undefined ? { id } : { id, roll } };
+    const applied: GameEvent = { type: "SetUpAdjustmentApplied", id, name: a.name, roll, commands: a.commands.length };
+    if (replaced) applied.replaces = replaced.name;
+    return { state: next, events: [applied, ...events] };
+  }
+
+  function startGame(state: GameState): StepResult {
+    if (!state.setUp) return reject(state, "StartGame", "Set up turn 1 first.");
+    if (state.started) return reject(state, "StartGame", "The game has already started.");
+    if (!state.adjustment) return reject(state, "StartGame", "Roll or choose the set-up adjustment first.");
+    return { state: { ...state, started: true }, events: [{ type: "GameStarted" }] };
+  }
+
+  /** Commands the player may only send once the game has started. */
+  const PLAY = new Set<Command["type"]>(["MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective"]);
+
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
+    const lock = PLAY.has(command.type) ? locked(state, actor) : null;
+    if (lock) return reject(state, command.type, lock);
     switch (command.type) {
       case "SetUpTurn1":
         return state.setUp ? reject(state, command.type, "Turn 1 is already set up.") : setUpTurn1();
@@ -190,15 +242,20 @@ export function createEngine(data: EngineData): Engine {
         return discardSovietCard(state, command.card, command.discarded);
       case "PlaceObjective":
         return placeObjective(state, command.front, command.face, command.at);
+      case "ApplySetUpAdjustment":
+        return applySetUpAdjustment(state, command.id, command.roll);
+      case "StartGame":
+        return startGame(state);
     }
   }
 
   return {
     step,
     whyNotMove,
+    locked,
     canLift: (state, id, actor = "player") => {
       const u = byId.get(id), s = state.units[id];
-      return !!u && !!s && (actor === "bot" || !(u.side === "soviet" && s.at === "reserve"));
+      return !!u && !!s && !locked(state, actor) && (actor === "bot" || !(u.side === "soviet" && s.at === "reserve"));
     },
     nextFace,
     units,

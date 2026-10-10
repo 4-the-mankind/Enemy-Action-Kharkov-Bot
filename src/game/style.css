@@ -128,6 +128,7 @@ kbd {
 .map-svg .counter { pointer-events: auto; cursor: grab; }
 .map-svg .counter image { filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.55)); }
 .map-svg .counter.dim { opacity: 0.3; }
+body.game-locked .map-svg .counter { cursor: default; }
 .map-svg .counter.lifted { opacity: 0.25; }
 /* Selection: a ring on the very edge of the selected counter. */
 .map-svg .sel-ring { fill: none; stroke: none; }
@@ -191,6 +192,8 @@ kbd {
 }
 .inspector.pinned .stack li { cursor: grab; }
 .inspector.pinned .stack li:hover { background: rgb(38 46 41 / 0.07); }
+body.game-locked .inspector.pinned .stack li { cursor: default; }
+body.game-locked .inspector.pinned .stack li:hover { background: transparent; }
 .stack li.selected { background: rgb(38 46 41 / 0.14); }
 .stack li.lifted { opacity: 0.4; }
 .stack img { width: 64px; height: 64px; border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.35); pointer-events: none; }
@@ -287,6 +290,63 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .recap-actions { display: flex; gap: 8px; }
 .recap .btn { border-color: var(--slip-ink); }
 .recap .btn:hover { background: rgb(38 46 41 / 0.08); }
+.recap .btn.ink { flex: 1; font-weight: 600; color: var(--slip); background: var(--slip-ink); }
+.recap .btn.ink:hover { background: var(--feldgrau); }
+.recap .btn[disabled]:hover { background: transparent; }
+
+.recap .btn.start { width: 100%; margin-top: 8px; padding: 8px 12px; }
+.recap .btn.ink[disabled] { color: var(--slip-dim); background: rgb(38 46 41 / 0.12); border-color: rgb(38 46 41 / 0.3); }
+
+/* Start notice: a slip laid on the middle of the map until Start (the map still pans under it). */
+.start-notice {
+  position: absolute; top: 50%; left: 50%; z-index: 6; transform: translate(-50%, -50%);
+  width: min(380px, calc(100% - 32px)); padding: 14px 18px 16px;
+  color: var(--slip-ink); background: var(--slip); border-left: 4px solid var(--stab-red);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 0.5); pointer-events: none;
+}
+.start-notice[hidden] { display: none; }
+.start-notice h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.start-notice p { margin: 0; font-size: 0.9rem; color: var(--slip-dim); }
+.start-notice .btn { pointer-events: auto; margin-top: 12px; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
+.start-notice .btn:hover { background: var(--feldgrau); }
+
+.counter-menu .menu-lock { margin: 0; padding: 6px 12px; font-size: 0.82rem; color: var(--stab-red); }
+
+/* Set-up adjustment (p48-50): a d10 result table ruled like the booklet's charts. */
+.adjust { margin: 0 0 12px; padding-top: 10px; border-top: 1px solid rgb(38 46 41 / 0.25); }
+.adjust-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.adjust h3 { margin: 0; font-size: 0.95rem; }
+.adjust-hint { margin: 2px 0 0; font-size: 0.82rem; color: var(--slip-dim); }
+/* The die: a d10 face is a kite. */
+.d10 {
+  flex: none; display: grid; place-items: center; width: 44px; height: 50px; padding-top: 8px;
+  font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--slip);
+  background: var(--slip-ink); clip-path: polygon(50% 0, 100% 38%, 50% 100%, 0 38%);
+}
+.d10.blank { background: rgb(38 46 41 / 0.18); }
+.d10.tumbling { animation: tumble 140ms linear infinite alternate; }
+@keyframes tumble { from { transform: rotate(-14deg) scale(0.94); } to { transform: rotate(12deg) scale(1.04); } }
+.d10.landed { background: var(--stab-red); }
+
+.die-table { list-style: none; margin: 0; padding: 0; border: 1.5px solid var(--slip-ink); }
+.die-table li + li { border-top: 1px solid rgb(38 46 41 / 0.3); }
+.die-table button {
+  display: grid; grid-template-columns: 52px 1fr; align-items: stretch; width: 100%; padding: 0;
+  font: inherit; text-align: left; color: var(--slip-ink); background: transparent; border: 0; cursor: pointer;
+}
+.die-table .faces {
+  display: flex; justify-content: center; align-items: center; gap: 1px; padding: 5px 0;
+  font-weight: 600; font-variant-numeric: tabular-nums; border-right: 1.5px solid var(--slip-ink);
+}
+.die-table .faces i { font-style: normal; color: var(--slip-dim); }
+.die-table .adj-name { padding: 5px 10px; }
+.die-table small { font-size: 0.78rem; color: var(--slip-dim); font-style: italic; }
+.die-table button:not([disabled]):hover { background: rgb(38 46 41 / 0.1); }
+.die-table button:focus-visible { outline: 2px solid var(--stab-red); outline-offset: -2px; }
+.die-table button[disabled] { cursor: default; }
+.die-table button.lit { color: var(--slip); background: var(--slip-ink); }
+.die-table button.lit small, .die-table button.lit .faces i { color: var(--paper-dim); }
+.die-table button.lit .faces { border-right-color: var(--slip); }
 
 .side-filter { display: flex; margin-top: 12px; border: 1px solid var(--feldgrau-light); border-radius: 3px; overflow: hidden; }
 .side-filter button { flex: 1; padding: 3px 0; font: inherit; color: var(--paper-dim); background: transparent; border: 0; cursor: pointer; }
@@ -405,6 +465,8 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .log li { padding: 6px 0; color: var(--paper-dim); border-bottom: 1px solid var(--feldgrau); }
 .log li b { color: var(--paper); font-weight: 600; }
 .log li.refused b { color: #ff8a80; }
+.log li.sub { padding: 3px 0 3px 12px; font-size: 0.85rem; border-bottom: 0; border-left: 2px solid var(--feldgrau); }
+.log li.sub:has(+ li:not(.sub)) { margin-bottom: 0; border-bottom: 1px solid var(--feldgrau); }
 .log li.fresh { animation: fresh 900ms ease-out; }
 @keyframes fresh { from { background: rgb(232 228 211 / 0.16); } to { background: transparent; } }
 
@@ -463,6 +525,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   .sheet, .bg, .folder-tab { transition: none; }
   .log li.fresh { animation: none; }
+  .d10.tumbling { animation: none; }
 }
 
 /* Narrow screens: an open dossier covers the map instead of squeezing it (phone layout: 5.3). */

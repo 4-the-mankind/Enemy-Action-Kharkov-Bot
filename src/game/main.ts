@@ -19,6 +19,7 @@ import { mountLogPanel } from "./panels/log-panel";
 import { stackRenderer } from "./panels/stack-list";
 import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
+import { mountStartNotice } from "./panels/start-notice";
 import { GameSession } from "./state/session";
 import { Selection } from "./state/selection";
 
@@ -65,7 +66,7 @@ async function init() {
 
   // Game session (D12): the engine owns the rules, the views play its events.
   const playableHexes = new Set(data.hexes.filter((x) => resolveHex(data.hexData, x.id).playable).map((x) => x.id));
-  const session = new GameSession(createEngine({ units: game.units, playableHexes }));
+  const session = new GameSession(createEngine({ units: game.units, playableHexes, adjustments: game.adjustments }));
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);
@@ -82,6 +83,7 @@ async function init() {
   units.setDim((side) => panel.filter() !== "all" && panel.filter() !== side);
   panel.onFilter(() => units.render(session.state));
   mountBotPanel($("bot"), session);
+  mountStartNotice($("startNotice"), session);
   mountLogPanel($("log"), session);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());
@@ -91,8 +93,10 @@ async function init() {
     const setUp = events.find((e) => e.type === "SetUpApplied");
     units.render(state, setUp && flyFrom ? { ...flyFrom, units: setUp.placed } : undefined);
     flyFrom = null;
-    const pinned = insp.pinnedHex();
-    selection.prune((id) => !!pinned && state.units[id]?.at === pinned);
+    const pinned = insp.pinnedHex(), locked = !!session.engine.locked(state);
+    // Locked until Start: no grab cursor or hover feedback that would suggest an action.
+    document.body.classList.toggle("game-locked", locked);
+    selection.prune((id) => !locked && !!pinned && state.units[id]?.at === pinned);
     insp.refresh();
   });
   selection.onChange(() => { units.render(session.state); insp.refresh(); });
@@ -107,6 +111,8 @@ async function init() {
       if (!info.unit || !at || !isHex(at)) { insp.click(t); selection.clear(); return; }
       const sameHex = insp.pinnedHex() === at;
       insp.pinHex(at);
+      // Before Start: the hex is pinned to read it, but counters are not selected.
+      if (session.engine.locked(session.state)) { selection.clear(); return; }
       if (info.toggle && sameHex) selection.toggle(info.unit);
       else selection.set([info.unit]);
     },
@@ -120,6 +126,7 @@ async function init() {
     menu: (unit, at) => menu.open(unit, at),
   };
   units.render(session.state);
+  document.body.classList.toggle("game-locked", !!session.engine.locked(session.state));
 
   const bgToggle = $<HTMLButtonElement>("toggleImage");
   const setImage = (on: boolean) => { view.setBackgroundVisible(on); bgToggle.setAttribute("aria-pressed", String(on)); };

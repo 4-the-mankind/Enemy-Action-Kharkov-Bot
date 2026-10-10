@@ -9,6 +9,7 @@
 - **Données** en JSON dans `data/` ; conventions (numéros de case `CCRR` à partir de 0101, côtés de case `"CCRR-CCRR"`) dans `PLANNING.md` §3.
 - Le moteur du bot doit **tracer chaque décision** (méthode, préférence, départage). Les exemples du livret servent de **tests de référence**.
 - Node.js est installé via nvm : dans les commandes shell, préfixer par `source ~/.nvm/nvm.sh && …`.
+- **Serveur de dev : port 5173 uniquement.** Le dev ne peut ouvrir que ce port dans son navigateur ; ne pas lancer de serveur sur un autre port. Si l'instance du 5173 sert du code périmé (modification non prise en compte), l'IA peut la redémarrer (arrêter le processus `vite` en cours, puis relancer la configuration `map` de `.claude/launch.json`) pour mettre à jour la page du dev.
 - Modèle, effort et économie de tokens : `PLANNING.md` §7.
 - Git : ne commiter que sur demande du dev.
 - Toujours demander au dev la permission avant de commencer à éditer les fichiers / coder.

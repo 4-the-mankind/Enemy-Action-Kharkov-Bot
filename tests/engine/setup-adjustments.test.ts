@@ -6,26 +6,25 @@ import { parseMapHexes, resolveHex } from "../../src/core/map-hexes";
 import { parseUnits } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { ADJUSTMENTS, parseSetupAdjustments } from "../../src/engine/setup-adjustments";
-import { emptyState, type GameState } from "../../src/engine/types";
+import { emptyState, type Command, type GameState, type StepResult } from "../../src/engine/types";
 
 const json = (p: string) => JSON.parse(readFileSync(p, "utf8"));
 const hexData = parseMapHexes(json("data/map-hexes.json"));
+const file = parseSetupAdjustments(json("data/setup-adjustments.json"));
 const engine = createEngine({
   units: parseUnits(json("data/units.json")).units,
   playableHexes: new Set(hexes(parseMapGrid(json("data/map-grid.json"))).filter((h) => resolveHex(hexData, h.id).playable).map((h) => h.id)),
+  adjustments: file.adjustments,
 });
-const file = parseSetupAdjustments(json("data/setup-adjustments.json"));
+const setUp = () => engine.step(emptyState(), { type: "SetUpTurn1" }).state;
+const refusal = (r: StepResult) => r.events.find((e) => e.type === "CommandRejected");
 
-/** Booklet set-up, then the adjustment's commands played by the bot (as 2.5 will). */
+/** Booklet set-up, then the recorded adjustment played by the bot (2.5). */
 function play(id: string): GameState {
-  let state = engine.step(emptyState(), { type: "SetUpTurn1" }).state;
-  for (const command of file.adjustments.find((a) => a.id === id)!.commands) {
-    const r = engine.step(state, command, "bot");
-    const refused = r.events.find((e) => e.type === "CommandRejected");
-    if (refused) throw new Error(`${id}: ${JSON.stringify(command)} refused: ${refused.reason}`);
-    state = r.state;
-  }
-  return state;
+  const r = engine.step(setUp(), { type: "ApplySetUpAdjustment", id });
+  const refused = refusal(r);
+  if (refused) throw new Error(`${id} refused: ${refused.reason}`);
+  return r.state;
 }
 const stack = (s: GameState, hex: string) => s.order.filter((u) => s.units[u].at === hex);
 
@@ -57,6 +56,55 @@ describe("Recorded set-up adjustments (data/setup-adjustments.json, p48-50)", ()
 
   it("7,8 Voronezh Front Breakout: the 40th Army reserve unit for Turn 1 in 0205", () => {
     expect(play("7-8").units[A305].at).toBe("0205");
+  });
+
+  it("places the Front Objective markers of the booklet (Chuguev in 1009, errata)", () => {
+    const expected: Record<string, GameState["objectives"]> = {
+      "1-2": { voronezh: { at: "1009", face: "west" }, southwest: { at: "1608", face: "west" } },
+      "3-4": { voronezh: { at: "1210", face: "west" }, southwest: { at: "1906", face: "west" } },
+      "5-6": { voronezh: { at: "0608", face: "south" }, southwest: { at: "1410", face: "south" } },
+      "7-8": { voronezh: { at: "1009", face: "west" }, southwest: { at: "1410", face: "west" } },
+      "9-10": { voronezh: { at: "1210", face: "west" }, southwest: { at: "1608", face: "west" } },
+    };
+    for (const [id, objectives] of Object.entries(expected)) expect(play(id).objectives).toEqual(objectives);
+  });
+
+  it("is traced: the adjustment first, then the events of each command it played", () => {
+    const r = engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "5-6", roll: 6 });
+    expect(r.events[0]).toEqual({ type: "SetUpAdjustmentApplied", id: "5-6", name: "Bloody Izyum", roll: 6, commands: file.adjustments[2].commands.length });
+    expect(r.events.length).toBeGreaterThan(1);
+    expect(r.state.adjustment).toEqual({ id: "5-6", roll: 6 });
+  });
+
+  it("can be replaced by another until Start, from the booklet set-up", () => {
+    const r = engine.step(play("3-4"), { type: "ApplySetUpAdjustment", id: "7-8", roll: 8 });
+    expect(r.events[0]).toMatchObject({ type: "SetUpAdjustmentApplied", id: "7-8", replaces: "Slavyansk Liberated" });
+    expect(r.state).toEqual({ ...play("7-8"), adjustment: { id: "7-8", roll: 8 } });
+  });
+
+  it("locks the player until Start, which needs an adjustment", () => {
+    const s = setUp(), move: Command = { type: "MoveUnits", units: ["sov_57G-Popov_infantry"], to: "1304" };
+    expect(refusal(engine.step(s, move))?.reason).toBe("Press Start to begin turn 1.");
+    expect(engine.canLift(s, "sov_57G-Popov_infantry")).toBe(false);
+    expect(refusal(engine.step(s, { type: "StartGame" }))?.reason).toMatch(/set-up adjustment first/);
+    const started = engine.step(play("9-10"), { type: "StartGame" });
+    expect(started.events).toEqual([{ type: "GameStarted" }]);
+    expect(refusal(engine.step(started.state, move))).toBeUndefined();
+    expect(refusal(engine.step(started.state, { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason).toMatch(/has started/);
+  });
+
+  it("is played after the set-up, with a roll that selects it", () => {
+    expect(refusal(engine.step(emptyState(), { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason).toMatch(/Set up turn 1 first/);
+    expect(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "1-2", roll: 3 }))?.reason).toMatch(/roll of 3/);
+    expect(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "11-12" }))?.reason).toMatch(/Unknown/);
+  });
+
+  it("is all or nothing: a refused command leaves the state unchanged", () => {
+    // 57G/Popov eliminated first (by hand, as the bot): the recorded step loss on it is refused.
+    const state = engine.step(setUp(), { type: "MoveUnits", units: ["sov_57G-Popov_infantry"], to: "eliminated" }, "bot").state;
+    const r = engine.step(state, { type: "ApplySetUpAdjustment", id: "1-2" });
+    expect(refusal(r)?.reason).toMatch(/Raus Overrun cannot be played/);
+    expect(r.state).toBe(state);
   });
 
   it("rejects unknown adjustments and command types", () => {
