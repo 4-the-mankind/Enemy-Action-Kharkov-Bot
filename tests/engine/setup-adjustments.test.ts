@@ -1,19 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { hexes } from "../../src/core/geometry";
-import { parseMapGrid } from "../../src/core/map-grid";
-import { parseMapHexes, resolveHex } from "../../src/core/map-hexes";
 import { parseUnits } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { ADJUSTMENTS, parseSetupAdjustments } from "../../src/engine/setup-adjustments";
 import { emptyState, type Command, type GameState, type StepResult } from "../../src/engine/types";
+import { realMap } from "./real-map";
 
 const json = (p: string) => JSON.parse(readFileSync(p, "utf8"));
-const hexData = parseMapHexes(json("data/map-hexes.json"));
 const file = parseSetupAdjustments(json("data/setup-adjustments.json"));
 const engine = createEngine({
   units: parseUnits(json("data/units.json")).units,
-  playableHexes: new Set(hexes(parseMapGrid(json("data/map-grid.json"))).filter((h) => resolveHex(hexData, h.id).playable).map((h) => h.id)),
+  ...realMap,
   adjustments: file.adjustments,
 });
 const setUp = () => engine.step(emptyState(), { type: "SetUpTurn1" }).state;

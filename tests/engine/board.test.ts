@@ -1,16 +1,9 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_GRID, hexDistance, hexId, hexNeighbor, parseHexId, type MapGrid } from "../../src/core/geometry";
-import { parseMapGrid } from "../../src/core/map-grid";
-import { parseMapHexes, type MapHexes } from "../../src/core/map-hexes";
-import { parseMapHexSides, type MapHexSides } from "../../src/core/map-hexsides";
+import type { MapHexes } from "../../src/core/map-hexes";
+import type { MapHexSides } from "../../src/core/map-hexsides";
 import { createBoard } from "../../src/engine/board";
-
-const json = (path: string) => JSON.parse(readFileSync(path, "utf8"));
-const grid = parseMapGrid(json("data/map-grid.json"));
-const hexData = parseMapHexes(json("data/map-hexes.json"));
-const sideData = parseMapHexSides(json("data/map-hexsides.json"));
-const board = createBoard({ grid, hexData, sideData });
+import { board, grid, hexData, sideData } from "./real-map";
 const ids = (hexes: readonly { hex: string }[]) => hexes.map((n) => n.hex).sort();
 const riverSides = (river: string) =>
   Object.entries(sideData.sides).filter(([, s]) => s.river === river).map(([id]) => id.split("-") as [string, string]);

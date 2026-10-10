@@ -1,7 +1,10 @@
 // The engine: pure functions over GameState, bound to the static game data.
 // Every rule lives here, so the UI can ask before acting (canMove) and the step
 // function refuses what it would allow anyway.
+import type { TerrainEffects } from "../core/terrain-effects";
 import type { Unit } from "../core/units";
+import type { Board } from "./board";
+import { createMovement, type Movement } from "./movement";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import {
   emptyState, isHex, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState, type Location,
@@ -10,8 +13,10 @@ import {
 
 export interface EngineData {
   units: Unit[];
-  /** Playable hex ids (dead hexes excluded, D5). */
-  playableHexes: Set<string>;
+  /** The map as the rules see it (3.1). */
+  board: Board;
+  /** Movement costs of the Terrain Effects Chart. */
+  terrain: TerrainEffects;
   /** Recorded set-up adjustments (data/setup-adjustments.json, D15). */
   adjustments?: RecordedAdjustment[];
 }
@@ -29,12 +34,15 @@ export interface Engine {
   /** Units used in the solo game, in data order. */
   readonly units: Unit[];
   unit(id: string): Unit | undefined;
+  /** Movement rules (3.2): reachable hexes, stacking, proximate, surround. */
+  readonly movement: Movement;
 }
 
 export function createEngine(data: EngineData): Engine {
   const units = data.units.filter((u) => !u.notUsedInSolo);
   const byId = new Map(units.map((u) => [u.id, u]));
   const name = (id: string) => byId.get(id)?.designation ?? id;
+  const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id) });
 
   // Booklet set-up (§3): start hex → on the map; turn 1 → reserve; later turn → reinforcements.
   function setUpTurn1(): StepResult {
@@ -61,7 +69,7 @@ export function createEngine(data: EngineData): Engine {
     const lock = locked(state, actor);
     if (lock) return lock;
     if (isHex(to)) {
-      if (!data.playableHexes.has(to)) return `${to} is not a playable hex.`;
+      if (!data.board.isPlayable(to)) return `${to} is not a playable hex.`;
     } else if (to !== "reserve" && to !== "reinforcements" && to !== "eliminated") {
       return `Unknown destination "${to}".`;
     }
@@ -97,7 +105,16 @@ export function createEngine(data: EngineData): Engine {
       const { dispersed, ...rest } = state.units[id];
       next.units[id] = isHex(to) && dispersed ? { ...rest, at: to, dispersed } : { ...rest, at: to };
     }
-    return { state: next, events: [{ type: "UnitsMoved", units: ordered, from, to }] };
+    const events: GameEvent[] = [{ type: "UnitsMoved", units: ordered, from, to }];
+    // 14.1: a town or city changes hands the moment an enemy unit enters it.
+    const sides = new Set(ordered.map((id) => byId.get(id)!.side));
+    const owner = isHex(to) ? movement.townOwner(next, to) : null;
+    if (owner && sides.size === 1 && !sides.has(owner)) {
+      const side = [...sides][0];
+      next.sovietTowns = side === "soviet" ? [...next.sovietTowns, to] : next.sovietTowns.filter((h) => h !== to);
+      events.push({ type: "TownCaptured", hex: to, owner: side });
+    }
+    return { state: next, events };
   }
 
   // Rulebook "Steps": a 2-step counter flips to its back; a 3-step unit is replaced by its
@@ -156,7 +173,7 @@ export function createEngine(data: EngineData): Engine {
   function placeObjective(state: GameState, front: ObjectiveFront, face: ObjectiveFace, at: string | null): StepResult {
     if (front !== "voronezh" && front !== "southwest") return reject(state, "PlaceObjective", `Unknown front "${front}".`);
     if (face !== "west" && face !== "south") return reject(state, "PlaceObjective", `Unknown objective "${face}".`);
-    if (at !== null && !data.playableHexes.has(at)) return reject(state, "PlaceObjective", `${at} is not a playable hex.`);
+    if (at !== null && !data.board.isPlayable(at)) return reject(state, "PlaceObjective", `${at} is not a playable hex.`);
     const cur = state.objectives[front];
     if (at === null ? !cur : cur?.at === at && cur.face === face) return { state, events: [] };
     const objectives = { ...state.objectives };
@@ -259,6 +276,7 @@ export function createEngine(data: EngineData): Engine {
     },
     nextFace,
     units,
+    movement,
     unit: (id) => byId.get(id),
   };
 }

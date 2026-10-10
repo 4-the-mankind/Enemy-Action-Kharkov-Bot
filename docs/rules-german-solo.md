@@ -2226,7 +2226,7 @@ Once placed, a Soviet forward support marker remains on the map until removed by
 
 ### 14.1 Towns and Cities
 
-Every town and city hex is considered owned by the Soviets or the Germans, even if not occupied by a unit. At the start of play, all town and city hexes are German owned except for two Soviet owned towns in 0202 and 1103. Ownership of a town or city changes the moment an enemy unit enters the hex. From that point forward, the town or city is owned by the side whose unit last entered the hex, even if the hex is subsequently empty.
+Every town and city hex is considered owned by the Soviets or the Germans, even if not occupied by a unit. At the start of play, all town and city hexes are German owned except for two Soviet owned towns in 0202 and 1103. Ownership of a town or city changes the moment an enemy unit enters the hex. From that point forward, the town or city is owned by the side whose unit last entered the hex, even if the hex is subsequently empty. **[Errata, dev 2026-10-10]** 0202 is a typo: the Soviet town is Valuyki, hex 0302.
 
 Ownership of a town or city is not affected by being in an enemy zone of control or out of supply; an enemy unit must actually enter the town or city to take ownership.
 
@@ -2659,12 +2659,12 @@ After making all adjustments, shuffle together the remaining initial Soviet card
 | Pryadovka | 2120 |
 | Sinelnikowo | 2615 |
 | Slavyansk | 1802 |
-| Sumy | 0322 |
+| Sumy | 0322 **[Errata, dev 2026-10-10]** 0221 on the map |
 | Valky | 1116 |
 | Valuyki | 0302 |
 | Volchansk | 0608 |
 | Zaporozhe | 3116 |
-| Zmiyev | 1311 |
+| Zmiyev | 1311 **[Errata, dev 2026-10-10]** 1210 on the map, as in the set-up adjustments |
 
 <!-- p52 -->
 

@@ -49,6 +49,8 @@ export interface GameState {
   order: string[];
   /** Soviet victory points (track starts at 2, §3 "Marker Placement"). */
   vp: number;
+  /** Town and city hexes owned by the Soviets (14.1); every other town and city is German-owned. */
+  sovietTowns: string[];
   /** Soviet discard pile, oldest first. */
   sovietDiscard: string[];
   /** Front Objective markers on the map (placement only; their logic comes in 4.2). */
@@ -95,6 +97,8 @@ export type GameEvent =
   /** Followed by the events of each command it played. */
   | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
   | { type: "GameStarted" }
+  /** A unit ended its move in an enemy town or city (14.1). */
+  | { type: "TownCaptured"; hex: string; owner: "german" | "soviet" }
   | { type: "CommandRejected"; command: Command["type"]; reason: string };
 
 export interface StepResult {
@@ -102,8 +106,14 @@ export interface StepResult {
   events: GameEvent[];
 }
 
+/**
+ * 14.1: at the start of play every town and city is German-owned except two Soviet towns.
+ * The booklet prints "0202 and 1103": a typo for Valuyki, 0302 (Q13, confirmed by the dev).
+ */
+export const START_SOVIET_TOWNS = ["0302", "1103"];
+
 /** Soviet VP at set up (§3 "Marker Placement": 1VP marker on "2", 10VP marker on "0"). */
 export const START_VP = 2;
 
 export const emptyState = (): GameState =>
-  ({ version: 1, turn: 1, setUp: false, units: {}, order: [], vp: START_VP, sovietDiscard: [], objectives: {}, started: false });
+  ({ version: 1, turn: 1, setUp: false, units: {}, order: [], vp: START_VP, sovietTowns: [...START_SOVIET_TOWNS], sovietDiscard: [], objectives: {}, started: false });

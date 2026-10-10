@@ -42,6 +42,8 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       return { html: `<b>Set-up adjustment ${e.id.replace("-", ",")}: ${e.name}</b> (${e.roll ? `die roll ${e.roll}` : "chosen"}${e.replaces ? `, replaces ${e.replaces}` : ""}), played by the bot in place of its first impulse (p48-50). ${e.commands} actions:` };
     case "GameStarted":
       return { html: "<b>Turn 1 begins</b> with the first German impulse (p48). Your counters are free to move." };
+    case "TownCaptured":
+      return { html: `<b>${e.hex}</b> is now ${e.owner === "soviet" ? "Soviet" : "German"}-owned.` };
     case "CommandRejected":
       return { html: `<b>Not done:</b> ${e.reason}`, refused: true };
   }

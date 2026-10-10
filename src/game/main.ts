@@ -3,7 +3,7 @@
 import { hexCorners } from "../core/geometry";
 import { createEngine } from "../engine/engine";
 import { isHex } from "../engine/types";
-import { resolveHex } from "../core/map-hexes";
+import { createBoard } from "../engine/board";
 import { loadGameData } from "./data/game-data";
 import { loadMapData } from "./data/map-data";
 import { createDragController } from "./drag";
@@ -65,8 +65,8 @@ async function init() {
   mountLayersPanel($("layers"), stack);
 
   // Game session (D12): the engine owns the rules, the views play its events.
-  const playableHexes = new Set(data.hexes.filter((x) => resolveHex(data.hexData, x.id).playable).map((x) => x.id));
-  const session = new GameSession(createEngine({ units: game.units, playableHexes, adjustments: game.adjustments }));
+  const board = createBoard({ grid: data.grid, hexData: data.hexData, sideData: data.sideData });
+  const session = new GameSession(createEngine({ units: game.units, board, terrain: game.terrain, adjustments: game.adjustments }));
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);

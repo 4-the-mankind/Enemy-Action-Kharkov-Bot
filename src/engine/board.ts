@@ -1,7 +1,7 @@
 // The map as the rules see it (3.1): playable hexes, their neighbors and hexsides,
 // adjacency and distance (9.3). Built once from the map data; it does not depend on
 // the game state, so distances can be cached for the whole game.
-import { hexId, hexNeighbor, hexSideId, parseHexId, rowsInColumn, type MapGrid } from "../core/geometry";
+import { hexDistance, hexId, hexNeighbor, hexSideId, parseHexId, rowsInColumn, type MapGrid } from "../core/geometry";
 import { resolveHex, type HexData, type MapHexes } from "../core/map-hexes";
 import { resolveSide, type MapHexSides, type SideData } from "../core/map-hexsides";
 
@@ -41,6 +41,11 @@ export interface Board {
   distance(a: string, b: string): number;
   /** Distances from one hex to every playable hex it can reach (9.3), cached. */
   distancesFrom(hex: string): ReadonlyMap<string, number>;
+  /**
+   * Plain hex count on the grid, ignoring hexsides and dead hexes: a lower bound of any
+   * path, of any ZOC reach. Not a rules distance (that is `distance`).
+   */
+  hexCount(a: string, b: string): number;
 }
 
 const isBlocked = (s: SideData) => s.river === "dnieprBlocked";
@@ -114,5 +119,6 @@ export function createBoard({ grid, hexData, sideData }: BoardData): Board {
     },
     distance: (a, b) => distancesFrom(a).get(b) ?? Infinity,
     distancesFrom,
+    hexCount: (a, b) => hexDistance(grid, a, b),
   };
 }

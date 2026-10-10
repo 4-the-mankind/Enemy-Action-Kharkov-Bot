@@ -1,5 +1,6 @@
 // Read-only game data for the game page: units (2.3) and the turn calendar, read as
 // static files like the map data (PWA without server, phase 5).
+import { parseTerrainEffects, type TerrainEffects } from "../../core/terrain-effects";
 import { parseUnits, type Unit } from "../../core/units";
 import { parseSetupAdjustments, type RecordedAdjustment } from "../../engine/setup-adjustments";
 
@@ -9,6 +10,7 @@ export interface GameData {
   units: Unit[];
   calendar: CalendarTurn[];
   adjustments: RecordedAdjustment[];
+  terrain: TerrainEffects;
 }
 
 async function fetchJson(path: string): Promise<unknown> {
@@ -28,9 +30,12 @@ function parseCalendar(raw: unknown): CalendarTurn[] {
 }
 
 export async function loadGameData(): Promise<GameData> {
-  const [units, calendar, adjustments] = await Promise.all(
-    ["/data/units.json", "/data/calendar.json", "/data/setup-adjustments.json"].map(fetchJson));
-  return { units: parseUnits(units).units, calendar: parseCalendar(calendar), adjustments: parseSetupAdjustments(adjustments).adjustments };
+  const [units, calendar, adjustments, terrain] = await Promise.all(
+    ["/data/units.json", "/data/calendar.json", "/data/setup-adjustments.json", "/data/terrain-effects.json"].map(fetchJson));
+  return {
+    units: parseUnits(units).units, calendar: parseCalendar(calendar),
+    adjustments: parseSetupAdjustments(adjustments).adjustments, terrain: parseTerrainEffects(terrain),
+  };
 }
 
 /** URL of a counter image from units.json (file name in assets/counters/units/). */

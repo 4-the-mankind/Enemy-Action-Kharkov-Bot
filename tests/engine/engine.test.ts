@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseUnits, type Unit } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { emptyState, type GameState } from "../../src/engine/types";
+import { realMap } from "./real-map";
 
 const realUnits = parseUnits(JSON.parse(readFileSync("data/units.json", "utf8"))).units;
 
@@ -24,13 +25,13 @@ const sample = [
   unit("gLate", "german", { turn: 3 }),
   unit("notSolo", "soviet", { turn: 2 }, { notUsedInSolo: true }),
 ];
-const engine = createEngine({ units: sample, playableHexes: new Set(["0105", "0204", "0305"]) });
+const engine = createEngine({ units: sample, ...realMap });
 /** A game in progress: booklet set-up, Start pressed (the adjustment is tested elsewhere). */
 const setUp = (): GameState => ({ ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true });
 
 describe("Set up turn 1", () => {
   it("places the booklet set-up of every unit used in solo (reference: data/units.json)", () => {
-    const real = createEngine({ units: realUnits, playableHexes: new Set(realUnits.flatMap((u) => u.entryHex ?? [])) });
+    const real = createEngine({ units: realUnits, ...realMap });
     const { state, events } = real.step(emptyState(), { type: "SetUpTurn1" });
     expect(events).toHaveLength(1);
     const e = events[0];
@@ -139,7 +140,7 @@ describe("Set-up adjustment commands (2.4)", () => {
     unit("one", "german", { hex: "0204" }, { steps: 1 }),
     unit("sRes", "soviet", { turn: 1 }),
   ];
-  const eng = createEngine({ units, playableHexes: new Set(["0105", "0204", "0305"]) });
+  const eng = createEngine({ units, ...realMap });
   const start = () => ({ ...eng.step(emptyState(), { type: "SetUpTurn1" }).state, started: true });
 
   it("starts with 2 Soviet VP, an empty discard and no objective marker", () => {
