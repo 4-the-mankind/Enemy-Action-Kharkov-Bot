@@ -26,7 +26,7 @@ body {
   grid-template-columns: auto 1fr auto;
   overflow: hidden;
 }
-body.dragging, body.dragging * { cursor: grabbing !important; }
+body.dragging, body.dragging * { cursor: grabbing !important; user-select: none !important; }
 
 kbd {
   font: inherit;
@@ -181,8 +181,7 @@ kbd {
 .stack-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.85rem; color: var(--slip-dim); }
 .stack ul { list-style: none; margin: 4px 0 0; padding: 0; }
 .stack li {
-  display: grid;
-  grid-template-columns: auto 64px 1fr auto;
+  display: flex;
   align-items: center;
   gap: 10px;
   padding: 4px;
@@ -202,7 +201,7 @@ kbd {
   font-size: 11px; line-height: 1;
 }
 .stack li.selected .tick { background: var(--slip-ink); color: var(--slip); }
-.stack-name { font-weight: 600; line-height: 1.15; }
+.stack-name { flex: 1; min-width: 0; font-weight: 600; line-height: 1.15; }
 .stack-name small { display: block; font-weight: 400; color: var(--slip-dim); font-size: 0.8rem; }
 .pips { display: flex; gap: 3px; }
 .pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--slip-ink); }
@@ -476,3 +475,65 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
   .units-body { width: var(--units-w); }
   .inspector { width: auto; right: 14px; }
 }
+
+.recap-actions { flex-wrap: wrap; }
+
+/* Counter context menu (L) */
+.counter-menu { position: fixed; z-index: 50; min-width: 200px; padding: 4px 0; color: var(--slip-ink); background: var(--slip); border-radius: 4px; box-shadow: 0 6px 18px rgb(0 0 0 / 0.45); }
+.counter-menu .menu-head { padding: 4px 12px 6px; font-size: 0.8rem; color: var(--slip-dim); border-bottom: 1px solid rgb(38 46 41 / 0.15); }
+.counter-menu button { display: block; width: 100%; font: inherit; text-align: left; color: inherit; background: none; border: 0; padding: 6px 12px; cursor: pointer; }
+.counter-menu button:hover:not([disabled]), .counter-menu button:focus-visible { background: rgb(38 46 41 / 0.1); outline: none; }
+.counter-menu button[disabled] { opacity: 0.4; cursor: default; }
+.stack .tag { font-size: 0.75rem; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; opacity: 0.8; }
+
+/* Bot tab: Soviet state */
+.bot-status { margin: 0; display: grid; gap: 6px; }
+.bot-status div { display: flex; justify-content: space-between; gap: 12px; }
+.bot-status dt { color: var(--paper-dim); }
+.bot-status dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Stack order arrows (inspector, pinned stack) */
+.stack li.restacking { position: relative; z-index: 1; background: var(--slip); box-shadow: 0 3px 10px rgb(0 0 0 / 0.25); }
+.restack { display: flex; flex-direction: column; gap: 2px; }
+.restack button {
+  display: grid; place-items: center;
+  width: 22px; height: 20px; padding: 0;
+  color: var(--slip-ink); background: transparent;
+  border: 1px solid rgb(38 46 41 / 0.35); border-radius: 2px;
+  cursor: pointer;
+}
+.restack button:hover:not([disabled]) { background: var(--slip-ink); color: var(--slip); border-color: var(--slip-ink); }
+.restack button:focus-visible { outline: 2px solid var(--stab-red); outline-offset: 1px; }
+.restack button[disabled] { opacity: 0.25; cursor: default; }
+.restack svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Units on/off: a paper slip clipped to the map's top right corner, like the inspector.
+   The icon shows the action (struck-through stack = hide); red edge while the counters are off the map. */
+.map-toggle {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--slip-ink);
+  background: var(--slip);
+  border: 0;
+  border-left: 4px solid var(--feldgrau);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+.map-toggle:hover { background: #fff; }
+.map-toggle:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+.map-toggle kbd { opacity: 0.55; }
+.map-toggle svg { width: 20px; height: 20px; }
+.map-toggle .c-back { fill: var(--slip); stroke: var(--slip-ink); stroke-width: 1.4; }
+.map-toggle .c-front { fill: var(--slip-ink); }
+.map-toggle .slash { stroke: var(--stab-red); stroke-width: 2.2; stroke-linecap: round; }
+.map-toggle:not(.off) .c-front { fill: var(--slip); stroke: var(--slip-ink); stroke-width: 1.4; stroke-dasharray: 2 1.6; }
+.map-toggle:not(.off) .c-back { stroke-dasharray: 2 1.6; }
+.map-toggle.off { border-left-color: var(--stab-red); }
+.map-toggle.off .slash { display: none; }

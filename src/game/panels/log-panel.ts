@@ -20,6 +20,24 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
         : e.to === "reinforcements" ? "back to the reinforcements" : `moved to ${e.to}`;
       return { html: `${who} ${verb}${from.length === 1 ? ` from ${where(from[0])}` : ""}.` };
     }
+    case "UnitRestacked": {
+      const how = { up: "up the stack", down: "down the stack", top: "to the top of the stack", bottom: "to the bottom of the stack" }[e.to];
+      return { html: `<b>${name(e.unit)}</b> moved ${how} in ${e.at}.` };
+    }
+    case "StepRemoved":
+      return { html: `<b>${name(e.unit)}</b> loses a step${e.to === "reduced" ? ": its \u201cR\u201d counter comes in" : ""}.` };
+    case "DispersedSet": {
+      const who = e.units.map(name).join(", ");
+      return { html: e.dispersed ? `<b>${who}</b> dispersed.` : `Dispersed marker removed from <b>${who}</b>.` };
+    }
+    case "VictoryPointsSet":
+      return { html: `<b>Soviet VP</b> ${e.from} → ${e.to}.` };
+    case "SovietCardDiscarded":
+      return { html: `Soviet card <b>${e.card.toUpperCase()}</b> ${e.discarded ? "discarded" : "back in the deck"}.` };
+    case "ObjectivePlaced": {
+      const marker = `${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${e.face === "west" ? "West" : "South"}`;
+      return { html: e.at ? `<b>${marker}</b> placed in ${e.at}.` : `<b>${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective</b> removed.` };
+    }
     case "CommandRejected":
       return { html: `<b>Not done:</b> ${e.reason}`, refused: true };
   }

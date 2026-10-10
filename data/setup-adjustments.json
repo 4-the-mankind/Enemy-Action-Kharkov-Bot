@@ -1,0 +1,807 @@
+{
+  "version": 1,
+  "adjustments": [
+    {
+      "id": "1-2",
+      "die": [
+        1,
+        2
+      ],
+      "name": "Raus Overrun",
+      "commands": [
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_586-320-Raus_inf"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_587-320-Raus_infantry"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_585-320-Raus_inf"
+          ],
+          "to": "1205"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_585-320-Raus_inf"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_57G-Popov_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_267-6th_infantry"
+          ],
+          "to": "1304"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_106-6th_infantry"
+          ],
+          "to": "1304"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_106-6th_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_172-6th_infantry",
+            "sov_6-6th_infantry"
+          ],
+          "to": "1203"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B4G-Popov_mech"
+          ],
+          "to": "1402"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_3-Popov_armor"
+          ],
+          "to": "1402"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_3-Popov_armor"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A4G-Popov_armor"
+          ],
+          "to": "1403"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_10-Popov_mech"
+          ],
+          "to": "1403"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "voronezh",
+          "face": "west",
+          "at": "1008"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "southwest",
+          "face": "west",
+          "at": "1608"
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e03",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e11",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e17",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e20",
+          "discarded": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_18-Popov_armor",
+            "sov_41G-Popov_infantry"
+          ],
+          "to": "1504"
+        }
+      ]
+    },
+    {
+      "id": "3-4",
+      "die": [
+        3,
+        4
+      ],
+      "name": "Slavyansk Liberated",
+      "commands": [
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_587-320-Raus_infantry"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_27-19P-IIICorps_arm"
+          ],
+          "to": "2003"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_27-19P-IIICorps_arm"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_27-19P-IIICorps_arm"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_52-1stGuards_infantry"
+          ],
+          "to": "1802"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A4G-Popov_armor"
+          ],
+          "to": "1802"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_10-Popov_mech"
+          ],
+          "to": "1801"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_10-Popov_mech"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_10-Popov_mech"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_3-Popov_armor"
+          ],
+          "to": "1503"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B4G-Popov_mech"
+          ],
+          "to": "1502"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "voronezh",
+          "face": "west",
+          "at": "1210"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "southwest",
+          "face": "west",
+          "at": "1906"
+        },
+        {
+          "type": "SetVictoryPoints",
+          "vp": 3
+        },
+        {
+          "type": "SetVictoryPoints",
+          "vp": 4
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e01",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e02",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e05",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e22",
+          "discarded": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_38G-1stGuards_infantry"
+          ],
+          "to": "1702"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_38G-1stGuards_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_41G-Popov_infantry"
+          ],
+          "to": "1502"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_18-Popov_armor"
+          ],
+          "to": "1602"
+        }
+      ]
+    },
+    {
+      "id": "5-6",
+      "die": [
+        5,
+        6
+      ],
+      "name": "Bloody Izyum",
+      "commands": [
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_587-320-Raus_infantry"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_586-320-Raus_inf"
+          ],
+          "to": "1405"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_586-320-Raus_inf"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_586-320-Raus_inf"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_387-IIICorps_inf"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_35G-Popov_infantry"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_57G-Popov_infantry"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_10-Popov_mech"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_10-Popov_mech"
+          ],
+          "to": "1702"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_27-19P-IIICorps_arm"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A4G-Popov_armor"
+          ],
+          "to": "1503"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B4G-Popov_mech"
+          ],
+          "to": "1402"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_B4G-Popov_mech"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_3-Popov_armor"
+          ],
+          "to": "1404"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "voronezh",
+          "face": "west",
+          "at": "0608"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "southwest",
+          "face": "west",
+          "at": "1410"
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e03",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e08",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e12",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e17",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e20",
+          "discarded": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_18-Popov_armor"
+          ],
+          "to": "1603"
+        },
+        {
+          "type": "Restack",
+          "unit": "sov_18-Popov_armor",
+          "to": "bottom"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_41G-Popov_infantry"
+          ],
+          "to": "1403"
+        }
+      ]
+    },
+    {
+      "id": "7-8",
+      "die": [
+        7,
+        8
+      ],
+      "name": "Voronezh Front Breakout",
+      "commands": [
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_429-168-Raus_inf"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_Fus-Grd-XLVIII_armor"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_417-168-Raus_infantry"
+          ],
+          "to": "0307"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_417-168-Raus_infantry"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_100-40th_infantry"
+          ],
+          "to": "0106"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_100-40th_infantry"
+          ],
+          "to": "0105"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_100-40th_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_184-3rdT_infantry"
+          ],
+          "to": "0504"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B15-3rdT_mech"
+          ],
+          "to": "0804"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_48G-3rdT_infantry"
+          ],
+          "to": "0804"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_48G-3rdT_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_Gre-Grd-XLVIII_armor"
+          ],
+          "to": "0805"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_Gre-Grd-XLVIII_armor"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_Gre-Grd-XLVIII_armor"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A12-3rdT_mech"
+          ],
+          "to": "0605"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A15-3rdT_armor"
+          ],
+          "to": "0705"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B15-3rdT_mech"
+          ],
+          "to": "0604"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_48G-3rdT_infantry"
+          ],
+          "to": "0604"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_6GC-3rdT_armor"
+          ],
+          "to": "0804"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_62G-3rdT_infantry"
+          ],
+          "to": "0803"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_62G-3rdT_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_111-3rdT_infantry"
+          ],
+          "to": "0903"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B12-3rdT_armor"
+          ],
+          "to": "0803"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_62G-3rdT_infantry"
+          ],
+          "to": "0802"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_62G-3rdT_infantry"
+          ],
+          "to": "0803"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "voronezh",
+          "face": "west",
+          "at": "1008"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "southwest",
+          "face": "west",
+          "at": "1410"
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e04",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e05",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e11",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e19",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e22",
+          "discarded": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_305-40th_infantry"
+          ],
+          "to": "0205"
+        }
+      ]
+    },
+    {
+      "id": "9-10",
+      "die": [
+        9,
+        10
+      ],
+      "name": "Drive on the Donets",
+      "commands": [
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_298-LVII_inf"
+          ],
+          "to": "1005"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "germ_298-LVII_inf"
+        },
+        {
+          "type": "SetDispersed",
+          "units": [
+            "germ_298-LVII_inf"
+          ],
+          "dispersed": true
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B12-3rdT_armor"
+          ],
+          "to": "1004"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_111-3rdT_infantry"
+          ],
+          "to": "1003"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_6GC-3rdT_armor"
+          ],
+          "to": "1003"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_111-3rdT_infantry"
+          ],
+          "to": "1002"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_111-3rdT_infantry"
+          ],
+          "to": "1003"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_62G-3rdT_infantry"
+          ],
+          "to": "1002"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_62G-3rdT_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_160-3rdT_infantry"
+          ],
+          "to": "0903"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "germ_Gre-Grd-XLVIII_armor"
+          ],
+          "to": "eliminated"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_48G-3rdT_infantry"
+          ],
+          "to": "0803"
+        },
+        {
+          "type": "RemoveStep",
+          "unit": "sov_48G-3rdT_infantry"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_184-3rdT_infantry"
+          ],
+          "to": "0802"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_B15-3rdT_mech"
+          ],
+          "to": "0703"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A12-3rdT_mech"
+          ],
+          "to": "0804"
+        },
+        {
+          "type": "MoveUnits",
+          "units": [
+            "sov_A15-3rdT_armor"
+          ],
+          "to": "0804"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "voronezh",
+          "face": "west",
+          "at": "1210"
+        },
+        {
+          "type": "PlaceObjective",
+          "front": "southwest",
+          "face": "west",
+          "at": "1608"
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e03",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e05",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e19",
+          "discarded": true
+        },
+        {
+          "type": "DiscardSovietCard",
+          "card": "e20",
+          "discarded": true
+        }
+      ]
+    }
+  ]
+}

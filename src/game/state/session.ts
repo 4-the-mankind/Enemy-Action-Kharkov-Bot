@@ -8,18 +8,25 @@ export type SessionListener = (state: GameState, events: GameEvent[], undo: bool
 
 export class GameSession {
   private current: GameState = emptyState();
-  private readonly history: GameState[] = [];
+  /** Each state change: the state before it and the command that made it (D16 keeps the commands). */
+  private readonly history: { state: GameState; command: Command }[] = [];
   private readonly listeners: SessionListener[] = [];
 
   constructor(readonly engine: Engine) {}
 
   get state(): GameState { return this.current; }
 
+  /** Number of state changes so far. */
+  get depth(): number { return this.history.length; }
+
+  /** Commands that changed the state since a given depth, in order. */
+  commandsSince(depth: number): Command[] { return this.history.slice(depth).map((h) => h.command); }
+
   /** Runs one command; a refused command leaves the state (and the undo history) unchanged. */
   dispatch(command: Command): GameEvent[] {
     const { state, events } = this.engine.step(this.current, command);
     if (state !== this.current) {
-      this.history.push(this.current);
+      this.history.push({ state: this.current, command });
       this.current = state;
     }
     this.emit(events, false);
@@ -29,9 +36,8 @@ export class GameSession {
   canUndo(): boolean { return this.history.length > 0; }
 
   undo() {
-    const prev = this.history.pop();
-    if (!prev) return;
-    this.current = prev;
+    if (!this.canUndo()) return;
+    this.current = this.history.pop()!.state;
     this.emit([], true);
   }
 

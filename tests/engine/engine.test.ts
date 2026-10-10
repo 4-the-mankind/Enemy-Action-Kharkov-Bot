@@ -110,8 +110,94 @@ describe("MoveUnits", () => {
     expect(engine.whyNotMove(emptyState(), ["s1"], "0105")).toBe("s1 is not in play.");
   });
 
+  it("restacks a unit within its hex only, up, down, to the top or the bottom", () => {
+    let s = setUp();
+    s = engine.step(s, { type: "MoveUnits", units: ["g1"], to: "0105" }).state; // 0105: s1, s2, g1 (bottom to top)
+    const inHex = (st: GameState) => st.order.filter((id) => st.units[id].at === "0105");
+    let r = engine.step(s, { type: "Restack", unit: "g1", to: "bottom" });
+    expect(inHex(r.state)).toEqual(["g1", "s1", "s2"]);
+    expect(r.events).toEqual([{ type: "UnitRestacked", unit: "g1", at: "0105", to: "bottom" }]);
+    r = engine.step(r.state, { type: "Restack", unit: "s1", to: "up" });
+    expect(inHex(r.state)).toEqual(["g1", "s2", "s1"]);
+    expect(r.state.order.filter((id) => r.state.units[id].at !== "0105")).toEqual(s.order.filter((id) => s.units[id].at !== "0105"));
+    expect(engine.step(r.state, { type: "Restack", unit: "s1", to: "top" }).events).toEqual([]);
+    expect(engine.step(s, { type: "Restack", unit: "sRes", to: "up" }).events[0]).toMatchObject({ type: "CommandRejected", reason: "sRes is not on the map." });
+  });
+
   it("does nothing when the units are already there", () => {
     const s = setUp();
     expect(engine.step(s, { type: "MoveUnits", units: ["s1"], to: "0105" })).toEqual({ state: s, events: [] });
+  });
+});
+
+describe("Set-up adjustment commands (2.4)", () => {
+  const face = { combatValue: 2, selector: "10", movementValue: 4, steps: 1 };
+  const units = [
+    unit("two", "soviet", { hex: "0105" }, { backFace: face }),
+    unit("three", "german", { hex: "0204" }, { steps: 3, reducedFace: { ...face, steps: 2 }, backFace: face }),
+    unit("one", "german", { hex: "0204" }, { steps: 1 }),
+    unit("sRes", "soviet", { turn: 1 }),
+  ];
+  const eng = createEngine({ units, playableHexes: new Set(["0105", "0204", "0305"]) });
+  const start = () => eng.step(emptyState(), { type: "SetUpTurn1" }).state;
+
+  it("starts with 2 Soviet VP, an empty discard and no objective marker", () => {
+    expect(start()).toMatchObject({ vp: 2, sovietDiscard: [], objectives: {} });
+  });
+
+  it("removes steps by the booklet: back face, or R counter then back face; never the last step", () => {
+    let s = start();
+    let r = eng.step(s, { type: "RemoveStep", unit: "two" });
+    expect(r.state.units.two.face).toBe("back");
+    expect(r.events).toEqual([{ type: "StepRemoved", unit: "two", from: "front", to: "back" }]);
+    expect(eng.step(r.state, { type: "RemoveStep", unit: "two" }).events[0])
+      .toMatchObject({ type: "CommandRejected", reason: "two has a single step left: eliminate it instead." });
+    s = eng.step(s, { type: "RemoveStep", unit: "three" }).state;
+    expect(s.units.three.face).toBe("reduced");
+    s = eng.step(s, { type: "RemoveStep", unit: "three" }).state;
+    expect(s.units.three.face).toBe("back");
+    expect(eng.step(s, { type: "RemoveStep", unit: "one" }).events[0]).toMatchObject({ type: "CommandRejected" });
+    expect(eng.nextFace("one", "front")).toBeNull();
+  });
+
+  it("places Dispersed markers on map units only, and drops them when the unit leaves the map", () => {
+    let s = start();
+    expect(eng.step(s, { type: "SetDispersed", units: ["sRes"], dispersed: true }).events[0])
+      .toMatchObject({ type: "CommandRejected", reason: "sRes is not on the map." });
+    s = eng.step(s, { type: "SetDispersed", units: ["three", "one"], dispersed: true }).state;
+    expect(s.units.three.dispersed).toBe(true);
+    s = eng.step(s, { type: "MoveUnits", units: ["three"], to: "0305" }).state;
+    expect(s.units.three.dispersed).toBe(true);
+    s = eng.step(s, { type: "MoveUnits", units: ["one"], to: "eliminated" }).state;
+    expect(s.units.one).toEqual({ at: "eliminated", face: "front" });
+    const r = eng.step(s, { type: "SetDispersed", units: ["three"], dispersed: false });
+    expect(r.state.units.three).toEqual({ at: "0305", face: "front" });
+    expect(r.events).toEqual([{ type: "DispersedSet", units: ["three"], dispersed: false }]);
+  });
+
+  it("sets the Soviet VP, discards Soviet cards and places Front Objective markers", () => {
+    let s = start();
+    s = eng.step(s, { type: "SetVictoryPoints", vp: 4 }).state;
+    expect(s.vp).toBe(4);
+    expect(eng.step(s, { type: "SetVictoryPoints", vp: -1 }).events[0]).toMatchObject({ type: "CommandRejected" });
+    s = eng.step(s, { type: "DiscardSovietCard", card: "e03", discarded: true }).state;
+    s = eng.step(s, { type: "DiscardSovietCard", card: "e11", discarded: true }).state;
+    expect(s.sovietDiscard).toEqual(["e03", "e11"]);
+    s = eng.step(s, { type: "DiscardSovietCard", card: "e03", discarded: false }).state;
+    expect(s.sovietDiscard).toEqual(["e11"]);
+    expect(eng.step(s, { type: "DiscardSovietCard", card: "e23", discarded: true }).events[0]).toMatchObject({ type: "CommandRejected" });
+    s = eng.step(s, { type: "PlaceObjective", front: "voronezh", face: "west", at: "0305" }).state;
+    expect(s.objectives).toEqual({ voronezh: { at: "0305", face: "west" } });
+    expect(eng.step(s, { type: "PlaceObjective", front: "southwest", face: "south", at: "0999" }).events[0])
+      .toMatchObject({ type: "CommandRejected", reason: "0999 is not a playable hex." });
+    s = eng.step(s, { type: "PlaceObjective", front: "voronezh", face: "west", at: null }).state;
+    expect(s.objectives).toEqual({});
+  });
+
+  it("lets the bot place a Soviet reserve unit, which the player may not (D17)", () => {
+    const s = start();
+    expect(eng.canLift(s, "sRes")).toBe(false);
+    expect(eng.canLift(s, "sRes", "bot")).toBe(true);
+    expect(eng.step(s, { type: "MoveUnits", units: ["sRes"], to: "0305" }, "bot").state.units.sRes.at).toBe("0305");
   });
 });

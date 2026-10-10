@@ -15,6 +15,26 @@ const BOX_LABEL: Record<Box, string> = {
   eliminated: "Eliminate",
 };
 
+/** Edge band (px) of a scrollable panel where a held drag scrolls it, and top speed (px per second). */
+const SCROLL_BAND = 56;
+const SCROLL_MAX = 1100;
+
+/**
+ * Scroll speed for a drag held near the top or bottom edge of a [data-autoscroll] panel (or just
+ * past it): negative = up. Faster the deeper into the band, like a file manager.
+ */
+function edgeScroll(x: number, y: number): { el: HTMLElement; speed: number } | null {
+  for (const el of document.querySelectorAll<HTMLElement>("[data-autoscroll]")) {
+    const r = el.getBoundingClientRect();
+    if (x < r.left || x > r.right || el.scrollHeight <= el.clientHeight) continue;
+    const speed = (d: number) => Math.max(120, SCROLL_MAX * Math.min(1, d / SCROLL_BAND));
+    const up = r.top + SCROLL_BAND - y, down = y - (r.bottom - SCROLL_BAND);
+    if (up > 0 && up < 2 * SCROLL_BAND && el.scrollTop > 0) return { el, speed: -speed(up) };
+    if (down > 0 && down < 2 * SCROLL_BAND && el.scrollTop + el.clientHeight < el.scrollHeight) return { el, speed: speed(down) };
+  }
+  return null;
+}
+
 export interface DragController {
   begin(units: string[], at: { clientX: number; clientY: number }): void;
   /** Called with the destination after each successful drop. */
@@ -43,11 +63,28 @@ export function createDragController(session: GameSession, view: MapView, data: 
     label.className = "drop-label";
     document.body.append(ghost, label);
     document.body.classList.add("dragging");
+    // Holding the button while the panel scrolls would otherwise select its text.
+    getSelection()?.removeAllRanges();
+    const noSelect = (e: Event) => e.preventDefault();
+    addEventListener("selectstart", noSelect, true);
     const lifted = document.querySelectorAll(ids.map((id) => `[data-unit="${CSS.escape(id)}"]`).join(","));
     lifted.forEach((el) => el.classList.add("lifted"));
 
     let target: Location | null = null, well: HTMLElement | null = null;
+    let pointer = at, frame = 0, last = 0;
+    // While the pointer rests near a panel edge, keep scrolling it and re-aim the drop.
+    // The distance follows the elapsed time, so a slow frame rate does not slow the scroll.
+    const scroll = (now: number) => {
+      const s = edgeScroll(pointer.clientX, pointer.clientY);
+      if (!s) { frame = 0; return; }
+      s.el.scrollTop += s.speed * Math.min(0.1, (now - last) / 1000);
+      last = now;
+      move(pointer);
+      frame = requestAnimationFrame(scroll);
+    };
     const move = (e: { clientX: number; clientY: number }) => {
+      pointer = { clientX: e.clientX, clientY: e.clientY };
+      if (!frame && edgeScroll(e.clientX, e.clientY)) { last = performance.now(); frame = requestAnimationFrame(scroll); }
       ghost.style.transform = label.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
       const over = document.elementFromPoint(e.clientX, e.clientY);
       well?.classList.remove("drop-target", "drop-refused");
@@ -86,12 +123,15 @@ export function createDragController(session: GameSession, view: MapView, data: 
       cleanup();
     };
     const cleanup = () => {
+      cancelAnimationFrame(frame);
+      frame = -1; // never restarted by a late move
       ghost.remove();
       label.remove();
       mark.style.display = "none";
       well?.classList.remove("drop-target", "drop-refused");
       lifted.forEach((el) => el.classList.remove("lifted"));
       document.body.classList.remove("dragging");
+      removeEventListener("selectstart", noSelect, true);
     };
     addEventListener("pointermove", move);
     addEventListener("pointerup", end);

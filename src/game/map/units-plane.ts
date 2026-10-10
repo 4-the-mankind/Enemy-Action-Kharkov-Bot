@@ -3,7 +3,7 @@
 import type { MapData } from "../data/map-data";
 import { faceImage } from "../data/game-data";
 import type { Engine } from "../../engine/engine";
-import { isHex, type GameState } from "../../engine/types";
+import { isHex, OBJECTIVE_FRONTS, type GameState, type ObjectiveFace, type ObjectiveFront } from "../../engine/types";
 import type { Selection } from "../state/selection";
 import type { MapView } from "./map-view";
 
@@ -12,6 +12,13 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const COUNTER = 150;
 /** Offset of each stacking level, up and left, in grid px. */
 const STACK_STEP = 14;
+/** Dispersed marker on a counter's top right corner, and Front Objective markers, in grid px. */
+const DISPERSED = 72;
+const OBJECTIVE = 104;
+/** Image of a Front Objective marker (assets/counters/others/). */
+const objectiveImage = (front: ObjectiveFront, face: ObjectiveFace) =>
+  `/assets/counters/others/marker-sov${front === "voronezh" ? "veronezhfront" : "swfront"}-obj${face === "west" ? "W" : "S"}.png`;
+const DISPERSED_IMAGE = { german: "marker-germandispersed.png", soviet: "marker-sovietdispersed-sml.png" };
 
 export class UnitsPlane {
   private readonly root: SVGGElement;
@@ -35,7 +42,17 @@ export class UnitsPlane {
       const x = hex.x - COUNTER / 2 - k * STACK_STEP, y = hex.y - COUNTER / 2 - k * STACK_STEP;
       parts.push(`<g class="counter${this.selection.has(id) ? " selected" : ""}${this.dimmed(u.side) ? " dim" : ""}" data-unit="${id}">` +
         `<image href="${faceImage(u, s.face)}" x="${x}" y="${y}" width="${COUNTER}" height="${COUNTER}"><title>${u.designation}</title></image>` +
+        (s.dispersed ? `<image class="marker" href="/assets/counters/others/${DISPERSED_IMAGE[u.side]}" x="${x + COUNTER - DISPERSED * 0.8}" ` +
+          `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>Dispersed</title></image>` : "") +
         `<rect class="sel-ring" x="${x}" y="${y}" width="${COUNTER}" height="${COUNTER}" rx="4"/></g>`);
+    }
+    // Front Objective markers sit on top of the hex, shifted down and right so the stack shows.
+    for (const front of OBJECTIVE_FRONTS) {
+      const m = state.objectives[front], hex = m && this.data.hexById.get(m.at);
+      if (!m || !hex) continue;
+      const x = hex.x - OBJECTIVE / 2 + 40, y = hex.y - OBJECTIVE / 2 + 40;
+      parts.push(`<image class="objective" href="${objectiveImage(front, m.face)}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
+        `<title>${front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${m.face === "west" ? "West" : "South"}</title></image>`);
     }
     this.root.innerHTML = parts.join("");
     if (fly && !matchMedia("(prefers-reduced-motion: reduce)").matches) this.flyIn(fly);

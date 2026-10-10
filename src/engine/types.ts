@@ -17,7 +17,26 @@ export type Face = "front" | "back" | "reduced";
 export interface UnitState {
   at: Location;
   face: Face;
+  /** Dispersed marker on the unit (12.52). Absent = not dispersed. */
+  dispersed?: boolean;
 }
+
+/** Soviet command cards E01-E22, as ids "e01" … "e22". */
+export const SOVIET_CARDS = Array.from({ length: 22 }, (_, i) => `e${String(i + 1).padStart(2, "0")}`);
+
+/** Soviet Front Objective markers (p48): one per front, printed West on one side and South on the other. */
+export type ObjectiveFront = "voronezh" | "southwest";
+export const OBJECTIVE_FRONTS: ObjectiveFront[] = ["voronezh", "southwest"];
+export type ObjectiveFace = "west" | "south";
+export interface ObjectiveMarker { at: string; face: ObjectiveFace }
+
+/**
+ * Who sends a command. The bot (the Soviet system) is not bound by the player's locks (D17):
+ * it places Soviet reserves. Set-up adjustments are played as the bot (D15), German units included.
+ */
+export type Actor = "player" | "bot";
+
+export type StackMove = "up" | "down" | "top" | "bottom";
 
 export interface GameState {
   version: 1;
@@ -28,18 +47,40 @@ export interface GameState {
   units: Record<string, UnitState>;
   /** Stacking order, bottom to top: within a hex, a unit listed later sits on top. */
   order: string[];
+  /** Soviet victory points (track starts at 2, §3 "Marker Placement"). */
+  vp: number;
+  /** Soviet discard pile, oldest first. */
+  sovietDiscard: string[];
+  /** Front Objective markers on the map (placement only; their logic comes in 4.2). */
+  objectives: Partial<Record<ObjectiveFront, ObjectiveMarker>>;
 }
 
 export type Command =
   | { type: "SetUpTurn1" }
   | { type: "ClearSetUp" }
   /** Player move: one unit or a selection, to a hex or a box. All or nothing. */
-  | { type: "MoveUnits"; units: string[]; to: Location };
+  | { type: "MoveUnits"; units: string[]; to: Location }
+  /** One step lost: the counter flips (or its "R" counter comes in). The last step is lost with an elimination. */
+  | { type: "RemoveStep"; unit: string }
+  | { type: "SetDispersed"; units: string[]; dispersed: boolean }
+  | { type: "SetVictoryPoints"; vp: number }
+  /** Moves a Soviet card to the discard pile, or back to the deck. */
+  | { type: "DiscardSovietCard"; card: string; discarded: boolean }
+  /** Moves a unit within its hex's stack: one level up or down, or to the top or bottom. */
+  | { type: "Restack"; unit: string; to: StackMove }
+  /** Places a Front Objective marker on a hex, or removes it (at null). */
+  | { type: "PlaceObjective"; front: ObjectiveFront; face: ObjectiveFace; at: string | null };
 
 export type GameEvent =
   | { type: "SetUpApplied"; placed: string[]; reserve: string[]; reinforcements: string[] }
   | { type: "SetUpCleared" }
   | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location }
+  | { type: "UnitRestacked"; unit: string; at: Location; to: StackMove }
+  | { type: "StepRemoved"; unit: string; from: Face; to: Face }
+  | { type: "DispersedSet"; units: string[]; dispersed: boolean }
+  | { type: "VictoryPointsSet"; from: number; to: number }
+  | { type: "SovietCardDiscarded"; card: string; discarded: boolean }
+  | { type: "ObjectivePlaced"; front: ObjectiveFront; face: ObjectiveFace; at: string | null }
   | { type: "CommandRejected"; command: Command["type"]; reason: string };
 
 export interface StepResult {
@@ -47,4 +88,8 @@ export interface StepResult {
   events: GameEvent[];
 }
 
-export const emptyState = (): GameState => ({ version: 1, turn: 1, setUp: false, units: {}, order: [] });
+/** Soviet VP at set up (§3 "Marker Placement": 1VP marker on "2", 10VP marker on "0"). */
+export const START_VP = 2;
+
+export const emptyState = (): GameState =>
+  ({ version: 1, turn: 1, setUp: false, units: {}, order: [], vp: START_VP, sovietDiscard: [], objectives: {} });

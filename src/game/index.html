@@ -19,7 +19,7 @@
           <h1>Units</h1>
         </header>
         <section id="setup" class="setup" aria-label="Set up"></section>
-        <div id="groups" class="groups"></div>
+        <div id="groups" class="groups" data-autoscroll></div>
       </div>
       <nav class="folder-tabs" role="tablist" aria-label="Units panel">
         <button type="button" class="fold-btn" data-fold aria-label="Fold the units panel" title="Fold the units panel">
@@ -32,6 +32,11 @@
     <main class="map-area">
       <div id="viewport" class="viewport" tabindex="0" aria-label="Game map: drag or arrow keys to pan, wheel or + and - to zoom, 0 to fit"></div>
       <aside id="inspector" class="inspector" aria-live="polite"></aside>
+      <button type="button" id="unitsToggle" class="map-toggle" aria-pressed="true" aria-keyshortcuts="u"
+        title="Hide the counters to read the map under them (U)">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><rect class="c-back" x="7" y="3" width="10" height="10" rx="1" /><rect class="c-front" x="3" y="7" width="10" height="10" rx="1" /><path class="slash" d="M2 18 18 2" /></svg>
+        <span data-label>Hide units</span> <kbd>U</kbd>
+      </button>
     </main>
 
     <aside id="railDossier" class="dossier right" aria-label="Bot, log and overlays">
@@ -51,6 +56,7 @@
 
         <section data-tabpanel="bot" class="rail-section" aria-label="Bot">
           <p class="hint">No Soviet card drawn yet. The bot's card and orders show here during its impulses.</p>
+          <dl id="bot" class="bot-status"></dl>
         </section>
 
         <section data-tabpanel="log" class="rail-section log-section" aria-label="Log">
@@ -67,6 +73,9 @@
           <div class="view-controls">
             <button type="button" id="toggleImage" class="switch" aria-pressed="true" aria-keyshortcuts="m">
               Printed map <kbd>M</kbd>
+            </button>
+            <button type="button" id="unitsSwitch" class="switch" aria-pressed="true" aria-keyshortcuts="u">
+              Units <kbd>U</kbd>
             </button>
             <button type="button" id="fit" class="switch" aria-keyshortcuts="0">Fit map <kbd>0</kbd></button>
           </div>

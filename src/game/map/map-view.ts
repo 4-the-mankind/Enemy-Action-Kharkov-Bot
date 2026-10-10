@@ -29,6 +29,8 @@ export interface MapViewEvents {
   click?: (target: PointerTarget, info: ClickInfo) => void;
   /** A counter held HOLD_MS without moving: the drag controller takes over the pointer. */
   lift?: (unit: string, at: { clientX: number; clientY: number }) => void;
+  /** Right-click on a counter without panning: its context menu (L). */
+  menu?: (unit: string, at: { clientX: number; clientY: number }) => void;
 }
 
 export class MapView {
@@ -154,11 +156,11 @@ export class MapView {
     let last = { clientX: 0, clientY: 0 };
     vp.addEventListener("pointerdown", (e) => {
       vp.focus({ preventScroll: true });
-      const unit = e.button === 0 ? (e.target as Element).closest<SVGElement>("[data-unit]")?.dataset.unit ?? null : null;
+      const unit = (e.target as Element).closest<SVGElement>("[data-unit]")?.dataset.unit ?? null;
       drag = { x: e.clientX, y: e.clientY, tx: this.view.tx, ty: this.view.ty, moved: false, unit };
       last = { clientX: e.clientX, clientY: e.clientY };
       vp.setPointerCapture(e.pointerId);
-      if (unit && this.events.lift) {
+      if (unit && e.button === 0 && this.events.lift) {
         drag.hold = window.setTimeout(() => {
           if (!drag || drag.moved) return;
           drag = null;
@@ -192,6 +194,7 @@ export class MapView {
         const t = this.targetAt(e.clientX, e.clientY);
         if (t) this.events.click?.(t, { unit: drag.unit, toggle: e.ctrlKey || e.metaKey });
       }
+      if (drag && !drag.moved && e.button === 2 && drag.unit) this.events.menu?.(drag.unit, e);
       drag = null;
       vp.classList.remove("panning");
     });

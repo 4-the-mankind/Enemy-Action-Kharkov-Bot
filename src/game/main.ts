@@ -13,10 +13,12 @@ import { MapView, type MapViewEvents } from "./map/map-view";
 import { UnitsPlane } from "./map/units-plane";
 import { mountDossier } from "./panels/dossier";
 import { mountInspector } from "./panels/inspector";
+import { createCounterMenu } from "./panels/counter-menu";
 import { mountLayersPanel } from "./panels/layers-panel";
 import { mountLogPanel } from "./panels/log-panel";
 import { stackRenderer } from "./panels/stack-list";
 import { mountUnitsPanel } from "./panels/units-panel";
+import { mountBotPanel } from "./panels/bot-panel";
 import { GameSession } from "./state/session";
 import { Selection } from "./state/selection";
 
@@ -37,11 +39,12 @@ async function init() {
 
   let inspector: ReturnType<typeof mountInspector> | null = null;
   // Map clicks and lifts need the session, created once the data is loaded.
-  let onClick: Pick<MapViewEvents, "click" | "lift"> = {};
+  let onClick: Pick<MapViewEvents, "click" | "lift" | "menu"> = {};
   const view = new MapView($("viewport"), {
     hover: (t) => inspector?.hover(t),
     click: (t, info) => onClick.click?.(t, info),
     lift: (unit, at) => onClick.lift?.(unit, at),
+    menu: (unit, at) => onClick.menu?.(unit, at),
   });
 
   let loaded, game;
@@ -66,7 +69,8 @@ async function init() {
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);
-  inspector = mountInspector($("inspector"), view, data, stackRenderer(session, selection, drag));
+  const menu = createCounterMenu(session);
+  inspector = mountInspector($("inspector"), view, data, stackRenderer(session, selection, drag, menu));
   const insp = inspector;
 
   let flyFrom: { clientX: number; clientY: number } | null = null;
@@ -77,6 +81,7 @@ async function init() {
   });
   units.setDim((side) => panel.filter() !== "all" && panel.filter() !== side);
   panel.onFilter(() => units.render(session.state));
+  mountBotPanel($("bot"), session);
   mountLogPanel($("log"), session);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());
@@ -108,8 +113,11 @@ async function init() {
     lift: (unit, at) => {
       const hex = session.state.units[unit]?.at;
       if (hex && isHex(hex)) insp.pinHex(hex);
-      drag.begin(selection.has(unit) ? selection.list() : [unit], at);
+      const sel = selection.list();
+      const fromSelection = selection.has(unit) || (sel.length > 0 && sel.every((id) => session.state.units[id]?.at === hex));
+      drag.begin(fromSelection ? sel : [unit], at);
     },
+    menu: (unit, at) => menu.open(unit, at),
   };
   units.render(session.state);
 
@@ -117,6 +125,16 @@ async function init() {
   const setImage = (on: boolean) => { view.setBackgroundVisible(on); bgToggle.setAttribute("aria-pressed", String(on)); };
   bgToggle.addEventListener("click", () => setImage(bgToggle.getAttribute("aria-pressed") !== "true"));
   $("fit").addEventListener("click", () => view.resetView());
+  // Counters hidden to read the map under them: one state, two buttons (map corner, Overlays).
+  const unitsPlane = view.plane("units"), unitsButtons = [$("unitsToggle"), $("unitsSwitch")];
+  const setUnitsShown = (on: boolean) => {
+    unitsPlane.style.display = on ? "" : "none";
+    unitsButtons.forEach((b) => b.setAttribute("aria-pressed", String(on)));
+    $("unitsToggle").querySelector("[data-label]")!.textContent = on ? "Hide units" : "Show units";
+    $("unitsToggle").classList.toggle("off", !on);
+  };
+  const unitsShown = () => unitsPlane.style.display !== "none";
+  unitsButtons.forEach((b) => b.addEventListener("click", () => setUnitsShown(!unitsShown())));
   document.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.matches("input, select, textarea")) return;
     if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) { e.preventDefault(); session.undo(); return; }
@@ -128,6 +146,7 @@ async function init() {
       view.panBy(dx * step, dy * step);
     }
     else if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey) setImage(bgToggle.getAttribute("aria-pressed") !== "true");
+    else if ((e.key === "u" || e.key === "U") && !e.ctrlKey && !e.metaKey && !e.altKey) setUnitsShown(!unitsShown());
   });
 
   view.fit();
