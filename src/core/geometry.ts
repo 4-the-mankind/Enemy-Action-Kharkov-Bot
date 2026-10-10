@@ -46,6 +46,12 @@ export const DEFAULT_GRID: MapGrid = {
 export const hexId = (col: number, row: number) =>
   String(col).padStart(2, "0") + String(row).padStart(2, "0");
 
+/** Column and row of a hex id "CCRR". */
+export function parseHexId(id: string): { col: number; row: number } {
+  if (!/^\d{4}$/.test(id)) throw new Error(`Invalid hex id "${id}": must be 4 digits.`);
+  return { col: Number(id.slice(0, 2)), row: Number(id.slice(2)) };
+}
+
 /** Horizontal hex radius (center → left/right corner). */
 export const hexRadius = (g: MapGrid) => (g.colStep * 2) / 3;
 
@@ -161,6 +167,18 @@ export function hexNeighbor(g: MapGrid, col: number, row: number, edge: number):
   const k2 = halfRow(g, col, row) + dk;
   const offset2 = col2 % 2 === 0 ? 2 * g.evenColumnShift : 0;
   return { col: col2, row: (k2 - offset2) / 2 + 1 };
+}
+
+/**
+ * Number of hex steps between two hexes on an unbounded grid, ignoring dead hexes and
+ * hexsides (the rules distance of 9.3 is Board.distance). Frame: u = column - 1,
+ * k = half-row; a step changes u by 1 and k by 1, or k by 2 alone.
+ */
+export function hexDistance(g: MapGrid, a: string, b: string): number {
+  const p = parseHexId(a), q = parseHexId(b);
+  const du = Math.abs(q.col - p.col);
+  const dk = Math.abs(halfRow(g, q.col, q.row) - halfRow(g, p.col, p.row));
+  return du + Math.max(0, (dk - du) / 2);
 }
 
 /** Side identifier for two neighboring cells, sorted per convention §3: "CCRR-CCRR". */
