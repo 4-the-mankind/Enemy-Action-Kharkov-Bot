@@ -124,12 +124,13 @@ describe("Booklet example p17: 3rd Tank Army on Game-turn 1 (9.21, reference tes
 });
 
 describe("ActivateFormation", () => {
-  it("refuses before Start, an army with no unit in play, and 9.22 (GT 5+ without objective)", () => {
+  it("refuses before Start and an army with no unit in play; 9.22 from GT 5 without objective, 9.21 before (errata)", () => {
     const { engine, state, activate } = setup({ units: [sov("s")], at: { s: "0402" } });
     expect(engine.step({ ...state, started: false }, { type: "ActivateFormation", army: "3T" }).events[0])
       .toMatchObject({ type: "CommandRejected", reason: "Press Start to begin turn 1." });
     expect(activate("69").events[0]).toMatchObject({ type: "CommandRejected", reason: "No unit of the 69 army on the map or in the reserve box." });
-    expect(activate("3T", { ...state, turn: 5 }).events[0]).toMatchObject({ type: "CommandRejected", reason: "Movement methods 9.22 are coded with task 4.3." });
+    expect(activate("3T", { ...state, turn: 5 }).events[0]).toMatchObject({ type: "FormationActivated", methods: "9.22" });
+    expect(activate("3T", { ...state, turn: 4 }).events[0]).toMatchObject({ type: "FormationActivated", methods: "9.21" });
   });
 
   it("does not move dispersed units nor reserve units, but counts them as active", () => {
@@ -180,9 +181,13 @@ describe("Method 1: Take VP Hex (▼)", () => {
     expect(traceOf(events, "low").skipped[0]).toEqual({ method: "9.21 method 1", reason: "no empty German town or city, nor map-edge VP hex, within reach" });
   });
 
-  it("b) else enters an empty map-edge VP hex", () => {
-    const { state } = setup({ units: [sov("s")], at: { s: "0404" }, hexes: { "0406": { vp: 1, mapEdge: "german" } } }).activate();
-    expect(state.units.s.at).toBe("0406");
+  it("b) else enters an empty map-edge VP hex from which Soviet supply can be traced", () => {
+    const edge = { "0406": { vp: 1 as const, mapEdge: "german" as const } };
+    const supplied = setup({ units: [sov("s")], at: { s: "0404" }, hexes: { ...edge, "0401": { mapEdge: "soviet" } } }).activate();
+    expect(supplied.state.units.s.at).toBe("0406");
+    // No Soviet map edge within seven hexes: no Soviet supply in 0406.
+    const cut = setup({ units: [sov("s")], at: { s: "0404" }, hexes: edge }).activate();
+    expect(cut.state.units.s.at).not.toBe("0406");
   });
 });
 

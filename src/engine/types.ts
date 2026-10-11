@@ -38,6 +38,15 @@ export type Actor = "player" | "bot";
 
 export type StackMove = "up" | "down" | "top" | "bottom";
 
+/** Supply marker on a unit (13.2): Out of Supply, or Isolated (the marker flipped). */
+export type SupplyMarker = "outOfSupply" | "isolated";
+
+/** Soviet support line in use (13.51): the western line, or the eastern (= artillery) line. */
+export type SupportLine = "west" | "east";
+
+/** 13.53: up to two Soviet Forward Support markers on the map. */
+export const MAX_FORWARD_SUPPORT = 2;
+
 export interface GameState {
   version: 1;
   turn: number;
@@ -55,6 +64,12 @@ export interface GameState {
   sovietDiscard: string[];
   /** Front Objective markers on the map (placement only; their logic comes in 4.2). */
   objectives: Partial<Record<ObjectiveFront, ObjectiveMarker>>;
+  /** Supply markers (13.2) set in the Supply Phase, by unit id. Absent = supplied. */
+  supply?: Record<string, SupplyMarker>;
+  /** Hexes of the Soviet Forward Support markers on the map (13.53). */
+  forwardSupport?: string[];
+  /** [GT 8+] Soviet support line chosen in step 4 of the Supply Phase (13.51). */
+  supportLine?: SupportLine;
   /** Set-up adjustment played after "Set up turn 1" (p48-50), with the die result when rolled. */
   adjustment?: { id: string; roll?: number };
   /**
@@ -83,6 +98,16 @@ export type Command =
   | { type: "ApplySetUpAdjustment"; id: string; roll?: number }
   /** Ends the set-up: the game starts with the first German impulse of turn 1 (p48). */
   | { type: "StartGame" }
+  /**
+   * Supply Phase (4.0 III), steps 2-4: supply status of German units [GT 2+] and Soviet units
+   * [GT 4+] (13.1-13.2), surrender (13.23), [GT 8+] Soviet support line (13.51).
+   * TODO 4.6: step 1 (garrisons, 15.1). TODO 4.2: step 5 (objective removal, 9.12).
+   */
+  | { type: "SupplyPhase" }
+  /** Sets or removes (supplied) the supply marker of units: Air Resupply (13.4), corrections. */
+  | { type: "SetSupplyStatus"; units: string[]; status: SupplyMarker | "supplied" }
+  /** Hexes of the Soviet Forward Support markers (13.53), at most two; [] removes them. */
+  | { type: "SetForwardSupport"; hexes: string[] }
   /**
    * Soviet activation, step 2 (9.0): the bot moves the army's units by the movement methods
    * (9.2). TODO 4.1: the units come from the command card (8.13); for now, the whole army.
@@ -114,18 +139,36 @@ export type GameEvent =
   /** Followed by the events of each command it played. */
   | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
   | { type: "GameStarted" }
+  /**
+   * Supply Phase done. `changes`: units whose supply marker changed. `germanSurrender`:
+   * isolated German stacks still unable to trace supply, which lose one step of the
+   * player's choice (13.23). Followed by the step losses of Soviet surrender.
+   */
+  | {
+    type: "SupplyPhaseDone"; turn: number;
+    changes: { unit: string; from: SupplyMarker | "supplied"; to: SupplyMarker | "supplied" }[];
+    germanSurrender: { hex: string; units: string[] }[];
+    sovietSurrender: { hex: string; unit: string }[];
+    supportLine?: SupportLine;
+  }
+  | { type: "SupplyStatusSet"; units: string[]; status: SupplyMarker | "supplied" }
+  | { type: "ForwardSupportSet"; hexes: string[] }
   /** A unit ended its move in an enemy town or city (14.1). */
   | { type: "TownCaptured"; hex: string; owner: "german" | "soviet" }
   | {
     type: "FormationActivated"; army: string; front: "voronezh" | "southwest";
     /** Active units on the map, in reserve, and those that move (on the map, not dispersed). */
     units: string[];
-    /** "9.21" (Soviet Movement Methods A). */
-    methods: string;
+    /** "9.21" (Soviet Movement Methods A) or "9.22" (B, front objective removed). */
+    methods: "9.21" | "9.22";
+    /** 9.22 Soviet Desperation (fewer than 19 VP): method 11 processed right after method 5. */
+    desperation?: boolean;
     /** Methods skipped for every unit, and why. */
     skipped: { method: string; reason: string }[];
     /** Spearhead units skipping methods 4-9 (9.21). */
     spearheads: string[];
+    /** Out of supply or isolated units, moved last by 9.27. */
+    unsupplied: string[];
   }
   /**
    * Why a Soviet unit moved where it did, or did not move (CLAUDE.md: every decision traced).
@@ -135,7 +178,7 @@ export type GameEvent =
     type: "DecisionTraced"; unit: string;
     /** "moved"; "frozen": a method says it does not move at all; "noMove": no method applied. */
     outcome: "moved" | "frozen" | "noMove";
-    /** Deciding method, e.g. "9.21 method 11", and its title; null when no method applied. */
+    /** Deciding method, e.g. "9.21 method 11" or "9.27", and its title; null when no method applied. */
     method: string | null;
     title: string | null;
     from: string;

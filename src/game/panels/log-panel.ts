@@ -43,10 +43,26 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       return { html: `<b>Set-up adjustment ${e.id.replace("-", ",")}: ${e.name}</b> (${e.roll ? `die roll ${e.roll}` : "chosen"}${e.replaces ? `, replaces ${e.replaces}` : ""}), played by the bot in place of its first impulse (p48-50). ${e.commands} actions:` };
     case "GameStarted":
       return { html: "<b>Turn 1 begins</b> with the first German impulse (p48). Your counters are free to move." };
+    case "SupplyPhaseDone": {
+      const marker = { supplied: "supplied", outOfSupply: "Out of Supply", isolated: "Isolated" } as const;
+      const changes = e.changes.map((c) => `${name(c.unit)} ${marker[c.to]}`).join(", ");
+      const german = e.germanSurrender.map((g) => `${g.hex} (${g.units.map(name).join(", ")})`).join("; ");
+      return {
+        html: `<b>Supply Phase, turn ${e.turn}.</b> ${changes ? `Supply markers: ${changes}.` : "No supply marker changes."}`
+          + (german ? ` <b>Surrender (13.23):</b> remove one step from ${german}.` : "")
+          + (e.supportLine ? ` Soviet support line: ${e.supportLine === "west" ? "western" : "eastern"} (13.51).` : ""),
+      };
+    }
+    case "SupplyStatusSet": {
+      const what = { supplied: "back in supply", outOfSupply: "Out of Supply", isolated: "Isolated" }[e.status];
+      return { html: `<b>${e.units.map(name).join(", ")}</b> ${what}.` };
+    }
+    case "ForwardSupportSet":
+      return { html: e.hexes.length ? `<b>Soviet Forward Support</b> in ${e.hexes.join(", ")}.` : "<b>Soviet Forward Support</b> markers removed." };
     case "TownCaptured":
       return { html: `<b>${e.hex}</b> is now ${e.owner === "soviet" ? "Soviet" : "German"}-owned.` };
     case "FormationActivated":
-      return { html: `<b>${e.army} activated</b> (${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front): movement methods ${e.methods}.` };
+      return { html: `<b>${e.army} activated</b> (${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front): movement methods ${e.methods}${e.desperation ? ", Soviet Desperation" : ""}.` };
     case "DecisionTraced": {
       if (e.outcome === "noMove") return { html: `<b>${name(e.unit)}</b> does not move (no movement method applies).` };
       const by = `${e.method} (${e.title})`;

@@ -9,8 +9,8 @@ import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
 import { createSovietMovement, type SovietMovement } from "./soviet-movement";
 import {
-  emptyState, isHex, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState, type Location,
-  type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult,
+  emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState,
+  type Location, type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult, type SupplyMarker,
 } from "./types";
 
 export interface EngineData {
@@ -21,7 +21,7 @@ export interface EngineData {
   terrain: TerrainEffects;
   /** Recorded set-up adjustments (data/setup-adjustments.json, D15). */
   adjustments?: RecordedAdjustment[];
-  /** Rules of tasks not coded yet (supply, garrisons, ground…): provisional by default (pending.ts). */
+  /** Supply (supply.ts) and the rules of tasks not coded yet (garrisons, ground…): pending.ts. */
   rules?: PendingRules;
 }
 
@@ -48,7 +48,7 @@ export function createEngine(data: EngineData): Engine {
   const units = data.units.filter((u) => !u.notUsedInSolo);
   const byId = new Map(units.map((u) => [u.id, u]));
   const name = (id: string) => byId.get(id)?.designation ?? id;
-  const rules = data.rules ?? provisionalRules(data.board);
+  const rules = data.rules ?? provisionalRules(data.board, (id) => byId.get(id));
   const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id), rules });
   const sovietMovement = createSovietMovement({
     board: data.board, movement, unit: (id) => byId.get(id), rules,
@@ -115,6 +115,11 @@ export function createEngine(data: EngineData): Engine {
       // Markers stay on the map: a unit leaving it drops its Dispersed marker.
       const { dispersed, ...rest } = state.units[id];
       next.units[id] = isHex(to) && dispersed ? { ...rest, at: to, dispersed } : { ...rest, at: to };
+    }
+    // So do supply markers (13.2).
+    if (!isHex(to) && ordered.some((id) => next.supply?.[id])) {
+      next.supply = { ...next.supply };
+      for (const id of ordered) delete next.supply[id];
     }
     const events: GameEvent[] = [{ type: "UnitsMoved", units: ordered, from, to }];
     // 14.1: a town or city changes hands the moment an enemy unit enters it.
@@ -245,6 +250,86 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, started: true }, events: [{ type: "GameStarted" }] };
   }
 
+  // Supply Phase (4.0 III), steps 2-4. Every unit's trace is judged on the state at the start
+  // of the phase, German and Soviet alike; then the markers change (13.2) and stacks already
+  // isolated surrender (13.23).
+  function supplyPhase(state: GameState): StepResult {
+    if (!state.started) return reject(state, "SupplyPhase", "Press Start to begin turn 1.");
+    // 13.0: all units supplied on GT 1; Soviet units throughout GT 2-3.
+    if (state.turn < 2) return reject(state, "SupplyPhase", "There is no Supply Phase on Game-turn 1.");
+    const sides = state.turn >= 4 ? ["german", "soviet"] : ["german"];
+    const traced = new Map<string, boolean>();
+    for (const [id, s] of Object.entries(state.units)) {
+      const u = byId.get(id);
+      if (u && isHex(s.at) && sides.includes(u.side)) traced.set(id, rules.canTraceSupply(state, id));
+    }
+    const supply: Record<string, SupplyMarker> = {};
+    const changes: Extract<GameEvent, { type: "SupplyPhaseDone" }>["changes"] = [];
+    const surrender = new Map<string, string[]>(); // hex → isolated units of that hex still cut off
+    for (const [id, can] of traced) {
+      const from = rules.supplyStatus(state, id);
+      const to = can ? "supplied" : from === "supplied" ? "outOfSupply" : "isolated";
+      if (to !== "supplied") supply[id] = to;
+      if (to !== from) changes.push({ unit: id, from, to });
+      if (!can && from === "isolated") {
+        const at = state.units[id].at;
+        surrender.set(at, [...(surrender.get(at) ?? []), id]);
+      }
+    }
+    // Markers of units not checked this turn (Soviet units before GT 4, units off the map) stay.
+    for (const [id, m] of Object.entries(state.supply ?? {}))
+      if (!traced.has(id) && state.units[id] && isHex(state.units[id].at)) supply[id] = m;
+    let next: GameState = { ...state, supply };
+    if (state.turn >= 8) next.supportLine = state.vp >= 21 ? "west" : "east"; // 13.51 step 4
+    else delete next.supportLine;
+
+    const germanSurrender: { hex: string; units: string[] }[] = [];
+    const sovietSurrender: { hex: string; unit: string }[] = [];
+    const losses: GameEvent[] = [];
+    for (const [hex, ids] of surrender) {
+      if (byId.get(ids[0])!.side === "german") { germanSurrender.push({ hex, units: ids }); continue; }
+      // 13.23: a Soviet stack adjacent to a German unit loses a step, from its highest selector.
+      const adjacent = data.board.neighbors(hex).some((n) => data.board.areAdjacent(hex, n.hex)
+        && Object.entries(state.units).some(([g, gs]) => gs.at === n.hex && byId.get(g)?.side === "german"));
+      if (!adjacent) continue;
+      const unit = [...ids].sort((a, b) => movement.faceValues(state, b).selector - movement.faceValues(state, a).selector)[0];
+      sovietSurrender.push({ hex, unit });
+      // The last step lost: the unit is destroyed. TODO 4.6: it can't return via replacement (13.22).
+      const r = nextFace(unit, next.units[unit].face) ? removeStep(next, unit) : moveUnits(next, [unit], "eliminated", "bot");
+      next = r.state;
+      losses.push(...r.events);
+    }
+    const done: GameEvent = { type: "SupplyPhaseDone", turn: state.turn, changes, germanSurrender, sovietSurrender };
+    if (next.supportLine) done.supportLine = next.supportLine;
+    return { state: next, events: [done, ...losses] };
+  }
+
+  function setSupplyStatus(state: GameState, ids: string[], status: SupplyMarker | "supplied"): StepResult {
+    const unique = [...new Set(ids)];
+    if (!unique.length) return reject(state, "SetSupplyStatus", "No unit selected.");
+    if (!["supplied", "outOfSupply", "isolated"].includes(status)) return reject(state, "SetSupplyStatus", `Unknown supply status "${status}".`);
+    for (const id of unique)
+      if (!state.units[id] || !isHex(state.units[id].at)) return reject(state, "SetSupplyStatus", `${name(id)} is not on the map.`);
+    const changing = unique.filter((id) => rules.supplyStatus(state, id) !== status);
+    if (!changing.length) return { state, events: [] };
+    const supply = { ...state.supply };
+    for (const id of changing) {
+      if (status === "supplied") delete supply[id];
+      else supply[id] = status;
+    }
+    return { state: { ...state, supply }, events: [{ type: "SupplyStatusSet", units: changing, status }] };
+  }
+
+  function setForwardSupport(state: GameState, hexes: string[]): StepResult {
+    const unique = [...new Set(hexes)];
+    if (unique.length > MAX_FORWARD_SUPPORT) return reject(state, "SetForwardSupport", `At most ${MAX_FORWARD_SUPPORT} Forward Support markers (13.53).`);
+    const bad = unique.find((h) => !data.board.isPlayable(h));
+    if (bad) return reject(state, "SetForwardSupport", `${bad} is not a playable hex.`);
+    const cur = state.forwardSupport ?? [];
+    if (cur.length === unique.length && cur.every((h) => unique.includes(h))) return { state, events: [] };
+    return { state: { ...state, forwardSupport: unique }, events: [{ type: "ForwardSupportSet", hexes: unique }] };
+  }
+
   // Step 2 of a Soviet activation (9.0): the bot moves the army by the movement methods (9.2).
   function activateFormation(state: GameState, army: string): StepResult {
     if (!state.started) return reject(state, "ActivateFormation", "Press Start to begin turn 1.");
@@ -253,7 +338,10 @@ export function createEngine(data: EngineData): Engine {
   }
 
   /** Commands the player may only send once the game has started. */
-  const PLAY = new Set<Command["type"]>(["MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective"]);
+  const PLAY = new Set<Command["type"]>([
+    "MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
+    "SetSupplyStatus", "SetForwardSupport",
+  ]);
 
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
@@ -281,6 +369,12 @@ export function createEngine(data: EngineData): Engine {
         return applySetUpAdjustment(state, command.id, command.roll);
       case "StartGame":
         return startGame(state);
+      case "SupplyPhase":
+        return supplyPhase(state);
+      case "SetSupplyStatus":
+        return setSupplyStatus(state, command.units, command.status);
+      case "SetForwardSupport":
+        return setForwardSupport(state, command.hexes);
       case "ActivateFormation":
         return activateFormation(state, command.army);
     }

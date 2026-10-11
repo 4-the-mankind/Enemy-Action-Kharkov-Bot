@@ -1,9 +1,10 @@
 // Movement (3.2): MP costs, zones of control, stacking and reachable hexes, then the 9.3
 // terms built on them (proximate, surround, cause surround, nearly surrounded).
 // Pure functions of the game state: nothing is cached between calls, the state changes
-// with every unit that moves. Supply, garrisons and the ground condition come from the
-// PendingRules (pending.ts) until their tasks (4.3, 4.6). TODO 5.1: a German unit ends its
-// move where it can trace supply (10.5), checked on the player's moves.
+// with every unit that moves. Supply markers come from the Supply Phase (supply.ts, 13.2);
+// garrisons and the ground condition from the PendingRules (pending.ts) until task 4.6.
+// TODO 5.1: a German unit ends its move where it can trace supply (10.5), checked on the
+// player's moves.
 import type { MoveClass, TerrainEffects } from "../core/terrain-effects";
 import type { Side, Unit } from "../core/units";
 import type { Board } from "./board";
@@ -53,7 +54,7 @@ export interface MovementData {
   board: Board;
   terrain: TerrainEffects;
   unit(id: string): Unit | undefined;
-  /** Supply, garrisons, ground: provisional until tasks 4.3 and 4.6. */
+  /** Supply (4.3); garrisons and ground provisional until task 4.6. */
   rules?: PendingRules;
 }
 
@@ -71,7 +72,7 @@ export function without(state: GameState, id: string): GameState {
 
 export type Movement = ReturnType<typeof createMovement>;
 
-export function createMovement({ board, terrain, unit, rules = provisionalRules(board) }: MovementData) {
+export function createMovement({ board, terrain, unit, rules = provisionalRules(board, unit) }: MovementData) {
   function known(id: string): Unit {
     const u = unit(id);
     if (!u) throw new Error(`Unknown unit "${id}".`);
@@ -135,7 +136,8 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     if (u.side !== "german") return "Only German units use strategic movement.";
     if (state.turn < 2) return "No German strategic movement before turn 2.";
     if (ground !== "frozen") return "No German strategic movement in mud (18.34).";
-    if (!rules.canTraceSupply(state, id)) return `${u.designation} is not in supply.`;
+    // "An active German unit in supply": its status of the Supply Phase (13.0).
+    if (rules.supplyStatus(state, id) !== "supplied") return `${u.designation} is not in supply.`;
     const start = hexOf(state, id), occ = occupancy(state);
     if (board.neighbors(start).some((n) => occupiedBy(occ, n.hex, "soviet") && board.areAdjacent(start, n.hex)))
       return `${u.designation} starts adjacent to an enemy unit.`;
@@ -164,6 +166,7 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     const adjacentToEnemy = (hex: string) =>
       board.neighbors(hex).some((n) => occupiedBy(occ, n.hex, foe) && board.areAdjacent(hex, n.hex));
     const startInZoc = enemyZoc.has(start);
+    const status = rules.supplyStatus(state, id);
     const startOnGermanEdge = u.side === "german" && board.hex(start).mapEdge === "german";
     // 15.22: German units do not enter a garrisoned hex and stop next to a garrison. A garrison
     // next to the start hex does not count: it is removed when the unit's activation begins
@@ -189,6 +192,7 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
       const side = board.side(from, to);
       if (!side || side.river === "dnieprBlocked") return null; // 10.31
       if (occupiedBy(occ, to, foe) || garrisonAt(to)) return null; // 10.1
+      if (status === "isolated" && enemyTown(to)) return null; // 13.22: not into an enemy town or city
       if (strategic && (adjacentToEnemy(to) || enemyTown(to) || garrisonNear(to))) return null; // 10.6
       const fromStart = from === start && spent === 0;
       const intoZoc = enemyZoc.has(to);
@@ -220,41 +224,48 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
       return exception ? { cost, stop, exception } : { cost, stop };
     }
 
-    // 13.21: an unsupplied mechanized unit moves no more than two hexes.
-    const maxHexes = cls === "mech" && rules.supplyStatus(state, id) !== "supplied" ? 2 : Infinity;
-    return { start, allowance, budget, enter, maxHexes, heavyMud: ground === "heavyMud" };
+    // 13.21: an unsupplied mechanized unit moves no more than two hexes. 13.22: an isolated
+    // mechanized unit can't move; isolated infantry or cavalry moves one hex at most, and not
+    // out of an enemy ZOC.
+    const maxHexes = status === "supplied" ? Infinity : cls === "mech" ? 2 : status === "isolated" ? 1 : Infinity;
+    const frozen = status === "isolated" && (cls === "mech" || startInZoc);
+    return { start, allowance, budget, enter, maxHexes, noMove: ground === "heavyMud" || frozen };
   }
 
   /** Hexes the unit can reach in one move, cheapest first (Dijkstra, one bucket per half MP). */
   function reachable(state: GameState, id: string, opts: MoveOptions = {}): ReachResult {
-    const { start, allowance, budget, enter, maxHexes, heavyMud } = stepper(state, id, opts);
+    const { start, allowance, budget, enter, maxHexes, noMove } = stepper(state, id, opts);
     const result: ReachResult = { unit: id, start, allowance, hexes: new Map() };
     result.hexes.set(start, { cost: 0, mpLeft: allowance, from: null, stop: null });
-    if (heavyMud) return result; // 18.34: no activation, no movement
+    if (noMove) return result; // 18.34: no movement in heavy mud; 13.22 isolated
 
     const best = new Map<string, number>([[start, 0]]);
     const info = new Map<string, Omit<Reach, "cost" | "mpLeft">>([[start, { from: null, stop: null }]]);
     const buckets: string[][] = [[start]];
 
-    // 13.21: two hexes at most; every path of one or two hexes is tried.
-    if (maxHexes === 2) {
+    // 13.21-13.22: one or two hexes at most; every path that short is tried. A neighbor of
+    // the start keeps its one-hex entry, so that each path read back has at most two hexes.
+    if (Number.isFinite(maxHexes)) {
+      const record = (from: string, to: string, s: NonNullable<ReturnType<typeof enter>>) => {
+        if ((best.get(to) ?? Infinity) <= s.cost) return;
+        best.set(to, s.cost);
+        const { cost: _, ...rest } = s;
+        info.set(to, { from, ...rest });
+      };
+      const firsts: [string, NonNullable<ReturnType<typeof enter>>][] = [];
       for (const n1 of board.neighbors(start)) {
         const s1 = enter(start, n1.hex, 0);
-        if (!s1) continue;
-        if ((best.get(n1.hex) ?? Infinity) > s1.cost) {
-          best.set(n1.hex, s1.cost);
-          const { cost: _, ...rest } = s1;
-          info.set(n1.hex, { from: start, ...rest });
-        }
-        if (s1.stop) continue;
-        for (const n2 of board.neighbors(n1.hex)) {
-          const s2 = n2.hex === start ? null : enter(n1.hex, n2.hex, s1.cost);
-          if (!s2 || (best.get(n2.hex) ?? Infinity) <= s2.cost) continue;
-          best.set(n2.hex, s2.cost);
-          const { cost: _, ...rest } = s2;
-          info.set(n2.hex, { from: n1.hex, ...rest });
-        }
+        if (s1) { record(start, n1.hex, s1); firsts.push([n1.hex, s1]); }
       }
+      if (maxHexes >= 2)
+        for (const [n1, s1] of firsts) {
+          if (s1.stop) continue;
+          for (const n2 of board.neighbors(n1)) {
+            if (n2.hex === start || info.get(n2.hex)?.from === start) continue;
+            const s2 = enter(n1, n2.hex, s1.cost);
+            if (s2) record(n1, n2.hex, s2);
+          }
+        }
       buckets.length = 0;
     }
 
@@ -285,9 +296,9 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
    * reason; it ends early at the first hex that cannot be entered or after a stop.
    */
   function walk(state: GameState, id: string, path: readonly string[], opts: MoveOptions = {}) {
-    const { start, allowance, budget, enter, maxHexes, heavyMud } = stepper(state, id, opts);
+    const { start, allowance, budget, enter, maxHexes, noMove } = stepper(state, id, opts);
     const entered: { hex: string; cost: number; mpLeft: number; stop: StopReason | null }[] = [];
-    if (heavyMud || path[0] !== start) return { allowance, entered };
+    if (noMove || path[0] !== start) return { allowance, entered };
     let spent = 0;
     for (let i = 1; i < path.length && i <= maxHexes; i++) {
       const step = enter(path[i - 1], path[i], spent);

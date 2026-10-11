@@ -99,7 +99,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
         const state = i === current!.lit && player.playing ? "current" : i > current!.lit ? "pending" : "";
         return `<li><button type="button" data-order="${i}" class="${state}${d === shown ? " shown" : ""}${d.outcome === "moved" ? "" : " still"}">` +
           (u ? `<img src="${faceImage(u, s?.face ?? "front")}" alt="">` : "") +
-          `<span class="name">${u?.designation ?? d.unit}<small>${d.method ? d.method.replace("9.21 method", "Method") : "No method"}</small></span>` +
+          `<span class="name">${u?.designation ?? d.unit}<small>${d.method ? d.method.replace(/^9\.2[12] method/, "Method") : "No method"}</small></span>` +
           `<span class="where">${outcome(d)}</span></button></li>`;
       }).join("") + "</ol>";
   };

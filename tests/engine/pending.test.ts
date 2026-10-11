@@ -6,11 +6,12 @@ import { createBoard } from "../../src/engine/board";
 import { createEngine } from "../../src/engine/engine";
 import { createMovement } from "../../src/engine/movement";
 import { provisionalRules, type PendingRules } from "../../src/engine/pending";
-import { emptyState, type GameEvent, type GameState } from "../../src/engine/types";
+import { emptyState, type GameState } from "../../src/engine/types";
 import { terrain } from "./real-map";
 
-// The engine already asks the questions of tasks 4.2, 4.3 and 4.6 (pending.ts). These tests
-// swap the provisional answers for other ones and check that each rule reacts.
+// The engine already asks the questions of tasks 4.2 and 4.6 (pending.ts), and those of
+// task 4.3 answered by supply.ts. These tests swap the answers for other ones and check that
+// each rule reacts (supply itself: supply.test.ts).
 
 const grid: MapGrid = { ...DEFAULT_GRID, cols: 8, rows: 8 };
 /** Every hex dead except column 04: moves run along the column. */
@@ -28,8 +29,8 @@ function unit(id: string, side: Unit["side"], extra: Partial<Unit> = {}): Unit {
 
 function setup(units: Unit[], at: Record<string, string>, change: Partial<PendingRules> = {}, hexes = corridor, turn = 2) {
   const board = createBoard({ grid, hexData: { version: 1, hexes }, sideData: { version: 1, sides: {} } });
-  const rules = { ...provisionalRules(board), ...change };
   const byId = new Map(units.map((u) => [u.id, u]));
+  const rules = { ...provisionalRules(board, (id) => byId.get(id)), ...change };
   const movement = createMovement({ board, terrain, unit: (id) => byId.get(id), rules });
   const state: GameState = {
     ...emptyState(), turn, started: true, sovietTowns: [],
@@ -43,13 +44,10 @@ function setup(units: Unit[], at: Record<string, string>, change: Partial<Pendin
 const garrisonIn = (...hexes: string[]): Partial<PendingRules> => ({ garrisonAt: (_s, h) => hexes.includes(h) });
 
 describe("Provisional answers (pending.ts)", () => {
-  it("hold on Game-turns 1-2: all supplied, no garrison, frozen, no army objective, all in support", () => {
+  it("hold on Game-turns 1-2: no garrison, frozen, no army objective", () => {
     const { board, state } = setup([], {});
-    const r = provisionalRules(board);
-    expect([r.canTraceSupply(state, "x"), r.supplyStatus(state, "x"), r.garrisonAt(state, "0404"), r.ground(state), r.armyObjective(state, "40")])
-      .toEqual([true, "supplied", false, "frozen", null]);
-    expect([r.supplyTracesTo(state, "soviet", "0404"), r.supplyTracesTo(state, "german", "0404")]).toEqual([true, false]);
-    expect(r.inSovietSupport(state, "0404")).toBe(true);
+    const r = provisionalRules(board, () => undefined);
+    expect([r.garrisonAt(state, "0404"), r.ground(state), r.armyObjective(state, "40")]).toEqual([false, "frozen", null]);
   });
 });
 
@@ -84,7 +82,7 @@ describe("Garrisons (task 4.6, 15.22 and 10.1)", () => {
   });
 });
 
-describe("Supply (task 4.3)", () => {
+describe("Supply answers (task 4.3) seen by movement", () => {
   it("isolated units exert no ZOC (11.0)", () => {
     const { movement, state } = setup([unit("s", "soviet")], { s: "0404" }, { supplyStatus: () => "isolated" });
     expect(movement.zoc(state, "soviet").size).toBe(0);
@@ -95,17 +93,9 @@ describe("Supply (task 4.3)", () => {
     expect(reach("m")).toEqual(["0401", "0402", "0403"]);
   });
 
-  it("no strategic movement out of supply (10.6)", () => {
-    const { movement, state } = setup([unit("g", "german")], { g: "0401" }, { canTraceSupply: () => false });
+  it("no strategic movement for a unit out of supply in the Supply Phase (10.6: its status, not its trace)", () => {
+    const { movement, state } = setup([unit("g", "german")], { g: "0401" }, { supplyStatus: () => "outOfSupply" });
     expect(movement.whyNoStrategic(state, "g")).toBe("g is not in supply.");
-  });
-
-  it("unsupplied Soviet units wait for 9.27; their own methods come with task 4.3", () => {
-    const { engine, state } = setup([unit("s", "soviet")], { s: "0404" }, { supplyStatus: () => "outOfSupply" }, corridor, 1);
-    const events: GameEvent[] = engine.step(state, { type: "ActivateFormation", army: "3T" }).events;
-    expect(events.find((e) => e.type === "DecisionTraced")).toMatchObject({
-      outcome: "noMove", skipped: [{ method: "9.27", reason: "unsupplied units: not coded yet (task 4.3)" }],
-    });
   });
 });
 

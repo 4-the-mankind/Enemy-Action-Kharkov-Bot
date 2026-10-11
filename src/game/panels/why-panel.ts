@@ -21,11 +21,11 @@ export function mountWhyPanel(root: HTMLElement, session: GameSession, player: M
     const d = shown, u = engine.unit(d.unit), s = session.state.units[d.unit];
     const move = d.outcome === "moved" ? `${d.from} to ${d.to}` : d.outcome === "frozen" ? `Stays in ${d.from}` : `Does not move from ${d.from}`;
     const method = d.method
-      ? `<p class="why-method"><b>${d.method.replace("9.21 method", "Method")}</b> ${d.title}<small>${d.method}</small></p>`
+      ? `<p class="why-method"><b>${d.method.replace(/^9\.2[12] method/, "Method")}</b> ${d.title}<small>${d.method}</small></p>`
       : `<p class="why-method"><b>No method applies.</b></p>`;
     const skipped = d.skipped.length
       ? `<details class="why-skipped"${d.method ? "" : " open"}><summary>${d.skipped.length} method${d.skipped.length > 1 ? "s" : ""} not applied</summary><ul>` +
-        d.skipped.map((k) => `<li><b>${k.method.replace("9.21 method", "Method")}</b> ${k.reason}</li>`).join("") + "</ul></details>"
+        d.skipped.map((k) => `<li><b>${k.method.replace(/^9\.2[12] method/, "Method")}</b> ${k.reason}</li>`).join("") + "</ul></details>"
       : "";
     const steps = d.steps.length
       ? `<ol class="why-steps">` + d.steps.map((st, i) => `<li data-step="${i}" tabindex="0"><span class="rule">${st.rule}</span> ${st.text}` +
