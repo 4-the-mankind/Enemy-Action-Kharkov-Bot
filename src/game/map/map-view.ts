@@ -6,9 +6,10 @@ import { hexAt, pointerTarget, type Hex, type MapGrid, type Point, type PointerT
  * Stacking order, bottom to top. Every feature draws into one plane, so adding a
  * layer never changes what covers what.
  *  - data:    debug layers over the printed map (grid, terrain, arrows, lines…)
- *  - marks:   hovered, pinned and drop-target hexes, under the counters they hold
- *  - units:   counters (task 2.2)
- *  - moves:   bot movement paths and animations (task 3.5)
+ *  - marks:   hovered, pinned and drop-target hexes, bot trails and candidate hexes (3.5),
+ *             under the counters they hold
+ *  - units:   counters (task 2.2); the bot's counters walk here (3.5)
+ *  - moves:   arrows that must cover the counters (attackers → target, I)
  *  - pointer: highlights that must cover everything
  */
 export const PLANES = ["data", "marks", "units", "moves", "pointer"] as const;

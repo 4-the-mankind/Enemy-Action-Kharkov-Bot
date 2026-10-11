@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-10-11.
+Mise à jour : 2026-10-11 (3.5, M1).
 
 ---
 
@@ -220,13 +220,14 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
   3. **3.3b** Méthodes 4 à 8 — **Opus 5.5, effort très élevé** ; après 4.3 (méthode 4 c et méthode 5 [GT 3+] demandent le ravitaillement).
   4. Puis **4.1** Cartes soviétiques (activation selon la carte tirée, 8.13) — **sous-agent Sonnet 5, effort bas à moyen** ; et **4.2** Objectifs de front et d'armée — **Opus 5.5, effort très élevé**.
 - [x] **3.4** Test de référence p17 : reproduire exactement les déplacements du livre — IA+Dev (Opus 5.5, élevé) — **fait (2026-10-11)**, dans `tests/engine/soviet-movement.test.ts` : les 10 unités de la 3T vont où le livret les met (01 → 1103, 03 → 0504, 04 → 1103, 06 → 0802, 08 → 0903, 09 → 1002 ; 05, 10, 15, 24 immobiles), avec les mêmes justifications (9.25 f pour 01, 9.24 c pour 03, 9.24 c puis e pour 04, empilement pour 08). Position retenue : **mise en place du livret (§3) sans ajustement, objectif Voronezh West en 1009** — avec l'ajustement 1,2 (Raus Overrun), qui place aussi l'objectif en 1009, la ligne allemande a des trous et le résultat diffère. Confirmé par le dev (Q18).
-- [ ] **3.5** Lecteur d'events : animation des mouvements du bot case par case, rail D (onglets Bot / Log / Overlays), carte tirée sur la pioche, panneau « Why this move » (§3bis) — IA (Sonnet 5, moyen)
+- [x] **3.5** Lecteur d'events : animation des mouvements du bot case par case, rail D (onglets Bot / Log / Overlays), carte tirée sur la pioche, panneau « Why this move » (§3bis) — IA (Sonnet 5, moyen) — **fait (2026-10-11)** : `src/game/playback/` (`readActivation` découpe les events d'un pas en en-tête `FormationActivated` + une décision par unité ; `MovePlayer` fait marcher chaque pion case par case le long de `path`, une unité après l'autre, et trace son chemin au crayon gras rouge **sous les pions** (plan `marks`, pour garder les valeurs lisibles ; le plan `moves` reste pour les flèches de combat) ; vitesse lente / normale / rapide (mémorisée par navigateur), « Skip », rien d'animé si « réduire les animations » ; chemins effacés à l'activation suivante ou si l'activation est annulée). Onglet Bot (`panels/bot-panel.ts`) : pioche en tranches (une par carte, « n cards left » = 22 − défausse) avec emplacement « No card drawn » et animation de pioche prête — la carte tirée viendra de l'état en 4.1 (`drawnCard`, `TODO 4.1`) ; **contrôle provisoire « Activate an army »** (liste des armées soviétiques + bouton, envoie `ActivateFormation`, raison affichée si refus ; remplacé par « Run bot impulse » en 4.1, `TODO 4.1`) ; ordres de l'activation dans l'ordre où le bot a traité les unités, unité en cours surlignée. « Why this move » (`panels/why-panel.ts`) : méthode et titre, étapes (règle, texte, cases gardées / écartées), méthodes non appliquées avec leur raison, « Replay move » (seulement si le pion est encore sur sa case d'arrivée) ; sur la carte, contour des cases candidates (arrivée en rouge plein, autres en tirets), et le survol d'une étape met en rouge les cases qu'elle a écartées. La fiche suit l'animation (sauf unités sans méthode), un clic sur un ordre ou sur une ligne de décision du journal l'affiche. **Scénario de dev `?scenario=p17`** (`src/game/scenarios.ts`, `GameSession.load`) : position du test 3.4 (mise en place du livret sans ajustement, objectif Voronezh West en 1009, partie démarrée). Vérifié dans le navigateur intégré : 3T activée, les 10 unités vont où le livret les met, annulation, journal, téléphone sans défilement horizontal.
 
-**M1 atteint** quand le test 3.4 passe et que le résultat est visible sur la carte.
+**M1 atteint (2026-10-11)** : le test 3.4 passe et le résultat est visible sur la carte (`/src/game/?scenario=p17`, onglet Bot, « Activate army » sur la 3rd Tank Army).
 
 ### Phase 4 — Bot complet
 
 - [ ] **4.1** Cartes soviétiques en JSON ; choix carte de commandement / auxiliaire (8.1) ; commandes 8.11-8.13 — IA (sous-agent Sonnet 5, bas à moyen)
+  - Points de branchement (3.5) : `drawnCard` dans `src/game/panels/bot-panel.ts` (carte tirée lue dans l'état ; la pioche joue alors son animation) ; contrôle provisoire « Activate an army » du même fichier, à remplacer par « Run bot impulse » (§3bis A).
 - [ ] **4.2** Objectifs de front et d'armée (9.1, tables de placement), armées avec objectif (9.26), unités non ravitaillées (9.27) — IA (Opus 5.5, très élevé)
   **Points de branchement** (déjà appelés par le moteur ; remplacer la réponse provisoire de `provisionalRules`, `src/engine/pending.ts`, et chercher `TODO 4.2` dans `src/`) :
   - `armyObjective(state, army)` → case du marqueur Army Objective (état de partie à ajouter) ; tant qu'il est non nul, `ActivateFormation` refuse l'armée : coder 9.26 dans `soviet-movement.ts` à la place du refus.
@@ -394,3 +395,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-11** — Fonctions provisoires des tâches à venir regroupées dans `src/engine/pending.ts` et branchées (ravitaillement, statut OOS / isolé, soutien, garrisons, sol, objectifs d'armée) ; listes « Points de branchement » ajoutées à 4.2, 4.3, 4.6 ; consigne `CLAUDE.md` : chercher `TODO <tâche>` avant de coder. Q18 réglée, 3.4 faite. Q19 : analyse demandée par le dev.
 - **2026-10-11** — Q19 réglée par le dev : 9.23 b jugée par town ; code et test mis à jour.
 - **2026-10-11** — Commit `2dfd8d9` (3.3a, 3.4, `pending.ts`). Ordre de travail révisé : 3.5 (M1) → 4.3 → 3.3b → 4.1 / 4.2, un chat par tâche, modèle et effort indiqués.
+- **2026-10-11** — 3.5 faite, **jalon M1 atteint** : lecteur d'events (pion qui marche case par case, chemins au crayon rouge sous les pions), onglet Bot (pioche, activation provisoire, ordres), « Why this move » avec cases candidates sur la carte, scénario de dev `?scenario=p17`. Points de branchement ajoutés à 4.1.

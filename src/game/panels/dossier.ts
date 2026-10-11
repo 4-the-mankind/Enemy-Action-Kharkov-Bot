@@ -35,4 +35,5 @@ export function mountDossier(root: HTMLElement, key: string) {
 
   open(tabs.some((t) => t.dataset.tab === saved.tab) ? saved.tab! : tabs[0].dataset.tab!);
   fold(saved.folded ?? matchMedia("(max-width: 760px)").matches);
+  return { open };
 }

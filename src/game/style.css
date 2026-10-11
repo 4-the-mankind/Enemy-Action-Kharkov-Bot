@@ -526,6 +526,8 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
   .sheet, .bg, .folder-tab { transition: none; }
   .log li.fresh { animation: none; }
   .d10.tumbling { animation: none; }
+  .deck .card.drawn { animation: none; }
+  .orders button { transition: none; }
 }
 
 /* Narrow screens: an open dossier covers the map instead of squeezing it (phone layout: 5.3). */
@@ -549,8 +551,122 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .counter-menu button[disabled] { opacity: 0.4; cursor: default; }
 .stack .tag { font-size: 0.75rem; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; opacity: 0.8; }
 
+/* ---------- Bot tab: deck, activation, orders, "Why this move" ---------- */
+
+.bot-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding-right: 18px; }
+.bot-section > [hidden] { display: none; }
+.bot-section h2 { font-size: 1rem; }
+
+/* Deck: the drawn card lies face up on the edges of the cards left, one edge per card. */
+.deck-area { display: grid; grid-template-columns: 112px 1fr; column-gap: 14px; align-items: end; }
+.deck { --card-h: 158px; position: relative; width: 112px; height: calc(var(--card-h) + var(--left) * 2px); grid-row: span 2; }
+.deck .edges i {
+  position: absolute; left: 0; right: 0; height: var(--card-h);
+  bottom: calc((var(--left) - 1 - var(--k)) * 2px);
+  background: #d9d3bc; border: 1px solid #8c8775; border-radius: 6px;
+}
+.deck .card {
+  position: absolute; left: 0; top: 0; width: 112px; height: var(--card-h);
+  border-radius: 6px; box-shadow: 0 3px 10px rgb(0 0 0 / 0.45);
+}
+.deck .card.empty {
+  display: grid; place-items: center; padding: 12px; text-align: center;
+  font-size: 0.85rem; color: var(--slip-dim);
+  background: var(--slip); box-shadow: none; border: 1px solid #8c8775;
+}
+.deck .card.drawn { animation: draw-card 700ms cubic-bezier(.2,.7,.2,1); transform-origin: left center; }
+@keyframes draw-card {
+  0% { transform: translateY(calc(var(--left) * 2px)) rotateY(90deg); }
+  45% { transform: translate(18px, -10px) rotateY(90deg); }
+  100% { transform: none; }
+}
+.deck-count { margin: 0; font-size: 0.9rem; color: var(--paper-dim); }
+.deck-count b { display: block; font-size: 1.9rem; line-height: 1; font-weight: 600; color: var(--paper); font-variant-numeric: tabular-nums; }
+.deck-note { margin: 6px 0 0; font-size: 0.8rem; color: var(--paper-dim); }
+
+.activate { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
+.activate .hint { margin: 2px 0 8px; }
+.activate-row { display: flex; gap: 8px; }
+.army-select {
+  flex: 1; min-width: 0; padding: 5px 6px; font: inherit; color: var(--paper);
+  background: var(--feldgrau-dark); border: 1px solid var(--feldgrau-light); border-radius: 2px;
+}
+.activate .btn.ink { font-weight: 600; color: var(--slip-ink); background: var(--paper); border-color: var(--paper); white-space: nowrap; }
+.activate .btn.ink:hover:not([disabled]) { background: #fff; }
+.activate-reason { margin: 6px 0 0; font-size: 0.85rem; color: #ff8a80; }
+.activate-reason:empty { display: none; }
+
+.orders-area { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
+.orders-head p { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }
+.playback { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 10px 0 8px; }
+.speed { display: flex; border: 1px solid var(--feldgrau-light); border-radius: 2px; overflow: hidden; }
+.speed button { padding: 3px 9px; font: inherit; font-size: 0.85rem; color: var(--paper-dim); background: transparent; border: 0; cursor: pointer; }
+.speed button[aria-pressed="true"] { color: var(--paper); font-weight: 600; background: var(--feldgrau-light); }
+.playback .switch { padding: 3px 12px; font-size: 0.85rem; }
+
+.orders { list-style: none; margin: 0; padding: 0; }
+.orders button {
+  display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 9px;
+  width: 100%; padding: 4px 6px 4px 4px; font: inherit; font-size: 0.88rem; text-align: left;
+  color: var(--paper); background: transparent; border: 0; border-left: 3px solid transparent; cursor: pointer;
+  transition: opacity 200ms;
+}
+.orders button:hover { background: rgb(232 228 211 / 0.07); }
+.orders img { width: 30px; height: 30px; border-radius: 2px; }
+.orders .name small { display: block; font-size: 0.78rem; color: var(--paper-dim); }
+.orders .where { font-size: 0.85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.orders .still .where { color: var(--paper-dim); }
+.orders .pending { opacity: 0.35; }
+/* The unit the bot is moving: lit like a pencil mark on the order. */
+.orders .current { border-left-color: var(--stab-red); background: rgb(192 39 45 / 0.16); }
+.orders .shown { border-left-color: var(--paper); background: rgb(232 228 211 / 0.1); }
+.orders .current.shown { border-left-color: var(--stab-red); }
+
+/* "Why this move": a paper slip, like the inspector. */
+.why { padding: 12px 14px 14px; color: var(--slip-ink); background: var(--slip); border-left: 4px solid var(--stab-red); }
+.why-head { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+.why-head img { width: 52px; height: 52px; border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.35); }
+.why-move { margin: 0; font-size: 0.9rem; color: var(--slip-dim); font-variant-numeric: tabular-nums; }
+.why-method { margin: 0 0 10px; padding-bottom: 8px; font-size: 0.95rem; border-bottom: 1.5px solid var(--slip-ink); }
+.why-method small { display: block; font-size: 0.78rem; color: var(--slip-dim); }
+.why-steps { list-style: none; margin: 0 0 10px; padding: 0; font-size: 0.86rem; counter-reset: step; }
+.why-steps li { padding: 6px 4px 6px 0; border-bottom: 1px solid rgb(38 46 41 / 0.2); outline: none; }
+.why-steps li:hover, .why-steps li:focus-visible { background: rgb(192 39 45 / 0.08); }
+.why-steps .rule { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.why .hexes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.why .hexes span { padding: 0 5px; font-size: 0.8rem; font-variant-numeric: tabular-nums; border-radius: 2px; }
+.why .hexes .kept { color: var(--slip); background: var(--slip-ink); }
+.why .hexes .dropped { color: var(--slip-dim); text-decoration: line-through; border: 1px solid rgb(38 46 41 / 0.3); }
+.why-skipped { margin: 0 0 10px; font-size: 0.84rem; }
+.why-skipped summary { cursor: pointer; color: var(--slip-dim); }
+.why-skipped ul { margin: 6px 0 0; padding-left: 16px; }
+.why-skipped li + li { margin-top: 3px; }
+.why .replay { width: 100%; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
+.why .replay:hover:not([disabled]) { background: var(--feldgrau); }
+
+.log li.decision { cursor: pointer; }
+.log li.decision:hover, .log li.decision:focus-visible { color: var(--paper); background: rgb(232 228 211 / 0.06); outline: none; }
+
+/* Bot trails on the map: grease pencil on the acetate, a paper casing to read on any terrain. */
+.bot-trails .trail { opacity: 0; }
+.bot-trails .trail.drawn { opacity: 1; }
+.bot-trails polyline {
+  fill: none; stroke: var(--stab-red); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 3px var(--paper)) drop-shadow(0 0 2px var(--paper));
+}
+.bot-trails .drawn polyline { stroke-dashoffset: 0; }
+.bot-trails .origin { fill: var(--paper); stroke: var(--stab-red); stroke-width: 7; }
+.bot-trails .trail:not(.focus) { opacity: 0.55; }
+.bot-trails .trail:not(.drawn) { opacity: 0; }
+.bot-trails:not(:has(.focus)) .trail.drawn { opacity: 1; }
+.bot-options .option { fill: rgb(38 46 41 / 0.08); stroke: var(--line); stroke-width: 4; stroke-dasharray: 14 9; stroke-linejoin: round; }
+.bot-options .option.stressed { fill: rgb(192 39 45 / 0.14); stroke: var(--stab-red); stroke-width: 6; }
+.bot-options .option.chosen { fill: rgb(192 39 45 / 0.12); stroke: var(--stab-red); stroke-width: 7; stroke-dasharray: none; }
+.counter.walking { filter: drop-shadow(0 14px 10px rgb(0 0 0 / 0.5)); }
+
 /* Bot tab: Soviet state */
-.bot-status { margin: 0; display: grid; gap: 6px; }
+.bot-status { margin: 0; display: grid; gap: 6px; padding-top: 14px; border-top: 1px solid var(--feldgrau); }
 .bot-status div { display: flex; justify-content: space-between; gap: 12px; }
 .bot-status dt { color: var(--paper-dim); }
 .bot-status dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }

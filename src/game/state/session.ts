@@ -33,6 +33,13 @@ export class GameSession {
     return events;
   }
 
+  /** Replaces the game with a given position (dev scenarios): no undo history before it. */
+  load(state: GameState) {
+    this.history.length = 0;
+    this.current = state;
+    this.emit([], false);
+  }
+
   canUndo(): boolean { return this.history.length > 0; }
 
   undo() {

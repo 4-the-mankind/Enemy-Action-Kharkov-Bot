@@ -1,6 +1,7 @@
 // Log tab of the rail (D): the events of each step, newest first, in the player's words.
 import type { Engine } from "../../engine/engine";
 import { isHex, type GameEvent, type Location } from "../../engine/types";
+import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
 
 const where = (at: Location) =>
@@ -56,8 +57,22 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
   }
 }
 
-/** An undo removes the lines of the step it takes back; refused commands stay (they changed nothing). */
-export function mountLogPanel(root: HTMLElement, session: GameSession) {
+/**
+ * An undo removes the lines of the step it takes back; refused commands stay (they changed nothing).
+ * A click on a bot decision line shows its "Why this move" slip.
+ */
+export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision) => void, intro?: string) {
+  const decisions = new WeakMap<HTMLLIElement, Decision>();
+  root.addEventListener("click", (e) => {
+    const li = (e.target as Element).closest("li");
+    const d = li && decisions.get(li);
+    if (d) onDecision(d);
+  });
+  root.addEventListener("keydown", (e) => {
+    const li = (e.target as Element).closest("li");
+    const d = li && decisions.get(li);
+    if (d && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onDecision(d); }
+  });
   const add = (html: string, cls = "") => {
     const li = document.createElement("li");
     li.innerHTML = html;
@@ -67,7 +82,7 @@ export function mountLogPanel(root: HTMLElement, session: GameSession) {
   };
   /** Lines of each step that changed the state, in the order of the undo history. */
   const steps: HTMLLIElement[][] = [];
-  add("New game. Set up turn 1 from the Units panel.");
+  add(intro ?? "New game. Set up turn 1 from the Units panel.");
   session.subscribe((_, events, undo) => {
     if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
     const lines: HTMLLIElement[] = [];
@@ -85,6 +100,12 @@ export function mountLogPanel(root: HTMLElement, session: GameSession) {
         anchor.after(li);
       } else li = add(line.html, cls);
       if (grouped) anchor = li;
+      if (e.type === "DecisionTraced") {
+        decisions.set(li, e);
+        li.classList.add("decision");
+        li.tabIndex = 0;
+        li.title = "Show why";
+      }
       if (!line.refused) lines.push(li);
     }
     if (lines.length) steps.push(lines);

@@ -55,8 +55,11 @@
           <a class="home" href="/">Home</a>
         </header>
 
-        <section data-tabpanel="bot" class="rail-section" aria-label="Bot">
-          <p class="hint">No Soviet card drawn yet. The bot's card and orders show here during its impulses.</p>
+        <section data-tabpanel="bot" class="rail-section bot-section" aria-label="Bot">
+          <div id="deck" class="deck-area"></div>
+          <div id="activate" class="activate"></div>
+          <section id="orders" class="orders-area" aria-label="Activation" aria-live="polite" hidden></section>
+          <section id="why" class="why" aria-label="Why this move" hidden></section>
           <dl id="bot" class="bot-status"></dl>
         </section>
 

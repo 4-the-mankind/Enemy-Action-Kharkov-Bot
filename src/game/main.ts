@@ -20,6 +20,9 @@ import { stackRenderer } from "./panels/stack-list";
 import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
 import { mountStartNotice } from "./panels/start-notice";
+import { mountWhyPanel } from "./panels/why-panel";
+import { MovePlayer } from "./playback/move-player";
+import { scenarioFromUrl } from "./scenarios";
 import { GameSession } from "./state/session";
 import { Selection } from "./state/selection";
 
@@ -36,7 +39,7 @@ function status(msg: string, error = false) {
 
 async function init() {
   mountDossier($("unitsDossier"), "units");
-  mountDossier($("railDossier"), "rail");
+  const rail = mountDossier($("railDossier"), "rail");
 
   let inspector: ReturnType<typeof mountInspector> | null = null;
   // Map clicks and lifts need the session, created once the data is loaded.
@@ -82,17 +85,22 @@ async function init() {
   });
   units.setDim((side) => panel.filter() !== "all" && panel.filter() !== side);
   panel.onFilter(() => units.render(session.state));
-  mountBotPanel($("bot"), session);
+  const player = new MovePlayer(view, data);
+  const why = mountWhyPanel($("why"), session, player);
+  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), orders: $("orders"), status: $("bot") }, session, player, why);
   mountStartNotice($("startNotice"), session);
-  mountLogPanel($("log"), session);
+  const scenario = scenarioFromUrl(session.engine);
+  mountLogPanel($("log"), session, (d) => { rail.open("bot"); bot.pick(d); }, scenario?.note);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());
   session.subscribe(() => { undo.disabled = !session.canUndo(); });
 
-  session.subscribe((state, events) => {
+  session.subscribe((state, events, undone) => {
     const setUp = events.find((e) => e.type === "SetUpApplied");
     units.render(state, setUp && flyFrom ? { ...flyFrom, units: setUp.placed } : undefined);
     flyFrom = null;
+    // The bot's moves walk once their counters are drawn at the end hex.
+    bot.onStep(state, events, undone);
     const pinned = insp.pinnedHex(), locked = !!session.engine.locked(state);
     // Locked until Start: no grab cursor or hover feedback that would suggest an action.
     document.body.classList.toggle("game-locked", locked);
@@ -125,6 +133,7 @@ async function init() {
     },
     menu: (unit, at) => menu.open(unit, at),
   };
+  if (scenario) session.load(scenario.state);
   units.render(session.state);
   document.body.classList.toggle("game-locked", !!session.engine.locked(session.state));
 
