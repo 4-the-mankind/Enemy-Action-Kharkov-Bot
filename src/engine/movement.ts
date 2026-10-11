@@ -379,25 +379,34 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
   function isNearlySurrounded(state: GameState, soviet: string, ground: Ground = rules.ground(state)): boolean {
     const hex = hexOf(state, soviet);
     if (board.hex(hex).mapEdge === "soviet") return false;
-    if (isSurrounded(state, soviet)) return false;
-    // Only a German unit ending next to one of the Soviet unit's neighbors can close the ring.
-    const ring = new Set<string>();
-    for (const n of board.neighbors(hex)) {
-      ring.add(n.hex);
-      for (const m of board.neighbors(n.hex)) ring.add(m.hex);
+    // Neighbors neither occupied by a German unit nor in a German ZOC. The moving German unit
+    // must cover all of them from its end hex (enter it or stand next to it); leaving its own
+    // hex can only uncover more. Candidate end hexes are therefore next to (or one of) every
+    // open neighbor: usually none, as soon as two open neighbors are far apart.
+    const occ = occupancy(state), germanZoc = zoc(state, "german");
+    const open = board.neighbors(hex).map((n) => n.hex).filter((n) => !occupiedBy(occ, n, "german") && !germanZoc.has(n));
+    if (!open.length) return false; // already surrounded: not nearly surrounded (Q16)
+    let ends = new Set([open[0], ...board.neighbors(open[0]).map((m) => m.hex)]);
+    for (const n of open.slice(1)) {
+      const around = new Set([n, ...board.neighbors(n).map((m) => m.hex)]);
+      ends = new Set([...ends].filter((e) => around.has(e)));
     }
+    ends.delete(hex);
+    if (!ends.size) return false;
     for (const [id, s] of Object.entries(state.units)) {
       if (!isHex(s.at) || s.dispersed || unit(id)?.side !== "german") continue;
-      // A move enters at most 2 × (allowance + 2) hexes (½ MP roads, +2 MP infantry): a unit
-      // farther than that from the ring cannot reach it. Plain hex count, not the 9.3 distance:
-      // the ring reaches across blocked Dniepr hexsides, which ZOCs cross (11.0).
-      if (board.hexCount(s.at, hex) > 2 * (faceValues(state, id).movement + 2) + 2) continue;
+      // A move enters at most 2 × (allowance + 2) hexes (½ MP roads, +2 MP infantry). Plain
+      // hex count, not the 9.3 distance: ZOCs reach across blocked Dniepr hexsides (11.0).
+      const range = 2 * (faceValues(state, id).movement + 2);
+      if (![...ends].some((e) => e !== s.at && board.hexCount(s.at, e) <= range)) continue;
       const modes: MoveOptions[] = [{ ground }];
       if (!whyNoStrategic(state, id, ground)) modes.push({ ground, strategic: true });
-      for (const mode of modes)
-        for (const end of reachable(state, id, mode).hexes.keys())
-          if (end !== s.at && ring.has(end) && canEndIn(state, end, [id]) && isSurrounded(withUnitAt(state, id, end), soviet))
+      for (const mode of modes) {
+        const reach = reachable(state, id, mode).hexes;
+        for (const end of ends)
+          if (end !== s.at && reach.has(end) && canEndIn(state, end, [id]) && isSurrounded(withUnitAt(state, id, end), soviet))
             return true;
+      }
     }
     return false;
   }
