@@ -1,8 +1,8 @@
 // The map as the rules see it (3.1): playable hexes, their neighbors and hexsides,
 // adjacency and distance (9.3). Built once from the map data; it does not depend on
 // the game state, so distances can be cached for the whole game.
-import { hexDistance, hexId, hexNeighbor, hexSideId, parseHexId, rowsInColumn, type MapGrid } from "../core/geometry";
-import { resolveHex, type HexData, type MapHexes } from "../core/map-hexes";
+import { halfRow, hexDistance, hexId, hexNeighbor, hexSideId, parseHexId, rowsInColumn, type MapGrid } from "../core/geometry";
+import { resolveHex, type HexData, type LINE_KEYS, type LineSide, type MapHexes } from "../core/map-hexes";
 import { resolveSide, type MapHexSides, type SideData } from "../core/map-hexsides";
 
 export interface Neighbor {
@@ -46,6 +46,17 @@ export interface Board {
    * path, of any ZOC reach. Not a rules distance (that is `distance`).
    */
   hexCount(a: string, b: string): number;
+  /**
+   * How far south and west a hex lies (§3, Q2: columns run south, rows run west), in
+   * comparable units: the column, and the half-row of its center (shifted columns sit half a
+   * hex apart). For "farthest in the compass direction" (9.24 c).
+   */
+  compass(hex: string): { south: number; west: number };
+  /**
+   * Side of a printed line (§3) for any playable hex. The map data tags only the hexes along
+   * the line; the others take the side of the tagged hexes they reach without crossing it.
+   */
+  lineSide(line: (typeof LINE_KEYS)[number], hex: string): LineSide;
 }
 
 const isBlocked = (s: SideData) => s.river === "dnieprBlocked";
@@ -103,6 +114,23 @@ export function createBoard({ grid, hexData, sideData }: BoardData): Board {
     return dist;
   }
 
+  // Flood fill from the hexes tagged east, never into a hex tagged west: the east side.
+  const eastOf = new Map<string, Set<string>>();
+  function eastSide(line: (typeof LINE_KEYS)[number]): Set<string> {
+    let east = eastOf.get(line);
+    if (east) return east;
+    east = new Set(hexes.filter((h) => resolveHex(hexData, h)[line] === "east"));
+    const queue = [...east];
+    for (let i = 0; i < queue.length; i++)
+      for (const n of neighbors(queue[i])) {
+        if (east.has(n.hex) || resolveHex(hexData, n.hex)[line] === "west") continue;
+        east.add(n.hex);
+        queue.push(n.hex);
+      }
+    eastOf.set(line, east);
+    return east;
+  }
+
   return {
     hexes,
     isPlayable: (hex) => playable.has(hex),
@@ -120,5 +148,10 @@ export function createBoard({ grid, hexData, sideData }: BoardData): Board {
     distance: (a, b) => distancesFrom(a).get(b) ?? Infinity,
     distancesFrom,
     hexCount: (a, b) => hexDistance(grid, a, b),
+    compass(hex) {
+      const { col, row } = parseHexId(hex);
+      return { south: col, west: halfRow(grid, col, row) };
+    },
+    lineSide: (line, hex) => (eastSide(line).has(hex) ? "east" : "west"),
   };
 }

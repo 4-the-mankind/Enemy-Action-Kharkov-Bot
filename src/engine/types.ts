@@ -82,12 +82,29 @@ export type Command =
   /** Plays a recorded set-up adjustment as the bot (p48-50, D15): chosen, or picked by a die roll (1-10). */
   | { type: "ApplySetUpAdjustment"; id: string; roll?: number }
   /** Ends the set-up: the game starts with the first German impulse of turn 1 (p48). */
-  | { type: "StartGame" };
+  | { type: "StartGame" }
+  /**
+   * Soviet activation, step 2 (9.0): the bot moves the army's units by the movement methods
+   * (9.2). TODO 4.1: the units come from the command card (8.13); for now, the whole army.
+   */
+  | { type: "ActivateFormation"; army: string };
+
+/** One preference, tiebreaker or restriction applied to a Soviet move, with its effect (8.3). */
+export interface DecisionStep {
+  /** Rule applied, e.g. "9.21 method 11 a", "9.25 f", "9.24 c", "9.23 b". */
+  rule: string;
+  /** What it asks for. */
+  text: string;
+  /** Destination hexes it kept, and the ones it set aside. */
+  kept: string[];
+  dropped: string[];
+}
 
 export type GameEvent =
   | { type: "SetUpApplied"; placed: string[]; reserve: string[]; reinforcements: string[] }
   | { type: "SetUpCleared" }
-  | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location }
+  /** `path`: hexes crossed, start and end included, when the engine knows them (bot moves). */
+  | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location; path?: string[] }
   | { type: "UnitRestacked"; unit: string; at: Location; to: StackMove }
   | { type: "StepRemoved"; unit: string; from: Face; to: Face }
   | { type: "DispersedSet"; units: string[]; dispersed: boolean }
@@ -99,6 +116,35 @@ export type GameEvent =
   | { type: "GameStarted" }
   /** A unit ended its move in an enemy town or city (14.1). */
   | { type: "TownCaptured"; hex: string; owner: "german" | "soviet" }
+  | {
+    type: "FormationActivated"; army: string; front: "voronezh" | "southwest";
+    /** Active units on the map, in reserve, and those that move (on the map, not dispersed). */
+    units: string[];
+    /** "9.21" (Soviet Movement Methods A). */
+    methods: string;
+    /** Methods skipped for every unit, and why. */
+    skipped: { method: string; reason: string }[];
+    /** Spearhead units skipping methods 4-9 (9.21). */
+    spearheads: string[];
+  }
+  /**
+   * Why a Soviet unit moved where it did, or did not move (CLAUDE.md: every decision traced).
+   * Followed by its UnitsMoved event when it moves.
+   */
+  | {
+    type: "DecisionTraced"; unit: string;
+    /** "moved"; "frozen": a method says it does not move at all; "noMove": no method applied. */
+    outcome: "moved" | "frozen" | "noMove";
+    /** Deciding method, e.g. "9.21 method 11", and its title; null when no method applied. */
+    method: string | null;
+    title: string | null;
+    from: string;
+    to: string;
+    path: string[];
+    steps: DecisionStep[];
+    /** Earlier methods that did not apply to this unit, and why. */
+    skipped: { method: string; reason: string }[];
+  }
   | { type: "CommandRejected"; command: Command["type"]; reason: string };
 
 export interface StepResult {

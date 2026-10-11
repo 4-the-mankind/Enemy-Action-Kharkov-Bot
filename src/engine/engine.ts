@@ -6,6 +6,8 @@ import type { Unit } from "../core/units";
 import type { Board } from "./board";
 import { createMovement, type Movement } from "./movement";
 import type { RecordedAdjustment } from "./setup-adjustments";
+import { provisionalRules, type PendingRules } from "./pending";
+import { createSovietMovement, type SovietMovement } from "./soviet-movement";
 import {
   emptyState, isHex, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState, type Location,
   type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult,
@@ -19,6 +21,8 @@ export interface EngineData {
   terrain: TerrainEffects;
   /** Recorded set-up adjustments (data/setup-adjustments.json, D15). */
   adjustments?: RecordedAdjustment[];
+  /** Rules of tasks not coded yet (supply, garrisons, ground…): provisional by default (pending.ts). */
+  rules?: PendingRules;
 }
 
 export interface Engine {
@@ -36,13 +40,20 @@ export interface Engine {
   unit(id: string): Unit | undefined;
   /** Movement rules (3.2): reachable hexes, stacking, proximate, surround. */
   readonly movement: Movement;
+  /** Soviet movement methods (3.3). */
+  readonly sovietMovement: SovietMovement;
 }
 
 export function createEngine(data: EngineData): Engine {
   const units = data.units.filter((u) => !u.notUsedInSolo);
   const byId = new Map(units.map((u) => [u.id, u]));
   const name = (id: string) => byId.get(id)?.designation ?? id;
-  const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id) });
+  const rules = data.rules ?? provisionalRules(data.board);
+  const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id), rules });
+  const sovietMovement = createSovietMovement({
+    board: data.board, movement, unit: (id) => byId.get(id), rules,
+    move: (state, id, to) => moveUnits(state, [id], to, "bot"),
+  });
 
   // Booklet set-up (§3): start hex → on the map; turn 1 → reserve; later turn → reinforcements.
   function setUpTurn1(): StepResult {
@@ -234,6 +245,13 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, started: true }, events: [{ type: "GameStarted" }] };
   }
 
+  // Step 2 of a Soviet activation (9.0): the bot moves the army by the movement methods (9.2).
+  function activateFormation(state: GameState, army: string): StepResult {
+    if (!state.started) return reject(state, "ActivateFormation", "Press Start to begin turn 1.");
+    const r = sovietMovement.activate(state, army);
+    return typeof r === "string" ? reject(state, "ActivateFormation", r) : r;
+  }
+
   /** Commands the player may only send once the game has started. */
   const PLAY = new Set<Command["type"]>(["MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective"]);
 
@@ -263,6 +281,8 @@ export function createEngine(data: EngineData): Engine {
         return applySetUpAdjustment(state, command.id, command.roll);
       case "StartGame":
         return startGame(state);
+      case "ActivateFormation":
+        return activateFormation(state, command.army);
     }
   }
 
@@ -277,6 +297,7 @@ export function createEngine(data: EngineData): Engine {
     nextFace,
     units,
     movement,
+    sovietMovement,
     unit: (id) => byId.get(id),
   };
 }

@@ -44,6 +44,13 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       return { html: "<b>Turn 1 begins</b> with the first German impulse (p48). Your counters are free to move." };
     case "TownCaptured":
       return { html: `<b>${e.hex}</b> is now ${e.owner === "soviet" ? "Soviet" : "German"}-owned.` };
+    case "FormationActivated":
+      return { html: `<b>${e.army} activated</b> (${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front): movement methods ${e.methods}.` };
+    case "DecisionTraced": {
+      if (e.outcome === "noMove") return { html: `<b>${name(e.unit)}</b> does not move (no movement method applies).` };
+      const by = `${e.method} (${e.title})`;
+      return { html: e.outcome === "frozen" ? `<b>${name(e.unit)}</b> stays in ${e.from}: ${by}.` : `<b>${name(e.unit)}</b> ${e.from} → ${e.to}: ${by}.` };
+    }
     case "CommandRejected":
       return { html: `<b>Not done:</b> ${e.reason}`, refused: true };
   }
