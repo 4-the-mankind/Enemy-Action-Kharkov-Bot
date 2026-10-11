@@ -112,6 +112,7 @@ describe("Soviet impulse (8.1)", () => {
     expect(of(events, "SovietCommandCard").map((e) => e.card)).toEqual(["e17"]);
     expect(state.sovietCards!.drawPile).toHaveLength(5);
     expect(state.sovietCards!.drawPile).toContain("e06");
+    expect(state.sovietCards!.lastDrawn).toEqual(["e17"]);
     expect(state.sovietDiscard).toEqual(["e17"]);
     // Fewer than four cards left: Command Delay does not apply, the card is a second command card.
     const short = impulse(withPile(["e06", "e17", "e01"]));

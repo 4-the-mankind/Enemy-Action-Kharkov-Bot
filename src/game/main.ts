@@ -40,8 +40,8 @@ function status(msg: string, error = false) {
 }
 
 async function init() {
-  mountDossier($("unitsDossier"), "units");
-  const rail = mountDossier($("railDossier"), "rail");
+  mountDossier($("unitsDossier"));
+  const rail = mountDossier($("railDossier"));
 
   let inspector: ReturnType<typeof mountInspector> | null = null;
   // Map clicks and lifts need the session, created once the data is loaded.
@@ -80,18 +80,20 @@ async function init() {
   const insp = inspector;
 
   let flyFrom: { clientX: number; clientY: number } | null = null;
-  const panel = mountUnitsPanel($("setup"), $("groups"), session, drag, game.calendar, (button) => {
+  // "Set up turn 1", from the Units panel or the start notice: the counters fly from the button.
+  const setUpTurn1 = (button: HTMLElement) => {
     const r = button.getBoundingClientRect();
     flyFrom = { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
     session.dispatch({ type: "SetUpTurn1" });
-  });
+  };
+  const panel = mountUnitsPanel($("setup"), $("groups"), session, drag, game.calendar, setUpTurn1);
   units.setDim((side) => panel.filter() !== "all" && panel.filter() !== side);
   panel.onFilter(() => units.render(session.state));
   const player = new MovePlayer(view, data);
   const why = mountWhyPanel($("why"), session, player);
   const scenario = scenarioFromUrl(session.engine);
   const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
-  mountStartNotice($("startNotice"), session);
+  mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
   mountCardZoom();
   mountLogPanel($("log"), session, (d) => { rail.open("bot"); bot.pick(d); }, scenario?.note);

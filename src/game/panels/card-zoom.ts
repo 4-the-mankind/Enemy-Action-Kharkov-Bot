@@ -1,6 +1,8 @@
 // Soviet card held up to read: hovering or focusing any element with data-card="eNN" shows
 // the scan large beside the pointer; a click keeps it up until another click or Escape.
 export const cardImage = (card: string) => `/assets/cards/EAKh-sovECcards-E-${card.slice(1)}.png`;
+/** The back shared by all Soviet cards. */
+export const CARD_BACK = "/assets/cards/EAKh-sovECCcards-back.png";
 
 export function mountCardZoom(root: HTMLElement = document.body) {
   const zoom = document.createElement("figure");

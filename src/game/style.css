@@ -6,7 +6,7 @@
    one slides out to the right. */
 
 :root {
-  --rail-w: 296px;
+  --rail-w: var(--units-w);
   --units-w: 400px;
   --tabs-w: 32px;
   --counter: 46px;
@@ -307,7 +307,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .start-notice[hidden] { display: none; }
 .start-notice h2 { margin: 0 0 4px; font-size: 1.15rem; }
 .start-notice p { margin: 0; font-size: 0.9rem; color: var(--slip-dim); }
-.start-notice .btn { pointer-events: auto; margin-top: 12px; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
+.start-notice .btn { display: block; pointer-events: auto; margin: 12px auto 0; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
 .start-notice .btn:hover { background: var(--feldgrau); }
 
 .counter-menu .menu-lock { margin: 0; padding: 6px 12px; font-size: 0.82rem; color: var(--stab-red); }
@@ -563,7 +563,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .deck .edges i {
   position: absolute; left: 0; right: 0; height: var(--card-h);
   bottom: calc((var(--left) - 1 - var(--k)) * 2px);
-  background: #d9d3bc; border: 1px solid #8c8775; border-radius: 6px;
+  background: #d9d3bc url("/assets/cards/EAKh-sovECCcards-back.png") center / cover; border: 1px solid #8c8775; border-radius: 6px;
 }
 .deck .card {
   position: absolute; left: 0; top: 0; width: 112px; height: var(--card-h);
@@ -574,18 +574,40 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
   font-size: 0.85rem; color: var(--slip-dim);
   background: var(--slip); box-shadow: none; border: 1px solid #8c8775;
 }
-.deck .card.drawn { animation: draw-card 700ms cubic-bezier(.2,.7,.2,1); transform-origin: left center; }
-@keyframes draw-card {
-  0% { transform: translateY(calc(var(--left) * 2px)) rotateY(90deg); }
-  45% { transform: translate(18px, -10px) rotateY(90deg); }
+/* A drawn card: back and face glued together; it slides off the pile face down, then turns over.
+   The auxiliary card follows a beat later and settles askew under the command card. */
+.deck .card.flip { transform-style: preserve-3d; }
+.deck .card.flip img { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 6px; backface-visibility: hidden; }
+.deck .card.flip .back { transform: rotateY(180deg); }
+.deck .card.flip.drawn { animation: draw-flip 900ms cubic-bezier(.2,.7,.2,1) backwards; }
+@keyframes draw-flip {
+  0% { transform: translateY(calc(var(--left) * 2px)) rotateY(180deg); }
+  40% { transform: translate(26px, -14px) rotateY(180deg); }
   100% { transform: none; }
+}
+@keyframes draw-flip-aux {
+  0% { transform: translateY(calc(var(--left) * 2px)) rotateY(180deg); }
+  40% { transform: translate(40px, -8px) rotateY(180deg); }
+  100% { transform: translate(14px, 6px) rotate(4deg); }
+}
+/* The auxiliary card fades off right after turning over. */
+.deck .card.flip.aux.drawn {
+  animation: draw-flip-aux 500ms cubic-bezier(.2,.7,.2,1) 100ms backwards, fade-aux 300ms ease-in 600ms forwards;
+}
+@keyframes fade-aux {
+  from { transform: translate(14px, 6px) rotate(4deg); }
+  to { opacity: 0; transform: translate(36px, 22px) rotate(9deg) scale(0.94); visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck .card.flip.drawn, .deck .card.flip.aux.drawn { animation: none; }
 }
 .deck-count { margin: 0; font-size: 0.9rem; color: var(--paper-dim); }
 .deck-count b { display: block; font-size: 1.9rem; line-height: 1; font-weight: 600; color: var(--paper); font-variant-numeric: tabular-nums; }
 .deck-note { margin: 6px 0 0; font-size: 0.8rem; color: var(--paper-dim); }
-.deck img.card { cursor: zoom-in; }
+.deck .card[data-card] { cursor: zoom-in; }
 /* The auxiliary card peeks out from under the command card. */
 .deck .card.aux { transform: translate(14px, 6px) rotate(4deg); filter: brightness(0.82); }
+.deck .card.aux.drawn { filter: none; }
 .deck.pair { margin-right: 22px; }
 
 /* A Soviet card held up to read (card-zoom.ts). */

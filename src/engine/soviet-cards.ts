@@ -256,7 +256,8 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
     if (pile.length < 4) return `fewer than four cards in the Soviet draw pile (${pile.length})`;
     const s = shuffle([...pile, id], piles(state).seed);
     return {
-      state: withPiles(state, { drawPile: s.items, seed: s.seed }), returned: true,
+      // Back in the pile: no longer face up beside the command card.
+      state: withPiles(state, { drawPile: s.items, seed: s.seed, lastDrawn: piles(state).lastDrawn.filter((c) => c !== id) }), returned: true,
       events: [{ type: "SovietCardReturned", card: id, left: s.items.length }],
       detail: "back into the draw pile, shuffled",
     };

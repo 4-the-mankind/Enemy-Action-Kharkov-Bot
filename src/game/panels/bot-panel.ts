@@ -10,7 +10,7 @@ import { faceImage } from "../data/game-data";
 import { readActivation, type Activation, type Decision } from "../playback/activation";
 import type { MovePlayer, Speed } from "../playback/move-player";
 import type { GameSession } from "../state/session";
-import { cardImage } from "./card-zoom";
+import { CARD_BACK, cardImage } from "./card-zoom";
 import type { mountWhyPanel } from "./why-panel";
 
 const armyName = (token: string) => ARMY_NAMES[token] ?? `${token} Army`;
@@ -70,14 +70,24 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     const drawn = state.sovietCards?.lastDrawn ?? [];
     const left = pileSize(state);
     const edges = Array.from({ length: left }, (_, i) => `<i style="--k:${i}"></i>`).join("");
-    const [command, aux] = drawn;
+    const [command, drawnAux] = drawn;
+    const fresh = !!command && command !== shownCard;
+    // The auxiliary card shows only while it is drawn: it turns over, then fades off at once.
+    // The command card stays face up until the next impulse.
+    const aux = fresh && !matchMedia("(prefers-reduced-motion: reduce)").matches ? drawnAux : undefined;
+    // A drawn card leaves the pile face down, then turns over (two faces, card-back.png behind).
+    const flip = (id: string, role: string, extra: string) =>
+      `<div class="card flip${extra}${fresh ? " drawn" : ""}" role="img" aria-label="${role} ${id.toUpperCase()}" data-card="${id}" tabindex="0">` +
+      `<img class="back" src="${CARD_BACK}" alt=""><img class="face" src="${cardImage(id)}" alt=""></div>`;
     const face = command
-      ? (aux ? `<img class="card aux" src="${cardImage(aux)}" alt="Auxiliary card ${aux.toUpperCase()}" data-card="${aux}" tabindex="0">` : "") +
-        `<img class="card${command !== shownCard ? " drawn" : ""}" src="${cardImage(command)}" alt="Command card ${command.toUpperCase()}" data-card="${command}" tabindex="0">`
-      : `<div class="card empty">${state.started ? "No card drawn yet this turn" : "Soviet draw pile"}</div>`;
+      ? (aux ? flip(aux, "Auxiliary card", " aux") : "") + flip(command, "Command card", "")
+      : left
+        ? `<img class="card" src="${CARD_BACK}" alt="Soviet draw pile, face down">`
+        : `<div class="card empty">No card left</div>`;
     parts.deck.innerHTML = `<div class="deck${aux ? " pair" : ""}" style="--left:${left}"><div class="edges">${edges}</div>${face}</div>` +
       `<p class="deck-count"><b>${left}</b> card${left === 1 ? "" : "s"} left</p>` +
-      (command ? `<p class="deck-note">Point at a card to read it, click to keep it up.</p>` : `<p class="deck-note">The bot draws two cards at each impulse: one commands, the other is the auxiliary card (8.1).</p>`);
+      (command ? `<p class="deck-note">Point at a card to read it, click to keep it up.</p>`
+        : `<p class="deck-note">The bot draws two cards at each impulse: one commands, the other is the auxiliary card (8.1).</p>`);
     shownCard = command ?? null;
   };
 
