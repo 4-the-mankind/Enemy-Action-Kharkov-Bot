@@ -1,17 +1,22 @@
 // The engine: pure functions over GameState, bound to the static game data.
 // Every rule lives here, so the UI can ask before acting (canMove) and the step
 // function refuses what it would allow anyway.
+import type { SovietCard } from "../core/soviet-cards";
 import type { TerrainEffects } from "../core/terrain-effects";
 import type { Unit } from "../core/units";
 import type { Board } from "./board";
 import { createMovement, type Movement } from "./movement";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
+import { createSovietCards, type SovietCards } from "./soviet-cards";
 import { createSovietMovement, type SovietMovement } from "./soviet-movement";
 import {
   emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState,
   type Location, type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult, type SupplyMarker,
 } from "./types";
+
+/** Last game-turn of the campaign (calendar, 18.35). */
+const LAST_TURN = 14;
 
 export interface EngineData {
   units: Unit[];
@@ -21,6 +26,8 @@ export interface EngineData {
   terrain: TerrainEffects;
   /** Recorded set-up adjustments (data/setup-adjustments.json, D15). */
   adjustments?: RecordedAdjustment[];
+  /** Soviet cards E01-E22 (data/soviet-cards.json): without them, the bot plays no impulse. */
+  cards?: SovietCard[];
   /** Supply (supply.ts) and the rules of tasks not coded yet (garrisons, ground…): pending.ts. */
   rules?: PendingRules;
 }
@@ -42,6 +49,8 @@ export interface Engine {
   readonly movement: Movement;
   /** Soviet movement methods (3.3). */
   readonly sovietMovement: SovietMovement;
+  /** Soviet draw pile and commands (8.0), when the cards are loaded. */
+  readonly sovietCards: SovietCards | null;
 }
 
 export function createEngine(data: EngineData): Engine {
@@ -54,6 +63,9 @@ export function createEngine(data: EngineData): Engine {
     board: data.board, movement, unit: (id) => byId.get(id), rules,
     move: (state, id, to) => moveUnits(state, [id], to, "bot"),
   });
+  const sovietCards = data.cards
+    ? createSovietCards({ cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, sovietMovement, step: (s, c) => step(s, c, "bot") })
+    : null;
 
   // Booklet set-up (§3): start hex → on the map; turn 1 → reserve; later turn → reinforcements.
   function setUpTurn1(): StepResult {
@@ -243,11 +255,53 @@ export function createEngine(data: EngineData): Engine {
     return { state: next, events: [applied, ...events] };
   }
 
-  function startGame(state: GameState): StepResult {
+  function startGame(state: GameState, seed = 1): StepResult {
     if (!state.setUp) return reject(state, "StartGame", "Set up turn 1 first.");
     if (state.started) return reject(state, "StartGame", "The game has already started.");
     if (!state.adjustment) return reject(state, "StartGame", "Roll or choose the set-up adjustment first.");
-    return { state: { ...state, started: true }, events: [{ type: "GameStarted" }] };
+    // §3: the initial Soviet cards left after the set-up adjustment, shuffled into the draw pile.
+    const next = sovietCards ? sovietCards.startPiles(state, seed) : state;
+    return { state: { ...next, started: true }, events: [{ type: "GameStarted" }] };
+  }
+
+  function runBotImpulse(state: GameState): StepResult {
+    if (!state.started) return reject(state, "RunBotImpulse", "Press Start to begin turn 1.");
+    if (!sovietCards) return reject(state, "RunBotImpulse", "The Soviet cards are not loaded.");
+    const r = sovietCards.runImpulse(state);
+    return typeof r === "string" ? reject(state, "RunBotImpulse", r) : r;
+  }
+
+  // End of turn (4.0 V) and start of the next: Reserve Phase (I), Soviet draw pile (II),
+  // Supply Phase (III). TODO 4.6: victory check (17.2) and garrison removal (15.3).
+  function nextTurn(state: GameState): StepResult {
+    if (!state.started) return reject(state, "NextTurn", "Press Start to begin turn 1.");
+    if (!sovietCards || !state.sovietCards) return reject(state, "NextTurn", "The Soviet cards are not loaded.");
+    const left = state.sovietCards.drawPile.length;
+    if (left) return reject(state, "NextTurn", `${left} Soviet card${left === 1 ? "" : "s"} left: the turn goes on until the Soviet draw pile is empty (4.0 IV.3).`);
+    if (state.turn >= LAST_TURN) return reject(state, "NextTurn", `Game-turn ${LAST_TURN} is the last turn.`);
+    // V: Dispersed and Forward Support markers off the map; [GT 7] objective markers out of play.
+    const units = { ...state.units };
+    for (const [id, u] of Object.entries(units)) if (u.dispersed) { const { dispersed: _, ...rest } = u; units[id] = rest; }
+    let next: GameState = {
+      ...state, units, forwardSupport: [], turn: state.turn + 1,
+      objectives: state.turn === 7 ? {} : state.objectives,
+      reminders: (state.reminders ?? []).filter((r) => r.until === "done"),
+    };
+    // I: units of the calendar space for the new turn enter their Reserve Units box.
+    const toReserve = Object.keys(units).filter((id) => units[id].at === "reinforcements" && byId.get(id)?.entryTurn === next.turn);
+    if (toReserve.length) next = moveUnits(next, toReserve, "reserve", "bot").state;
+    // II: the Soviet draw pile.
+    const pile = sovietCards.preparePile(next);
+    next = pile.state;
+    const events: GameEvent[] = [{ type: "TurnStarted", turn: next.turn, cardsAdded: pile.added, toReserve, pile: next.sovietCards!.drawPile.length }];
+    // III: supply.
+    const supply = supplyPhase(next);
+    return { state: supply.state, events: [...events, ...supply.events] };
+  }
+
+  function dismissReminder(state: GameState, id: string): StepResult {
+    if (!state.reminders?.some((r) => r.id === id)) return reject(state, "DismissReminder", "No such reminder.");
+    return { state: { ...state, reminders: state.reminders.filter((r) => r.id !== id) }, events: [{ type: "ReminderDismissed", id }] };
   }
 
   // Supply Phase (4.0 III), steps 2-4. Every unit's trace is judged on the state at the start
@@ -368,7 +422,13 @@ export function createEngine(data: EngineData): Engine {
       case "ApplySetUpAdjustment":
         return applySetUpAdjustment(state, command.id, command.roll);
       case "StartGame":
-        return startGame(state);
+        return startGame(state, command.seed);
+      case "RunBotImpulse":
+        return runBotImpulse(state);
+      case "NextTurn":
+        return nextTurn(state);
+      case "DismissReminder":
+        return dismissReminder(state, command.id);
       case "SupplyPhase":
         return supplyPhase(state);
       case "SetSupplyStatus":
@@ -392,6 +452,7 @@ export function createEngine(data: EngineData): Engine {
     units,
     movement,
     sovietMovement,
+    sovietCards,
     unit: (id) => byId.get(id),
   };
 }

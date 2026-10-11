@@ -19,6 +19,8 @@ import { mountLogPanel } from "./panels/log-panel";
 import { stackRenderer } from "./panels/stack-list";
 import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
+import { mountCardZoom } from "./panels/card-zoom";
+import { mountReminders } from "./panels/reminders";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountWhyPanel } from "./panels/why-panel";
 import { MovePlayer } from "./playback/move-player";
@@ -69,7 +71,7 @@ async function init() {
 
   // Game session (D12): the engine owns the rules, the views play its events.
   const board = createBoard({ grid: data.grid, hexData: data.hexData, sideData: data.sideData });
-  const session = new GameSession(createEngine({ units: game.units, board, terrain: game.terrain, adjustments: game.adjustments }));
+  const session = new GameSession(createEngine({ units: game.units, board, terrain: game.terrain, adjustments: game.adjustments, cards: game.cards }));
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);
@@ -87,9 +89,11 @@ async function init() {
   panel.onFilter(() => units.render(session.state));
   const player = new MovePlayer(view, data);
   const why = mountWhyPanel($("why"), session, player);
-  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), orders: $("orders"), status: $("bot") }, session, player, why);
-  mountStartNotice($("startNotice"), session);
   const scenario = scenarioFromUrl(session.engine);
+  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
+  mountStartNotice($("startNotice"), session);
+  mountReminders($("reminders"), session);
+  mountCardZoom();
   mountLogPanel($("log"), session, (d) => { rail.open("bot"); bot.pick(d); }, scenario?.note);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());

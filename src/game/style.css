@@ -558,7 +558,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .bot-section h2 { font-size: 1rem; }
 
 /* Deck: the drawn card lies face up on the edges of the cards left, one edge per card. */
-.deck-area { display: grid; grid-template-columns: 112px 1fr; column-gap: 14px; align-items: end; }
+.deck-area { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: end; }
 .deck { --card-h: 158px; position: relative; width: 112px; height: calc(var(--card-h) + var(--left) * 2px); grid-row: span 2; }
 .deck .edges i {
   position: absolute; left: 0; right: 0; height: var(--card-h);
@@ -583,18 +583,80 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .deck-count { margin: 0; font-size: 0.9rem; color: var(--paper-dim); }
 .deck-count b { display: block; font-size: 1.9rem; line-height: 1; font-weight: 600; color: var(--paper); font-variant-numeric: tabular-nums; }
 .deck-note { margin: 6px 0 0; font-size: 0.8rem; color: var(--paper-dim); }
+.deck img.card { cursor: zoom-in; }
+/* The auxiliary card peeks out from under the command card. */
+.deck .card.aux { transform: translate(14px, 6px) rotate(4deg); filter: brightness(0.82); }
+.deck.pair { margin-right: 22px; }
+
+/* A Soviet card held up to read (card-zoom.ts). */
+.card-zoom {
+  position: fixed; z-index: 50; margin: 0; width: min(300px, 80vw); pointer-events: none;
+  border-radius: 12px; box-shadow: 0 14px 40px rgb(0 0 0 / 0.6);
+}
+.card-zoom[hidden] { display: none; }
+.card-zoom img { display: block; width: 100%; border-radius: 12px; }
+.card-zoom.pinned { outline: 3px solid var(--stab-red); outline-offset: 2px; }
+
+.log-card { white-space: nowrap; font-weight: 600; color: var(--paper); cursor: zoom-in; }
+.log-card img { width: 16px; margin-right: 3px; vertical-align: -5px; border-radius: 2px; }
+.log li i { font-style: normal; color: var(--paper); }
+
+/* Reminders: paper slips pinned to the map's top left corner, one per event to keep in mind. */
+.reminders {
+  position: absolute; top: 14px; left: 14px; z-index: 5; display: grid; gap: 8px;
+  width: min(340px, calc(100% - 28px));
+}
+.reminders[hidden] { display: none; }
+.reminder {
+  display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: start;
+  padding: 9px 12px; color: var(--slip-ink); background: var(--slip);
+  border-left: 4px solid var(--stab-red); box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+}
+.reminder img { width: 38px; border-radius: 3px; cursor: zoom-in; }
+.reminder h2 { margin: 0; font-size: 0.95rem; }
+.reminder p { margin: 2px 0 0; font-size: 0.85rem; }
+.reminder .until { color: var(--slip-dim); font-size: 0.78rem; }
+.reminder .btn { border-color: var(--slip-ink); padding: 3px 10px; font-weight: 600; }
+.reminder .btn:hover { background: rgb(38 46 41 / 0.1); }
 
 .activate { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
-.activate .hint { margin: 2px 0 8px; }
-.activate-row { display: flex; gap: 8px; }
+.turn-line { margin: 0 0 8px; font-size: 0.9rem; color: var(--paper-dim); }
+.turn-line b { color: var(--paper); font-weight: 600; }
+.impulse-row { display: flex; gap: 8px; }
+.impulse-row .btn { white-space: nowrap; }
+.activate .btn.ink { flex: 1; font-weight: 600; color: var(--slip-ink); background: var(--paper); border-color: var(--paper); }
+.activate .btn.ink:hover:not([disabled]) { background: #fff; }
+.activate-row { display: flex; gap: 8px; margin-top: 8px; }
 .army-select {
   flex: 1; min-width: 0; padding: 5px 6px; font: inherit; color: var(--paper);
   background: var(--feldgrau-dark); border: 1px solid var(--feldgrau-light); border-radius: 2px;
 }
-.activate .btn.ink { font-weight: 600; color: var(--slip-ink); background: var(--paper); border-color: var(--paper); white-space: nowrap; }
-.activate .btn.ink:hover:not([disabled]) { background: #fff; }
 .activate-reason { margin: 6px 0 0; font-size: 0.85rem; color: #ff8a80; }
 .activate-reason:empty { display: none; }
+.dev-activate { margin-top: 12px; font-size: 0.85rem; color: var(--paper-dim); }
+.dev-activate summary { cursor: pointer; }
+
+/* Reading: each card of the last impulse with its printed lines; the line played carries the
+   staff-red pointer, lines passed over keep the reason in small print. */
+.reading { padding-top: 14px; border-top: 1px solid var(--feldgrau); display: grid; gap: 12px; }
+.reading[hidden] { display: none; }
+.reading-head p { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }
+.read-card h3 { display: flex; gap: 10px; align-items: center; margin: 0 0 6px; font-size: 0.95rem; font-weight: 600; }
+.read-card h3 img { width: 34px; border-radius: 3px; cursor: zoom-in; box-shadow: 0 1px 4px rgb(0 0 0 / 0.5); }
+.read-card h3 small { display: block; font-size: 0.78rem; font-weight: 400; color: var(--paper-dim); }
+.read-card .lines { list-style: none; margin: 0; padding: 0; font-size: 0.85rem; }
+.read-card .lines li { position: relative; padding: 3px 0 3px 18px; color: var(--paper-dim); }
+.read-card .lines .gt {
+  display: inline-block; margin-right: 5px; padding: 0 4px; font-size: 0.75rem; font-weight: 600;
+  color: #fff; background: var(--stab-red); border-radius: 2px;
+}
+.read-card .lines .note { display: block; font-size: 0.8rem; }
+.read-card .lines .played { color: var(--paper); }
+.read-card .lines .played .text { font-weight: 600; }
+.read-card .lines .played .note { color: var(--paper); }
+.read-card .lines .mark { position: absolute; left: 2px; top: 4px; font-size: 0.7rem; color: var(--stab-red); }
+.read-card .lines .unread, .read-card .lines .idle { opacity: 0.5; }
+.read-card .fate { margin: 4px 0 0 18px; font-size: 0.8rem; color: var(--paper-dim); }
 
 .orders-area { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
 .orders-head p { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }

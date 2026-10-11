@@ -1065,17 +1065,20 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
   }
 
   /**
-   * Step 2 of the activation of an army (9.0): moves its on-map undispersed units by the
-   * methods of 9.21 or 9.22, then its unsupplied units (9.27). Fails with a reason when the
+   * Step 2 of the activation of a formation (9.0): moves its on-map undispersed units by the
+   * methods of 9.21 or 9.22, then its unsupplied units (9.27). `army` names the formation (an
+   * army, or a front for the [GT 8+] Front cards); `units`, the active units the card chose
+   * (8.13), all of one front; by default, every unit of the army. Fails with a reason when the
    * formation cannot be activated.
    */
-  function activate(state: GameState, army: string): { events: GameEvent[]; state: GameState } | string {
-    const members = Object.keys(state.units).filter((id) => unit(id)?.side === "soviet" && known(id).armyOrCorps === army);
+  function activate(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | string {
+    const members = units ?? Object.keys(state.units).filter((id) => unit(id)?.side === "soviet" && known(id).armyOrCorps === army);
     const active = members.filter((id) => isHex(state.units[id].at) || state.units[id].at === "reserve");
     if (!active.length) return `No unit of the ${army} army on the map or in the reserve box.`;
     const front = known(active[0]).front!;
     const objective = state.objectives[front] ?? null;
-    if (rules.armyObjective(state, army)) return "Movement methods 9.26 (army objective) are coded with task 4.2.";
+    if ([...new Set(active.map((id) => known(id).armyOrCorps))].some((a) => rules.armyObjective(state, a)))
+      return "Movement methods 9.26 (army objective) are coded with task 4.2.";
 
     // 10.4 (Q26): an over-stacked end that the rest of the movement step does not correct is
     // refused, and the activation played again from its start. The latest such end first:

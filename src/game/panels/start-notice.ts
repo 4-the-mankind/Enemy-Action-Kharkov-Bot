@@ -1,6 +1,7 @@
 // Start notice, centred on the map while the set-up is in progress (p48): the player's
 // counters stay locked until Start, so the notice says what to do next. Gone once started.
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
+import { newSeed } from "../../engine/soviet-cards";
 import type { GameState } from "../../engine/types";
 import type { GameSession } from "../state/session";
 
@@ -21,7 +22,7 @@ export function mountStartNotice(root: HTMLElement, session: GameSession) {
     if (!state.started) root.innerHTML = content(state);
   };
   root.addEventListener("click", (e) => {
-    if ((e.target as HTMLElement).closest("[data-action=start]")) session.dispatch({ type: "StartGame" });
+    if ((e.target as HTMLElement).closest("[data-action=start]")) session.dispatch({ type: "StartGame", seed: newSeed() });
   });
   session.subscribe(render);
   render(session.state);

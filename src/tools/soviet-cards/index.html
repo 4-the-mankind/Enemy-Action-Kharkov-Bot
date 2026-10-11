@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Soviet cards — EA Kharkov</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/ui/theme.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <a class="home" href="/">EA Kharkov Bot</a>
+      <h1>Soviet cards</h1>
+      <p class="file">Each scan beside what the bot reads from data/soviet-cards.json (4.1). Lines are read top to bottom; the bot plays the first one it can.</p>
+    </header>
+
+    <div class="toolbar">
+      <div class="tabs" role="tablist" id="front-tabs">
+        <button type="button" class="tab active" data-front="all" role="tab" aria-selected="true">All</button>
+        <button type="button" class="tab" data-front="voronezh" role="tab" aria-selected="false">Voronezh Front</button>
+        <button type="button" class="tab" data-front="southwest" role="tab" aria-selected="false">Southwest Front</button>
+        <button type="button" class="tab" data-front="stavka" role="tab" aria-selected="false">STAVKA</button>
+      </div>
+      <p class="count" id="count"></p>
+    </div>
+
+    <main class="cards" id="cards" aria-label="Soviet cards"></main>
+    <p class="error" id="error" hidden></p>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

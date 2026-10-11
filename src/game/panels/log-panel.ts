@@ -1,13 +1,20 @@
 // Log tab of the rail (D): the events of each step, newest first, in the player's words.
 import type { Engine } from "../../engine/engine";
+import { ARMY_NAMES } from "../../engine/soviet-cards";
 import { isHex, type GameEvent, type Location } from "../../engine/types";
 import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
+import { cardImage } from "./card-zoom";
 
 const where = (at: Location) =>
   isHex(at) ? at : at === "reserve" ? "the reserve" : at === "reinforcements" ? "the reinforcements" : "the eliminated units";
 
-function describe(e: GameEvent, engine: Engine): { html: string; refused?: boolean } {
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+/** A card named in the log: its number, with the scan held up on hover (card-zoom). */
+const card = (id: string) => `<span class="log-card" data-card="${id}" tabindex="0"><img src="${cardImage(id)}" alt="">${id.toUpperCase()}</span>`;
+
+/** One log line for the event, or null when it adds nothing to the lines around it. */
+function describe(e: GameEvent, engine: Engine): { html: string; refused?: boolean } | null {
   const name = (id: string) => engine.unit(id)?.designation ?? id;
   switch (e.type) {
     case "SetUpApplied":
@@ -34,7 +41,32 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     case "VictoryPointsSet":
       return { html: `<b>Soviet VP</b> ${e.from} → ${e.to}.` };
     case "SovietCardDiscarded":
-      return { html: `Soviet card <b>${e.card.toUpperCase()}</b> ${e.discarded ? "discarded" : "back in the deck"}.` };
+      return { html: `Soviet card ${card(e.card)} ${e.discarded ? "discarded" : "back in the deck"}.` };
+    case "SovietCardsDrawn":
+      return {
+        html: `<b>Soviet impulse:</b> ${e.auxiliary ? `${card(e.command)} commands, ${card(e.auxiliary)} is the auxiliary card (${esc(e.why)})` : `${card(e.command)} commands (${esc(e.why)})`}. ${e.left} card${e.left === 1 ? "" : "s"} left.`,
+      };
+    case "SovietCommandCard":
+      return e.second ? { html: `<b>Second impulse:</b> the auxiliary card ${card(e.card)} becomes the command card (8.1).` } : null;
+    case "SovietCommandChecked": {
+      const line = engine.sovietCards?.card(e.card)?.commands[e.index];
+      const what = `${card(e.card)} <i>${esc(line?.text ?? `line ${e.index + 1}`)}</i>`;
+      return e.played ? { html: `${what}: <b>${esc(e.reason ?? "done")}</b>.` } : { html: `${what}: passed over, ${esc(e.reason ?? "")}.` };
+    }
+    case "SovietCardReturned":
+      return { html: `${card(e.card)} shuffled back into the Soviet draw pile (${e.left} cards).` };
+    case "SovietCardRemoved":
+      return { html: `${card(e.card)} removed from the game (8.2).` };
+    case "ReminderAdded":
+      return { html: `<b>For you, ${esc(e.reminder.title)}:</b> ${esc(e.reminder.text)}` };
+    case "ReminderDismissed":
+      return { html: "Reminder marked done." };
+    case "TurnStarted":
+      return {
+        html: `<b>Game-turn ${e.turn} begins.</b> ` +
+          (e.toReserve.length ? `${e.toReserve.map(name).join(", ")} ${e.toReserve.length === 1 ? "enters its" : "enter their"} reserve box. ` : "") +
+          `Soviet draw pile: ${e.pile} cards${e.cardsAdded.length ? `, with ${e.cardsAdded.map(card).join(", ")} new` : ""}.`,
+      };
     case "ObjectivePlaced": {
       const marker = `${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${e.face === "west" ? "West" : "South"}`;
       return { html: e.at ? `<b>${marker}</b> placed in ${e.at}.` : `<b>${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective</b> removed.` };
@@ -62,7 +94,7 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     case "TownCaptured":
       return { html: `<b>${e.hex}</b> is now ${e.owner === "soviet" ? "Soviet" : "German"}-owned.` };
     case "FormationActivated":
-      return { html: `<b>${e.army} activated</b> (${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front): movement methods ${e.methods}${e.desperation ? ", Soviet Desperation" : ""}.` };
+      return { html: `<b>${ARMY_NAMES[e.army] ?? e.army} activated</b> (${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front): movement methods ${e.methods}${e.desperation ? ", Soviet Desperation" : ""}.` };
     case "DecisionTraced": {
       if (e.outcome === "noMove") return { html: `<b>${name(e.unit)}</b> does not move (no movement method applies).` };
       const by = `${e.method} (${e.title})`;
@@ -103,10 +135,12 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
     if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
     const lines: HTMLLIElement[] = [];
     // A set-up adjustment is one step: its own actions are listed under it, in play order.
-    const grouped = events[0]?.type === "SetUpAdjustmentApplied";
+    // So is a Soviet impulse, and the start of a turn.
+    const grouped = ["SetUpAdjustmentApplied", "SovietCardsDrawn", "TurnStarted"].includes(events[0]?.type);
     let anchor: HTMLLIElement | null = null;
     for (const [i, e] of events.entries()) {
       const line = describe(e, session.engine);
+      if (!line) continue;
       const cls = (line.refused ? "fresh refused" : "fresh") + (grouped && i > 0 ? " sub" : "");
       let li: HTMLLIElement;
       if (grouped && anchor) {

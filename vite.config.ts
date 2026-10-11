@@ -16,6 +16,7 @@ export default defineConfig({
         mapCalibration: page("src/tools/map-calibration/index.html"),
         mapPainter: page("src/tools/map-painter/index.html"),
         unitsIndex: page("src/tools/units-index/index.html"),
+        sovietCards: page("src/tools/soviet-cards/index.html"),
       },
     },
   },

@@ -4,7 +4,7 @@
 // replaces its provisional answers here (or passes its own PendingRules to createEngine)
 // and nowhere else. Each answer names its task: search "TODO <task>" in src/ too.
 // Supply, support and the operational limit (task 4.3) are coded: supply.ts.
-import type { Unit } from "../core/units";
+import type { Front, Unit } from "../core/units";
 import type { Board } from "./board";
 import { createSupply, type SupplyRules } from "./supply";
 import type { GameState } from "./types";
@@ -20,6 +20,15 @@ export interface PendingRules extends SupplyRules {
   ground(state: GameState): Ground;
   /** Task 4.2 (9.13): hex of the army's Army Objective marker (40th, 1G), or null if not in play. */
   armyObjective(state: GameState, army: string): string | null;
+  /**
+   * Task 4.6 (8.12, 16): unit of the army that would receive a replacement step, or null if
+   * none is eligible. The Soviet card command "Assign 1 RP" is passed over while null.
+   */
+  replacementFor(state: GameState, army: string): string | null;
+  /** Task 4.6 (15.1): hexes where a Garrison Front event would newly place a garrison marker. */
+  garrisonPlacements(state: GameState, front: Front): string[];
+  /** Task 4.4 (14.2, 9.7): hexes where the Soviet Engineers event would remove or place an IP marker. */
+  engineerHexes(state: GameState): string[];
 }
 
 export function provisionalRules(board: Board, unit: (id: string) => Unit | undefined): PendingRules {
@@ -30,6 +39,12 @@ export function provisionalRules(board: Board, unit: (id: string) => Unit | unde
     ground: (_state: GameState): Ground => "frozen",
     // TODO 4.2: Army Objective markers (9.13) are not in the game state yet.
     armyObjective: (_state: GameState, _army: string): string | null => null,
+    // TODO 4.6: replacements (16) are not coded yet: no unit is eligible.
+    replacementFor: (_state: GameState, _army: string): string | null => null,
+    // TODO 4.6: garrison markers (15) are not in the game state yet.
+    garrisonPlacements: (_state: GameState, _front: Front): string[] => [],
+    // TODO 4.4: IP markers (14.2) are not in the game state yet.
+    engineerHexes: (_state: GameState): string[] => [],
   };
   return { ...pending, ...createSupply({ board, unit, garrisonAt: pending.garrisonAt }) };
 }

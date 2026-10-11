@@ -24,6 +24,32 @@ export interface UnitState {
 /** Soviet command cards E01-E22, as ids "e01" … "e22". */
 export const SOVIET_CARDS = Array.from({ length: 22 }, (_, i) => `e${String(i + 1).padStart(2, "0")}`);
 
+/** Soviet draw pile and the cards out of play (8.0). Command and auxiliary boxes are empty between impulses. */
+export interface SovietCardPiles {
+  /** Draw pile, top card first. */
+  drawPile: string[];
+  /** Removed from the game (8.2, STAVKA). */
+  removed: string[];
+  /** Cards drawn in the last Soviet impulse: the command card first, then the auxiliary card. */
+  lastDrawn: string[];
+  /**
+   * State of the shuffling generator: the same seed always gives the same order, so an undo
+   * followed by the same impulse draws the same cards, and a saved game draws the same (D16).
+   */
+  seed: number;
+}
+
+/** A reminder shown to the player until done, or until the end of the turn. */
+export interface Reminder {
+  id: string;
+  /** Card that set it, e.g. "e18". */
+  card: string;
+  title: string;
+  text: string;
+  turn: number;
+  until: "done" | "endOfTurn";
+}
+
 /** Soviet Front Objective markers (p48): one per front, printed West on one side and South on the other. */
 export type ObjectiveFront = "voronezh" | "southwest";
 export const OBJECTIVE_FRONTS: ObjectiveFront[] = ["voronezh", "southwest"];
@@ -70,6 +96,12 @@ export interface GameState {
   forwardSupport?: string[];
   /** [GT 8+] Soviet support line chosen in step 4 of the Supply Phase (13.51). */
   supportLine?: SupportLine;
+  /** Soviet cards outside the discard pile (8.0), from Start on. */
+  sovietCards?: SovietCardPiles;
+  /** Things the player has to do or keep in mind, set by the bot (events, specials). */
+  reminders?: Reminder[];
+  /** Soviet impulses played this turn (each may hold a second impulse, 8.1). */
+  sovietImpulses?: number;
   /** Set-up adjustment played after "Set up turn 1" (p48-50), with the die result when rolled. */
   adjustment?: { id: string; roll?: number };
   /**
@@ -97,7 +129,16 @@ export type Command =
   /** Plays a recorded set-up adjustment as the bot (p48-50, D15): chosen, or picked by a die roll (1-10). */
   | { type: "ApplySetUpAdjustment"; id: string; roll?: number }
   /** Ends the set-up: the game starts with the first German impulse of turn 1 (p48). */
-  | { type: "StartGame" }
+  /** `seed`: starts the shuffling of the Soviet draw pile (random in the UI, fixed in tests). */
+  | { type: "StartGame"; seed?: number }
+  /** IV.1: the bot plays a Soviet impulse (8.1); the player's German impulse is over (D14). */
+  | { type: "RunBotImpulse" }
+  /**
+   * End of the turn (V, minimal) and start of the next one: Reserve Phase (I), Soviet draw
+   * pile (II), Supply Phase (III). Only once the Soviet draw pile is empty.
+   */
+  | { type: "NextTurn" }
+  | { type: "DismissReminder"; id: string }
   /**
    * Supply Phase (4.0 III), steps 2-4: supply status of German units [GT 2+] and Soviet units
    * [GT 4+] (13.1-13.2), surrender (13.23), [GT 8+] Soviet support line (13.51).
@@ -139,6 +180,20 @@ export type GameEvent =
   /** Followed by the events of each command it played. */
   | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
   | { type: "GameStarted" }
+  /** Start of a Soviet impulse (8.1): cards drawn, which is the command card and why. */
+  | { type: "SovietCardsDrawn"; cards: string[]; command: string; auxiliary: string | null; why: string; left: number }
+  /** A card in the Command Card box: the first command, or the second one (8.1 step 3). */
+  | { type: "SovietCommandCard"; card: string; second: boolean }
+  /** One line of a card: played (followed by its events), or passed over with the reason. */
+  | { type: "SovietCommandChecked"; card: string; role: "command" | "auxiliary"; index: number; played: boolean; reason?: string }
+  /** Command Delay: the auxiliary card goes back into the draw pile, shuffled. */
+  | { type: "SovietCardReturned"; card: string; left: number }
+  /** 8.2: STAVKA removed from the game. */
+  | { type: "SovietCardRemoved"; card: string }
+  | { type: "ReminderAdded"; reminder: Reminder }
+  | { type: "ReminderDismissed"; id: string }
+  /** End of a turn and start of the next (NextTurn). */
+  | { type: "TurnStarted"; turn: number; cardsAdded: string[]; toReserve: string[]; pile: number }
   /**
    * Supply Phase done. `changes`: units whose supply marker changed. `germanSurrender`:
    * isolated German stacks still unable to trace supply, which lose one step of the

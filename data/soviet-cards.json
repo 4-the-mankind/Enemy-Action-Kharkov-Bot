@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "source": "Soviet Enemy cards E01-E22 (assets/cards/EAKh-sovECcards-E-NN.png), read by the AI (task 4.1) and checked by the dev in the Soviet cards tool. Commands are listed top to bottom as printed; `turns` is the red game-turn badge (\"1-3\", \"6+\", \"1,3\", \"6\"), absent when the command applies on every turn. `text` is the printed wording.",
+  "cards": [
+    {
+      "id": "e01", "front": "southwest", "title": "1st Guards Army", "commandValue": 3, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "1G", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-3", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-air-supply", "turns": "4-7", "text": "Event: Air Supply" }
+      ],
+      "tactics": [{ "name": "Artillery", "tactic": "soviet-airpower-artillery" }],
+      "reuse": true
+    },
+    {
+      "id": "e02", "front": "southwest", "title": "Mobile Group Popov", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "replacement", "army": "Popov", "turns": "6+", "text": "Assign 1 RP to Group" },
+        { "kind": "activateArmy", "army": "Popov", "text": "Activate all units in Group" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Airpower", "tactic": "soviet-airpower-artillery" },
+        { "name": "Partisans", "tactic": "soviet-partisans" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e03", "front": "voronezh", "title": "3rd Tank Army Units", "commandValue": 1, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "3T", "text": "Activate up to two unit/stacks in 3rd Tank Army not in a VP hex, and all Army reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "voronezh", "turns": "6+", "text": "Event: Garrison Voronezh Front" }
+      ],
+      "tactics": [
+        { "name": "Tank Brigade", "tactic": "soviet-tank-brigade", "turns": "1-5" },
+        { "name": "Rifle Brigade", "tactic": "soviet-rifle-brigade", "turns": "6-14" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e04", "front": "voronezh", "title": "40th Army", "commandValue": 2, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "40", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-command-delay", "text": "Event: Command Delay" }
+      ],
+      "tactics": [{ "name": "Intelligence", "tactic": "soviet-intelligence" }],
+      "reuse": true
+    },
+    {
+      "id": "e05", "front": "voronezh", "title": "3rd Tank Army", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "replacement", "army": "3T", "turns": "6+", "text": "Assign 1 RP to Army" },
+        { "kind": "activateArmy", "army": "3T", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-partisan-uprisings", "turns": "2-5", "text": "Event: Partisan Uprising" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "6+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Reinforce Battle", "tactic": "soviet-reinforce-battle" },
+        { "name": "Artillery", "tactic": "soviet-airpower-artillery" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e06", "front": "voronezh", "title": "69th Army Units", "commandValue": 1, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "69", "text": "Activate up to two unit/stacks in 69th Army not in a VP hex, and all Army reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-5", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "voronezh", "turns": "6+", "text": "Event: Garrison Voronezh Front" }
+      ],
+      "tactics": [{ "name": "Fixed Artillery", "tactic": "soviet-fixed-artillery" }],
+      "reuse": false
+    },
+    {
+      "id": "e07", "front": "voronezh", "title": "69th Army", "commandValue": 2, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "69", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-3", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-air-supply", "turns": "4-6", "text": "Event: Air Supply" },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "voronezh", "turns": "7+", "text": "Event: Garrison Voronezh Front" }
+      ],
+      "tactics": [{ "name": "Assault Coordination", "tactic": "soviet-assault-coordination" }],
+      "reuse": true
+    },
+    {
+      "id": "e08", "front": "voronezh", "title": "69th Army", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "special", "event": "soviet-nkvd-operations", "turns": "1-2", "text": "Special: NKVD Operations" },
+        { "kind": "replacement", "army": "69", "turns": "5+", "text": "Assign 1 RP to Army" },
+        { "kind": "activateArmy", "army": "69", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Airpower", "tactic": "soviet-airpower-artillery" }],
+      "reuse": false
+    },
+    {
+      "id": "e09", "front": "voronezh", "title": "40th Army Units", "commandValue": 1, "primary": false, "entryTurn": 3,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "40", "text": "Activate up to two unit/stacks in 40th Army not in a VP hex, and all Army reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "voronezh", "turns": "6+", "text": "Event: Garrison Voronezh Front" }
+      ],
+      "tactics": [{ "name": "NKVD", "tactic": "soviet-nkvd" }],
+      "reuse": false
+    },
+    {
+      "id": "e10", "front": "southwest", "title": "6th Army", "commandValue": 2, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "6", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-command-delay", "text": "Event: Command Delay" }
+      ],
+      "tactics": [{ "name": "Reinforce Battle", "tactic": "soviet-reinforce-battle" }],
+      "reuse": true
+    },
+    {
+      "id": "e11", "front": "southwest", "title": "6th Army", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "replacement", "army": "6", "turns": "6+", "text": "Assign 1 RP to Army" },
+        { "kind": "activateArmy", "army": "6", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Partisans", "tactic": "soviet-partisans" }],
+      "reuse": false
+    },
+    {
+      "id": "e12", "front": "southwest", "title": "6th Army Units", "commandValue": 1, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "6", "text": "Activate up to two unit/stacks in 6th Army not in a VP hex, and all Army reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-5", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "southwest", "turns": "6+", "text": "Event: Garrison Southwestern Front" }
+      ],
+      "tactics": [{ "name": "Fixed Artillery", "tactic": "soviet-fixed-artillery" }],
+      "reuse": false
+    },
+    {
+      "id": "e13", "front": "voronezh", "title": "3rd Tank Army", "commandValue": 3, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "3T", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-4", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Partisans", "tactic": "soviet-partisans" }],
+      "reuse": true
+    },
+    {
+      "id": "e14", "front": "voronezh", "title": "40th Army", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "special", "event": "soviet-expedited-reserves", "turns": "9-10", "text": "Special: Expedited Reserves" },
+        { "kind": "replacement", "army": "40", "turns": "6+", "text": "Assign 1 RP to Army" },
+        { "kind": "activateArmy", "army": "40", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Artillery", "tactic": "soviet-airpower-artillery" }],
+      "reuse": false
+    },
+    {
+      "id": "e15", "front": "southwest", "title": "1st Guards Army Units", "commandValue": 1, "primary": false, "entryTurn": 3,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "1G", "text": "Activate up to two unit/stacks in 1st Gds Army not in a VP hex, and all Army reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "southwest", "turns": "6+", "text": "Event: Garrison Southwestern Front" }
+      ],
+      "tactics": [
+        { "name": "Rifle Brigade", "tactic": "soviet-rifle-brigade", "use": "attack" },
+        { "name": "Battlefield Replacements", "tactic": "soviet-battlefield-replacements", "use": "defense" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e16", "front": "southwest", "title": "Mobile Group Popov Units", "commandValue": 2, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "Popov", "text": "Activate up to two unit/stacks in MGP not in a VP hex, and all MGP reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-engineers", "turns": "4-6", "text": "Event: Engineers" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "7+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Combat Engineers", "tactic": "soviet-combat-engineer" }],
+      "reuse": false
+    },
+    {
+      "id": "e17", "front": "southwest", "title": "Mobile Group Popov", "commandValue": 3, "primary": true, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "Popov", "text": "Activate all units in Group" },
+        { "kind": "event", "event": "soviet-command-delay", "turns": "1-4", "text": "Event: Command Delay" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [{ "name": "Assault Coordination", "tactic": "soviet-assault-coordination" }],
+      "reuse": true
+    },
+    {
+      "id": "e18", "front": "southwest", "title": "1st Guards Army", "commandValue": 3, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "special", "event": "soviet-hitler-distracts", "turns": "6", "text": "Special: Hitler Distracts" },
+        { "kind": "replacement", "army": "1G", "turns": "6+", "text": "Assign 1 RP to Army" },
+        { "kind": "activateArmy", "army": "1G", "text": "Activate all units in Army" },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Tank Brigade", "tactic": "soviet-tank-brigade", "turns": "2-7" },
+        { "name": "Rifle Brigade", "tactic": "soviet-rifle-brigade", "turns": "8+" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e19", "front": "southwest", "title": "Mobile Group Popov Units", "commandValue": 1, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmyUnits", "army": "Popov", "text": "Activate up to two unit/stacks in MGP not in a VP hex, and all MGP reserves. Prefer a) supplied; b) not surrounded; c) highest strength; d) most units; e) lowest selector." },
+        { "kind": "event", "event": "soviet-garrison-front", "front": "southwest", "turns": "6+", "text": "Event: Garrison Southwestern Front" }
+      ],
+      "tactics": [{ "name": "NKVD", "tactic": "soviet-nkvd" }],
+      "reuse": false
+    },
+    {
+      "id": "e20", "front": "southwest", "title": "Southwestern Front", "commandValue": 4, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "Popov", "stacked": true, "turns": "1-3", "text": "Activate all units in Mobile Group Popov plus stacked units." },
+        { "kind": "activateMostUnits", "front": "southwest", "turns": "4-7", "text": "Activate army in Southwestern Front with most supplied units on map and in reserve, plus stacked units." },
+        { "kind": "activateEndangered", "front": "southwest", "turns": "8+", "text": "Activate all Southwestern Front units outside operational limit or nearly surrounded. If no units qualify, instead activate army per this card's activation command for GT4." },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Artillery", "tactic": "soviet-airpower-artillery" },
+        { "name": "Airpower", "tactic": "soviet-airpower-artillery" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e21", "front": "voronezh", "title": "Voronezh Front", "commandValue": 4, "primary": false, "entryTurn": 2,
+      "commands": [
+        { "kind": "activateArmy", "army": "3T", "stacked": true, "turns": "2,3", "text": "Activate all units in 3T Army plus stacked units." },
+        { "kind": "activateMostUnits", "front": "voronezh", "turns": "4-7", "text": "Activate army in Voronezh Front with most supplied units on map and in reserve box, plus stacked units." },
+        { "kind": "activateEndangered", "front": "voronezh", "turns": "8+", "text": "Activate all Voronezh Front units outside operational limit or nearly surrounded. If no units qualify, instead activate army per this card's activation command for GT4." },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Tank Brigade", "tactic": "soviet-tank-brigade" },
+        { "name": "Assault Coordination", "tactic": "soviet-assault-coordination" }
+      ],
+      "reuse": false
+    },
+    {
+      "id": "e22", "front": null, "title": "STAVKA", "commandValue": 5, "primary": false, "entryTurn": null,
+      "commands": [
+        { "kind": "activateArmy", "army": "Popov", "stacked": true, "turns": "1,3", "text": "Activate all units in Mobile Group Popov plus stacked units." },
+        { "kind": "activateArmy", "army": "3T", "stacked": true, "turns": "2,4", "text": "Activate all units in 3T Army plus stacked units." },
+        { "kind": "activateMostUnits", "front": null, "turns": "5-7", "text": "Activate army with most supplied units on map and in reserve box, plus stacked units." },
+        { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
+      ],
+      "tactics": [
+        { "name": "Intelligence", "tactic": "soviet-intelligence" },
+        { "name": "Airpower", "tactic": "soviet-airpower-artillery" },
+        { "name": "Reinforce Battle", "tactic": "soviet-reinforce-battle" }
+      ],
+      "reuse": false,
+      "nkvdAttacks": true,
+      "removeFromTurn": 7,
+      "note": "All in-support attacks receive the NKVD combat tactic. Remove from the game if played for any purpose on Turn 7 or after."
+    }
+  ]
+}

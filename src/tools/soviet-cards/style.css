@@ -1,0 +1,61 @@
+body { padding: 24px 32px 64px; }
+
+.bar .home { color: var(--paper-dim); text-decoration: none; font-size: 0.85rem; }
+.bar .home:hover { color: var(--paper); }
+.bar h1 { margin: 2px 0 2px; font-size: 1.6rem; font-weight: 600; }
+.bar .file { margin: 0; max-width: 70ch; color: var(--paper-dim); font-size: 0.9rem; }
+
+.toolbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px;
+  margin: 20px 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--feldgrau);
+}
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; }
+.tab {
+  font-family: var(--font); font-size: 0.9rem; color: var(--paper-dim);
+  background: var(--feldgrau-deep); border: 1px solid var(--feldgrau); padding: 6px 14px; cursor: pointer;
+}
+.tab.active { color: var(--paper); background: var(--feldgrau); }
+.tab:hover { color: var(--paper); }
+.count { margin-left: auto; color: var(--paper-dim); font-size: 0.85rem; }
+.error { color: #ff8a80; }
+
+/* One row per card: the scan, then the reading laid out like the card, top to bottom. */
+.cards { display: grid; gap: 28px; max-width: 980px; }
+.card-row { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--feldgrau); }
+.scan img { display: block; width: 100%; border-radius: 10px; box-shadow: 0 6px 18px rgb(0 0 0 / 0.45); }
+.scan:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; border-radius: 10px; }
+
+.reading h2 { margin: 0 0 8px; font-size: 1.3rem; font-weight: 600; }
+.reading h2 .id { color: var(--paper-dim); font-weight: 500; font-variant-numeric: tabular-nums; }
+.reading h3 { margin: 16px 0 6px; font-size: 0.95rem; font-weight: 600; color: var(--paper-dim); }
+
+.facts { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0; }
+.facts div { display: flex; gap: 6px; }
+.facts dt { color: var(--paper-dim); }
+.facts dd { margin: 0; font-weight: 500; }
+
+.lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lines li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: start; }
+.lines p { margin: 0; }
+.gt {
+  display: inline-block; justify-self: start; padding: 1px 6px; font-size: 0.8rem; font-weight: 600;
+  color: #fff; background: var(--stab-red); border-radius: 2px; font-variant-numeric: tabular-nums;
+}
+.gt.all { color: var(--paper-dim); background: transparent; border: 1px solid var(--feldgrau-light); font-weight: 500; }
+.what { line-height: 1.35; }
+.rule { font-size: 0.8rem; color: var(--paper-dim); white-space: nowrap; }
+.printed { font-size: 0.85rem; color: var(--paper-dim); }
+.note { font-size: 0.85rem; }
+.waits { font-size: 0.85rem; color: #ffcf70; }
+
+.tactics { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.tactics .gt { margin-right: 6px; }
+.tactics .use { font-size: 0.85rem; color: var(--paper-dim); }
+.tactics .tactic { margin-left: 8px; font-size: 0.8rem; color: var(--paper-dim); }
+.flag { margin: 10px 0 0; padding-left: 10px; font-size: 0.85rem; border-left: 3px solid var(--stab-red); }
+
+@media (max-width: 640px) {
+  body { padding: 16px 16px 48px; }
+  .card-row { grid-template-columns: 1fr; }
+  .scan { width: min(240px, 100%); }
+}
