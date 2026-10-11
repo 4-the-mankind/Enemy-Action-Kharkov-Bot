@@ -19,13 +19,18 @@
 // move, will leave it (Q26). The activation is played to its end; if the hex is still
 // over-stacked, that end is refused and the activation played again from its start.
 //
-// 9.21 methods 1-8, 10-12; 9.22 methods 1-8, 10, 11; 9.27. TODO 4.6: method 9 of both.
-// TODO 4.2: 9.26 army objectives. Supply, support and the operational limit come from
-// supply.ts; garrisons and the ground from the PendingRules (pending.ts), provisional until
-// task 4.6.
+// Step 1 of the activation (objective check, 9.1) comes first: objectives.ts. Units with an
+// Army Objective marker (9.26) move first, one at a time (Q34), then the 9.2 loop, then 9.27.
+// The army marker a unit reaches moves on at once (the engine's MoveUnits), a front's third
+// objective goes at the end of the activation (9.12).
+//
+// 9.21 methods 1-8, 10-12; 9.22 methods 1-8, 10, 11; 9.26; 9.27. TODO 4.6: method 9 of 9.21
+// and 9.22. Supply, support and the operational limit come from supply.ts; garrisons and the
+// ground from the PendingRules (pending.ts), provisional until task 4.6.
 import type { Front, Unit } from "../core/units";
 import type { Board } from "./board";
 import { withUnitAt, without, type Ground, type Movement } from "./movement";
+import { ARMY_OBJECTIVE_FACE, armyObjective, hexName, type Objectives } from "./objectives";
 import type { PendingRules } from "./pending";
 import { isHex, type DecisionStep, type GameEvent, type GameState, type ObjectiveMarker, type StepResult, type UnitState } from "./types";
 
@@ -34,8 +39,10 @@ export interface SovietMovementData {
   movement: Movement;
   unit(id: string): Unit | undefined;
   rules: PendingRules;
-  /** Moves one unit as the bot: the engine's MoveUnits (stacking order, town capture). */
-  move(state: GameState, id: string, to: string): StepResult;
+  /** Objective markers (9.1): step 1 of the activation, and the end of the activation. */
+  objectives: Objectives;
+  /** Moves one unit as the bot along the path: the engine's MoveUnits (stacking order, town capture, army objectives). */
+  move(state: GameState, id: string, to: string, path: string[]): StepResult;
 }
 
 /** A destination considered by a method. */
@@ -108,7 +115,7 @@ type Found =
   /** The method does not apply to the unit. */
   | { kind: "none"; reason: string }
   /** Candidate destinations, with the method's preferences in letter order. */
-  | { kind: "options"; options: Option[]; prefs: Pref[]; none: string };
+  | { kind: "options"; options: Option[]; prefs: Pref[]; none: string; intro?: DecisionStep };
 
 interface Method {
   /** Number in 9.21 or 9.22. */
@@ -155,7 +162,7 @@ const armyNumber = (army: string) => ARMY_NUMBER[army] ?? (Number.parseInt(army,
 
 export type SovietMovement = ReturnType<typeof createSovietMovement>;
 
-export function createSovietMovement({ board, movement, unit, rules, move }: SovietMovementData) {
+export function createSovietMovement({ board, movement, unit, rules, objectives, move }: SovietMovementData) {
   const known = (id: string) => {
     const u = unit(id);
     if (!u) throw new Error(`Unknown unit "${id}".`);
@@ -256,16 +263,22 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
    * `supply`, German supply is traceable to it (13.1).
    */
   function threatened(ctx: Ctx, hex: string, supply: boolean): boolean {
+    if (supply && rules.supplyTracesTo(ctx.state, "german", hex)) return true;
+    return germansOnMap(ctx.state).some(([g]) => germanProximate(ctx, g, hex));
+  }
+
+  /**
+   * 9.3: the German unit is proximate to the hex: able to enter it if empty or German-held; to
+   * end next to its garrison or its Soviet units otherwise.
+   */
+  function germanProximate(ctx: Ctx, g: string, hex: string): boolean {
     const state = ctx.state;
-    if (supply && rules.supplyTracesTo(state, "german", hex)) return true;
+    // Regular movement (9.3): one hex per MP at most (roads cost 1), one at the minimum.
+    if (board.hexCount(state.units[g].at, hex) > Math.max(movement.faceValues(state, g).movement, 1) + 1) return false;
     const soviets = unitsIn(state, hex, "soviet");
-    return germansOnMap(state).some(([g, s]) => {
-      // Regular movement (9.3): one hex per MP at most (roads cost 1), one at the minimum.
-      if (board.hexCount(s.at, hex) > Math.max(movement.faceValues(state, g).movement, 1) + 1) return false;
-      if (soviets.length) return movement.proximateToUnit(state, g, soviets[0], ctx.ground);
-      return rules.garrisonAt(state, hex)
-        ? movement.proximateToGarrison(state, g, hex, ctx.ground) : movement.proximateToHex(state, g, hex, ctx.ground);
-    });
+    if (soviets.length) return movement.proximateToUnit(state, g, soviets[0], ctx.ground);
+    return rules.garrisonAt(state, hex)
+      ? movement.proximateToGarrison(state, g, hex, ctx.ground) : movement.proximateToHex(state, g, hex, ctx.ground);
   }
 
   // ---------------------------------------------------------------- 9.23 restrictions
@@ -394,8 +407,14 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
     ];
   }
 
+  /** 9.24 "the unit's Objective marker": its army's (9.26) while in play, else its front's. */
+  function objectiveOf(ctx: Ctx, id: string): ObjectiveMarker | null {
+    const at = armyObjective(ctx.state, known(id).armyOrCorps);
+    return at ? { at, face: ARMY_OBJECTIVE_FACE } : ctx.objective;
+  }
+
   function tiebreakers(ctx: Ctx, id: string): Pref[] {
-    const base = without(ctx.state, id), obj = ctx.objective;
+    const base = without(ctx.state, id), obj = objectiveOf(ctx, id);
     const out: Pref[] = [];
     if (obj) out.push(lowest("9.24 a", "closest to the unit's Objective marker", (o) => board.distance(o.hex, obj.at)));
     out.push(prefer("9.24 b", "an empty hex", (o) => isEmpty(base, o.hex)));
@@ -622,11 +641,10 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
   /**
    * 9.21 method 8, 9.22 method 8 (Adjacent to German Unit): unoccupied hexes next to a German
    * unit and not next to a Soviet unit adjacent to that same German unit; in 9.22, hexes where
-   * the unit would not be nearly surrounded.
+   * the unit would not be nearly surrounded. Also 9.26 method 2, "identical to 9.21, Method 8".
    */
-  function adjacentToGermanUnit(ctx: Ctx, id: string): Found {
+  function adjacentToGermanUnit(ctx: Ctx, id: string, method = `${ctx.book} method 8`): Found {
     const state = ctx.state, start = hexOf(state, id), base = without(state, id), b = ctx.book === "9.22";
-    const method = `${ctx.book} method 8`;
     // German hexes next to the hex with no other Soviet unit next to both.
     const open = (hex: string) => adjacentHexesWith(base, hex, "german").filter((g) =>
       !adjacentHexesWith(base, g, "soviet").some((s) => board.areAdjacent(s, hex)));
@@ -1008,6 +1026,62 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
     },
   ];
 
+  // ---------------------------------------------------------------- 9.26 methods
+
+  /** A method of 9.26, tried in order for one unit at a time; `objective`: its army's marker. */
+  interface ArmyMethod { n: number; title: string; find(ctx: Ctx, id: string, objective: string): Found }
+
+  const METHODS_ARMY: ArmyMethod[] = [
+    // "Identical to 9.21, Method 1, including urban infiltration."
+    { n: 1, title: "Take VP Hex", find: (ctx, id) => takeVpHex(ctx, id) },
+    // "Identical to 9.21, Method 8."
+    { n: 2, title: "Adjacent to German Unit", find: (ctx, id) => adjacentToGermanUnit(ctx, id, "9.26 method 2") },
+    {
+      n: 3, title: "Closer to German Unit & Army Objective",
+      find(ctx, id, objective) {
+        const state = ctx.state, start = hexOf(state, id);
+        // Q33: only German units in the army objective hex or proximate to it (9.3).
+        const near = germansOnMap(state).filter(([g, s]) => s.at === objective || germanProximate(ctx, g, objective));
+        if (!near.length) return { kind: "none", reason: `no German unit in or proximate to the army objective ${hexName(objective)}` };
+        // In or closest to the objective; then a) in the hex closest to the moving unit; b) in the highest numbered hex.
+        const toObjective = (hex: string) => board.distance(hex, objective);
+        const [[g, s]] = [...near].sort(([, a], [, b]) => toObjective(a.at) - toObjective(b.at)
+          || board.distance(start, a.at) - board.distance(start, b.at) || Number(b.at) - Number(a.at));
+        const target = s.at, d = toObjective(target);
+        const what = `${known(g).designation} in ${target}, ${d ? `${d} hex${d === 1 ? "" : "es"} from` : "in"} the army objective ${hexName(objective)}`;
+        const tied = new Set(near.filter(([, x]) => toObjective(x.at) === d).map(([, x]) => x.at)).size;
+        const intro = `the German unit in or closest to the army objective: ${what}` +
+          (tied > 1 ? ` (${tied} hexes as close: a) the closest to the unit, b) the highest numbered)` : "");
+        if (board.areAdjacent(start, target)) return stays(start, `starts adjacent to ${what}`, true);
+        // Q33: a move only if it brings the unit closer to that German unit; method 4 otherwise.
+        const d0 = board.distance(start, target);
+        const options = destinations(ctx, id).filter((o) => board.distance(o.hex, target) < d0).map((o) => ({ ...o, target }));
+        return {
+          kind: "options", options, none: `no reachable hex closer to ${what}`,
+          intro: { rule: "9.26 method 3", text: intro, kept: hexesOf(options), dropped: [] },
+          prefs: [lowest("9.26 method 3", `as close as possible to ${known(g).designation} in ${target}, adjacent if able`, (o) => board.distance(o.hex, target))],
+        };
+      },
+    },
+    {
+      n: 4, title: "Closer to Front Objective",
+      find(ctx, id, objective) {
+        const front = ctx.objective;
+        if (!front) return { kind: "none", reason: "the active front's objective marker is not in play" };
+        // Q33: a move only if it brings the unit closer to the front objective.
+        const d0 = board.distance(hexOf(ctx.state, id), front.at);
+        const options = destinations(ctx, id).filter((o) => board.distance(o.hex, front.at) < d0);
+        return {
+          kind: "options", options, none: `no reachable hex closer to the front objective ${hexName(front.at)}`,
+          prefs: [
+            lowest("9.26 method 4", `as close as possible to the front objective ${hexName(front.at)}, in it if able`, (o) => board.distance(o.hex, front.at)),
+            lowest("9.26 method 4", `among them, closer to the army objective ${hexName(objective)}`, (o) => board.distance(o.hex, objective)),
+          ],
+        };
+      },
+    },
+  ];
+
   /**
    * Methods in the order they are processed. 9.22 Soviet Desperation: with fewer than 19 VP,
    * method 11 right after method 5 (and not again at the end).
@@ -1065,20 +1139,23 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
   }
 
   /**
-   * Step 2 of the activation of a formation (9.0): moves its on-map undispersed units by the
-   * methods of 9.21 or 9.22, then its unsupplied units (9.27). `army` names the formation (an
-   * army, or a front for the [GT 8+] Front cards); `units`, the active units the card chose
-   * (8.13), all of one front; by default, every unit of the army. Fails with a reason when the
-   * formation cannot be activated.
+   * Steps 1 and 2 of the activation of a formation (9.0): the objective check (9.1), then its
+   * on-map undispersed units move: those with an Army Objective marker by 9.26, the others by
+   * the methods of 9.21 or 9.22, then the unsupplied units (9.27). At the end, a front's third
+   * objective entered leaves play (9.12). `army` names the formation (an army, or a front for
+   * the [GT 8+] Front cards); `units`, the active units the card chose (8.13), all of one
+   * front; by default, every unit of the army. Fails with a reason when the formation cannot
+   * be activated.
    */
   function activate(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | string {
     const members = units ?? Object.keys(state.units).filter((id) => unit(id)?.side === "soviet" && known(id).armyOrCorps === army);
     const active = members.filter((id) => isHex(state.units[id].at) || state.units[id].at === "reserve");
     if (!active.length) return `No unit of the ${army} army on the map or in the reserve box.`;
     const front = known(active[0]).front!;
-    const objective = state.objectives[front] ?? null;
-    if ([...new Set(active.map((id) => known(id).armyOrCorps))].some((a) => rules.armyObjective(state, a)))
-      return "Movement methods 9.26 (army objective) are coded with task 4.2.";
+    // Step 1: the objective check (9.1); the movement starts from its outcome.
+    const first = objectives.check(state, front, army);
+    const start = first.state;
+    const objective = start.objectives[front] ?? null;
 
     // 10.4 (Q26): an over-stacked end that the rest of the movement step does not correct is
     // refused, and the activation played again from its start. The latest such end first:
@@ -1087,11 +1164,16 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
     for (;;) {
       const run = attempt(refused);
       const bad = [...run.overStacked].reverse().find(({ hex }) => !stackingOk(run.state, hex));
-      if (!bad) return { events: run.events, state: run.state };
-      refused.add(`${bad.unit}>${bad.hex}`);
+      if (bad) { refused.add(`${bad.unit}>${bad.hex}`); continue; }
+      // 9.12: a front's third objective entered (crossed included, Q32) leaves play at the end.
+      const entered = new Set(run.events.flatMap((e) => (e.type === "UnitsMoved" && isHex(e.to) ? (e.path?.slice(1) ?? [e.to]) : [])));
+      const end = objectives.endActivation(run.state, entered);
+      const [header, ...rest] = run.events;
+      return { events: [header, ...first.events, ...rest, ...end.events], state: end.state };
     }
 
     function attempt(refused: Set<string>) {
+      const state = start;
       // 9.2 and errata: 9.21 throughout GT 1-4, and later while the front objective is in play.
       const book: Book = state.turn >= 5 && !objective ? "9.22" : "9.21";
       const ctx: Ctx = {
@@ -1103,10 +1185,12 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
       // 9.27: out-of-supply and isolated units move last, by their own methods.
       const movers = onMap.filter((id) => rules.supplyStatus(state, id) === "supplied");
       const unsupplied = onMap.filter((id) => !movers.includes(id));
+      // 9.26: units with an Army Objective marker move first, one at a time (Q34).
+      const withArmyObjective = movers.filter((id) => armyObjective(state, known(id).armyOrCorps));
       const methods = methodsFor(ctx);
       const header: Extract<GameEvent, { type: "FormationActivated" }> = {
         type: "FormationActivated", army, front, units: active, methods: book, skipped: [],
-        spearheads: movers.filter((id) => spearheadSkip(ctx, id)), unsupplied,
+        spearheads: movers.filter((id) => spearheadSkip(ctx, id)), unsupplied, armyObjective: withArmyObjective,
       };
       if (book === "9.22" && state.vp < 19) header.desperation = true;
       const events: GameEvent[] = [header];
@@ -1130,7 +1214,7 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
           });
         }
         trace(id, "moved", by, o.hex, o.path, steps);
-        const r = move(ctx.state, id, o.hex);
+        const r = move(ctx.state, id, o.hex, o.path);
         for (const e of r.events) events.push(e.type === "UnitsMoved" ? { ...e, path: o.path } : e);
         ctx.state = r.state;
       }
@@ -1159,6 +1243,18 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
         return true;
       }
 
+      /** A method's decision for the unit (`options`: what is left of the method's own); notes why when it does not apply. */
+      function tryMethod(id: string, by: { method: string; title: string }, found: Extract<Found, { kind: "options" }>, options: Option[]): boolean {
+        if (decide(id, by, { ...found, options }, found.intro ? [found.intro] : [])) return true;
+        skipped.get(id)!.push({
+          method: by.method,
+          reason: !options.length ? found.none
+            : options.every((o) => o.refused) ? "every destination is over-stacked at the end of movement (10.4)"
+            : "every destination breaks a 9.23 restriction",
+        });
+        return false;
+      }
+
       /** The methods in order for these units (9.2); `noteSkip` records a method skipped for all. */
       function runMethods(ids: string[], noteSkip: (method: string, reason: string) => void) {
         for (const m of methods) {
@@ -1176,16 +1272,30 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
               options = options.filter((o) => o.stay || !beyond(ctx, o.hex));
               if (!options.length && found.options.length) { note("every destination is beyond the operational limit"); continue; }
             }
-            const steps: DecisionStep[] = [];
-            if (!decide(id, { method: label(m), title: m.title }, { ...found, options }, steps))
-              note(!options.length ? found.none
-                : options.every((o) => o.refused) ? "every destination is over-stacked at the end of movement (10.4)"
-                : "every destination breaks a 9.23 restriction");
+            tryMethod(id, { method: label(m), title: m.title }, found, options);
           }
         }
       }
 
-      runMethods(movers, (method, reason) => header.skipped.push({ method, reason }));
+      /**
+       * 9.26 for one unit with an Army Objective marker: methods 1-4 in order, the first that
+       * decides. A unit whose marker left play meanwhile is left to the 9.21 methods (9.13).
+       */
+      function armyMove(id: string) {
+        const objective = armyObjective(ctx.state, known(id).armyOrCorps);
+        if (!objective) return;
+        for (const m of METHODS_ARMY) {
+          const by = { method: `9.26 method ${m.n}`, title: m.title };
+          const found = m.find(ctx, id, objective);
+          if (found.kind === "none") skipped.get(id)!.push({ method: by.method, reason: found.reason });
+          else if (tryMethod(id, by, found, found.options)) return;
+        }
+        done.add(id);
+        trace(id, "noMove", null, hexOf(ctx.state, id), [hexOf(ctx.state, id)], []);
+      }
+
+      for (const id of sorted(ctx, withArmyObjective, "desc")) armyMove(id);
+      runMethods(movers.filter((id) => !done.has(id)), (method, reason) => header.skipped.push({ method, reason }));
       for (const id of sorted(ctx, movers, "asc"))
         if (!done.has(id)) trace(id, "noMove", null, hexOf(ctx.state, id), [hexOf(ctx.state, id)], []);
       for (const id of sorted(ctx, unsupplied, "asc")) {
@@ -1207,6 +1317,12 @@ export function createSovietMovement({ board, movement, unit, rules, move }: Sov
         }
         // Able to trace supply: the methods of 9.21 or 9.22, within its supply state (13.2).
         if (rules.canTraceSupply(state, id)) {
+          // Q34: with an Army Objective marker, 9.26.
+          if (armyObjective(state, known(id).armyOrCorps)) {
+            note("able to trace supply: follows the movement methods of 9.26");
+            armyMove(id);
+            return;
+          }
           note("able to trace supply: follows the movement methods of " + book);
           runMethods([id], (method, reason) => skipped.get(id)!.push({ method, reason }));
           return;

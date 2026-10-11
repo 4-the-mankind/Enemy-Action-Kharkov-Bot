@@ -3,7 +3,7 @@ import { onTurn, parseSovietCards } from "../../src/core/soviet-cards";
 import { parseUnits } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { parseSetupAdjustments } from "../../src/engine/setup-adjustments";
-import { shuffle } from "../../src/engine/soviet-cards";
+import { shuffle } from "../../src/engine/random";
 import { emptyState, type GameEvent, type GameState } from "../../src/engine/types";
 import { board, json, realMap } from "./real-map";
 

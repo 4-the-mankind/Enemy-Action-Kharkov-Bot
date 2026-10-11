@@ -6,6 +6,7 @@ import type { TerrainEffects } from "../core/terrain-effects";
 import type { Unit } from "../core/units";
 import type { Board } from "./board";
 import { createMovement, type Movement } from "./movement";
+import { createObjectives } from "./objectives";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
 import { createSovietCards, type SovietCards } from "./soviet-cards";
@@ -59,9 +60,10 @@ export function createEngine(data: EngineData): Engine {
   const name = (id: string) => byId.get(id)?.designation ?? id;
   const rules = data.rules ?? provisionalRules(data.board, (id) => byId.get(id));
   const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id), rules });
+  const objectives = createObjectives({ board: data.board, movement, unit: (id) => byId.get(id), rules });
   const sovietMovement = createSovietMovement({
-    board: data.board, movement, unit: (id) => byId.get(id), rules,
-    move: (state, id, to) => moveUnits(state, [id], to, "bot"),
+    board: data.board, movement, unit: (id) => byId.get(id), rules, objectives,
+    move: (state, id, to, path) => moveUnits(state, [id], to, "bot", path),
   });
   const sovietCards = data.cards
     ? createSovietCards({ cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, sovietMovement, step: (s, c) => step(s, c, "bot") })
@@ -109,7 +111,8 @@ export function createEngine(data: EngineData): Engine {
     return null;
   }
 
-  function moveUnits(state: GameState, ids: string[], to: Location, actor: Actor): StepResult {
+  /** `path`: hexes crossed by a bot move, start and end included (army objectives entered, Q32). */
+  function moveUnits(state: GameState, ids: string[], to: Location, actor: Actor, path?: string[]): StepResult {
     const unique = [...new Set(ids)];
     const reason = whyNotMove(state, unique, to, actor);
     if (reason) return reject(state, "MoveUnits", reason);
@@ -142,7 +145,10 @@ export function createEngine(data: EngineData): Engine {
       next.sovietTowns = side === "soviet" ? [...next.sovietTowns, to] : next.sovietTowns.filter((h) => h !== to);
       events.push({ type: "TownCaptured", hex: to, owner: side });
     }
-    return { state: next, events };
+    if (!isHex(to)) return { state: next, events };
+    // 9.13: an Army Objective marker moves on when a Soviet unit enters its hex.
+    const reached = objectives.entered(next, ordered, path?.slice(1) ?? [to]);
+    return { state: reached.state, events: [...events, ...reached.events] };
   }
 
   // Rulebook "Steps": a 2-step counter flips to its back; a 3-step unit is replaced by its
@@ -279,12 +285,12 @@ export function createEngine(data: EngineData): Engine {
     const left = state.sovietCards.drawPile.length;
     if (left) return reject(state, "NextTurn", `${left} Soviet card${left === 1 ? "" : "s"} left: the turn goes on until the Soviet draw pile is empty (4.0 IV.3).`);
     if (state.turn >= LAST_TURN) return reject(state, "NextTurn", `Game-turn ${LAST_TURN} is the last turn.`);
-    // V: Dispersed and Forward Support markers off the map; [GT 7] objective markers out of play.
+    // V: Dispersed and Forward Support markers off the map; [GT 7] objective markers out of play (9.12).
     const units = { ...state.units };
     for (const [id, u] of Object.entries(units)) if (u.dispersed) { const { dispersed: _, ...rest } = u; units[id] = rest; }
+    const end = state.turn === 7 ? objectives.endOfTurn7(state) : { state, events: [] };
     let next: GameState = {
-      ...state, units, forwardSupport: [], turn: state.turn + 1,
-      objectives: state.turn === 7 ? {} : state.objectives,
+      ...end.state, units, forwardSupport: [], turn: state.turn + 1,
       reminders: (state.reminders ?? []).filter((r) => r.until === "done"),
     };
     // I: units of the calendar space for the new turn enter their Reserve Units box.
@@ -293,7 +299,7 @@ export function createEngine(data: EngineData): Engine {
     // II: the Soviet draw pile.
     const pile = sovietCards.preparePile(next);
     next = pile.state;
-    const events: GameEvent[] = [{ type: "TurnStarted", turn: next.turn, cardsAdded: pile.added, toReserve, pile: next.sovietCards!.drawPile.length }];
+    const events: GameEvent[] = [{ type: "TurnStarted", turn: next.turn, cardsAdded: pile.added, toReserve, pile: next.sovietCards!.drawPile.length }, ...end.events];
     // III: supply.
     const supply = supplyPhase(next);
     return { state: supply.state, events: [...events, ...supply.events] };
@@ -304,9 +310,9 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, reminders: state.reminders.filter((r) => r.id !== id) }, events: [{ type: "ReminderDismissed", id }] };
   }
 
-  // Supply Phase (4.0 III), steps 2-4. Every unit's trace is judged on the state at the start
+  // Supply Phase (4.0 III), steps 2-5. Every unit's trace is judged on the state at the start
   // of the phase, German and Soviet alike; then the markers change (13.2) and stacks already
-  // isolated surrender (13.23).
+  // isolated surrender (13.23). [GT 7] Step 5: front objective removal (9.12).
   function supplyPhase(state: GameState): StepResult {
     if (!state.started) return reject(state, "SupplyPhase", "Press Start to begin turn 1.");
     // 13.0: all units supplied on GT 1; Soviet units throughout GT 2-3.
@@ -355,7 +361,8 @@ export function createEngine(data: EngineData): Engine {
     }
     const done: GameEvent = { type: "SupplyPhaseDone", turn: state.turn, changes, germanSurrender, sovietSurrender };
     if (next.supportLine) done.supportLine = next.supportLine;
-    return { state: next, events: [done, ...losses] };
+    const removal = objectives.supplyPhase(next);
+    return { state: removal.state, events: [done, ...losses, ...removal.events] };
   }
 
   function setSupplyStatus(state: GameState, ids: string[], status: SupplyMarker | "supplied"): StepResult {
@@ -384,7 +391,7 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, forwardSupport: unique }, events: [{ type: "ForwardSupportSet", hexes: unique }] };
   }
 
-  // Step 2 of a Soviet activation (9.0): the bot moves the army by the movement methods (9.2).
+  // Steps 1-2 of a Soviet activation (9.0): objective check (9.1), movement methods (9.2).
   function activateFormation(state: GameState, army: string): StepResult {
     if (!state.started) return reject(state, "ActivateFormation", "Press Start to begin turn 1.");
     const r = sovietMovement.activate(state, army);

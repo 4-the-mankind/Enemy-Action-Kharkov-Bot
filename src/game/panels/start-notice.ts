@@ -1,7 +1,7 @@
 // Start notice, centred on the map while the set-up is in progress (p48): the player's
 // counters stay locked until Start, so the notice says what to do next. Gone once started.
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
-import { newSeed } from "../../engine/soviet-cards";
+import { newSeed } from "../../engine/random";
 import type { GameState } from "../../engine/types";
 import type { GameSession } from "../state/session";
 

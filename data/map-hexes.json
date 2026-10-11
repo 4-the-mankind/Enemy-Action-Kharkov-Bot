@@ -14,11 +14,13 @@
       "lineArtillery": "west"
     },
     "1007": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1009": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "voronezh"
     },
     "1010": {
       "logistics": "voronezh"
@@ -31,6 +33,7 @@
     },
     "1013": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "logistics": "voronezh"
     },
@@ -55,9 +58,11 @@
     },
     "1103": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "southwest"
     },
     "1106": {
+      "village": true,
       "frontTarget": "both",
       "lineArtillery": "east"
     },
@@ -66,6 +71,7 @@
     },
     "1109": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1110": {
@@ -74,6 +80,7 @@
     },
     "1111": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "logistics": "voronezh"
     },
@@ -83,6 +90,7 @@
     },
     "1113": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "logistics": "voronezh"
     },
@@ -93,20 +101,24 @@
     },
     "1115": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "logistics": "voronezh",
       "lineWest": "west"
     },
     "1116": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "voronezh"
     },
     "1117": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1120": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "lineFar": "east"
     },
@@ -127,7 +139,8 @@
     },
     "1210": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "both"
     },
     "1211": {
       "logistics": "voronezh"
@@ -147,6 +160,7 @@
     },
     "1218": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1220": {
@@ -165,17 +179,20 @@
     },
     "1304": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "1305": {
       "lineArtillery": "east"
     },
     "1306": {
+      "village": true,
       "frontTarget": "southwest",
       "lineArtillery": "west"
     },
     "1310": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "both"
     },
     "1311": {
@@ -184,6 +201,7 @@
     },
     "1312": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "both",
       "logistics": "voronezh"
     },
@@ -192,6 +210,7 @@
     },
     "1315": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh",
       "lineWest": "west"
     },
@@ -209,6 +228,7 @@
       "mapEdge": "soviet"
     },
     "1402": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1404": {
@@ -219,14 +239,17 @@
     },
     "1407": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "1408": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "1411": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "both"
     },
     "1414": {
@@ -236,9 +259,11 @@
       "lineWest": "west"
     },
     "1416": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1419": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1420": {
@@ -247,6 +272,7 @@
     "1421": {
       "terrain": "city",
       "vp": 2,
+      "frontTarget": "voronezh",
       "lineFar": "west"
     },
     "1422": {
@@ -284,6 +310,7 @@
     },
     "1602": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "1603": {
@@ -292,6 +319,7 @@
     "1604": {
       "terrain": "town",
       "vp": 1,
+      "frontTarget": "southwest",
       "lineArtillery": "east"
     },
     "1605": {
@@ -300,15 +328,19 @@
     },
     "1606": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "1608": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1610": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1613": {
+      "village": true,
       "frontTarget": "both",
       "lineWest": "east"
     },
@@ -317,12 +349,15 @@
     },
     "1615": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "voronezh"
     },
     "1617": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "1619": {
+      "village": true,
       "frontTarget": "voronezh",
       "lineFar": "east"
     },
@@ -337,6 +372,7 @@
     },
     "1701": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest",
       "mapEdge": "soviet"
     },
@@ -378,13 +414,15 @@
     },
     "1802": {
       "terrain": "city",
-      "vp": 2
+      "vp": 2,
+      "frontTarget": "southwest"
     },
     "1803": {
       "terrain": "broken"
     },
     "1804": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "southwest",
       "logistics": "southwest",
       "lineArtillery": "east"
@@ -397,9 +435,11 @@
       "logistics": "southwest"
     },
     "1808": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1813": {
+      "village": true,
       "frontTarget": "southwest",
       "lineWest": "east"
     },
@@ -407,6 +447,7 @@
       "lineWest": "west"
     },
     "1815": {
+      "village": true,
       "frontTarget": "both"
     },
     "1817": {
@@ -435,6 +476,7 @@
     },
     "1904": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "southwest",
       "logistics": "southwest",
       "lineArtillery": "east"
@@ -444,6 +486,7 @@
       "lineArtillery": "west"
     },
     "1906": {
+      "village": true,
       "frontTarget": "southwest",
       "logistics": "southwest"
     },
@@ -451,9 +494,12 @@
       "logistics": "southwest"
     },
     "1910": {
-      "terrain": "town"
+      "terrain": "town",
+      "vp": 1,
+      "frontTarget": "southwest"
     },
     "1912": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1913": {
@@ -463,6 +509,7 @@
       "lineWest": "west"
     },
     "1918": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "1919": {
@@ -482,6 +529,7 @@
     },
     "2002": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "southwest",
       "lineArtillery": "west"
     },
@@ -502,6 +550,7 @@
       "lineWest": "east"
     },
     "2014": {
+      "village": true,
       "frontTarget": "southwest",
       "lineWest": "west"
     },
@@ -522,19 +571,24 @@
     },
     "2102": {
       "terrain": "city",
-      "vp": 2
+      "vp": 2,
+      "frontTarget": "southwest"
     },
     "2103": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "southwest"
     },
     "2106": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2109": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2112": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2113": {
@@ -547,15 +601,18 @@
       "terrain": "broken"
     },
     "2117": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2119": {
+      "village": true,
       "frontTarget": "southwest",
       "lineFar": "east"
     },
     "2120": {
       "terrain": "town",
       "vp": 1,
+      "frontTarget": "southwest",
       "lineFar": "west"
     },
     "2123": {
@@ -563,10 +620,12 @@
     },
     "2201": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "southwest",
       "mapEdge": "german"
     },
     "2207": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2208": {
@@ -576,6 +635,7 @@
       "lineWest": "east"
     },
     "2210": {
+      "village": true,
       "frontTarget": "southwest",
       "lineWest": "east"
     },
@@ -593,6 +653,7 @@
     },
     "2215": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "2218": {
@@ -634,6 +695,7 @@
     },
     "2314": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "southwest"
     },
     "2318": {
@@ -656,36 +718,44 @@
       "mapEdge": "german"
     },
     "2402": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2404": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "southwest"
     },
     "2406": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2407": {
       "lineWest": "east"
     },
     "2408": {
+      "village": true,
       "frontTarget": "southwest",
       "lineWest": "west"
     },
     "2410": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2412": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "southwest"
     },
     "2415": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2416": {
       "terrain": "marsh"
     },
     "2417": {
+      "village": true,
       "frontTarget": "southwest",
       "lineFar": "east"
     },
@@ -730,11 +800,13 @@
     "2518": {
       "terrain": "city",
       "vp": 3,
+      "frontTarget": "southwest",
       "lineFar": "west"
     },
     "2520": {
       "terrain": "city",
-      "vp": 2
+      "vp": 2,
+      "frontTarget": "southwest"
     },
     "2521": {
       "terrain": "broken"
@@ -763,21 +835,26 @@
       "lineWest": "west"
     },
     "2607": {
+      "village": true,
       "frontTarget": "southwest",
       "lineWest": "west"
     },
     "2609": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2611": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2613": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2615": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "southwest"
     },
     "2616": {
       "lineFar": "east"
@@ -794,9 +871,11 @@
       "edgeRoad": true
     },
     "2702": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2705": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2708": {
@@ -823,15 +902,18 @@
       "mapEdge": "german"
     },
     "2807": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2809": {
+      "village": true,
       "frontTarget": "southwest"
     },
     "2811": {
       "lineFar": "east"
     },
     "2812": {
+      "village": true,
       "frontTarget": "southwest",
       "lineFar": "east"
     },
@@ -839,6 +921,7 @@
       "lineFar": "east"
     },
     "2814": {
+      "village": true,
       "frontTarget": "southwest",
       "lineFar": "east"
     },
@@ -1127,6 +1210,7 @@
     },
     "0511": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0610": {
@@ -1137,6 +1221,7 @@
     },
     "0809": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0609": {
@@ -1144,6 +1229,7 @@
     },
     "0409": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0214": {
@@ -1179,6 +1265,7 @@
     },
     "0218": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0318": {
@@ -1212,6 +1299,7 @@
     },
     "0614": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh",
       "lineWest": "east"
     },
@@ -1221,11 +1309,13 @@
     },
     "0815": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh",
       "lineWest": "west"
     },
     "0915": {
       "terrain": "broken",
+      "village": true,
       "frontTarget": "voronezh",
       "lineWest": "west"
     },
@@ -1243,11 +1333,13 @@
     },
     "0407": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "lineArtillery": "west"
     },
     "0208": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0309": {
@@ -1258,6 +1350,7 @@
     },
     "0908": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0909": {
@@ -1269,10 +1362,12 @@
     },
     "0812": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0712": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0811": {
@@ -1280,19 +1375,23 @@
     },
     "0903": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0503": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0315": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "lineWest": "west"
     },
     "0416": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0417": {
@@ -1303,10 +1402,12 @@
     },
     "0518": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0817": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0917": {
@@ -1314,6 +1415,7 @@
     },
     "0918": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0121": {
@@ -1338,38 +1440,46 @@
     },
     "0104": {
       "terrain": "woods",
+      "village": true,
       "frontTarget": "voronezh",
       "mapEdge": "soviet"
     },
     "0302": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "voronezh"
     },
     "0608": {
       "terrain": "town",
-      "vp": 1
+      "vp": 1,
+      "frontTarget": "voronezh"
     },
     "0215": {
       "terrain": "town",
       "vp": 1,
+      "frontTarget": "voronezh",
       "lineWest": "west"
     },
     "0720": {
       "terrain": "town",
       "vp": 1,
+      "frontTarget": "voronezh",
       "lineFar": "east"
     },
     "0912": {
       "terrain": "city",
-      "vp": 4
+      "vp": 4,
+      "frontTarget": "voronezh"
     },
     "0311": {
       "terrain": "city",
-      "vp": 2
+      "vp": 2,
+      "frontTarget": "voronezh"
     },
     "0221": {
       "terrain": "city",
       "vp": 2,
+      "frontTarget": "voronezh",
       "lineFar": "west"
     },
     "0914": {
@@ -1384,6 +1494,7 @@
       "mapEdge": "soviet"
     },
     "0112": {
+      "village": true,
       "frontTarget": "voronezh",
       "mapEdge": "soviet",
       "edgeRoad": true
@@ -1472,36 +1583,46 @@
       "mapEdge": "german"
     },
     "0306": {
+      "village": true,
       "frontTarget": "voronezh",
       "lineArtillery": "east"
     },
     "0604": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0702": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0210": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0313": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0520": {
+      "village": true,
       "frontTarget": "voronezh",
       "lineFar": "east"
     },
     "0513": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0709": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0706": {
+      "village": true,
       "frontTarget": "voronezh",
       "lineArtillery": "east"
     },
     "0905": {
+      "village": true,
       "frontTarget": "voronezh"
     },
     "0421": {

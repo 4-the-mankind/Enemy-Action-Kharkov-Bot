@@ -9,8 +9,8 @@ import { provisionalRules, type PendingRules } from "../../src/engine/pending";
 import { emptyState, type GameState } from "../../src/engine/types";
 import { terrain } from "./real-map";
 
-// The engine already asks the questions of tasks 4.2 and 4.6 (pending.ts), and those of
-// task 4.3 answered by supply.ts. These tests swap the answers for other ones and check that
+// The engine already asks the questions of task 4.6 (pending.ts), and those of task 4.3
+// answered by supply.ts. These tests swap the answers for other ones and check that
 // each rule reacts (supply itself: supply.test.ts).
 
 const grid: MapGrid = { ...DEFAULT_GRID, cols: 8, rows: 8 };
@@ -44,10 +44,10 @@ function setup(units: Unit[], at: Record<string, string>, change: Partial<Pendin
 const garrisonIn = (...hexes: string[]): Partial<PendingRules> => ({ garrisonAt: (_s, h) => hexes.includes(h) });
 
 describe("Provisional answers (pending.ts)", () => {
-  it("hold on Game-turns 1-2: no garrison, frozen, no army objective", () => {
+  it("hold on Game-turns 1-2: no garrison, frozen", () => {
     const { board, state } = setup([], {});
     const r = provisionalRules(board, () => undefined);
-    expect([r.garrisonAt(state, "0404"), r.ground(state), r.armyObjective(state, "40")]).toEqual([false, "frozen", null]);
+    expect([r.garrisonAt(state, "0404"), r.ground(state)]).toEqual([false, "frozen"]);
   });
 });
 
@@ -96,13 +96,5 @@ describe("Supply answers (task 4.3) seen by movement", () => {
   it("no strategic movement for a unit out of supply in the Supply Phase (10.6: its status, not its trace)", () => {
     const { movement, state } = setup([unit("g", "german")], { g: "0401" }, { supplyStatus: () => "outOfSupply" });
     expect(movement.whyNoStrategic(state, "g")).toBe("g is not in supply.");
-  });
-});
-
-describe("Army objectives (task 4.2)", () => {
-  it("an army with an Army Objective marker waits for 9.26", () => {
-    const { engine, state } = setup([unit("s", "soviet", { armyOrCorps: "40" })], { s: "0404" }, { armyObjective: () => "0311" }, corridor, 1);
-    expect(engine.step(state, { type: "ActivateFormation", army: "40" }).events[0])
-      .toMatchObject({ type: "CommandRejected", reason: "Movement methods 9.26 (army objective) are coded with task 4.2." });
   });
 });

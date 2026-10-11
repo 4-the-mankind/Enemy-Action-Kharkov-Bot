@@ -11,6 +11,7 @@ import { readActivation, walks, type Activation, type Decision } from "../playba
 import type { MovePlayer, Speed } from "../playback/move-player";
 import type { GameSession } from "../state/session";
 import { CARD_BACK, cardImage } from "./card-zoom";
+import { objectiveChange, objectiveName } from "./objective-text";
 import type { mountWhyPanel } from "./why-panel";
 
 const armyName = (token: string) => ARMY_NAMES[token] ?? `${token} Army`;
@@ -179,7 +180,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       const state = i === current!.lit && player.playing ? "current" : i > current!.lit ? "pending" : "";
       return `<li><button type="button" data-order="${i}" class="${state}${d === shown ? " shown" : ""}${d.outcome === "moved" ? "" : " still"}">` +
         (u ? `<img src="${faceImage(u, s?.face ?? "front")}" alt="">` : "") +
-        `<span class="name">${u?.designation ?? d.unit}<small>${d.method ? d.method.replace(/^9\.2[12] method/, "Method") : "No method"}</small></span>` +
+        `<span class="name">${u?.designation ?? d.unit}<small>${d.method ? d.method.replace(/^9\.2[12] method/, "Method").replace(/^9\.26 method/, "Army objective method") : "No method"}</small></span>` +
         `<span class="where">${outcome(d)}</span></button></li>`;
     };
     parts.orders.innerHTML = `<div class="playback"><div class="speed" role="group" aria-label="Animation speed">` +
@@ -187,9 +188,12 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       `</div><div class="playback-actions">` +
       `<button type="button" class="switch" data-action="replay-all"${player.playing ? " disabled" : canReplayAll() ? "" : ` disabled title="Counters have moved since."`}>Replay all moves</button>` +
       `<button type="button" class="switch" data-action="skip"${player.playing ? "" : " disabled"}>Skip</button></div></div>` +
-      formations.map(({ formation, first }, k) => {
+      formations.map(({ formation, first, objectives }, k) => {
         const end = formations[k + 1]?.first ?? decisions.length;
-        return `<header class="orders-head"><h2>${armyName(formation.army)}</h2><p>${frontName(formation.front)}, movement methods ${formation.methods}</p></header>` +
+        // Step 1 (9.0): the objective check, and any marker the moves reached.
+        const marks = objectives.map((e) => `<p class="objective-check" title="${esc(e.why)} (${e.rule})">` +
+          `${objectiveName(e.marker, e.face)} ${objectiveChange(e)}.</p>`).join("");
+        return `<header class="orders-head"><h2>${armyName(formation.army)}</h2><p>${frontName(formation.front)}, movement methods ${formation.methods}</p>${marks}</header>` +
           `<ol class="orders">${decisions.slice(first, end).map((d, j) => order(d, first + j)).join("")}</ol>`;
       }).join("");
     placeWhy();

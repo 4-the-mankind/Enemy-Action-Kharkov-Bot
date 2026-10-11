@@ -3,7 +3,9 @@
 import type { MapData } from "../data/map-data";
 import { faceImage } from "../data/game-data";
 import type { Engine } from "../../engine/engine";
-import { isHex, OBJECTIVE_FRONTS, type GameState, type ObjectiveFace, type ObjectiveFront } from "../../engine/types";
+import { armyObjective } from "../../engine/objectives";
+import { ARMY_NAMES } from "../../engine/soviet-cards";
+import { isHex, OBJECTIVE_ARMIES, OBJECTIVE_FRONTS, type GameState, type ObjectiveFace, type ObjectiveFront } from "../../engine/types";
 import type { Selection } from "../state/selection";
 import type { MapView } from "./map-view";
 
@@ -12,12 +14,14 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const COUNTER = 150;
 /** Offset of each stacking level, up and left, in grid px. */
 const STACK_STEP = 14;
-/** Dispersed marker on a counter's top right corner, and Front Objective markers, in grid px. */
+/** Dispersed marker on a counter's top right corner, and objective markers, in grid px. */
 const DISPERSED = 72;
 const OBJECTIVE = 104;
 /** Image of a Front Objective marker (assets/counters/others/). */
 const objectiveImage = (front: ObjectiveFront, face: ObjectiveFace) =>
   `/assets/counters/others/marker-sov${front === "voronezh" ? "veronezhfront" : "swfront"}-obj${face === "west" ? "W" : "S"}.png`;
+/** Army Objective markers (9.13), West side only. */
+const ARMY_OBJECTIVE_IMAGE = { "40": "marker-sov40tharmy-objW.png", "1G": "marker-sov1stGrdsarmy-objW.png" };
 const DISPERSED_IMAGE = { german: "marker-germandispersed.png", soviet: "marker-sovietdispersed-sml.png" };
 
 export class UnitsPlane {
@@ -53,6 +57,14 @@ export class UnitsPlane {
       const x = hex.x - OBJECTIVE / 2 + 40, y = hex.y - OBJECTIVE / 2 + 40;
       parts.push(`<image class="objective" href="${objectiveImage(front, m.face)}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
         `<title>${front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${m.face === "west" ? "West" : "South"}</title></image>`);
+    }
+    // Army Objective markers in play (9.13): shifted down and left.
+    for (const army of OBJECTIVE_ARMIES) {
+      const at = armyObjective(state, army), hex = at && this.data.hexById.get(at);
+      if (!hex) continue;
+      const x = hex.x - OBJECTIVE / 2 - 40, y = hex.y - OBJECTIVE / 2 + 40;
+      parts.push(`<image class="objective" href="/assets/counters/others/${ARMY_OBJECTIVE_IMAGE[army]}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
+        `<title>${ARMY_NAMES[army]} Objective</title></image>`);
     }
     this.root.innerHTML = parts.join("");
     if (fly && !matchMedia("(prefers-reduced-motion: reduce)").matches) this.flyIn(fly);

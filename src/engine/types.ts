@@ -56,6 +56,10 @@ export const OBJECTIVE_FRONTS: ObjectiveFront[] = ["voronezh", "southwest"];
 export type ObjectiveFace = "west" | "south";
 export interface ObjectiveMarker { at: string; face: ObjectiveFace }
 
+/** Armies with an Army Objective marker (9.13): 40th Army (Voronezh), 1st Guards Army (Southwest). */
+export type ObjectiveArmy = "40" | "1G";
+export const OBJECTIVE_ARMIES: ObjectiveArmy[] = ["40", "1G"];
+
 /**
  * Who sends a command. The bot (the Soviet system) is not bound by the player's locks (D17):
  * it places Soviet reserves. Set-up adjustments are played as the bot (D15), German units included.
@@ -88,8 +92,13 @@ export interface GameState {
   sovietTowns: string[];
   /** Soviet discard pile, oldest first. */
   sovietDiscard: string[];
-  /** Front Objective markers on the map (placement only; their logic comes in 4.2). */
+  /** Front Objective markers on the map (9.11); a front without one has had it removed (9.12). */
   objectives: Partial<Record<ObjectiveFront, ObjectiveMarker>>;
+  /**
+   * Army Objective markers (9.13): hex of the marker; null once removed from play; absent
+   * until the army is first activated. Always West side up.
+   */
+  armyObjectives?: Partial<Record<ObjectiveArmy, string | null>>;
   /** Supply markers (13.2) set in the Supply Phase, by unit id. Absent = supplied. */
   supply?: Record<string, SupplyMarker>;
   /** Hexes of the Soviet Forward Support markers on the map (13.53). */
@@ -142,7 +151,7 @@ export type Command =
   /**
    * Supply Phase (4.0 III), steps 2-4: supply status of German units [GT 2+] and Soviet units
    * [GT 4+] (13.1-13.2), surrender (13.23), [GT 8+] Soviet support line (13.51).
-   * TODO 4.6: step 1 (garrisons, 15.1). TODO 4.2: step 5 (objective removal, 9.12).
+   * [GT 7] step 5: front objective removal (9.12). TODO 4.6: step 1 (garrisons, 15.1).
    */
   | { type: "SupplyPhase" }
   /** Sets or removes (supplied) the supply marker of units: Air Resupply (13.4), corrections. */
@@ -150,8 +159,8 @@ export type Command =
   /** Hexes of the Soviet Forward Support markers (13.53), at most two; [] removes them. */
   | { type: "SetForwardSupport"; hexes: string[] }
   /**
-   * Soviet activation, step 2 (9.0): the bot moves the army's units by the movement methods
-   * (9.2). TODO 4.1: the units come from the command card (8.13); for now, the whole army.
+   * Soviet activation of a whole army (dev scenarios; the cards choose their units, 8.13):
+   * steps 1 (objective check, 9.1) and 2 (movement methods, 9.2) of 9.0.
    */
   | { type: "ActivateFormation"; army: string };
 
@@ -177,6 +186,15 @@ export type GameEvent =
   | { type: "VictoryPointsSet"; from: number; to: number }
   | { type: "SovietCardDiscarded"; card: string; discarded: boolean }
   | { type: "ObjectivePlaced"; front: ObjectiveFront; face: ObjectiveFace; at: string | null }
+  /**
+   * The bot checked or moved an objective marker (9.1): a front's ("voronezh", "southwest") or
+   * an army's ("40", "1G"). `from` null: placed for the first time; `to` null: removed from
+   * play; `to` equal to `from`: checked, it stays. `roll`: the die of a relocation (9.11).
+   */
+  | {
+    type: "ObjectiveChanged"; marker: ObjectiveFront | ObjectiveArmy; from: string | null; to: string | null;
+    face?: ObjectiveFace; roll?: number; rule: string; why: string;
+  }
   /** Followed by the events of each command it played. */
   | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
   | { type: "GameStarted" }
@@ -224,6 +242,8 @@ export type GameEvent =
     spearheads: string[];
     /** Out of supply or isolated units, moved last by 9.27. */
     unsupplied: string[];
+    /** Units with an Army Objective marker, moved first by 9.26 (Q34). */
+    armyObjective: string[];
   }
   /**
    * Why a Soviet unit moved where it did, or did not move (CLAUDE.md: every decision traced).

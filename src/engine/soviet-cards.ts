@@ -8,6 +8,7 @@ import type { Front, Unit } from "../core/units";
 import type { Board } from "./board";
 import type { Movement } from "./movement";
 import type { PendingRules } from "./pending";
+import { shuffle } from "./random";
 import type { SovietMovement } from "./soviet-movement";
 import { isHex, MAX_FORWARD_SUPPORT, type Command, type GameEvent, type GameState, type Reminder, type SovietCardPiles, type StepResult } from "./types";
 
@@ -21,29 +22,6 @@ export interface SovietCardsData {
   /** Runs an engine command as the bot (moves, markers). */
   step(state: GameState, command: Command): StepResult;
 }
-
-/** One step of the shuffling generator (mulberry32): same seed, same sequence. */
-function random(seed: number): { seed: number; value: number } {
-  const next = (seed + 0x6d2b79f5) >>> 0;
-  let r = Math.imul(next ^ (next >>> 15), 1 | next);
-  r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-  return { seed: next, value: ((r ^ (r >>> 14)) >>> 0) / 4294967296 };
-}
-
-/** Fisher-Yates shuffle driven by the seed; returns the seed to use next. */
-export function shuffle<T>(items: readonly T[], seed: number): { items: T[]; seed: number } {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const r = random(seed);
-    seed = r.seed;
-    const j = Math.floor(r.value * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return { items: out, seed };
-}
-
-/** A random seed for a new game (UI side: the engine itself never draws at random). */
-export const newSeed = () => Math.floor(Math.random() * 0x100000000) >>> 0;
 
 const KHARKOV = "0912";
 /** 8.13 STAVKA [GT 5-7] tie: the army with a supplied unit closest to this hex. */

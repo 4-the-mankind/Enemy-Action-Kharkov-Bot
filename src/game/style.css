@@ -682,6 +682,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 
 .orders-area { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
 .orders-head p { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }
+.orders-head .objective-check { margin-top: 2px; font-size: 0.8rem; }
 .playback { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 10px 0 8px; }
 .speed { display: flex; border: 1px solid var(--feldgrau-light); border-radius: 2px; overflow: hidden; }
 .speed button { padding: 3px 9px; font: inherit; font-size: 0.85rem; color: var(--paper-dim); background: transparent; border: 0; cursor: pointer; }

@@ -5,11 +5,13 @@ import { isHex, type GameEvent, type Location } from "../../engine/types";
 import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
+import { objectiveChange, objectiveName } from "./objective-text";
 
 const where = (at: Location) =>
   isHex(at) ? at : at === "reserve" ? "the reserve" : at === "reinforcements" ? "the reinforcements" : "the eliminated units";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
 /** A card named in the log: its number, with the scan held up on hover (card-zoom). */
 const card = (id: string) => `<span class="log-card" data-card="${id}" tabindex="0"><img src="${cardImage(id)}" alt="">${id.toUpperCase()}</span>`;
 
@@ -71,6 +73,8 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       const marker = `${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${e.face === "west" ? "West" : "South"}`;
       return { html: e.at ? `<b>${marker}</b> placed in ${e.at}.` : `<b>${e.front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective</b> removed.` };
     }
+    case "ObjectiveChanged":
+      return { html: `<b>${objectiveName(e.marker, e.face)}</b> ${objectiveChange(e)}: ${esc(e.why)} (${e.rule}).` };
     case "SetUpAdjustmentApplied":
       return { html: `<b>Set-up adjustment ${e.id.replace("-", ",")}: ${e.name}</b> (${e.roll ? `die roll ${e.roll}` : "chosen"}${e.replaces ? `, replaces ${e.replaces}` : ""}), played by the bot in place of its first impulse (p48-50). ${e.commands} actions:` };
     case "GameStarted":

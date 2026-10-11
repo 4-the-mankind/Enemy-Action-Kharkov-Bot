@@ -282,6 +282,17 @@ describe("9.3 terms", () => {
     expect(movement.proximateToUnit(state, "s3", "far")).toBe(false);
   });
 
+  it("a dispersed unit can't move (12.9): it reaches no hex, and is proximate to an enemy unit only when adjacent", () => {
+    const units = [inf("s"), inf("g", 4, "german"), inf("far", 4, "german")];
+    const { movement, state } = setup({ units, at: { s: "0404", g: "0405", far: "0401" } });
+    const dispersed: GameState = { ...state, units: { ...state.units, s: { ...state.units.s, dispersed: true } } };
+    expect([...movement.reachable(dispersed, "s").hexes.keys()]).toEqual(["0404"]);
+    expect(movement.proximateToHex(dispersed, "s", "0403")).toBe(false);
+    expect(movement.proximateToUnit(dispersed, "s", "g")).toBe(true);
+    expect(movement.proximateToUnit(state, "s", "far")).toBe(true);
+    expect(movement.proximateToUnit(dispersed, "s", "far")).toBe(false);
+  });
+
   // German unit in 0404 (neighbors 0403, 0405, 0304, 0305, 0504, 0505), Soviet units around.
   it("surround: every adjacent hex occupied by the enemy or in its ZOC", () => {
     const units = [inf("g", 4, "german"), inf("n"), inf("s")];

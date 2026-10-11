@@ -229,7 +229,9 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     // out of an enemy ZOC.
     const maxHexes = status === "supplied" ? Infinity : cls === "mech" ? 2 : status === "isolated" ? 1 : Infinity;
     const frozen = status === "isolated" && (cls === "mech" || startInZoc);
-    return { start, allowance, budget, enter, maxHexes, noMove: ground === "heavyMud" || frozen };
+    // 12.9: a dispersed unit can't move, so it reaches nothing (nor is proximate, 9.3, but by adjacency).
+    const dispersed = !!state.units[id]?.dispersed;
+    return { start, allowance, budget, enter, maxHexes, noMove: ground === "heavyMud" || frozen || dispersed };
   }
 
   /** Hexes the unit can reach in one move, cheapest first (Dijkstra, one bucket per half MP). */
@@ -237,7 +239,7 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     const { start, allowance, budget, enter, maxHexes, noMove } = stepper(state, id, opts);
     const result: ReachResult = { unit: id, start, allowance, hexes: new Map() };
     result.hexes.set(start, { cost: 0, mpLeft: allowance, from: null, stop: null });
-    if (noMove) return result; // 18.34: no movement in heavy mud; 13.22 isolated
+    if (noMove) return result; // 18.34: no movement in heavy mud; 13.22 isolated; 12.9 dispersed
 
     const best = new Map<string, number>([[start, 0]]);
     const info = new Map<string, Omit<Reach, "cost" | "mpLeft">>([[start, { from: null, stop: null }]]);

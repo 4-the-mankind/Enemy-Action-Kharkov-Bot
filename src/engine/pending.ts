@@ -3,7 +3,8 @@
 // each answer comes from `provisionalRules`, the one that holds on Game-turns 1-2. A task
 // replaces its provisional answers here (or passes its own PendingRules to createEngine)
 // and nowhere else. Each answer names its task: search "TODO <task>" in src/ too.
-// Supply, support and the operational limit (task 4.3) are coded: supply.ts.
+// Supply, support and the operational limit (task 4.3) are coded: supply.ts; the front and
+// army objectives (task 4.2): objectives.ts.
 import type { Front, Unit } from "../core/units";
 import type { Board } from "./board";
 import { createSupply, type SupplyRules } from "./supply";
@@ -18,8 +19,6 @@ export interface PendingRules extends SupplyRules {
   garrisonAt(state: GameState, hex: string): boolean;
   /** Task 4.6 (18.33-18.34): ground condition of the current turn. */
   ground(state: GameState): Ground;
-  /** Task 4.2 (9.13): hex of the army's Army Objective marker (40th, 1G), or null if not in play. */
-  armyObjective(state: GameState, army: string): string | null;
   /**
    * Task 4.6 (8.12, 16): unit of the army that would receive a replacement step, or null if
    * none is eligible. The Soviet card command "Assign 1 RP" is passed over while null.
@@ -37,8 +36,6 @@ export function provisionalRules(board: Board, unit: (id: string) => Unit | unde
     garrisonAt: (_state: GameState, _hex: string) => false,
     // TODO 4.6: ground condition markers (18.33) vary from Game-turn 7; frozen until then.
     ground: (_state: GameState): Ground => "frozen",
-    // TODO 4.2: Army Objective markers (9.13) are not in the game state yet.
-    armyObjective: (_state: GameState, _army: string): string | null => null,
     // TODO 4.6: replacements (16) are not coded yet: no unit is eligible.
     replacementFor: (_state: GameState, _army: string): string | null => null,
     // TODO 4.6: garrison markers (15) are not in the game state yet.
