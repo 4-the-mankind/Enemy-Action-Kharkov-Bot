@@ -462,12 +462,12 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .log-tools { margin-bottom: 8px; }
 .switch:disabled { opacity: 0.45; cursor: not-allowed; }
 .log { list-style: none; margin: 0; padding: 0 18px 0 0; font-size: 0.9rem; }
-.log li { padding: 6px 0; color: var(--paper-dim); border-bottom: 1px solid var(--feldgrau); }
-.log li b { color: var(--paper); font-weight: 600; }
-.log li.refused b { color: #ff8a80; }
-.log li.sub { padding: 3px 0 3px 12px; font-size: 0.85rem; border-bottom: 0; border-left: 2px solid var(--feldgrau); }
-.log li.sub:has(+ li:not(.sub)) { margin-bottom: 0; border-bottom: 1px solid var(--feldgrau); }
-.log li.fresh { animation: fresh 900ms ease-out; }
+.log > li { padding: 6px 0; color: var(--paper-dim); border-bottom: 1px solid var(--feldgrau); }
+.log > li:not(.why-host) b { color: var(--paper); font-weight: 600; }
+.log > li.refused b { color: #ff8a80; }
+.log > li.sub { padding: 3px 0 3px 12px; font-size: 0.85rem; border-bottom: 0; border-left: 2px solid var(--feldgrau); }
+.log > li.sub:has(+ li:not(.sub)) { margin-bottom: 0; border-bottom: 1px solid var(--feldgrau); }
+.log > li.fresh { animation: fresh 900ms ease-out; }
 @keyframes fresh { from { background: rgb(232 228 211 / 0.16); } to { background: transparent; } }
 
 /* An overlay sheet. Lifted (off): pushed right, dim, ink stripe faded.
@@ -524,10 +524,10 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
   .sheet, .bg, .folder-tab { transition: none; }
-  .log li.fresh { animation: none; }
+  .log > li.fresh { animation: none; }
   .d10.tumbling { animation: none; }
   .deck .card.drawn { animation: none; }
-  .orders button { transition: none; }
+  .orders > li > button { transition: none; }
 }
 
 /* Narrow screens: an open dossier covers the map instead of squeezing it (phone layout: 5.3). */
@@ -621,7 +621,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 
 .log-card { white-space: nowrap; font-weight: 600; color: var(--paper); cursor: zoom-in; }
 .log-card img { width: 16px; margin-right: 3px; vertical-align: -5px; border-radius: 2px; }
-.log li i { font-style: normal; color: var(--paper); }
+.log > li:not(.why-host) i { font-style: normal; color: var(--paper); }
 
 /* Reminders: paper slips pinned to the map's top left corner, one per event to keep in mind. */
 .reminders {
@@ -687,28 +687,34 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .speed button { padding: 3px 9px; font: inherit; font-size: 0.85rem; color: var(--paper-dim); background: transparent; border: 0; cursor: pointer; }
 .speed button[aria-pressed="true"] { color: var(--paper); font-weight: 600; background: var(--feldgrau-light); }
 .playback .switch { padding: 3px 12px; font-size: 0.85rem; }
+.playback-actions { display: flex; gap: 6px; }
+/* "Why this move" right under the order or the log line it explains. */
+.why-host { list-style: none; padding: 4px 0 8px; }
+.log > li.why-host { padding: 4px 0 8px; color: var(--slip-ink); border-bottom: 0; }
 
 .orders { list-style: none; margin: 0; padding: 0; }
-.orders button {
+.orders > li > button {
   display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 9px;
   width: 100%; padding: 4px 6px 4px 4px; font: inherit; font-size: 0.88rem; text-align: left;
   color: var(--paper); background: transparent; border: 0; border-left: 3px solid transparent; cursor: pointer;
   transition: opacity 200ms;
 }
-.orders button:hover { background: rgb(232 228 211 / 0.07); }
-.orders img { width: 30px; height: 30px; border-radius: 2px; }
-.orders .name small { display: block; font-size: 0.78rem; color: var(--paper-dim); }
-.orders .where { font-size: 0.85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.orders .still .where { color: var(--paper-dim); }
-.orders .pending { opacity: 0.35; }
+.orders > li > button:hover { background: rgb(232 228 211 / 0.07); }
+.orders > li > button img { width: 30px; height: 30px; border-radius: 2px; }
+.orders > li > button .name small { display: block; font-size: 0.78rem; color: var(--paper-dim); }
+.orders > li > button .where { font-size: 0.85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.orders > li > .still .where { color: var(--paper-dim); }
+.orders > li > .pending { opacity: 0.35; }
 /* The unit the bot is moving: lit like a pencil mark on the order. */
-.orders .current { border-left-color: var(--stab-red); background: rgb(192 39 45 / 0.16); }
-.orders .shown { border-left-color: var(--paper); background: rgb(232 228 211 / 0.1); }
-.orders .current.shown { border-left-color: var(--stab-red); }
+.orders > li > .current { border-left-color: var(--stab-red); background: rgb(192 39 45 / 0.16); }
+.orders > li > .shown { border-left-color: var(--paper); background: rgb(232 228 211 / 0.1); }
+.orders > li > .current.shown { border-left-color: var(--stab-red); }
 
 /* "Why this move": a paper slip, like the inspector. */
 .why { padding: 12px 14px 14px; color: var(--slip-ink); background: var(--slip); border-left: 4px solid var(--stab-red); }
-.why-head { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+/* Head in two parts: the unit and its move on the left, Replay move on the right. */
+.why-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.why-unit { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; min-width: 0; }
 .why-head img { width: 52px; height: 52px; border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.35); }
 .why-move { margin: 0; font-size: 0.9rem; color: var(--slip-dim); font-variant-numeric: tabular-nums; }
 .why-method { margin: 0 0 10px; padding-bottom: 8px; font-size: 0.95rem; border-bottom: 1.5px solid var(--slip-ink); }
@@ -725,11 +731,11 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .why-skipped summary { cursor: pointer; color: var(--slip-dim); }
 .why-skipped ul { margin: 6px 0 0; padding-left: 16px; }
 .why-skipped li + li { margin-top: 3px; }
-.why .replay { width: 100%; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
+.why .replay { flex: none; white-space: nowrap; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
 .why .replay:hover:not([disabled]) { background: var(--feldgrau); }
 
-.log li.decision { cursor: pointer; }
-.log li.decision:hover, .log li.decision:focus-visible { color: var(--paper); background: rgb(232 228 211 / 0.06); outline: none; }
+.log > li.decision { cursor: pointer; }
+.log > li.decision:hover, .log > li.decision:focus-visible { color: var(--paper); background: rgb(232 228 211 / 0.06); outline: none; }
 
 /* Bot trails on the map: grease pencil on the acetate, a paper casing to read on any terrain. */
 .bot-trails .trail { opacity: 0; }

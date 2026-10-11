@@ -7,7 +7,7 @@ import { ARMY_NAMES } from "../../engine/soviet-cards";
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
 import { isHex, SOVIET_CARDS, type GameEvent, type GameState } from "../../engine/types";
 import { faceImage } from "../data/game-data";
-import { readActivation, type Activation, type Decision } from "../playback/activation";
+import { readActivation, walks, type Activation, type Decision } from "../playback/activation";
 import type { MovePlayer, Speed } from "../playback/move-player";
 import type { GameSession } from "../state/session";
 import { CARD_BACK, cardImage } from "./card-zoom";
@@ -184,21 +184,59 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     };
     parts.orders.innerHTML = `<div class="playback"><div class="speed" role="group" aria-label="Animation speed">` +
       speeds.map((s) => `<button type="button" data-speed="${s}" aria-pressed="${player.speed === s}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("") +
-      `</div><button type="button" class="switch" data-action="skip"${player.playing ? "" : " disabled"}>Skip</button></div>` +
+      `</div><div class="playback-actions">` +
+      `<button type="button" class="switch" data-action="replay-all"${player.playing ? " disabled" : canReplayAll() ? "" : ` disabled title="Counters have moved since."`}>Replay all moves</button>` +
+      `<button type="button" class="switch" data-action="skip"${player.playing ? "" : " disabled"}>Skip</button></div></div>` +
       formations.map(({ formation, first }, k) => {
         const end = formations[k + 1]?.first ?? decisions.length;
         return `<header class="orders-head"><h2>${armyName(formation.army)}</h2><p>${frontName(formation.front)}, movement methods ${formation.methods}</p></header>` +
           `<ol class="orders">${decisions.slice(first, end).map((d, j) => order(d, first + j)).join("")}</ol>`;
       }).join("");
+    placeWhy();
   };
+
+  /** The slip sits under the order it explains, unless the player opened it from the log. */
+  function placeWhy() {
+    if (why.inLog()) return;
+    const d = why.shown(), i = d && current ? current.activation.decisions.indexOf(d) : -1;
+    const li = i >= 0 ? parts.orders.querySelector<HTMLElement>(`[data-order="${i}"]`)?.closest("li") ?? null : null;
+    why.place(li);
+  }
+
+  /** Every counter the activation walked still stands where it ended. */
+  const canReplayAll = () => !!current && current.activation.decisions.every((d) => !walks(d) || session.state.units[d.unit]?.at === d.to);
+
+  /** Plays the activation on show: the counters walk one after the other, the slip follows. */
+  function playCurrent() {
+    if (!current) return;
+    const { activation } = current;
+    current.lit = -1;
+    player.play(activation, (i) => {
+      if (!current) return;
+      current.lit = i;
+      // The slip follows the moves; a unit no method moves would only blank it.
+      if (!picked && activation.decisions[i].outcome !== "noMove") why.show(activation.decisions[i]);
+      renderOrders();
+      renderControls(session.state);
+    }, () => {
+      // Skip lands every counter at once: no order is left pending.
+      if (current?.activation === activation) current.lit = activation.decisions.length - 1;
+      renderOrders();
+      renderControls(session.state);
+    });
+  }
 
   parts.orders.addEventListener("click", (e) => {
     const t = e.target as Element;
     const speed = t.closest<HTMLElement>("[data-speed]")?.dataset.speed as Speed | undefined;
     if (speed) { player.setSpeed(speed); renderOrders(); return; }
     if (t.closest("[data-action=skip]")) { player.skip(); return; }
+    if (t.closest("[data-action=replay-all]")) {
+      if (!player.playing && canReplayAll()) { picked = false; why.place(null); why.show(null); playCurrent(); }
+      return;
+    }
     const order = t.closest<HTMLElement>("[data-order]");
-    if (order && current) { picked = true; why.show(current.activation.decisions[Number(order.dataset.order)]); renderOrders(); }
+    if (order && current) { picked = true; why.place(null); why.show(current.activation.decisions[Number(order.dataset.order)]); renderOrders(); }
   });
 
   // ---- Soviet state kept so far.
@@ -222,20 +260,14 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     if (activation) {
       current = { activation, depth: session.depth, lit: -1 };
       picked = false;
+      why.place(null);
       why.show(null);
-      player.play(activation, (i) => {
-        if (!current) return;
-        current.lit = i;
-        // The slip follows the moves; a unit no method moves would only blank it.
-        if (!picked && activation.decisions[i].outcome !== "noMove") why.show(activation.decisions[i]);
-        renderOrders();
-        renderControls(session.state);
-      }, () => { renderOrders(); renderControls(session.state); });
+      playCurrent();
     } else if (current && (session.depth < current.depth || impulse)) {
       // The activation was undone (or a new position loaded, or an impulse without one): its trails and slip go too.
       current = null;
       player.clear();
-      why.show(null);
+      if (!why.inLog()) why.show(null);
     }
     render(state);
     // The slip's Replay button depends on where the counter stands now.
@@ -245,7 +277,5 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   render(session.state);
   return {
     onStep,
-    /** Shows a decision picked elsewhere (log line), lighting its order when it belongs to the activation on show. */
-    pick(d: Decision) { picked = true; why.show(d); renderOrders(); },
   };
 }

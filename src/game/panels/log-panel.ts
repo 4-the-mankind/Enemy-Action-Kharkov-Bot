@@ -109,17 +109,17 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
  * An undo removes the lines of the step it takes back; refused commands stay (they changed nothing).
  * A click on a bot decision line shows its "Why this move" slip.
  */
-export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision) => void, intro?: string) {
+export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision, line: HTMLLIElement) => void, intro?: string) {
   const decisions = new WeakMap<HTMLLIElement, Decision>();
   root.addEventListener("click", (e) => {
     const li = (e.target as Element).closest("li");
     const d = li && decisions.get(li);
-    if (d) onDecision(d);
+    if (d) onDecision(d, li);
   });
   root.addEventListener("keydown", (e) => {
     const li = (e.target as Element).closest("li");
     const d = li && decisions.get(li);
-    if (d && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onDecision(d); }
+    if (d && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onDecision(d, li); }
   });
   const add = (html: string, cls = "") => {
     const li = document.createElement("li");

@@ -96,7 +96,8 @@ async function init() {
   mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
   mountCardZoom();
-  mountLogPanel($("log"), session, (d) => { rail.open("bot"); bot.pick(d); }, scenario?.note);
+  // A log line's "Why this move" opens right under it, in the Log tab.
+  mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); }, scenario?.note);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());
   session.subscribe(() => { undo.disabled = !session.canUndo(); });
