@@ -13,6 +13,14 @@ import { isHex, type GameState, type SupportLine } from "./types";
 /** Supply marker of a unit (13.2), set in the Supply Phase. */
 export type SupplyStatus = "supplied" | "outOfSupply" | "isolated";
 
+/**
+ * A supply line (13.1, shown in 4.3b): the path from the hex to a supply head (both included,
+ * seven hexes entered at most), then the supply route: the road hexes linking a road supply
+ * head to the hex where the road leaves the map (head excluded, exit included; empty for a
+ * map-edge head).
+ */
+export interface SupplyLine { path: string[]; route: string[] }
+
 /** Soviet operational limit line in use (9.8): far (21 VP or more) or near. */
 export type OperationalLimit = "far" | "near";
 
@@ -27,6 +35,10 @@ export interface SupplyRules {
   reserveSupplyTracesTo(state: GameState, hex: string): boolean;
   /** Hexes of a supply path from the hex to a supply head (both included), or null (4.3b). */
   supplyPath(state: GameState, side: Side, hex: string, reserve?: boolean): string[] | null;
+  /** The supply path and the road route behind its head, or null (4.3b). */
+  supplyLine(state: GameState, side: Side, hex: string): SupplyLine | null;
+  /** Why that side cannot trace supply from the hex (13.1), or null if it can (4.3b). */
+  whyNoSupply(state: GameState, side: Side, hex: string): string | null;
   /** 13.51, 13.53: the hex is in Soviet support. */
   inSovietSupport(state: GameState, hex: string): boolean;
   /** 9.8: the line in use, or null when the entire map is within the limit (GT 1-5). */
@@ -49,7 +61,16 @@ interface SupplyMap {
   next: Map<string, string | null>;
   /** Whole path of a hex supplied only across an unbridged Dniepr (two hexes at most). */
   short: Map<string, string[]>;
+  /** Road supply heads: next road hex toward the map-edge exit; null for a map-edge head. */
+  road: Map<string, string | null>;
+  /** Hexes entered from a supply head (no Dniepr crossed). */
+  dist: Map<string, number>;
+  /** Hexes in an enemy ZOC without a friendly unit: closed to the path (13.1). */
+  zocClosed: Set<string>;
 }
+
+/** Relaxed searches that tell why a hex is not supplied (whyNoSupply). */
+interface Relax { reserve?: boolean; noLimit?: boolean; noZoc?: boolean }
 
 /** 13.1: a path is at most seven hexes long (two if it crosses an unbridged Dniepr hexside). */
 const PATH = 7;
@@ -67,8 +88,8 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
    * enterable; the hex traced from need not be (it may be in an enemy ZOC, and an enemy
    * unit in it is replaced by an imagined friendly one).
    */
-  function supplyMap(state: GameState, side: Side, reserve: boolean): SupplyMap {
-    const key = `${side}${reserve ? ":reserve" : ""}`;
+  function supplyMap(state: GameState, side: Side, { reserve = false, noLimit = false, noZoc = false }: Relax = {}): SupplyMap {
+    const key = `${side}${reserve ? ":reserve" : ""}${noLimit ? ":noLimit" : ""}${noZoc ? ":noZoc" : ""}`;
     let byKey = cache.get(state);
     const cached = byKey?.get(key);
     if (cached) return cached;
@@ -93,9 +114,10 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     };
     // 13.1: never through enemy towns or cities, enemy units or garrisons; into an enemy ZOC
     // only if a friendly unit is in the hex (13.3: reserve supply, never into a German ZOC).
+    const zocClosed = new Set([...zoc].filter((h) => reserve || !has(h, side)));
     const enterable = (hex: string) =>
       !has(hex, foe) && !enemyTown(hex) && !(side === "german" && garrisonAt(state, hex))
-      && (!zoc.has(hex) || (!reserve && has(hex, side)));
+      && (noZoc || !zocClosed.has(hex));
     const crossing = (a: string, b: string) => {
       const s = board.side(a, b);
       return { blocked: s?.river === "dnieprBlocked", unbridged: s?.river === "dniepr" && !s.road };
@@ -108,12 +130,14 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     for (const h of board.hexes) if (board.hex(h).mapEdge === side && enterable(h)) heads.push(h);
     const roadQueue = heads.filter((h) => board.hex(h).edgeRoad);
     const isHead = new Set(heads);
+    const road = new Map<string, string | null>(roadQueue.map((h) => [h, null]));
     for (let i = 0; i < roadQueue.length; i++)
       for (const n of board.neighbors(roadQueue[i])) {
         if (isHead.has(n.hex) || !board.side(roadQueue[i], n.hex)?.road || crossing(roadQueue[i], n.hex).blocked || !enterable(n.hex)) continue;
         isHead.add(n.hex);
         heads.push(n.hex);
         roadQueue.push(n.hex);
+        road.set(n.hex, roadQueue[i]);
       }
     for (const h of heads) next.set(h, null);
 
@@ -122,7 +146,7 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     const queue = [...heads];
     for (let i = 0; i < queue.length; i++) {
       const cur = queue[i], d = dist.get(cur)!;
-      if (d >= PATH) continue;
+      if (d >= PATH && !noLimit) continue;
       for (const n of board.neighbors(cur)) {
         if (dist.has(n.hex)) continue;
         const c = crossing(cur, n.hex);
@@ -149,7 +173,7 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     // 13.1: a unit in a friendly map-edge hex is always supplied.
     for (const h of board.hexes) if (board.hex(h).mapEdge === side && !next.has(h)) next.set(h, null);
 
-    const result: SupplyMap = { supplied: new Set([...next.keys(), ...short.keys()]), next, short };
+    const result: SupplyMap = { supplied: new Set([...next.keys(), ...short.keys()]), next, short, road, dist, zocClosed };
     if (!byKey) cache.set(state, (byKey = new Map()));
     byKey.set(key, result);
     return result;
@@ -168,7 +192,39 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
   }
 
   const supplyTracesTo = (state: GameState, side: Side, hex: string) =>
-    supplyMap(hypothetical(state, side, hex), side, false).supplied.has(hex);
+    supplyMap(hypothetical(state, side, hex), side).supplied.has(hex);
+
+  /** Path from the hex to a supply head in that map, or null. */
+  function pathIn(map: SupplyMap, hex: string): string[] | null {
+    if (!map.next.has(hex)) return map.short.get(hex) ?? null;
+    const out: string[] = [];
+    for (let h: string | null = hex; h !== null; h = map.next.get(h)!) out.push(h);
+    return out;
+  }
+
+  const sideName = (side: Side) => (side === "soviet" ? "Soviet" : "German");
+
+  /**
+   * 13.1, read back for the player (4.3b): each constraint is lifted in turn, and the one
+   * whose removal opens a path is the reason. Path length first, then enemy ZOC.
+   */
+  function whyNoSupply(state: GameState, side: Side, hex: string): string | null {
+    const s = hypothetical(state, side, hex);
+    if (supplyMap(s, side).supplied.has(hex)) return null;
+    const far = supplyMap(s, side, { noLimit: true });
+    if (far.supplied.has(hex))
+      return `The nearest ${sideName(side)} supply head is ${far.dist.get(hex)} hexes away; a supply path enters seven hexes at most (13.1).`;
+    const open = supplyMap(s, side, { noZoc: true });
+    const path = pathIn(open, hex);
+    if (path) {
+      const closed = supplyMap(s, side).zocClosed;
+      const zoc = path.slice(1).filter((h) => closed.has(h));
+      return `Enemy ZOC closes every path${zoc.length ? ` (${zoc.join(", ")} on the shortest one)` : ""}: a supply path enters an enemy ZOC only where a friendly unit is (13.1).`;
+    }
+    if (supplyMap(s, side, { noLimit: true, noZoc: true }).supplied.has(hex))
+      return `Every path is either longer than seven hexes or enters an enemy ZOC without a friendly unit (13.1).`;
+    return `Enemy units, enemy towns or cities${side === "german" ? ", garrisons" : ""} or the Dniepr cut every path to a ${sideName(side)} supply head (13.1).`;
+  }
 
   function inSovietSupport(state: GameState, hex: string): boolean {
     if (state.turn < 5) return true; // 13.5: prior to GT 5, all hexes are in support
@@ -192,14 +248,17 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
       return !!u && !!at && isHex(at) && supplyTracesTo(state, u.side, at);
     },
     supplyTracesTo,
-    reserveSupplyTracesTo: (state, hex) => supplyMap(hypothetical(state, "soviet", hex), "soviet", true).supplied.has(hex),
-    supplyPath(state, side, hex, reserve = false) {
-      const { next, short } = supplyMap(hypothetical(state, side, hex), side, reserve);
-      if (!next.has(hex)) return short.get(hex) ?? null;
-      const out: string[] = [];
-      for (let h: string | null = hex; h !== null; h = next.get(h)!) out.push(h);
-      return out;
+    reserveSupplyTracesTo: (state, hex) => supplyMap(hypothetical(state, "soviet", hex), "soviet", { reserve: true }).supplied.has(hex),
+    supplyPath: (state, side, hex, reserve = false) => pathIn(supplyMap(hypothetical(state, side, hex), side, { reserve }), hex),
+    supplyLine(state, side, hex) {
+      const map = supplyMap(hypothetical(state, side, hex), side);
+      const path = pathIn(map, hex);
+      if (!path) return null;
+      const route: string[] = [];
+      for (let h = map.road.get(path[path.length - 1]) ?? null; h !== null; h = map.road.get(h) ?? null) route.push(h);
+      return { path, route };
     },
+    whyNoSupply,
     inSovietSupport,
     operationalLimit,
     beyondOperationalLimit(state, front, hex) {

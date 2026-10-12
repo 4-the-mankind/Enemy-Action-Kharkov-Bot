@@ -34,11 +34,23 @@
       <aside id="inspector" class="inspector" aria-live="polite"></aside>
       <section id="startNotice" class="start-notice" aria-live="polite" aria-label="Before the game starts"></section>
       <section id="reminders" class="reminders" aria-live="polite" aria-label="Events to keep in mind" hidden></section>
-      <button type="button" id="unitsToggle" class="map-toggle" aria-pressed="true" aria-keyshortcuts="u"
-        title="Hide the counters to read the map under them (U)">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><rect class="c-back" x="7" y="3" width="10" height="10" rx="1" /><rect class="c-front" x="3" y="7" width="10" height="10" rx="1" /><path class="slash" d="M2 18 18 2" /></svg>
-        <span data-label>Hide units</span> <kbd>U</kbd>
-      </button>
+      <div class="map-tools">
+        <button type="button" class="map-toggle supply-toggle soviet" data-supply="soviet" aria-pressed="false" aria-keyshortcuts="s"
+          title="Show the supply path of every Soviet unit on the map (S)">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path class="s-path" d="M3 16 9 10l4 1" /><circle class="s-head" cx="15" cy="6" r="3.2" /></svg>
+          Soviet supply <kbd>S</kbd>
+        </button>
+        <button type="button" class="map-toggle supply-toggle german" data-supply="german" aria-pressed="false" aria-keyshortcuts="g"
+          title="Show the supply path of every German unit on the map (G)">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path class="s-path" d="M3 16 9 10l4 1" /><circle class="s-head" cx="15" cy="6" r="3.2" /></svg>
+          German supply <kbd>G</kbd>
+        </button>
+        <button type="button" id="unitsToggle" class="map-toggle" aria-pressed="true" aria-keyshortcuts="u"
+          title="Hide the counters to read the map under them (U)">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><rect class="c-back" x="7" y="3" width="10" height="10" rx="1" /><rect class="c-front" x="3" y="7" width="10" height="10" rx="1" /><path class="slash" d="M2 18 18 2" /></svg>
+          <span data-label>Hide units</span> <kbd>U</kbd>
+        </button>
+      </div>
     </main>
 
     <aside id="railDossier" class="dossier right" aria-label="Bot, log and overlays">

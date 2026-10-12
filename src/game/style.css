@@ -549,6 +549,9 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .counter-menu button { display: block; width: 100%; font: inherit; text-align: left; color: inherit; background: none; border: 0; padding: 6px 12px; cursor: pointer; }
 .counter-menu button:hover:not([disabled]), .counter-menu button:focus-visible { background: rgb(38 46 41 / 0.1); outline: none; }
 .counter-menu button[disabled] { opacity: 0.4; cursor: default; }
+.counter-menu .menu-sep { margin-top: 4px; padding: 6px 12px 2px; font-size: 0.8rem; color: var(--slip-dim); border-top: 1px solid rgb(38 46 41 / 0.15); }
+.counter-menu [role="menuitemradio"] { display: flex; justify-content: space-between; gap: 12px; }
+.counter-menu [aria-checked="true"][disabled] { opacity: 1; }
 .stack .tag { font-size: 0.75rem; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; opacity: 0.8; }
 
 /* ---------- Bot tab: deck, activation, orders, "Why this move" ---------- */
@@ -779,10 +782,20 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 
 /* Units on/off: a paper slip clipped to the map's top right corner, like the inspector.
    The icon shows the action (struck-through stack = hide); red edge while the counters are off the map. */
-.map-toggle {
+.map-tools {
   position: absolute;
   top: 14px;
   right: 14px;
+  left: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+.map-toggle {
+  pointer-events: auto;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -807,3 +820,41 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .map-toggle:not(.off) .c-back { stroke-dasharray: 2 1.6; }
 .map-toggle.off { border-left-color: var(--stab-red); }
 .map-toggle.off .slash { display: none; }
+
+/* Supply analysis (G, 4.3b): grease pencil of each side on the acetate, under the counters.
+   Soviet in staff red, German in Prussian blue (staff-map convention). Paths are dashed; the
+   road route behind a head is a thin solid line; the head is ringed; a hex that cannot trace
+   has no line. No filter: the paper casing is a wider stroke underneath. The dashes
+   march only for a moment after switching on, then on the hovered or pinned line alone. */
+:root { --prussian: #1f4f9a; }
+.supply.soviet { --supply: var(--stab-red); }
+.supply.german { --supply: var(--prussian); }
+.supply path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.supply .casing { stroke: var(--paper); opacity: 0.85; }
+.supply .casing.path { stroke-width: 19; }
+.supply .casing.route { stroke-width: 11; }
+.supply .path:not(.casing) { stroke: var(--supply); stroke-width: 11; stroke-dasharray: var(--dasharray); }
+.supply .route:not(.casing) { stroke: var(--supply); stroke-width: 5; }
+.supply .head polygon { fill: color-mix(in srgb, var(--supply) 10%, transparent); stroke: var(--supply); stroke-width: 7; stroke-linejoin: round; }
+.supply .head circle { fill: var(--supply); stroke: var(--paper); stroke-width: 4; }
+.supply.intro .path:not(.casing) { animation: supply-flow var(--flow) linear infinite; }
+.supply-focus .path:not(.casing) { animation: supply-flow var(--flow) linear var(--flow-delay) infinite; }
+@keyframes supply-flow { to { stroke-dashoffset: var(--dash-shift); } }
+.supply-lines.has-focus { opacity: 0.3; }
+@media (prefers-reduced-motion: reduce) {
+  .supply.intro .path:not(.casing), .supply-focus .path:not(.casing) { animation: none; }
+}
+
+/* Supply toggles: the pencil color shows on the clip edge and the icon while they are on. */
+.supply-toggle { --supply: var(--stab-red); }
+.supply-toggle.german { --supply: var(--prussian); }
+.supply-toggle .s-path { fill: none; stroke: var(--slip-dim); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2.6 2.4; }
+.supply-toggle .s-head { fill: none; stroke: var(--slip-dim); stroke-width: 1.8; }
+.supply-toggle[aria-pressed="true"] { border-left-color: var(--supply); }
+.supply-toggle[aria-pressed="true"] .s-path { stroke: var(--supply); }
+.supply-toggle[aria-pressed="true"] .s-head { fill: var(--supply); stroke: var(--supply); }
+
+/* Inspector: the supply trace of the stack. */
+.supply-note { margin: 6px 0 0; padding-left: 8px; font-size: 0.82rem; line-height: 1.3; border-left: 3px solid var(--stab-red); }
+.supply-note.german { border-left-color: var(--prussian); }
+.supply-note.cut { border-left-style: dashed; }

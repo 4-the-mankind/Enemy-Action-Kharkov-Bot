@@ -50,6 +50,8 @@ export interface Engine {
   readonly movement: Movement;
   /** Soviet movement methods (3.3). */
   readonly sovietMovement: SovietMovement;
+  /** Supply (4.3) and the rules of tasks not coded yet: read by the supply analysis (4.3b). */
+  readonly rules: PendingRules;
   /** Soviet draw pile and commands (8.0), when the cards are loaded. */
   readonly sovietCards: SovietCards | null;
 }
@@ -460,6 +462,7 @@ export function createEngine(data: EngineData): Engine {
     movement,
     sovietMovement,
     sovietCards,
+    rules,
     unit: (id) => byId.get(id),
   };
 }

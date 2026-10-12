@@ -8,6 +8,7 @@ import { loadGameData } from "./data/game-data";
 import { loadMapData } from "./data/map-data";
 import { createDragController } from "./drag";
 import { LayerStack } from "./map/layer-stack";
+import { SUPPLY_SIDES, SupplyPlane } from "./map/supply-plane";
 import { DEBUG_LAYERS } from "./map/layers";
 import { MapView, type MapViewEvents } from "./map/map-view";
 import { UnitsPlane } from "./map/units-plane";
@@ -46,8 +47,10 @@ async function init() {
   let inspector: ReturnType<typeof mountInspector> | null = null;
   // Map clicks and lifts need the session, created once the data is loaded.
   let onClick: Pick<MapViewEvents, "click" | "lift" | "menu"> = {};
+  // The supply line of the hovered hex (or the pinned one) comes forward (4.3b).
+  let hovered: string | null = null, focusSupply = () => {};
   const view = new MapView($("viewport"), {
-    hover: (t) => inspector?.hover(t),
+    hover: (t) => { inspector?.hover(t); hovered = t?.hex.id ?? null; focusSupply(); },
     click: (t, info) => onClick.click?.(t, info),
     lift: (unit, at) => onClick.lift?.(unit, at),
     menu: (unit, at) => onClick.menu?.(unit, at),
@@ -75,6 +78,7 @@ async function init() {
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);
+  const supply = new SupplyPlane(view, data, session.engine);
   const menu = createCounterMenu(session);
   inspector = mountInspector($("inspector"), view, data, stackRenderer(session, selection, drag, menu));
   const insp = inspector;
@@ -104,6 +108,7 @@ async function init() {
 
   session.subscribe((state, events, undone) => {
     const setUp = events.find((e) => e.type === "SetUpApplied");
+    supply.render(state);
     units.render(state, setUp && flyFrom ? { ...flyFrom, units: setUp.placed } : undefined);
     flyFrom = null;
     // The bot's moves walk once their counters are drawn at the end hex.
@@ -115,7 +120,16 @@ async function init() {
     insp.refresh();
   });
   selection.onChange(() => { units.render(session.state); insp.refresh(); });
-  insp.onPinChange(() => { const p = insp.pinnedHex(); selection.prune((id) => session.state.units[id]?.at === p); });
+  insp.onPinChange(() => { const p = insp.pinnedHex(); selection.prune((id) => session.state.units[id]?.at === p); focusSupply(); });
+  focusSupply = () => supply.focus(insp.pinnedHex() ?? hovered);
+
+  // Supply analysis (G): Soviet and German toggles, both may be on.
+  const supplyButtons = [...document.querySelectorAll<HTMLButtonElement>("button.supply-toggle")];
+  const toggleSupply = (side: (typeof SUPPLY_SIDES)[number]) => supply.setShown(side, !supply.isShown(side), session.state);
+  supply.onToggle(() => {
+    supplyButtons.forEach((b) => b.setAttribute("aria-pressed", String(supply.isShown(b.dataset.supply as (typeof SUPPLY_SIDES)[number]))));
+  });
+  supplyButtons.forEach((b) => b.addEventListener("click", () => toggleSupply(b.dataset.supply as (typeof SUPPLY_SIDES)[number])));
   drag.onDrop((to) => { if (isHex(to)) insp.pinHex(to); });
 
   // Map clicks: a counter selects itself (Ctrl/Cmd adds or removes it) and pins its hex;
@@ -170,6 +184,8 @@ async function init() {
     }
     else if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey) setImage(bgToggle.getAttribute("aria-pressed") !== "true");
     else if ((e.key === "u" || e.key === "U") && !e.ctrlKey && !e.metaKey && !e.altKey) setUnitsShown(!unitsShown());
+    else if ((e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSupply("soviet");
+    else if ((e.key === "g" || e.key === "G") && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSupply("german");
   });
 
   view.fit();

@@ -153,6 +153,34 @@ describe("13.1 Tracing supply", () => {
   });
 });
 
+describe("4.3b Supply lines and reasons shown to the player", () => {
+  const roads: [string, string, Partial<SideData>][] = [];
+  for (let r = 1; r < 9; r++) roads.push([`040${r}`, `040${r + 1}`, { road: true }]);
+  const exit = { "0401": { mapEdge: "german" as const, edgeRoad: true } };
+
+  it("a road supply head comes with its supply route to the exit; a map-edge head with none", () => {
+    const road = setup({ units: [ger("g")], at: { g: "0410" }, hexes: exit, sides: roads });
+    // The head is 0409 (first road hex reached); the route runs on to the exit hex 0401.
+    expect(road.supply.supplyLine(road.state, "german", "0410")).toEqual({
+      path: ["0410", "0409"], route: ["0408", "0407", "0406", "0405", "0404", "0403", "0402", "0401"],
+    });
+    const edge = setup({ units: [sov("s")], at: { s: "0404" }, hexes: sovietEdge });
+    expect(edge.supply.supplyLine(edge.state, "soviet", "0404")).toEqual({ path: ["0404", "0403", "0402", "0401"], route: [] });
+    expect(edge.supply.supplyLine(edge.state, "soviet", "0409")).toBeNull();
+  });
+
+  it("whyNoSupply names the constraint that closes the path", () => {
+    const far = setup({ units: [sov("s")], at: { s: "0409" }, hexes: sovietEdge });
+    expect(far.supply.whyNoSupply(far.state, "soviet", "0408")).toBeNull();
+    expect(far.supply.whyNoSupply(far.state, "soviet", "0409")).toMatch(/8 hexes away/);
+    // The German unit in 0505 controls 0404 and 0405, both on the path.
+    const zoc = setup({ units: [sov("s"), ger("g")], at: { s: "0406", g: "0505" }, open: ["0505"], hexes: sovietEdge });
+    expect(zoc.supply.whyNoSupply(zoc.state, "soviet", "0406")).toMatch(/Enemy ZOC closes every path \(0405, 0404 on the shortest one\)/);
+    const town = setup({ units: [sov("s")], at: { s: "0406" }, hexes: { ...sovietEdge, "0404": { terrain: "town" as const, vp: 1 as const } } });
+    expect(town.supply.whyNoSupply(town.state, "soviet", "0406")).toMatch(/enemy towns or cities/);
+  });
+});
+
 describe("13.5 Soviet support and 9.8 operational limit", () => {
   // West line between 0404 (east) and 0405; artillery line between 0402 and 0403; far line
   // between 0406 and 0407.

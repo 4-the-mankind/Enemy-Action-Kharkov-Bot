@@ -1,8 +1,10 @@
 // Counter context menu (L, §3bis), on a right-click on a counter of the map or a row of the
 // inspector stack: Remove step (the counter flips), Eliminate (last step only), Dispersed
-// marker on or off. Outside combat it is a manual correction; it also records the
+// marker on or off, supply marker (13.2: Air Resupply 13.4, corrections; task 4.3b). Outside combat it is a manual correction; it also records the
 // reductions of a set-up adjustment (2.4). Commands go through the engine like any other.
-import { isHex } from "../../engine/types";
+import { isHex, type SupplyMarker } from "../../engine/types";
+
+const SUPPLY: [SupplyMarker | "supplied", string][] = [["supplied", "In supply"], ["outOfSupply", "Out of Supply"], ["isolated", "Isolated"]];
 import type { GameSession } from "../state/session";
 
 export interface CounterMenu {
@@ -37,7 +39,14 @@ export function createCounterMenu(session: GameSession): CounterMenu {
     menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${lock}</p>` : "") +
       item("step", "Remove step", !last, last ? "Single step left: eliminate it instead" : "") +
       item("eliminate", "Eliminate", last, last ? "" : "Only on the last step") +
-      item("disperse", s.dispersed ? "Remove Dispersed marker" : "Place Dispersed marker", onMap, onMap ? "" : "Only on the map");
+      item("disperse", s.dispersed ? "Remove Dispersed marker" : "Place Dispersed marker", onMap, onMap ? "" : "Only on the map") +
+      `<div class="menu-group" role="group" aria-label="Supply marker"><div class="menu-sep">Supply marker</div>` +
+      SUPPLY.map(([status, label]) => {
+        const current = (state.supply?.[id] ?? "supplied") === status;
+        return `<button type="button" role="menuitemradio" aria-checked="${current}" data-supply="${status}"` +
+          `${onMap && !current && !lock ? "" : " disabled"}${onMap ? "" : ` title="Only on the map"`}>` +
+          `${label}<span class="check" aria-hidden="true">${current ? "✓" : ""}</span></button>`;
+      }).join("") + `</div>`;
     menu.dataset.unit = id;
     menu.hidden = false;
     const r = menu.getBoundingClientRect();
@@ -49,10 +58,11 @@ export function createCounterMenu(session: GameSession): CounterMenu {
   }
 
   menu.addEventListener("click", (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-action]");
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-action], button[data-supply]");
     const id = menu.dataset.unit;
     if (!b || !id) return;
     close();
+    if (b.dataset.supply) session.dispatch({ type: "SetSupplyStatus", units: [id], status: b.dataset.supply as SupplyMarker | "supplied" });
     if (b.dataset.action === "step") session.dispatch({ type: "RemoveStep", unit: id });
     else if (b.dataset.action === "eliminate") session.dispatch({ type: "MoveUnits", units: [id], to: "eliminated" });
     else if (b.dataset.action === "disperse") session.dispatch({ type: "SetDispersed", units: [id], dispersed: !session.state.units[id].dispersed });

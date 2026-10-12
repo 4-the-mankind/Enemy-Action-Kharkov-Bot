@@ -9,6 +9,9 @@ import type { GameSession } from "../state/session";
 import type { Selection } from "../state/selection";
 import type { CounterMenu } from "./counter-menu";
 import type { StackRenderer } from "./inspector";
+import { supplyNote } from "./supply-note";
+
+const MARKER_TAG = { outOfSupply: ["OOS", "Out of Supply marker (13.2)"], isolated: ["Isolated", "Isolated marker (13.2)"] };
 
 export function stackRenderer(session: GameSession, selection: Selection, drag: DragController, menu: CounterMenu): StackRenderer {
   return (hexId, pinned) => {
@@ -36,6 +39,7 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
         `<span class="stack-name">${u.designation}<small>${u.armyOrCorps}, ${u.side === "soviet" ? "Soviet" : "German"}</small></span>` +
         `<span class="pips" title="${steps} steps">${"<i></i>".repeat(steps)}</span>` +
         (s.dispersed ? `<span class="tag">Dispersed</span>` : "") +
+        (state.supply?.[id] ? `<span class="tag" title="${MARKER_TAG[state.supply[id]][1]}">${MARKER_TAG[state.supply[id]][0]}</span>` : "") +
         (arrows ? `<span class="restack">` +
           `<button type="button" data-restack="up" ${k === 0 ? "disabled" : ""} aria-label="Move ${u.designation} up the stack" title="Up the stack"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4"/></svg></button>` +
           `<button type="button" data-restack="down" ${k === ids.length - 1 ? "disabled" : ""} aria-label="Move ${u.designation} down the stack" title="Down the stack"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button></span>` : "");
@@ -60,6 +64,9 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
       list.append(li);
     });
     box.append(list);
+    // A stack holds one side: one supply trace for the hex.
+    const side = engine.unit(ids[0])!.side;
+    box.insertAdjacentHTML("beforeend", supplyNote(engine, state, side, hexId, ids.some((id) => state.supply?.[id])));
     if (pinned) box.insertAdjacentHTML("beforeend", `<p class="insp-hint">${lock ?? "Click to select, hold to drag."}</p>`);
     box.querySelector("[data-all]")?.addEventListener("click", () => selection.set(all ? [] : ids));
     return box;
