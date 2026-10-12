@@ -1,0 +1,901 @@
+{
+  "list": {
+    "comma": ", ",
+    "semicolon": "; ",
+    "sentence": ". "
+  },
+  "common": {
+    "sentences": "{{parts}}"
+  },
+  "names": {
+    "army": {
+      "3T": "3rd Tank Army",
+      "6": "6th Army",
+      "40": "40th Army",
+      "69": "69th Army",
+      "1G": "1st Guards Army",
+      "Popov": "Mobile Group Popov"
+    },
+    "front": {
+      "voronezh": "Voronezh Front",
+      "southwest": "Southwest Front",
+      "both": "Both"
+    },
+    "side": {
+      "soviet": "Soviet",
+      "german": "German"
+    },
+    "adjustment": {
+      "1-2": "Raus Overrun",
+      "3-4": "Slavyansk Liberated",
+      "5-6": "Bloody Izyum",
+      "7-8": "Voronezh Front Breakout",
+      "9-10": "Drive on the Donets"
+    },
+    "hex": "{{name}} ({{hex}})",
+    "place": {
+      "0215": "Gotnya",
+      "0311": "Belgorod",
+      "0608": "Volchansk",
+      "0912": "Kharkov",
+      "1009": "Chuguev",
+      "1116": "Valki",
+      "1210": "Zmiyev",
+      "1421": "Poltava",
+      "1615": "Krasnograd",
+      "1910": "Lozovaya",
+      "2102": "Kramatorsk",
+      "2120": "Pryadovka",
+      "2404": "Krasnoarmiysk",
+      "2412": "Pavlograd",
+      "2518": "Dnepropetrovsk",
+      "2615": "Sinelnikowo",
+      "3116": "Zaporozhe"
+    },
+    "terrain": {
+      "town": "town",
+      "city": "city",
+      "clear": "clear",
+      "broken": "broken",
+      "marsh": "marsh",
+      "woods": "woods"
+    },
+    "event": {
+      "nkvdOperations": "NKVD Operations",
+      "hitlerDistracts": "Hitler Distracts"
+    },
+    "frontShort": {
+      "voronezh": "Voronezh",
+      "southwest": "Southwest",
+      "both": "Both"
+    },
+    "river": {
+      "minor": "Minor river",
+      "donets": "Donets",
+      "dniepr": "Dniepr",
+      "dnieprBlocked": "Dniepr (blocked)"
+    },
+    "line": {
+      "lineArtillery": "Artillery/East",
+      "lineWest": "West",
+      "lineFar": "Far"
+    },
+    "compass": {
+      "west": "west",
+      "south": "south"
+    }
+  },
+  "reject": {
+    "setUpFirst": "Set up turn 1 first.",
+    "pressStart": "Press Start to begin turn 1.",
+    "alreadySetUp": "Turn 1 is already set up.",
+    "noUnitToMove": "No unit to move.",
+    "noUnitSelected": "No unit selected.",
+    "notPlayable": "{{hex}} is not a playable hex.",
+    "unknownDestination": "Unknown destination \"{{to}}\".",
+    "notInPlay": "{{unit}} is not in play.",
+    "notOnMap": "{{unit}} is not on the map.",
+    "inSovietReserve": "{{unit}} is in the Soviet reserve: the bot places it.",
+    "onlyBotToReserve": "Only the bot puts Soviet units in reserve.",
+    "sovietToReinforcements": "Soviet units cannot go back to the reinforcements.",
+    "noLaterEntry": "{{unit}} has no later turn of entry.",
+    "alreadyEliminated": "{{unit}} is already eliminated.",
+    "singleStep": "{{unit}} has a single step left: eliminate it instead.",
+    "invalidVp": "{{vp}} is not a valid VP total.",
+    "unknownCard": "Unknown Soviet card \"{{card}}\".",
+    "unknownFront": "Unknown front \"{{front}}\".",
+    "unknownObjective": "Unknown objective \"{{face}}\".",
+    "unknownStackMove": "Unknown stack move \"{{to}}\".",
+    "adjustmentLocked": "The game has started: the set-up adjustment can no longer change.",
+    "unknownAdjustment": "Unknown set-up adjustment \"{{id}}\".",
+    "rollMismatch": "A roll of {{roll}} does not select {{adjustment}}.",
+    "adjustmentFailed": "{{adjustment}} cannot be played on this map (step {{step}}: {{reason}})",
+    "alreadyStarted": "The game has already started.",
+    "chooseAdjustment": "Roll or choose the set-up adjustment first.",
+    "cardsNotLoaded": "The Soviet cards are not loaded.",
+    "cardsLeft_one": "{{count}} Soviet card left: the turn goes on until the Soviet draw pile is empty (4.0 IV.3).",
+    "cardsLeft_other": "{{count}} Soviet cards left: the turn goes on until the Soviet draw pile is empty (4.0 IV.3).",
+    "lastTurn": "Game-turn {{turn}} is the last turn.",
+    "noReminder": "No such reminder.",
+    "noSupplyPhaseGt1": "There is no Supply Phase on Game-turn 1.",
+    "unknownSupplyStatus": "Unknown supply status \"{{status}}\".",
+    "forwardSupportMax": "At most {{max}} Forward Support markers (13.53)."
+  },
+  "movement": {
+    "strategic": {
+      "germanOnly": "Only German units use strategic movement.",
+      "beforeTurn2": "No German strategic movement before turn 2.",
+      "mud": "No German strategic movement in mud (18.34).",
+      "notSupplied": "{{unit}} is not in supply.",
+      "adjacentEnemy": "{{unit}} starts adjacent to an enemy unit.",
+      "adjacentGarrison": "{{unit}} starts adjacent to a garrison."
+    }
+  },
+  "supply": {
+    "why": {
+      "tooFar": "The nearest {{side}} supply head is {{count}} hexes away; a supply path enters seven hexes at most (13.1).",
+      "zoc": "Enemy ZOC closes every path: a supply path enters an enemy ZOC only where a friendly unit is (13.1).",
+      "zocAt": "Enemy ZOC closes every path ({{hexes}} on the shortest one): a supply path enters an enemy ZOC only where a friendly unit is (13.1).",
+      "tooFarOrZoc": "Every path is either longer than seven hexes or enters an enemy ZOC without a friendly unit (13.1).",
+      "cutSoviet": "Enemy units, enemy towns or cities or the Dniepr cut every path to a Soviet supply head (13.1).",
+      "cutGerman": "Enemy units, enemy towns or cities, garrisons or the Dniepr cut every path to a German supply head (13.1)."
+    }
+  },
+  "objective": {
+    "reach": {
+      "occupies": "{{unit}} occupies it",
+      "adjacent": "{{unit}} ({{hex}}) is adjacent to it, German-occupied",
+      "proximate": "{{unit}} ({{hex}}) is proximate to it"
+    },
+    "table": {
+      "first": "1st to 2nd",
+      "second": "2nd to 3rd"
+    },
+    "faceShort": {
+      "west": "W",
+      "south": "S"
+    },
+    "why": {
+      "frontLeft": "the {{front}} objective marker left play",
+      "third": "third objective: the placement tables are no longer used",
+      "notReached": "no unit of the {{front}} in it, adjacent to it while German-occupied, or proximate to it",
+      "relocated": "{{reasons}}. Die {{roll}} on the {{table}} objective table: {{hex}} {{face}}",
+      "armyFirst": "first activation of the {{army}}",
+      "enteredLast": "{{units}} entered {{hex}}, the last hex of the marker",
+      "entered": "{{units}} entered {{hex}}",
+      "thirdEntered": "a Soviet unit entered its third objective, {{hex}}, in this activation",
+      "notThird": "not at its third objective: it stays until the end of Game-turn 7",
+      "reserveSupply": "{{unit}} ({{hex}}) is next to it and can trace reserve supply",
+      "gt7NoReserve": "Game-turn 7 Supply Phase: no Soviet unit in or next to it can trace reserve supply",
+      "endGt7": "end of Game-turn 7"
+    },
+    "name": {
+      "frontWest": "{{front}} Objective West",
+      "frontSouth": "{{front}} Objective South",
+      "front": "{{front}} Objective",
+      "army": "{{army}} Objective"
+    },
+    "change": {
+      "removed": "removed from play (was in {{hex}})",
+      "placed": "placed in {{hex}}",
+      "stays": "stays in {{hex}}",
+      "relocated": "relocated (die {{roll}}) from {{from}} to {{to}}",
+      "moved": "moved from {{from}} to {{to}}",
+      "line": "{{marker}} {{change}}."
+    }
+  },
+  "cards": {
+    "choose": {
+      "onlyOne": "only one card left: it is the command card (8.0)",
+      "primary": "the card marked Primary",
+      "higherValue": "{{both}}: the higher Command Value",
+      "lowerId": "{{both}}, same Command Value: the lower card ID",
+      "bothPrimary": "both Primary",
+      "neitherPrimary": "neither Primary"
+    },
+    "onlyTurn": "only on game-turn {{turns}}",
+    "onlyTurns": "only on game-turns {{turns}}",
+    "noPile": "There is no Soviet draw pile: press Start first.",
+    "pileDone": "The Soviet draw pile is empty: the turn ends once your hand and draw pile are played too (4.0 IV.3). Press Next turn.",
+    "pileEmpty": "the Soviet draw pile is empty",
+    "fewerThanFour": "fewer than four cards in the Soviet draw pile ({{count}})",
+    "army": {
+      "noUnit": "no non-isolated unit of the {{army}} on the map or in the reserve box",
+      "detail_one": "{{army}}: {{count}} unit",
+      "detail_other": "{{army}}: {{count}} units",
+      "detailStacked_one": "{{army}}: {{count}} unit, plus {{units}} stacked with them",
+      "detailStacked_other": "{{army}}: {{count}} units, plus {{units}} stacked with them"
+    },
+    "armyUnits": {
+      "none": "no unit of the {{army}} outside a VP hex nor in the reserve box",
+      "stack": "{{hex}} ({{units}}: strength {{strength}})",
+      "stackFlags": "{{hex}} ({{units}}: strength {{strength}}, {{flags}})",
+      "unsupplied": "unsupplied",
+      "surrounded": "surrounded",
+      "chosen": "Stacks chosen by a) supplied, b) not surrounded, c) strength, d) units, e) selector: {{stacks}}",
+      "noStack": "No stack outside a VP hex",
+      "notChosen": "Not chosen: {{hexes}}",
+      "reserves": "Reserves: {{units}}"
+    },
+    "most": {
+      "target": {
+        "west": "the west map edge",
+        "hexrow": "the 3300 hexrow",
+        "hex": "hex {{hex}}"
+      },
+      "asGt4": "No unit outside the operational limit or nearly surrounded, so as on GT 4: {{rest}}",
+      "noArmy": "no army has a supplied unit on the map or a unit in reserve",
+      "noArmyFront": "no army of the {{front}} has a supplied unit on the map or a unit in reserve",
+      "mostUnits": "the most units ({{count}})",
+      "closest": "{{count}} units like {{armies}}; a supplied unit closest to {{target}} ({{distance}} hexes)",
+      "lowestNumber": "{{count}} units, as close to {{target}}: the lowest numbered army",
+      "count": "{{army}} {{count}}",
+      "detail": "{{army}}: {{why}}. Supplied units on the map and in reserve: {{counts}}",
+      "detailStacked": "{{army}}: {{why}}. Supplied units on the map and in reserve: {{counts}}. Plus {{units}} stacked with them"
+    },
+    "endangered": {
+      "isolated": "every unit outside the operational limit or nearly surrounded is isolated",
+      "outsideLimit": "outside the operational limit",
+      "nearlySurrounded": "nearly surrounded",
+      "unit": "{{unit}} ({{why}})",
+      "detail": "{{front}} units: {{units}}"
+    },
+    "delay": {
+      "auxOnly": "Command Delay applies only to the auxiliary card",
+      "done": "back into the draw pile, shuffled"
+    },
+    "forwardSupport": {
+      "both": "both Forward Support markers are in play",
+      "fewer": "fewer than 2 units would be put in support ({{count}} at most)",
+      "cannot": "the marker cannot be placed",
+      "done": "Forward Support in {{hex}}: puts {{count}} supplied units in support ({{units}})",
+      "doneTied": "Forward Support in {{hex}}: puts {{count}} supplied units in support ({{units}}); {{tied}} hexes do as much, the southernmost then westernmost"
+    },
+    "airSupply": {
+      "none": "no Soviet unit is out of supply or isolated",
+      "noneInLimit": "no out of supply or isolated Soviet unit within the operational limit",
+      "cannot": "the units cannot be put in supply",
+      "done": "Air Supply in {{hex}}: {{units}} ({{steps}} steps, strength {{strength}})",
+      "doneOthers": "Air Supply in {{hex}}: {{units}} ({{steps}} steps, strength {{strength}}); other hexes: {{hexes}}"
+    },
+    "partisans": {
+      "noGerman": "no undispersed German unit in a town or city",
+      "noProximate": "no Soviet unit is proximate to a German unit in a town or city",
+      "onlyOne": "only one hex other than Kharkov qualifies ({{hex}})",
+      "cannot": "the units cannot be dispersed",
+      "done": "Dispersed in {{hexes}}: {{units}}"
+    },
+    "expedited": {
+      "none": "no Soviet unit scheduled for turn {{turn}}",
+      "cannot": "the units cannot enter the reserve box",
+      "done": "{{units}} enter the reserve box"
+    },
+    "nkvd": {
+      "noTarget": "no German unit is adjacent to a Soviet unit",
+      "targetTown": "{{hex}} ({{terrain}}: the hits are not reduced)",
+      "chooseText": "Choose the German stack among {{targets}} (Soviet strength {{strength}} adjacent to each) and assign it two hits. Then remove one step from the Soviet units adjacent to it: the unit with the most steps, then the higher selector (12.6). If your units retreated, the Soviet units advance after combat (12.83).",
+      "tie": "{{count}} German stacks tie at Soviet strength {{strength}}: you choose",
+      "cannot": "the Soviet step loss cannot be applied",
+      "assignText": "Assign two hits to the German units in {{target}}. If they retreated, the Soviet units adjacent to it advance after combat (12.83): not coded yet, play it by hand.",
+      "done": "Target {{hex}}: Soviet strength {{strength}} adjacent ({{units}}). Soviet step lost by {{unit}} (12.6: most steps, then higher selector)"
+    },
+    "specialOnAux": "special events on the auxiliary card are not implemented (8.1)",
+    "hitler": {
+      "text": "Discard cards from your hand with a total command value of at least 6.",
+      "done": "you discard German cards worth at least 6 command value"
+    },
+    "garrison": {
+      "notCoded": "garrison placement is not coded yet (task 4.6)",
+      "none": "no garrison marker can be newly placed (garrisons come with task 4.6)"
+    },
+    "engineers": {
+      "notCoded": "IP markers are not coded yet (task 4.4)",
+      "fewer": "fewer than three hexes qualify (IP markers come with task 4.4)"
+    },
+    "replacement": {
+      "notCoded": "replacements are not coded yet (task 4.6)",
+      "none": "no unit of the {{army}} is eligible for replacement (replacements come with task 4.6)"
+    }
+  },
+  "move": {
+    "trace": {
+      "mechanizedUnitMayNotEndMarsh": "a mechanized unit may not end in marsh",
+      "overStackedEndMovementActiveUnits": "over-stacked at the end of movement: the active units in the hex would not leave it",
+      "noReachableHexSovietSupplyHex": "no reachable hex in Soviet supply: a hex not adjacent to any German unit",
+      "shift925": "moves to a preferred hex adjacent to the same German unit ({{hexes}})",
+      "staysNextTo": "starts in an unoccupied hex next to {{hexes}}, no other Soviet unit adjacent to both",
+      "onlyAdjacent": "the only Soviet unit adjacent to {{hexes}}, within the operational limit, not nearly surrounded",
+      "startsAdjacentLogistics": "starts adjacent to the German unit in {{hexes}}, a logistics hex of the front",
+      "holdsVpHex_one": "holds the VP hex {{hex}} ({{count}} other step), threatened by the Germans",
+      "holdsVpHex_other": "holds the VP hex {{hex}} ({{count}} other steps), threatened by the Germans",
+      "startsAdjacentGermanVp": "starts adjacent to the German VP hex {{hexes}}, not nearly surrounded",
+      "endsOverStacked": "ends over-stacked: {{units}}, active and still to move, are to leave the hex",
+      "frozen927": "{{why}}: does not move",
+      "surrounded": "surrounded",
+      "isolatedAdjacent": "isolated and adjacent to a German unit"
+    },
+    "pref": {
+      "hexWithinCurrentSovietOperationalLimit": "a hex within the current Soviet operational limit",
+      "hexWouldCauseGermanUnitBecome": "a hex that would cause the German unit to become surrounded",
+      "hexSovietSupport": "a hex in Soviet support",
+      "hexNotAdjacentSovietUnit": "a hex not adjacent to a Soviet unit",
+      "emptyGarrisonedHex": "an empty or garrisoned hex",
+      "hexNotOccupiedActiveUnit": "a hex not occupied by an active unit",
+      "closestUnitSObjectiveMarker": "closest to the unit's Objective marker",
+      "emptyHex": "an empty hex",
+      "closestHexSovietSupport": "in or closest to a hex in Soviet support",
+      "highestNumberedHex": "the highest numbered hex",
+      "hexCausesSurroundMostGermanUnits": "a hex that causes surround of the most German units",
+      "hexAdjacentGermanUnitBeingSurrounded": "a hex adjacent to the German unit being surrounded",
+      "hexPreventsGermanUnitTracingSupply": "a hex that prevents a German unit from tracing supply",
+      "hexAdjacentMostGermanUnits": "a hex adjacent to the most German units",
+      "germanUnitNoSovietUnitAdjacent": "a German unit to which no Soviet unit is adjacent",
+      "closestGermanUnit": "the closest German unit",
+      "highestHexNumber": "the highest hex number",
+      "vpHexTargetedExclusivelyActiveFront": "a VP hex targeted exclusively by the active front",
+      "vpHexOccupiedLeastGermanStrength": "a VP hex occupied by the least German strength",
+      "vpHexNotAcrossDnieprRiver": "a VP hex not across a Dniepr River hexside",
+      "vpHexHighestVPValue": "the VP hex with the highest VP value",
+      "hexEnablesMostSovietUnitsTrace": "the hex that enables the most Soviet units to trace supply",
+      "unoccupiedSovietVPHexBeforeVP": "an unoccupied Soviet VP hex before a VP hex held only by armor units (infantry)",
+      "hexGermanUnitAdjacent": "a hex to which a German unit is adjacent",
+      "highestVPValue": "the highest VP value",
+      "infantryUnitStartingVPHexStacked": "an infantry unit starting in a VP hex stacked with only armor units does not move",
+      "theVpHexLeastGermanStrength": "the VP hex occupied by the least German strength",
+      "germanUnitStackLowestTotalStrength": "the German unit/stack with the lowest total strength",
+      "easternmostGermanUnitStack": "the easternmost German unit/stack",
+      "moveEndsUnoccupiedHex": "a move that ends in an unoccupied hex",
+      "moveEndsFarthestHexesStart": "a move that ends farthest in hexes from its start",
+      "moveEndsClosestObjective": "a move that ends closest to the objective",
+      "moveFollowsPrimaryMovementArrows": "a move that follows primary movement arrows",
+      "hexClosestFrontObjective": "the hex closest to the front objective",
+      "adjacentGermanOccupiedHexLeastStrength": "adjacent to the German-occupied hex with least strength",
+      "hexEnablingMostSovietUnitsTrace": "a hex enabling the most Soviet units to trace supply",
+      "hexMovingUnitWouldNotNearly": "a hex in which the moving unit would not be nearly surrounded",
+      "hexClosestSovietSupport": "the hex closest to Soviet support",
+      "paragraph3aAppliesBefore3b": "paragraph 3a applies before 3b",
+      "highestVPValueHex": "the highest VP value hex",
+      "hexWithinOperationalLimit": "a hex within the operational limit",
+      "hexCloserHexSupportThanStarting": "a hex closer to a hex in support than the starting hex",
+      "unoccupiedHex": "an unoccupied hex",
+      "hexClosestStartingHex": "the hex closest to the starting hex",
+      "adjacentVPHexOccupiedLeastGerman": "adjacent to the VP hex occupied by the least German strength",
+      "adjacentVPHexHighestVPValue": "adjacent to the VP hex with the highest VP value",
+      "hexNotMapEdge": "a hex not on a map edge",
+      "hexNotStackedAdjacentSovietUnit": "a hex not stacked with or adjacent to a Soviet unit",
+      "hexClosestHexSupport": "the hex closest to a hex in support",
+      "hexContainingVillageTargetedUnitS": "a hex containing a village targeted for the unit's front",
+      "hexAdjacentVPHex": "a hex adjacent to the VP hex",
+      "hexSovietSupplyCanTraced": "a hex from which Soviet supply can be traced",
+      "hexClosestVPHex": "the hex closest to the VP hex",
+      "closestHex": "the closest hex",
+      "hexClosePossibleHexSovietSupply": "a hex as close as possible to a hex in Soviet supply",
+      "furthestCompass": "the hex furthest {{direction}}, the objective's compass direction",
+      "alreadyCausingSurround": "already causing surround of {{units}}: moves adjacent to it"
+    },
+    "skip": {
+      "activeFrontSObjectiveMarkerNot": "the active front's objective marker is not in play",
+      "spearheadUnitGT12Skips": "spearhead unit (GT 1-2): skips methods 4-9",
+      "armoredSpearheadUnitGT35": "armored spearhead unit (GT 3-5): skips methods 4-9",
+      "noEmptyGermanTownCityNor": "no empty German town or city, nor map-edge VP hex, within reach",
+      "gameTurn3Later": "Game-turn 3 and later",
+      "everyUnitActiveFrontCanTrace": "every unit of the active front can trace supply",
+      "noUnsurroundedGermanUnitLogisticsHex": "no unsurrounded German unit in a logistics hex of the front",
+      "gameTurn4Later": "Game-turn 4 and later",
+      "noMovementArrowFrontHex": "no movement arrow for its front in its hex",
+      "startsAdjacentGermanUnit": "starts adjacent to a German unit",
+      "vpHex": "in a VP hex",
+      "notNearlySurrounded": "not nearly surrounded",
+      "noActiveUnitBeyondOperationalLimit": "no active unit is beyond the operational limit",
+      "withinOperationalLimit": "within the operational limit",
+      "noEligibleGermanVPHex": "no eligible German VP hex",
+      "everyDestinationOverStackedEndMovement": "every destination is over-stacked at the end of movement (10.4)",
+      "everyDestinationBreaks923Restriction": "every destination breaks a 9.23 restriction",
+      "everyDestinationBeyondOperationalLimit": "every destination is beyond the operational limit",
+      "noReachableHexSovietSupplyNor": "no reachable hex in Soviet supply nor away from German units",
+      "notCoded": "not coded yet (task {{task}})",
+      "alreadyProximate": "already proximate to {{hex}}",
+      "followsMethodsOf": "able to trace supply: follows the movement methods of {{book}}"
+    },
+    "none": {
+      "noReachableHexWouldSurroundGerman": "no reachable hex would surround a German unit without the unit becoming nearly surrounded",
+      "noReachableHexWouldSurroundUnsurrounded": "no reachable hex would surround an unsurrounded German unit",
+      "noHexAdjacentGermanVPHex": "no hex adjacent to a German VP hex and closer to (or within 4 hexes of) the objective",
+      "noReachableHexLetsUnitFront": "no reachable hex lets a unit of the front trace supply",
+      "noReachableSovietVPHexFront": "no reachable Soviet VP hex of the front, unoccupied and threatened by the Germans",
+      "noReachableHexAdjacentGermanVP": "no reachable hex adjacent to a German VP hex targeted for the front",
+      "noReachableHexAdjacentGermanUnit": "no reachable hex adjacent to a German unit in a logistics hex of the front",
+      "noMoveAlongArrowsSpendsEntire": "no move along the arrows spends its entire movement allowance",
+      "noReachableHexCloserFrontObjective": "no reachable hex closer to the front objective",
+      "noHexAdjacentGermanUnitAnother": "no hex adjacent to a German unit another active unit is adjacent to",
+      "noSovietVpHexLightlyHeld": "no reachable Soviet VP hex of the front, lightly held and threatened by the Germans",
+      "noReachableHexUnitNotNearly": "no reachable hex in which the unit is not nearly surrounded",
+      "noHexAdjacentGermanVpNotExposed": "no reachable hex adjacent to a German VP hex of the front, without being nearly surrounded",
+      "noReachableHexWithinCloserOperational": "no reachable hex within or closer to the operational limit",
+      "noReachableHexGermanVPHex": "no reachable hex from which a German VP hex is proximate",
+      "noHexNextToGerman": "no reachable unoccupied hex next to a German unit and not next to a Soviet unit adjacent to it",
+      "noHexNextToGermanNotExposed": "no reachable unoccupied hex next to a German unit and not next to a Soviet unit adjacent to it, without being nearly surrounded",
+      "noDestination": "no destination"
+    },
+    "method": {
+      "takeVPHex": "Take VP Hex",
+      "adjacentGermanVPHexNearObjective": "Adjacent to German VP Hex & Near Objective",
+      "openSupplyLine": "Open Supply Line",
+      "causeSurround": "Cause Surround",
+      "toSovietVpHex": "To Soviet VP Hex",
+      "adjacentGermanVPHex": "Adjacent to German VP Hex",
+      "adjacentGermanUnitLogisticsHex": "Adjacent to German Unit in Logistics Hex",
+      "adjacentGermanUnit": "Adjacent to German Unit",
+      "relieveGarrison": "Relieve Garrison",
+      "followMovementArrows": "Follow Movement Arrows",
+      "moveClosestFrontObjective": "Move Closest to Front Objective",
+      "strengthenPotentialAttack": "Strengthen Potential Attack",
+      "avoidSurround": "Avoid Surround",
+      "moveIntoTowardOperationalLimit": "Move Into or Toward Operational Limit",
+      "proximateGermanVPHex": "Proximate to German VP Hex",
+      "closerGermanUnitArmyObjective": "Closer to German Unit & Army Objective",
+      "closerFrontObjective": "Closer to Front Objective",
+      "movementMethodsUnsuppliedUnits": "Movement Methods For Unsupplied Units"
+    },
+    "noUnit": "No unit of the {{army}} army on the map or in the reserve box.",
+    "why923": {
+      "noLongerSurrounded": "{{unit}} would no longer be surrounded",
+      "becomesProximate": "{{unit}} would become proximate to {{town}}",
+      "germanSupplyReaches": "German supply would reach {{town}}",
+      "mapEdgeVacated": "{{hex}} (map-edge VP hex) would be vacated",
+      "outOfSupply": "{{unit}} would be out of supply",
+      "item": "{{hex}}: {{why}}"
+    },
+    "army": {
+      "noGermanNear": "no German unit in or proximate to the army objective {{objective}}",
+      "what_one": "{{unit}} in {{target}}, {{count}} hex from the army objective {{objective}}",
+      "what_other": "{{unit}} in {{target}}, {{count}} hexes from the army objective {{objective}}",
+      "whatIn": "{{unit}} in {{target}}, in the army objective {{objective}}",
+      "intro": "the German unit in or closest to the army objective: {{what}}",
+      "introTied": "the German unit in or closest to the army objective: {{what}} ({{count}} hexes as close: a) the closest to the unit, b) the highest numbered)",
+      "startsAdjacent": "starts adjacent to {{what}}",
+      "noCloser": "no reachable hex closer to {{what}}",
+      "asClose": "as close as possible to {{unit}} in {{target}}, adjacent if able",
+      "noCloserFront": "no reachable hex closer to the front objective {{objective}}",
+      "asCloseFront": "as close as possible to the front objective {{objective}}, in it if able",
+      "closerArmy": "among them, closer to the army objective {{objective}}"
+    }
+  },
+  "bot": {
+    "deck": {
+      "auxiliary": "Auxiliary card {{card}}",
+      "command": "Command card {{card}}",
+      "faceDown": "Soviet draw pile, face down",
+      "noCardLeft": "No card left",
+      "left_one": "<b>{{count}}</b> card left",
+      "left_other": "<b>{{count}}</b> cards left",
+      "readHint": "Point at a card to read it, click to keep it up.",
+      "drawHint": "The bot draws two cards at each impulse: one commands, the other is the auxiliary card (8.1)."
+    },
+    "runImpulse": "Run bot impulse",
+    "nextTurn": "Next turn",
+    "devActivate": "Activate an army (dev scenario)",
+    "devArmy": "Soviet army",
+    "activate": "Activate",
+    "turnLine": {
+      "started": "<b>Game-turn {{turn}}</b>, after Soviet impulse {{impulse}}",
+      "noImpulse": "<b>Game-turn {{turn}}</b>, no Soviet impulse yet",
+      "beforeStart": "<b>Game-turn 1</b>, before Start"
+    },
+    "runTitle": {
+      "pileEmpty": "The Soviet draw pile is empty.",
+      "endsImpulse": "Ends your German impulse: the bot plays its Soviet impulse."
+    },
+    "nextTitle": {
+      "waitPile": "Once the Soviet draw pile is empty ({{count}} left) and your cards are played.",
+      "ready": "End this turn and start the next."
+    },
+    "armyOption": "{{army}} ({{front}})",
+    "reading": {
+      "done": "Done.",
+      "passed": "Passed over: {{reason}}.",
+      "played": "played",
+      "role": {
+        "auxiliary": "Auxiliary card: event check",
+        "command": "Command card",
+        "second": "Second impulse: the auxiliary card commands"
+      },
+      "title": "Soviet impulse",
+      "drew": "Drew {{cards}}: {{why}}.",
+      "and": " and ",
+      "fate": {
+        "discarded": "Discarded.",
+        "returned": "Shuffled back into the draw pile.",
+        "removed": "Removed from the game (8.2)."
+      }
+    },
+    "order": {
+      "moved": "{{from}} to {{to}}",
+      "stays": "stays in {{from}}",
+      "noMethod": "no method",
+      "method": "Method {{n}}",
+      "armyMethod": "Army objective method {{n}}",
+      "noMethodLabel": "No method"
+    },
+    "speed": {
+      "group": "Animation speed",
+      "slow": "Slow",
+      "normal": "Normal",
+      "fast": "Fast"
+    },
+    "replayAll": "Replay all moves",
+    "replayAllMoved": "Counters have moved since.",
+    "skip": "Skip",
+    "clearTrails": "Clear trails",
+    "clearTrailsTitle": "Wipe the bot's red trails off the map",
+    "formation": {
+      "front": "{{front}}, movement methods {{methods}}"
+    },
+    "status": {
+      "adjustment": "Set-up adjustment",
+      "adjustmentRolled": "{{adjustment}} (rolled {{roll}})",
+      "vp": "Soviet VP",
+      "discard": "Soviet discard",
+      "none": "None",
+      "removed": "Out of the game"
+    }
+  },
+  "log": {
+    "where": {
+      "reserve": "the reserve",
+      "reinforcements": "the reinforcements",
+      "eliminated": "the eliminated units"
+    },
+    "setUp": "<b>Turn 1 set up.</b> {{placed}} counters on their start hex, {{reserve}} in reserve, {{reinforcements}} in the reinforcements.",
+    "setUpCleared": "<b>Set up undone.</b> All counters removed.",
+    "moved": {
+      "many": "<b>{{count}} counters</b> ({{units}})",
+      "one": "<b>{{unit}}</b>",
+      "eliminated": "{{who}} eliminated.",
+      "eliminatedFrom": "{{who}} eliminated from {{from}}.",
+      "reserve": "{{who}} put in reserve.",
+      "reserveFrom": "{{who}} put in reserve from {{from}}.",
+      "reinforcements": "{{who}} back to the reinforcements.",
+      "reinforcementsFrom": "{{who}} back to the reinforcements from {{from}}.",
+      "hex": "{{who}} moved to {{to}}.",
+      "hexFrom": "{{who}} moved to {{to}} from {{from}}."
+    },
+    "restacked": {
+      "up": "<b>{{unit}}</b> moved up the stack in {{hex}}.",
+      "down": "<b>{{unit}}</b> moved down the stack in {{hex}}.",
+      "top": "<b>{{unit}}</b> moved to the top of the stack in {{hex}}.",
+      "bottom": "<b>{{unit}}</b> moved to the bottom of the stack in {{hex}}."
+    },
+    "stepRemoved": "<b>{{unit}}</b> loses a step.",
+    "stepRemovedR": "<b>{{unit}}</b> loses a step: its “R” counter comes in.",
+    "dispersed": "<b>{{units}}</b> dispersed.",
+    "undispersed": "Dispersed marker removed from <b>{{units}}</b>.",
+    "vp": "<b>Soviet VP</b> {{from}} → {{to}}.",
+    "cardDiscarded": "Soviet card {{card}} discarded.",
+    "cardUndiscarded": "Soviet card {{card}} back in the deck.",
+    "drawn": {
+      "pair_one": "<b>Soviet impulse:</b> {{command}} commands, {{auxiliary}} is the auxiliary card ({{why}}). {{count}} card left.",
+      "pair_other": "<b>Soviet impulse:</b> {{command}} commands, {{auxiliary}} is the auxiliary card ({{why}}). {{count}} cards left.",
+      "single_one": "<b>Soviet impulse:</b> {{command}} commands ({{why}}). {{count}} card left.",
+      "single_other": "<b>Soviet impulse:</b> {{command}} commands ({{why}}). {{count}} cards left."
+    },
+    "secondImpulse": "<b>Second impulse:</b> the auxiliary card {{card}} becomes the command card (8.1).",
+    "line": "line {{n}}",
+    "linePlayed": "{{card}} <i>{{line}}</i>: <b>{{what}}</b>.",
+    "lineDone": "done",
+    "linePassed": "{{card}} <i>{{line}}</i>: passed over, {{reason}}.",
+    "cardReturned": "{{card}} shuffled back into the Soviet draw pile ({{count}} cards).",
+    "cardRemoved": "{{card}} removed from the game (8.2).",
+    "reminder": "<b>For you, {{title}}:</b> {{text}}",
+    "reminderDone": "Reminder marked done.",
+    "turn": {
+      "begins": "<b>Game-turn {{turn}} begins.</b> ",
+      "toReserve_one": "{{units}} enters its reserve box. ",
+      "toReserve_other": "{{units}} enter their reserve box. ",
+      "pile": "Soviet draw pile: {{count}} cards.",
+      "pileNew": "Soviet draw pile: {{count}} cards, with {{cards}} new."
+    },
+    "objectivePlaced": "<b>{{marker}}</b> placed in {{hex}}.",
+    "objectiveRemoved": "<b>{{marker}}</b> removed.",
+    "objectiveChanged": "<b>{{marker}}</b> {{change}}: {{why}} ({{rule}}).",
+    "adjustment": "<b>Set-up adjustment {{die}}: {{name}}</b> ({{how}}), played by the bot in place of its first impulse (p48-50). {{count}} actions:",
+    "adjustmentReplaces": "<b>Set-up adjustment {{die}}: {{name}}</b> ({{how}}, replaces {{replaced}}), played by the bot in place of its first impulse (p48-50). {{count}} actions:",
+    "adjustmentRoll": "die roll {{roll}}",
+    "adjustmentChosen": "chosen",
+    "gameStarted": "<b>Turn 1 begins</b> with the first German impulse (p48). Your counters are free to move.",
+    "supply": {
+      "phase": "<b>Supply Phase, turn {{turn}}.</b> Supply markers: {{changes}}.",
+      "phaseNone": "<b>Supply Phase, turn {{turn}}.</b> No supply marker changes.",
+      "change": "{{unit}} {{marker}}",
+      "surrender": " <b>Surrender (13.23):</b> remove one step from {{stacks}}.",
+      "stack": "{{hex}} ({{units}})",
+      "lineWest": " Soviet support line: western (13.51).",
+      "lineEast": " Soviet support line: eastern (13.51).",
+      "marker": {
+        "supplied": "supplied",
+        "outOfSupply": "Out of Supply",
+        "isolated": "Isolated"
+      },
+      "set": {
+        "supplied": "<b>{{units}}</b> back in supply.",
+        "outOfSupply": "<b>{{units}}</b> Out of Supply.",
+        "isolated": "<b>{{units}}</b> Isolated."
+      }
+    },
+    "forwardSupport": "<b>Soviet Forward Support</b> in {{hexes}}.",
+    "forwardSupportRemoved": "<b>Soviet Forward Support</b> markers removed.",
+    "townCaptured": "<b>{{hex}}</b> is now {{side}}-owned.",
+    "activated": "<b>{{army}} activated</b> ({{front}}): movement methods {{methods}}.",
+    "activatedDesperate": "<b>{{army}} activated</b> ({{front}}): movement methods {{methods}}, Soviet Desperation.",
+    "decision": {
+      "noMove": "<b>{{unit}}</b> does not move (no movement method applies).",
+      "stays": "<b>{{unit}}</b> stays in {{from}}: {{method}} ({{title}}).",
+      "moved": "<b>{{unit}}</b> {{from}} → {{to}}: {{method}} ({{title}})."
+    },
+    "rejected": "<b>Not done:</b> {{reason}}",
+    "newGame": "New game. Set up turn 1 from the Units panel.",
+    "showWhy": "Show why"
+  },
+  "units": {
+    "counter": "{{unit}} ({{army}})",
+    "counterLocked": "{{unit}} ({{army}}): {{why}}",
+    "placedByBot": "placed by the bot",
+    "adjust": {
+      "rolled": "Rolled {{roll}} and played by the bot. Press Start to begin, or roll again or pick another row before that.",
+      "chosen": "Chosen and played by the bot. Press Start to begin, or roll again or pick another row before that.",
+      "rolling": "Rolling…",
+      "prompt": "Roll the die, or choose the outcome of the Soviet initial assault.",
+      "historical": "historical start",
+      "title": "Set-up adjustment",
+      "die": "Die: {{face}}",
+      "noDie": "Die not rolled"
+    },
+    "undoSetUp": "Undo set up",
+    "rollAgain": "Roll again",
+    "rollDie": "Roll the die",
+    "start": "Start",
+    "startNeedsAdjustment": "Roll or choose the set-up adjustment first",
+    "recap": {
+      "title": "Turn 1 set up",
+      "onMap": "On the map",
+      "inReserve": "In reserve",
+      "reinforcements": "Reinforcements"
+    },
+    "setUp": "Set up turn 1",
+    "setUpHint": "Places the booklet set-up: counters on their start hex, turn 1 units in reserve, later units by turn of entry.",
+    "filter": {
+      "group": "Show units of",
+      "all": "All",
+      "soviet": "Soviet",
+      "german": "German"
+    },
+    "none": "None",
+    "emptyUntilSetUp": "Empty until set up",
+    "setAsideAtSetUp": "Set aside at set up",
+    "group": {
+      "reserves": "Reserves",
+      "reinforcements": "Reinforcements",
+      "reduced": "Reduced counters",
+      "eliminated": "Eliminated"
+    },
+    "turn": "Turn {{turn}}"
+  },
+  "inspector": {
+    "terrain": "Terrain",
+    "deadHex": "dead hex (off map)",
+    "village": "Village",
+    "yes": "yes",
+    "vp": "VP",
+    "frontTarget": "Front target",
+    "logistics": "Logistics",
+    "mapEdge": "Map edge",
+    "supplyEntry": "Supply entry",
+    "roadLeaves": "road leaves the map",
+    "line": "{{line}} line",
+    "lineSide": "{{side}} of it",
+    "east": "east",
+    "west": "west",
+    "road": "Road",
+    "river": "River",
+    "arrow": "Arrow",
+    "arrowValue": "{{type}}, {{from}} → {{to}}, {{front}}",
+    "arrowType": {
+      "primary": "primary",
+      "secondary": "secondary"
+    },
+    "pointAt": "Point at a hex or a hex side",
+    "side": "Side {{id}}",
+    "hex": "Hex {{id}}",
+    "pinned": "Pinned, Esc to release",
+    "noData": "No data painted here"
+  },
+  "stack": {
+    "of": "Stack of {{count}}",
+    "counter": "Counter",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "unitOf": "{{army}}, {{side}}",
+    "steps": "{{count}} steps",
+    "dispersed": "Dispersed",
+    "oos": "OOS",
+    "oosTitle": "Out of Supply marker (13.2)",
+    "isolated": "Isolated",
+    "isolatedTitle": "Isolated marker (13.2)",
+    "up": "Move {{unit}} up the stack",
+    "down": "Move {{unit}} down the stack",
+    "upTitle": "Up the stack",
+    "downTitle": "Down the stack",
+    "hint": "Click to select, hold to drag."
+  },
+  "supplyNote": {
+    "cannot": "<b>Cannot trace supply.</b> {{why}}",
+    "cannotUnmarked": "<b>Cannot trace supply.</b> {{why}} Markers are placed in the Supply Phase.",
+    "can": "<b>Can trace supply:</b> {{where}}.",
+    "hexes_one": "{{count}} hex to {{source}}",
+    "hexes_other": "{{count}} hexes to {{source}}",
+    "on": "on {{source}}",
+    "roadHead": "a supply head on the road ({{head}}), which leaves the map at {{exit}}",
+    "edgeAt": "the {{side}} map edge at {{head}}",
+    "edge": "the {{side}} map edge"
+  },
+  "menu": {
+    "removeStep": "Remove step",
+    "lastStep": "Single step left: eliminate it instead",
+    "eliminate": "Eliminate",
+    "onlyLastStep": "Only on the last step",
+    "placeDispersed": "Place Dispersed marker",
+    "removeDispersed": "Remove Dispersed marker",
+    "onlyOnMap": "Only on the map",
+    "supplyMarker": "Supply marker",
+    "supplied": "In supply",
+    "outOfSupply": "Out of Supply",
+    "isolated": "Isolated"
+  },
+  "why": {
+    "moved": "{{from}} to {{to}}",
+    "stays": "Stays in {{from}}",
+    "noMove": "Does not move from {{from}}",
+    "method": "Method {{n}}",
+    "noMethod": "<b>No method applies.</b>",
+    "skipped_one": "{{count}} method not applied",
+    "skipped_other": "{{count}} methods not applied",
+    "replay": "Replay move",
+    "movedSince": "The counter has moved since."
+  },
+  "start": {
+    "setUp": {
+      "title": "Set up turn 1",
+      "text": "Click on ‘Set up turn 1’ below or on the top left Units panel. Counters stay locked until the game starts.",
+      "button": "Set up turn 1"
+    },
+    "strike": {
+      "title": "The Soviets strike first",
+      "text": "Roll the die or choose a set-up adjustment in the Units panel: the bot plays the outcome of the Soviet initial assault. Counters stay locked until you press Start."
+    },
+    "ready": {
+      "text": "Press Start to begin the first German impulse and unlock your counters.",
+      "button": "Start"
+    }
+  },
+  "reminder": {
+    "until": {
+      "done": "From {{card}}, turn {{turn}}.",
+      "endOfTurn": "From {{card}}, until the end of turn {{turn}}."
+    },
+    "done": "Done"
+  },
+  "cardZoom": {
+    "alt": "Soviet card {{card}}"
+  },
+  "drag": {
+    "reserve": "Put in reserve",
+    "reinforcements": "Back to its turn of entry",
+    "eliminated": "Eliminate",
+    "dropOn": "Drop on {{hex}}"
+  },
+  "map": {
+    "supplyMarker": {
+      "outOfSupply": "Out of Supply",
+      "isolated": "Isolated"
+    },
+    "dispersed": "Dispersed",
+    "forwardSupport": "Soviet Forward Support",
+    "loadFailed": "{{error}} Calibrate the map and check data/ first.",
+    "imageFailed": "The map image could not be loaded: showing the grid only.",
+    "layersEmpty": "{{warnings}} Those layers stay empty.",
+    "hideUnits": "Hide units",
+    "showUnits": "Show units"
+  },
+  "layers": {
+    "grid": {
+      "label": "Hex grid",
+      "description": "Hex outlines; dead hexes hatched"
+    },
+    "ids": {
+      "label": "Hex numbers",
+      "description": "Hex number CCRR at the top of each hex"
+    },
+    "terrain": {
+      "label": "Terrain",
+      "description": "Terrain tint per hex (clear is left blank); white dot = village"
+    },
+    "sides": {
+      "label": "Roads and rivers",
+      "description": "Roads drawn center to center across the sides they cross; rivers along hex sides; red ticks = blocked Dniepr"
+    },
+    "arrows": {
+      "label": "Movement arrows",
+      "description": "One-way movement arrows; filled = primary, outline = secondary; color = front"
+    },
+    "edges": {
+      "label": "Map edges and supply",
+      "description": "Soviet/German map edges (dashed); black stubs = roads leaving the map (supply entry, 13.1)"
+    },
+    "lines": {
+      "label": "Support and limit lines",
+      "description": "The three printed lines, drawn along the hex sides where they run"
+    },
+    "targets": {
+      "label": "Objectives",
+      "description": "VP value; ring = front target; diamond = logistics hex; color = front"
+    }
+  },
+  "scenario": {
+    "p17": "<b>Booklet example p17 loaded:</b> turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev scenario)."
+  },
+  "page": {
+    "title": "Situation map",
+    "units": "Units",
+    "setUp": "Set up",
+    "unitsPanel": "Units panel",
+    "foldUnits": "Fold the units panel",
+    "viewport": "Game map: drag or arrow keys to pan, wheel or + and - to zoom, 0 to fit",
+    "beforeStart": "Before the game starts",
+    "reminders": "Events to keep in mind",
+    "hideUnitsTitle": "Hide the counters to read the map under them (U)",
+    "sovietSupply": "Soviet supply",
+    "sovietSupplyTitle": "Show the supply path of every Soviet unit on the map (S)",
+    "germanSupply": "German supply",
+    "germanSupplyTitle": "Show the supply path of every German unit on the map (G)",
+    "rail": "Bot, log and overlays",
+    "railTabs": "Rail",
+    "foldRail": "Fold the rail",
+    "tab": {
+      "bot": "Bot",
+      "log": "Log",
+      "overlays": "Overlays"
+    },
+    "home": "Home",
+    "sovietCardsRead": "Soviet cards read",
+    "activation": "Activation",
+    "whyThisMove": "Why this move",
+    "undo": "Undo",
+    "undoHint": "Undo takes back the last action and removes it from the log. Arrow keys move the map.",
+    "overlaysHint": "Lay a sheet on the map to check what the bot reads from it.",
+    "printedMap": "Printed map",
+    "unitsSwitch": "Units",
+    "fitMap": "Fit map"
+  },
+  "legend": {
+    "title": "Bot moves legend",
+    "trail": "Path a Soviet unit walked in the last activation. Clear trails removes it.",
+    "chosen": "Current hex of the unit inspected in the bot decision details panel.",
+    "dropped": "Hexes set aside by the bot, because of a preference, a restriction or a tiebreaker."
+  },
+  "home": {
+    "title": "EA Kharkov Bot",
+    "intro": "Soviet bot for Enemy Action: Kharkov, German Solo.",
+    "game": "Game",
+    "map": "Situation map",
+    "mapText": "The game map, with overlays showing what the bot reads from it",
+    "tools": "Tools",
+    "calibration": "Map calibration",
+    "calibrationText": "Hex grid, background image, saved to data/map-grid.json",
+    "painter": "Map painter",
+    "painterText": "Paint per-hex and per-side engine data, saved to data/map-hexes.json and data/map-hexsides.json",
+    "unitsIndex": "Units index",
+    "unitsIndexText": "Every known unit counter with its decoded data, for checking against data/units.json (2.3)",
+    "sovietCards": "Soviet cards",
+    "sovietCardsText": "Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)"
+  }
+}

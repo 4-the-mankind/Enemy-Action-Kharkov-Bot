@@ -28,6 +28,7 @@
 // and 9.22. Supply, support and the operational limit come from supply.ts; garrisons and the
 // ground from the PendingRules (pending.ts), provisional until task 4.6.
 import type { Front, Unit } from "../core/units";
+import { msg, semicolonList, type Message } from "../i18n/message";
 import type { Board } from "./board";
 import { withUnitAt, without, type Ground, type Movement } from "./movement";
 import { ARMY_OBJECTIVE_FACE, armyObjective, hexName, type Objectives } from "./objectives";
@@ -59,7 +60,7 @@ interface Option {
   /** Stays without the 9.25 shift: the clause does not say "except as directed by 9.25". */
   hold?: boolean;
   /** Why the unit stays, traced when it does. */
-  why?: string;
+  why?: Message;
   /** Paragraph of the method the option comes from, when a later one applies only if the first cannot. */
   clause?: string;
   /** 10.4: ends over-stacked; these active units, still to move, are to leave the hex. */
@@ -72,9 +73,9 @@ interface Option {
  * One lettered preference (8.3): narrows the options, or keeps them all if it applies to none.
  * `when`: the preference belongs to one paragraph of the method, used only on its options.
  */
-interface Pref { rule: string; text: string; pick(options: Option[]): Option[]; when?(options: Option[]): boolean }
+interface Pref { rule: string; text: Message; pick(options: Option[]): Option[]; when?(options: Option[]): boolean }
 
-function prefer(rule: string, text: string, test: (o: Option) => boolean): Pref {
+function prefer(rule: string, text: Message, test: (o: Option) => boolean): Pref {
   return {
     rule, text, pick: (os) => {
       const kept = os.filter(test);
@@ -84,7 +85,7 @@ function prefer(rule: string, text: string, test: (o: Option) => boolean): Pref 
 }
 
 /** Keeps the lowest score; null or infinite = the preference does not apply to that option. */
-function lowest(rule: string, text: string, score: (o: Option) => number | null): Pref {
+function lowest(rule: string, text: Message, score: (o: Option) => number | null): Pref {
   return {
     rule, text, pick: (os) => {
       const s = os.map(score);
@@ -96,7 +97,7 @@ function lowest(rule: string, text: string, score: (o: Option) => number | null)
   };
 }
 
-const highest = (rule: string, text: string, score: (o: Option) => number | null) =>
+const highest = (rule: string, text: Message, score: (o: Option) => number | null) =>
   lowest(rule, text, (o) => {
     const v = score(o);
     return v === null ? null : -v;
@@ -113,24 +114,27 @@ const KHARKOV = "0912";
 /** What a method found for one unit. */
 type Found =
   /** The method does not apply to the unit. */
-  | { kind: "none"; reason: string }
-  /** Candidate destinations, with the method's preferences in letter order. */
-  | { kind: "options"; options: Option[]; prefs: Pref[]; none: string; intro?: DecisionStep };
+  | { kind: "none"; reason: Message }
+  /** Candidate destinations, with the method's preferences in letter order; `none`: why when there is none. */
+  | { kind: "options"; options: Option[]; prefs: Pref[]; none?: Message; intro?: DecisionStep };
 
 interface Method {
   /** Number in 9.21 or 9.22. */
   n: number;
-  title: string;
+  title: Message;
   /** ▲ ascending or ▼ descending unit selector order (9.2). */
   order: "asc" | "desc";
   /** Why the method is skipped for every unit, or null. */
-  skip(ctx: Ctx): string | null;
+  skip(ctx: Ctx): Message | null;
   /** Why the method is skipped for this unit (spearheads), or null. */
-  skipUnit?(ctx: Ctx, id: string): string | null;
+  skipUnit?(ctx: Ctx, id: string): Message | null;
   find?(ctx: Ctx, id: string): Found;
   /** 9.22 "Operational limit applies": destinations beyond the limit are not eligible. */
   opLimit?: boolean;
 }
+
+/** The deciding method of a move, as traced: its rule label and title. */
+type By = { method: string; title: Message };
 
 /** Movement methods in use (9.2). */
 type Book = "9.21" | "9.22";
@@ -284,7 +288,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   // ---------------------------------------------------------------- 9.23 restrictions
 
   /** Which 9.23 restriction the move breaks, with its letter, or null. */
-  function restriction(ctx: Ctx, id: string, hex: string): { letter: string; why: string } | null {
+  function restriction(ctx: Ctx, id: string, hex: string): { letter: string; why: Message } | null {
     const before = ctx.state, start = hexOf(before, id), after = moved(before, id, hex);
     const u = known(id);
 
@@ -294,7 +298,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
       if (!isHex(s.at) || sideOf(g) !== "german" || board.hexCount(s.at, start) > 2) continue;
       if (rules.supplyStatus(before, g) === "isolated") continue;
       if (movement.isSurrounded(before, g) && !movement.isSurrounded(after, g))
-        return { letter: "a", why: `${known(g).designation} would no longer be surrounded` };
+        return { letter: "a", why: msg("move.why923.noLongerSurrounded", { unit: known(g).designation }) };
     }
 
     // b) A German unit becomes proximate to (or [GT 4+] German supply traceable to) an empty
@@ -317,29 +321,29 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
           // Its reach unchanged (no ZOC change nearby, town not vacated), it still cannot reach the town.
           const range = Math.max(movement.faceValues(before, g).movement, 1);
           if (town !== start && board.hexCount(s.at, start) > range + 1 && board.hexCount(s.at, hex) > range + 1) continue;
-          if (proximate(after, g)) return { letter: "b", why: `${known(g).designation} would become proximate to ${town}` };
+          if (proximate(after, g)) return { letter: "b", why: msg("move.why923.becomesProximate", { unit: known(g).designation, town }) };
         }
       }
       if (before.turn >= 4 && rules.supplyTracesTo(after, "german", town) && !rules.supplyTracesTo(before, "german", town))
-        return { letter: "b", why: `German supply would reach ${town}` };
+        return { letter: "b", why: msg("move.why923.germanSupplyReaches", { town }) };
     }
 
     // c) A map-edge VP hex vacated, unless Soviet supply cannot be traced to it.
     if (isMapEdgeVp(start) && unitsIn(after, start, "soviet").length === 0 && rules.supplyTracesTo(before, "soviet", start))
-      return { letter: "c", why: `${start} (map-edge VP hex) would be vacated` };
+      return { letter: "c", why: msg("move.why923.mapEdgeVacated", { hex: start }) };
 
     // d) [GT 4+] A Soviet unit unable to trace supply; not for a move ending in a German VP hex.
     if (before.turn >= 4 && !isGermanVp(before, hex)) {
       for (const [s, st] of Object.entries(before.units)) {
         if (!isHex(st.at) || sideOf(s) !== "soviet") continue;
         if (rules.canTraceSupply(before, s) && !rules.canTraceSupply(after, s))
-          return { letter: "d", why: `${known(s).designation} would be out of supply` };
+          return { letter: "d", why: msg("move.why923.outOfSupply", { unit: known(s).designation }) };
       }
     }
 
     // e) [GT 1-6] A Soviet mechanized unit ending in a marsh hex.
     if (before.turn <= 6 && u.type === "mechanized" && board.hex(hex).terrain === "marsh")
-      return { letter: "e", why: "a mechanized unit may not end in marsh" };
+      return { letter: "e", why: msg("move.trace.mechanizedUnitMayNotEndMarsh") };
     return null;
   }
 
@@ -352,26 +356,26 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     if (refused.length) {
       options = options.filter((o) => !o.refused);
       steps.push({
-        rule: "10.4", text: "over-stacked at the end of movement: the active units in the hex would not leave it",
+        rule: "10.4", text: msg("move.trace.overStackedEndMovementActiveUnits"),
         kept: hexesOf(options), dropped: refused,
       });
     }
-    const broken = new Map<string, string>();
-    const verdict = new Map<string, string | null>();
+    const broken = new Map<string, { letter: string; why: Message }>();
+    const verdict = new Set<string>();
     for (const o of options) {
       if (o.stay) continue; // a restriction forbids a move, not staying put
       if (!verdict.has(o.hex)) {
+        verdict.add(o.hex);
         const r = restriction(ctx, id, o.hex);
-        verdict.set(o.hex, r ? r.letter : null);
-        if (r) broken.set(o.hex, `${r.letter}: ${r.why}`);
+        if (r) broken.set(o.hex, r);
       }
     }
     if (!broken.size) return options;
     for (const letter of ["a", "b", "c", "d", "e"]) {
-      const dropped = [...broken].filter(([, why]) => why.startsWith(letter + ":"));
+      const dropped = [...broken].filter(([, r]) => r.letter === letter);
       if (!dropped.length) continue;
       steps.push({
-        rule: `9.23 ${letter}`, text: dropped.map(([h, why]) => `${h}: ${why.slice(3)}`).join("; "),
+        rule: `9.23 ${letter}`, text: msg("common.sentences", { parts: semicolonList(dropped.map(([hex, r]) => msg("move.why923.item", { hex, why: r.why }))) }),
         kept: [], dropped: dropped.map(([h]) => h),
       });
     }
@@ -398,12 +402,12 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     };
     return [
       // a) Only while an operational limit applies to the front (9.8).
-      ...(limited(ctx) ? [prefer("9.25 a", "a hex within the current Soviet operational limit", (o) => !beyond(ctx, o.hex))] : []),
-      prefer("9.25 b", "a hex that would cause the German unit to become surrounded", surrounds),
-      prefer("9.25 c", "a hex in Soviet support", (o) => rules.inSovietSupport(state, o.hex)),
-      prefer("9.25 d", "a hex not adjacent to a Soviet unit", (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
-      prefer("9.25 e", "an empty or garrisoned hex", (o) => isUnoccupied(base, o.hex)),
-      prefer("9.25 f", "a hex not occupied by an active unit", (o) => !unitsIn(base, o.hex).some((x) => ctx.active.has(x))),
+      ...(limited(ctx) ? [prefer("9.25 a", msg("move.pref.hexWithinCurrentSovietOperationalLimit"), (o) => !beyond(ctx, o.hex))] : []),
+      prefer("9.25 b", msg("move.pref.hexWouldCauseGermanUnitBecome"), surrounds),
+      prefer("9.25 c", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(state, o.hex)),
+      prefer("9.25 d", msg("move.pref.hexNotAdjacentSovietUnit"), (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
+      prefer("9.25 e", msg("move.pref.emptyGarrisonedHex"), (o) => isUnoccupied(base, o.hex)),
+      prefer("9.25 f", msg("move.pref.hexNotOccupiedActiveUnit"), (o) => !unitsIn(base, o.hex).some((x) => ctx.active.has(x))),
     ];
   }
 
@@ -416,12 +420,12 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   function tiebreakers(ctx: Ctx, id: string): Pref[] {
     const base = without(ctx.state, id), obj = objectiveOf(ctx, id);
     const out: Pref[] = [];
-    if (obj) out.push(lowest("9.24 a", "closest to the unit's Objective marker", (o) => board.distance(o.hex, obj.at)));
-    out.push(prefer("9.24 b", "an empty hex", (o) => isEmpty(base, o.hex)));
-    if (obj) out.push(highest("9.24 c", `the hex furthest ${obj.face}, the objective's compass direction`,
+    if (obj) out.push(lowest("9.24 a", msg("move.pref.closestUnitSObjectiveMarker"), (o) => board.distance(o.hex, obj.at)));
+    out.push(prefer("9.24 b", msg("move.pref.emptyHex"), (o) => isEmpty(base, o.hex)));
+    if (obj) out.push(highest("9.24 c", msg("move.pref.furthestCompass", { direction: msg(obj.face === "west" ? "names.compass.west" : "names.compass.south") }),
       (o) => board.compass(o.hex)[obj.face]));
-    out.push(lowest("9.24 d", "in or closest to a hex in Soviet support", (o) => ctx.supportDistance.get(o.hex) ?? null));
-    out.push(highest("9.24 e", "the highest numbered hex", (o) => Number(o.hex)));
+    out.push(lowest("9.24 d", msg("move.pref.closestHexSovietSupport"), (o) => ctx.supportDistance.get(o.hex) ?? null));
+    out.push(highest("9.24 e", msg("move.pref.highestNumberedHex"), (o) => Number(o.hex)));
     return out;
   }
 
@@ -456,7 +460,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     if (best.includes(chosen)) return chosen;
     best = narrow(best, tiebreakers(ctx, id), sub);
     steps.push({
-      rule: "9.25", text: `moves to a preferred hex adjacent to the same German unit (${germanHexes.join(", ")})`,
+      rule: "9.25", text: msg("move.trace.shift925", { hexes: germanHexes }),
       kept: hexesOf(best), dropped: [chosen.hex],
     }, ...sub);
     return best[0];
@@ -464,7 +468,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
 
   // ---------------------------------------------------------------- shared method parts
 
-  const objectiveRemoved = (ctx: Ctx) => (ctx.objective ? null : "the active front's objective marker is not in play");
+  const objectiveRemoved = (ctx: Ctx) => (ctx.objective ? null : msg("move.skip.activeFrontSObjectiveMarkerNot"));
   const distanceToObjective = (ctx: Ctx, hex: string) => (ctx.objective ? board.distance(hex, ctx.objective.at) : Infinity);
 
   /**
@@ -472,15 +476,15 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
    * objective is in play. [GT 1-2] supplied spearheads skip 4-9; [GT 3-5] supplied armored
    * spearheads; unless in a town or city.
    */
-  function spearheadSkip(ctx: Ctx, id: string): string | null {
+  function spearheadSkip(ctx: Ctx, id: string): Message | null {
     const u = known(id), s = ctx.state;
     if ((u.armyOrCorps !== "3T" && u.armyOrCorps !== "Popov") || !ctx.objective) return null;
     if (s.turn > 5 || isTownOrCity(hexOf(s, id)) || rules.supplyStatus(s, id) !== "supplied") return null;
-    if (s.turn <= 2) return "spearhead unit (GT 1-2): skips methods 4-9";
-    return u.type === "mechanized" ? "armored spearhead unit (GT 3-5): skips methods 4-9" : null;
+    if (s.turn <= 2) return msg("move.skip.spearheadUnitGT12Skips");
+    return u.type === "mechanized" ? msg("move.skip.armoredSpearheadUnitGT35") : null;
   }
 
-  const notYet = (task: string) => () => `not coded yet (task ${task})`;
+  const notYet = (task: string) => () => msg("move.skip.notCoded", { task });
 
   /** Soviet units of the active front on the map that cannot trace supply right now (13.1). */
   const cutOff = (ctx: Ctx) => Object.keys(ctx.state.units).filter((s) =>
@@ -508,12 +512,12 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     const towns = destinations(ctx, id, true).filter((o) =>
       isTownOrCity(o.hex) && isGermanVp(ctx.state, o.hex) && isEmpty(ctx.state, o.hex)
       && board.hex(o.hex).frontTarget !== ctx.inactive);
-    if (towns.length) return { kind: "options", options: towns, prefs: [], none: "" };
+    if (towns.length) return { kind: "options", options: towns, prefs: [] };
     // b) An empty map-edge VP hex from which Soviet supply can be traced.
     const edges = destinations(ctx, id).filter((o) =>
       isMapEdgeVp(o.hex) && isEmpty(ctx.state, o.hex) && rules.supplyTracesTo(ctx.state, "soviet", o.hex));
-    if (edges.length) return { kind: "options", options: edges, prefs: [], none: "" };
-    return { kind: "none", reason: "no empty German town or city, nor map-edge VP hex, within reach" };
+    if (edges.length) return { kind: "options", options: edges, prefs: [] };
+    return { kind: "none", reason: msg("move.skip.noEmptyGermanTownCityNor") };
   };
 
   /** Hexes in a front's target (9.3 Front Target): its own, or both fronts'. */
@@ -570,16 +574,16 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     board.neighbors(hex).filter((n) => board.areAdjacent(hex, n.hex) && isGermanVp(state, n.hex)).map((n) => n.hex);
 
   /** "Does not move by this or any subsequent method"; `shift`: "except as directed by 9.25". */
-  const stays = (hex: string, why: string, shift: boolean): Found =>
-    ({ kind: "options", options: [{ hex, path: [hex], stay: true, hold: !shift, why }], prefs: [], none: "" });
+  const stays = (hex: string, why: Message, shift: boolean): Found =>
+    ({ kind: "options", options: [{ hex, path: [hex], stay: true, hold: !shift, why }], prefs: [] });
 
   /** "If not possible": the first paragraph's options, when both paragraphs offer some. */
-  const clauseFirst = (rule: string, text: string, clause: string): Pref => ({
+  const clauseFirst = (rule: string, text: Message, clause: string): Pref => ({
     ...prefer(rule, text, (o) => o.clause === clause),
     when: (os) => os.some((o) => o.clause === clause) && os.some((o) => o.clause !== clause),
   });
   /** A "does not move" clause of a later paragraph, competing with that paragraph's moves. */
-  const stayFirst = (rule: string, text: string): Pref => ({ ...prefer(rule, text, (o) => !!o.stay), when: (os) => os.some((o) => o.stay) });
+  const stayFirst = (rule: string, text: Message): Pref => ({ ...prefer(rule, text, (o) => !!o.stay), when: (os) => os.some((o) => o.stay) });
 
   /**
    * 9.21 method 5, 9.22 method 3b: a VP hex (Q23: any, map-edge VP hexes included) occupied
@@ -622,18 +626,18 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     const beingSurrounded = (o: Option) => [...surrounds.get(o.hex)!, ...held.map(([g]) => g)];
     return {
       kind: "options", options,
-      none: ctx.book === "9.22" ? "no reachable hex would surround a German unit without the unit becoming nearly surrounded"
-        : "no reachable hex would surround an unsurrounded German unit",
+      none: ctx.book === "9.22" ? msg("move.none.noReachableHexWouldSurroundGerman")
+        : msg("move.none.noReachableHexWouldSurroundUnsurrounded"),
       prefs: [
-        clauseFirst(method, `already causing surround of ${held.map(([g]) => known(g).designation).join(", ")}: moves adjacent to it`, "adjacent"),
-        highest(`${method} a`, "a hex that causes surround of the most German units", (o) => surrounds.get(o.hex)!.length),
-        prefer(`${method} b`, "a hex adjacent to the German unit being surrounded",
+        clauseFirst(method, msg("move.pref.alreadyCausingSurround", { units: held.map(([g]) => known(g).designation) }), "adjacent"),
+        highest(`${method} a`, msg("move.pref.hexCausesSurroundMostGermanUnits"), (o) => surrounds.get(o.hex)!.length),
+        prefer(`${method} b`, msg("move.pref.hexAdjacentGermanUnitBeingSurrounded"),
           (o) => beingSurrounded(o).some((g) => board.areAdjacent(o.hex, state.units[g].at))),
-        prefer(`${method} c`, "a hex that prevents a German unit from tracing supply", (o) => {
+        prefer(`${method} c`, msg("move.pref.hexPreventsGermanUnitTracingSupply"), (o) => {
           const after = moved(state, id, o.hex);
           return germansOnMap(state).some(([g]) => rules.canTraceSupply(state, g) && !rules.canTraceSupply(after, g));
         }),
-        prefer(`${method} d`, "a hex not adjacent to a Soviet unit", (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
+        prefer(`${method} d`, msg("move.pref.hexNotAdjacentSovietUnit"), (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
       ],
     };
   }
@@ -651,13 +655,13 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     if (!b) {
       // "A unit starting in a hex satisfying this movement method does not move."
       const at = isUnoccupied(base, start) ? open(start) : [];
-      if (at.length) return stays(start, `starts in an unoccupied hex next to ${at.join(", ")}, no other Soviet unit adjacent to both`, true);
+      if (at.length) return stays(start, msg("move.trace.staysNextTo", { hexes: at }), true);
     } else {
       // "Starting as the only Soviet unit adjacent to a given German unit and in a hex within
       // the operational limit and not nearly surrounded."
       const alone = adjacentHexesWith(state, start, "german").filter((g) => !adjacentHexesWith(base, g, "soviet").length);
       if (alone.length && !beyond(ctx, start) && !exposed(ctx, id, start))
-        return stays(start, `the only Soviet unit adjacent to ${alone.join(", ")}, within the operational limit, not nearly surrounded`, true);
+        return stays(start, msg("move.trace.onlyAdjacent", { hexes: alone }), true);
     }
     const options: Option[] = [];
     for (const o of destinations(ctx, id)) {
@@ -670,12 +674,12 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
       adjacentHexesWith(state, hex, "german").reduce((n, h) => n + unitsIn(state, h, "german").length, 0);
     return {
       kind: "options", options,
-      none: `no reachable unoccupied hex next to a German unit and not next to a Soviet unit adjacent to it${b ? ", without being nearly surrounded" : ""}`,
+      none: msg(b ? "move.none.noHexNextToGermanNotExposed" : "move.none.noHexNextToGerman"),
       prefs: [
-        highest(`${method} a`, "a hex adjacent to the most German units", (o) => germanUnitsNext(o.hex)),
-        prefer(`${method} b`, "a German unit to which no Soviet unit is adjacent", (o) => !adjacentHexesWith(base, o.target!, "soviet").length),
-        lowest(`${method} c`, "the closest German unit", (o) => board.distance(start, o.target!)),
-        ...(b ? [highest(`${method} d`, "the highest hex number", (o) => Number(o.hex))] : []),
+        highest(`${method} a`, msg("move.pref.hexAdjacentMostGermanUnits"), (o) => germanUnitsNext(o.hex)),
+        prefer(`${method} b`, msg("move.pref.germanUnitNoSovietUnitAdjacent"), (o) => !adjacentHexesWith(base, o.target!, "soviet").length),
+        lowest(`${method} c`, msg("move.pref.closestGermanUnit"), (o) => board.distance(start, o.target!)),
+        ...(b ? [highest(`${method} d`, msg("move.pref.highestHexNumber"), (o) => Number(o.hex))] : []),
       ],
     };
   }
@@ -683,9 +687,9 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   // ---------------------------------------------------------------- 9.21 methods
 
   const METHODS_A: Method[] = [
-    { n: 1, title: "Take VP Hex", order: "desc", skip: () => null, find: takeVpHex },
+    { n: 1, title: msg("move.method.takeVPHex"), order: "desc", skip: () => null, find: takeVpHex },
     {
-      n: 2, title: "Adjacent to German VP Hex & Near Objective", order: "asc", skip: objectiveRemoved,
+      n: 2, title: msg("move.method.adjacentGermanVPHexNearObjective"), order: "asc", skip: objectiveRemoved,
       find(ctx, id) {
         const obj = ctx.objective!, start = hexOf(ctx.state, id);
         const startDistance = distanceToObjective(ctx, start);
@@ -702,31 +706,31 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
           if (board.distance(vp, obj.at) <= 4) options.push({ hex: start, path: [start], target: vp, stay: true });
         const front = ctx.front;
         return {
-          kind: "options", options, none: "no hex adjacent to a German VP hex and closer to (or within 4 hexes of) the objective",
+          kind: "options", options, none: msg("move.none.noHexAdjacentGermanVPHex"),
           prefs: [
-            prefer("9.21 method 2 a", "a VP hex targeted exclusively by the active front", (o) => board.hex(o.target!).frontTarget === front),
-            lowest("9.21 method 2 b", "a VP hex occupied by the least German strength", (o) => strengthIn(ctx.state, o.target!)),
-            prefer("9.21 method 2 c", "a VP hex not across a Dniepr River hexside", (o) => !board.crossesDniepr(o.hex, o.target!)),
-            highest("9.21 method 2 d", "the VP hex with the highest VP value", (o) => board.hex(o.target!).vp),
+            prefer("9.21 method 2 a", msg("move.pref.vpHexTargetedExclusivelyActiveFront"), (o) => board.hex(o.target!).frontTarget === front),
+            lowest("9.21 method 2 b", msg("move.pref.vpHexOccupiedLeastGermanStrength"), (o) => strengthIn(ctx.state, o.target!)),
+            prefer("9.21 method 2 c", msg("move.pref.vpHexNotAcrossDnieprRiver"), (o) => !board.crossesDniepr(o.hex, o.target!)),
+            highest("9.21 method 2 d", msg("move.pref.vpHexHighestVPValue"), (o) => board.hex(o.target!).vp),
           ],
         };
       },
     },
     {
       // Begins on GT 3 even though Soviet supply checks begin on GT 4.
-      n: 3, title: "Open Supply Line", order: "desc",
-      skip: (ctx) => (ctx.state.turn < 3 ? "Game-turn 3 and later" : cutOff(ctx).length ? null : "every unit of the active front can trace supply"),
+      n: 3, title: msg("move.method.openSupplyLine"), order: "desc",
+      skip: (ctx) => (ctx.state.turn < 3 ? msg("move.skip.gameTurn3Later") : cutOff(ctx).length ? null : msg("move.skip.everyUnitActiveFrontCanTrace")),
       find(ctx, id) {
         const { options, enabled } = openSupply(ctx, id);
         return {
-          kind: "options", options, none: "no reachable hex lets a unit of the front trace supply",
-          prefs: [highest("9.21 method 3", "the hex that enables the most Soviet units to trace supply", (o) => enabled.get(o.hex) ?? 0)],
+          kind: "options", options, none: msg("move.none.noReachableHexLetsUnitFront"),
+          prefs: [highest("9.21 method 3", msg("move.pref.hexEnablesMostSovietUnitsTrace"), (o) => enabled.get(o.hex) ?? 0)],
         };
       },
     },
-    { n: 4, title: "Cause Surround", order: "desc", skip: () => null, skipUnit: spearheadSkip, find: causeSurround },
+    { n: 4, title: msg("move.method.causeSurround"), order: "desc", skip: () => null, skipUnit: spearheadSkip, find: causeSurround },
     {
-      n: 5, title: "To Soviet VP Hex", order: "desc", skip: () => null, skipUnit: spearheadSkip,
+      n: 5, title: msg("move.method.toSovietVpHex"), order: "desc", skip: () => null, skipUnit: spearheadSkip,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id), infantry = known(id).type === "infantry";
         const options: Option[] = [];
@@ -741,19 +745,19 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         // Infantry paragraph: one starting in a VP hex stacked with only armor units does not move.
         if (infantry && armorOnly(state, start, id)) options.push({ hex: start, path: [start], stay: true, hold: true, clause: "infantry" });
         return {
-          kind: "options", options, none: "no reachable Soviet VP hex of the front, unoccupied and threatened by the Germans",
+          kind: "options", options, none: msg("move.none.noReachableSovietVPHexFront"),
           prefs: [
-            clauseFirst("9.21 method 5", "an unoccupied Soviet VP hex before a VP hex held only by armor units (infantry)", "any"),
-            forClause("any", prefer("9.21 method 5 a", "a hex to which a German unit is adjacent", (o) => adjacentToGerman(state, o.hex))),
-            forClause("any", prefer("9.21 method 5 b", "an empty hex", (o) => isEmpty(state, o.hex))),
-            forClause("any", highest("9.21 method 5 c", "the highest VP value", (o) => board.hex(o.hex).vp)),
-            stayFirst("9.21 method 5", "an infantry unit starting in a VP hex stacked with only armor units does not move"),
+            clauseFirst("9.21 method 5", msg("move.pref.unoccupiedSovietVPHexBeforeVP"), "any"),
+            forClause("any", prefer("9.21 method 5 a", msg("move.pref.hexGermanUnitAdjacent"), (o) => adjacentToGerman(state, o.hex))),
+            forClause("any", prefer("9.21 method 5 b", msg("move.pref.emptyHex"), (o) => isEmpty(state, o.hex))),
+            forClause("any", highest("9.21 method 5 c", msg("move.pref.highestVPValue"), (o) => board.hex(o.hex).vp)),
+            stayFirst("9.21 method 5", msg("move.pref.infantryUnitStartingVPHexStacked")),
           ],
         };
       },
     },
     {
-      n: 6, title: "Adjacent to German VP Hex", order: "asc", skip: () => null, skipUnit: spearheadSkip,
+      n: 6, title: msg("move.method.adjacentGermanVPHex"), order: "asc", skip: () => null, skipUnit: spearheadSkip,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id);
         const targets = (hex: string) => germanVpAround(state, hex).filter((vp) => targetedFor(vp, ctx.front));
@@ -762,85 +766,85 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         // "Starting adjacent to the most qualified German VP hex": the start competes with the moves.
         for (const vp of targets(start)) options.push({ hex: start, path: [start], target: vp, stay: true });
         return {
-          kind: "options", options, none: "no reachable hex adjacent to a German VP hex targeted for the front",
+          kind: "options", options, none: msg("move.none.noReachableHexAdjacentGermanVP"),
           prefs: [
-            lowest("9.21 method 6 a", "the VP hex occupied by the least German strength", (o) => strengthIn(state, o.target!)),
-            highest("9.21 method 6 b", "the VP hex with the highest VP value", (o) => board.hex(o.target!).vp),
+            lowest("9.21 method 6 a", msg("move.pref.theVpHexLeastGermanStrength"), (o) => strengthIn(state, o.target!)),
+            highest("9.21 method 6 b", msg("move.pref.vpHexHighestVPValue"), (o) => board.hex(o.target!).vp),
           ],
         };
       },
     },
     {
-      n: 7, title: "Adjacent to German Unit in Logistics Hex", order: "desc", skip: () => null, skipUnit: spearheadSkip,
+      n: 7, title: msg("move.method.adjacentGermanUnitLogisticsHex"), order: "desc", skip: () => null, skipUnit: spearheadSkip,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id);
         // German units in a logistics hex of the active front, not surrounded (by stack: same hex).
         const stacks = [...new Set(germansOnMap(state).filter(([, s]) => board.hex(s.at).logistics === ctx.front).map(([, s]) => s.at))]
           .filter((h) => !movement.isSurrounded(state, unitsIn(state, h, "german")[0]));
-        if (!stacks.length) return { kind: "none", reason: "no unsurrounded German unit in a logistics hex of the front" };
+        if (!stacks.length) return { kind: "none", reason: msg("move.skip.noUnsurroundedGermanUnitLogisticsHex") };
         const around = (hex: string) => stacks.filter((g) => board.areAdjacent(hex, g));
         const at = around(start);
-        if (at.length) return stays(start, `starts adjacent to the German unit in ${at.join(", ")}, a logistics hex of the front`, true);
+        if (at.length) return stays(start, msg("move.trace.startsAdjacentLogistics", { hexes: at }), true);
         const options = destinations(ctx, id).flatMap((o) => around(o.hex).map((g) => ({ ...o, target: g })));
         return {
-          kind: "options", options, none: "no reachable hex adjacent to a German unit in a logistics hex of the front",
+          kind: "options", options, none: msg("move.none.noReachableHexAdjacentGermanUnit"),
           prefs: [
-            lowest("9.21 method 7 a", "the German unit/stack with the lowest total strength", (o) => strengthIn(state, o.target!)),
+            lowest("9.21 method 7 a", msg("move.pref.germanUnitStackLowestTotalStrength"), (o) => strengthIn(state, o.target!)),
             // Q24: the hex of the German stack.
-            highest("9.21 method 7 b", "the easternmost German unit/stack", (o) => -board.compass(o.target!).west),
+            highest("9.21 method 7 b", msg("move.pref.easternmostGermanUnitStack"), (o) => -board.compass(o.target!).west),
           ],
         };
       },
     },
-    { n: 8, title: "Adjacent to German Unit", order: "desc", skip: () => null, skipUnit: spearheadSkip, find: adjacentToGermanUnit },
+    { n: 8, title: msg("move.method.adjacentGermanUnit"), order: "desc", skip: () => null, skipUnit: spearheadSkip, find: adjacentToGermanUnit },
     {
-      n: 9, title: "Relieve Garrison", order: "desc", skipUnit: spearheadSkip,
-      skip: (ctx) => (ctx.state.turn < 4 ? "Game-turn 4 and later" : notYet("4.6")()),
+      n: 9, title: msg("move.method.relieveGarrison"), order: "desc", skipUnit: spearheadSkip,
+      skip: (ctx) => (ctx.state.turn < 4 ? msg("move.skip.gameTurn4Later") : notYet("4.6")()),
     },
     {
-      n: 10, title: "Follow Movement Arrows", order: "asc", skip: () => null,
+      n: 10, title: msg("move.method.followMovementArrows"), order: "asc", skip: () => null,
       find(ctx, id) {
         const paths = arrowPaths(ctx, id);
-        if (paths === null) return { kind: "none", reason: "no movement arrow for its front in its hex" };
+        if (paths === null) return { kind: "none", reason: msg("move.skip.noMovementArrowFrontHex") };
         const start = hexOf(ctx.state, id), base = without(ctx.state, id);
         return {
-          kind: "options", options: paths, none: "no move along the arrows spends its entire movement allowance",
+          kind: "options", options: paths, none: msg("move.none.noMoveAlongArrowsSpendsEntire"),
           prefs: [
-            prefer("9.21 method 10 a", "a move that ends in an unoccupied hex", (o) => isUnoccupied(base, o.hex)),
-            highest("9.21 method 10 b", "a move that ends farthest in hexes from its start", (o) => board.distance(start, o.hex)),
-            lowest("9.21 method 10 c", "a move that ends closest to the objective", (o) => distanceToObjective(ctx, o.hex)),
-            prefer("9.21 method 10 d", "a move that follows primary movement arrows", (o) => !!o.primary),
+            prefer("9.21 method 10 a", msg("move.pref.moveEndsUnoccupiedHex"), (o) => isUnoccupied(base, o.hex)),
+            highest("9.21 method 10 b", msg("move.pref.moveEndsFarthestHexesStart"), (o) => board.distance(start, o.hex)),
+            lowest("9.21 method 10 c", msg("move.pref.moveEndsClosestObjective"), (o) => distanceToObjective(ctx, o.hex)),
+            prefer("9.21 method 10 d", msg("move.pref.moveFollowsPrimaryMovementArrows"), (o) => !!o.primary),
           ],
         };
       },
     },
     {
-      n: 11, title: "Move Closest to Front Objective", order: "asc", skip: objectiveRemoved,
+      n: 11, title: msg("move.method.moveClosestFrontObjective"), order: "asc", skip: objectiveRemoved,
       find(ctx, id) {
         const startDistance = distanceToObjective(ctx, hexOf(ctx.state, id));
         const options = destinations(ctx, id).filter((o) => distanceToObjective(ctx, o.hex) < startDistance);
         return {
-          kind: "options", options, none: "no reachable hex closer to the front objective",
+          kind: "options", options, none: msg("move.none.noReachableHexCloserFrontObjective"),
           prefs: [
-            lowest("9.21 method 11 a", "the hex closest to the front objective", (o) => distanceToObjective(ctx, o.hex)),
-            lowest("9.21 method 11 b", "adjacent to the German-occupied hex with least strength", (o) => {
+            lowest("9.21 method 11 a", msg("move.pref.hexClosestFrontObjective"), (o) => distanceToObjective(ctx, o.hex)),
+            lowest("9.21 method 11 b", msg("move.pref.adjacentGermanOccupiedHexLeastStrength"), (o) => {
               const s = adjacentHexesWith(ctx.state, o.hex, "german").map((h) => strengthIn(ctx.state, h));
               return s.length ? Math.min(...s) : null;
             }),
-            prefer("9.21 method 11 c", "an empty hex", (o) => isEmpty(ctx.state, o.hex)),
+            prefer("9.21 method 11 c", msg("move.pref.emptyHex"), (o) => isEmpty(ctx.state, o.hex)),
           ],
         };
       },
     },
     {
-      n: 12, title: "Strengthen Potential Attack", order: "asc", skip: () => null,
+      n: 12, title: msg("move.method.strengthenPotentialAttack"), order: "asc", skip: () => null,
       find(ctx, id) {
         const state = ctx.state, base = without(state, id);
-        if (adjacentToGerman(state, hexOf(state, id))) return { kind: "none", reason: "starts adjacent to a German unit" };
+        if (adjacentToGerman(state, hexOf(state, id))) return { kind: "none", reason: msg("move.skip.startsAdjacentGermanUnit") };
         // A German hex to which another active Soviet unit is adjacent.
         const backed = (g: string) => adjacentHexesWith(base, g, "soviet").some((h) => unitsIn(base, h).some((x) => ctx.active.has(x)));
         const options = destinations(ctx, id).filter((o) => adjacentHexesWith(state, o.hex, "german").some(backed));
-        return { kind: "options", options, prefs: [], none: "no hex adjacent to a German unit another active unit is adjacent to" };
+        return { kind: "options", options, prefs: [], none: msg("move.none.noHexAdjacentGermanUnitAnother") };
       },
     },
   ];
@@ -848,25 +852,25 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   // ---------------------------------------------------------------- 9.22 methods
 
   const METHODS_B: Method[] = [
-    { n: 1, title: "Take VP Hex", order: "desc", skip: () => null, find: takeVpHex },
+    { n: 1, title: msg("move.method.takeVPHex"), order: "desc", skip: () => null, find: takeVpHex },
     {
-      n: 2, title: "Open Supply Line", order: "desc",
-      skip: (ctx) => (cutOff(ctx).length ? null : "every unit of the active front can trace supply"),
+      n: 2, title: msg("move.method.openSupplyLine"), order: "desc",
+      skip: (ctx) => (cutOff(ctx).length ? null : msg("move.skip.everyUnitActiveFrontCanTrace")),
       find(ctx, id) {
         const { options, enabled } = openSupply(ctx, id);
         return {
-          kind: "options", options, none: "no reachable hex lets a unit of the front trace supply",
+          kind: "options", options, none: msg("move.none.noReachableHexLetsUnitFront"),
           prefs: [
-            highest("9.22 method 2 a", "a hex enabling the most Soviet units to trace supply", (o) => enabled.get(o.hex) ?? 0),
-            prefer("9.22 method 2 b", "a hex in which the moving unit would not be nearly surrounded", (o) => !exposed(ctx, id, o.hex)),
-            prefer("9.22 method 2 c", "a hex in Soviet support", (o) => rules.inSovietSupport(ctx.state, o.hex)),
-            lowest("9.22 method 2 d", "the hex closest to Soviet support", (o) => ctx.supportDistance.get(o.hex) ?? null),
+            highest("9.22 method 2 a", msg("move.pref.hexEnablingMostSovietUnitsTrace"), (o) => enabled.get(o.hex) ?? 0),
+            prefer("9.22 method 2 b", msg("move.pref.hexMovingUnitWouldNotNearly"), (o) => !exposed(ctx, id, o.hex)),
+            prefer("9.22 method 2 c", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(ctx.state, o.hex)),
+            lowest("9.22 method 2 d", msg("move.pref.hexClosestSovietSupport"), (o) => ctx.supportDistance.get(o.hex) ?? null),
           ],
         };
       },
     },
     {
-      n: 3, title: "To Soviet VP Hex", order: "asc", skip: () => null,
+      n: 3, title: msg("move.method.toSovietVpHex"), order: "asc", skip: () => null,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id), base = without(state, id), infantry = known(id).type === "infantry";
         const most = (hex: string) => (hex === KHARKOV ? 2 : 1);
@@ -874,7 +878,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         // VP hex (Q23: any) to which a German unit is proximate or German supply is traceable
         // does not move by this or any subsequent method.
         if (board.hex(start).vp !== null && stepsIn(base, start) <= most(start) && threatened(ctx, start, true))
-          return stays(start, `holds the VP hex ${start} (${stepsIn(base, start)} other step(s)), threatened by the Germans`, false);
+          return stays(start, msg("move.trace.holdsVpHex", { hex: start, count: stepsIn(base, start) }), false);
         const options: Option[] = [];
         for (const o of destinations(ctx, id)) {
           // 3a: a Soviet VP hex targeted for the active front, empty, garrisoned or occupied by only
@@ -887,41 +891,41 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         // 3b: an infantry unit starting in a VP hex stacked with only armor units does not move.
         if (infantry && armorOnly(state, start, id)) options.push({ hex: start, path: [start], stay: true, hold: true, clause: "3b" });
         return {
-          kind: "options", options, none: "no reachable Soviet VP hex of the front, lightly held and threatened by the Germans",
+          kind: "options", options, none: msg("move.none.noSovietVpHexLightlyHeld"),
           prefs: [
-            clauseFirst("9.22 method 3a", "paragraph 3a applies before 3b", "3a"),
-            forClause("3a", prefer("9.22 method 3a a", "an empty or garrisoned hex", (o) => isUnoccupied(state, o.hex))),
-            forClause("3a", highest("9.22 method 3a b", "the highest VP value hex", (o) => board.hex(o.hex).vp)),
-            forClause("3a", prefer("9.22 method 3a c", "a hex to which a German unit is adjacent", (o) => adjacentToGerman(state, o.hex))),
-            forClause("3a", prefer("9.22 method 3a d", "a hex in Soviet support", (o) => rules.inSovietSupport(state, o.hex))),
-            stayFirst("9.22 method 3b", "an infantry unit starting in a VP hex stacked with only armor units does not move"),
+            clauseFirst("9.22 method 3a", msg("move.pref.paragraph3aAppliesBefore3b"), "3a"),
+            forClause("3a", prefer("9.22 method 3a a", msg("move.pref.emptyGarrisonedHex"), (o) => isUnoccupied(state, o.hex))),
+            forClause("3a", highest("9.22 method 3a b", msg("move.pref.highestVPValueHex"), (o) => board.hex(o.hex).vp)),
+            forClause("3a", prefer("9.22 method 3a c", msg("move.pref.hexGermanUnitAdjacent"), (o) => adjacentToGerman(state, o.hex))),
+            forClause("3a", prefer("9.22 method 3a d", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(state, o.hex))),
+            stayFirst("9.22 method 3b", msg("move.pref.infantryUnitStartingVPHexStacked")),
           ],
         };
       },
     },
     {
-      n: 4, title: "Avoid Surround", order: "asc", skip: () => null,
+      n: 4, title: msg("move.method.avoidSurround"), order: "asc", skip: () => null,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id), base = without(state, id);
-        if (board.hex(start).vp !== null) return { kind: "none", reason: "in a VP hex" };
-        if (!movement.isNearlySurrounded(state, id, ctx.ground)) return { kind: "none", reason: "not nearly surrounded" };
+        if (board.hex(start).vp !== null) return { kind: "none", reason: msg("move.skip.vpHex") };
+        if (!movement.isNearlySurrounded(state, id, ctx.ground)) return { kind: "none", reason: msg("move.skip.notNearlySurrounded") };
         const d0 = ctx.supportDistance.get(start) ?? Infinity;
         return {
           kind: "options", options: destinations(ctx, id).filter((o) => !exposed(ctx, id, o.hex)),
-          none: "no reachable hex in which the unit is not nearly surrounded",
+          none: msg("move.none.noReachableHexUnitNotNearly"),
           prefs: [
-            prefer("9.22 method 4 a", "a hex in Soviet support", (o) => rules.inSovietSupport(state, o.hex)),
-            prefer("9.22 method 4 b", "a hex within the operational limit", (o) => !beyond(ctx, o.hex)),
-            prefer("9.22 method 4 c", "a hex closer to a hex in support than the starting hex", (o) => (ctx.supportDistance.get(o.hex) ?? Infinity) < d0),
-            prefer("9.22 method 4 d", "an unoccupied hex", (o) => isUnoccupied(base, o.hex)),
-            prefer("9.22 method 4 e", "a hex not adjacent to a Soviet unit", (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
-            lowest("9.22 method 4 f", "the hex closest to the starting hex", (o) => board.distance(start, o.hex)),
+            prefer("9.22 method 4 a", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(state, o.hex)),
+            prefer("9.22 method 4 b", msg("move.pref.hexWithinOperationalLimit"), (o) => !beyond(ctx, o.hex)),
+            prefer("9.22 method 4 c", msg("move.pref.hexCloserHexSupportThanStarting"), (o) => (ctx.supportDistance.get(o.hex) ?? Infinity) < d0),
+            prefer("9.22 method 4 d", msg("move.pref.unoccupiedHex"), (o) => isUnoccupied(base, o.hex)),
+            prefer("9.22 method 4 e", msg("move.pref.hexNotAdjacentSovietUnit"), (o) => adjacentHexesWith(base, o.hex, "soviet").length === 0),
+            lowest("9.22 method 4 f", msg("move.pref.hexClosestStartingHex"), (o) => board.distance(start, o.hex)),
           ],
         };
       },
     },
     {
-      n: 5, title: "Adjacent to German VP Hex", order: "asc", skip: () => null,
+      n: 5, title: msg("move.method.adjacentGermanVPHex"), order: "asc", skip: () => null,
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id);
         // A German VP hex beyond the operational limit is eligible only if empty or occupied by just 1 step.
@@ -929,74 +933,74 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         const targets = (hex: string) => germanVpAround(state, hex).filter(eligible);
         const at = targets(start);
         if (at.length && !exposed(ctx, id, start))
-          return stays(start, `starts adjacent to the German VP hex ${at.join(", ")}, not nearly surrounded`, true);
+          return stays(start, msg("move.trace.startsAdjacentGermanVp", { hexes: at }), true);
         const options: Option[] = [];
         for (const o of destinations(ctx, id)) {
           const vps = targets(o.hex);
           if (vps.length && !exposed(ctx, id, o.hex)) for (const vp of vps) options.push({ ...o, target: vp });
         }
         return {
-          kind: "options", options, none: "no reachable hex adjacent to a German VP hex of the front, without being nearly surrounded",
+          kind: "options", options, none: msg("move.none.noHexAdjacentGermanVpNotExposed"),
           prefs: [
-            lowest("9.22 method 5 a", "adjacent to the VP hex occupied by the least German strength", (o) => strengthIn(state, o.target!)),
-            highest("9.22 method 5 b", "adjacent to the VP hex with the highest VP value", (o) => board.hex(o.target!).vp),
+            lowest("9.22 method 5 a", msg("move.pref.adjacentVPHexOccupiedLeastGerman"), (o) => strengthIn(state, o.target!)),
+            highest("9.22 method 5 b", msg("move.pref.adjacentVPHexHighestVPValue"), (o) => board.hex(o.target!).vp),
           ],
         };
       },
     },
     {
-      n: 6, title: "Move Into or Toward Operational Limit", order: "asc",
+      n: 6, title: msg("move.method.moveIntoTowardOperationalLimit"), order: "asc",
       skip: (ctx) => ([...ctx.active].some((id) => isHex(ctx.state.units[id].at) && beyond(ctx, ctx.state.units[id].at))
-        ? null : "no active unit is beyond the operational limit"),
+        ? null : msg("move.skip.noActiveUnitBeyondOperationalLimit")),
       find(ctx, id) {
         const state = ctx.state, start = hexOf(state, id), base = without(state, id), front = known(id).front!;
-        if (!beyond(ctx, start)) return { kind: "none", reason: "within the operational limit" };
+        if (!beyond(ctx, start)) return { kind: "none", reason: msg("move.skip.withinOperationalLimit") };
         // Within the limit or, if not possible, closer to it: the first is the preferred option
         // (a), so that 9.23 may push the move to the second.
         const dist = limitDistances(ctx), d0 = dist.get(start) ?? Infinity;
         const options = destinations(ctx, id).filter((o) => (dist.get(o.hex) ?? Infinity) < d0);
         return {
-          kind: "options", options, none: "no reachable hex within or closer to the operational limit",
+          kind: "options", options, none: msg("move.none.noReachableHexWithinCloserOperational"),
           prefs: [
-            prefer("9.22 method 6 a", "a hex within the operational limit", (o) => !beyond(ctx, o.hex)),
-            prefer("9.22 method 6 b", "a hex not on a map edge", (o) => board.hex(o.hex).mapEdge === null),
-            prefer("9.22 method 6 c", "a hex not stacked with or adjacent to a Soviet unit",
+            prefer("9.22 method 6 a", msg("move.pref.hexWithinOperationalLimit"), (o) => !beyond(ctx, o.hex)),
+            prefer("9.22 method 6 b", msg("move.pref.hexNotMapEdge"), (o) => board.hex(o.hex).mapEdge === null),
+            prefer("9.22 method 6 c", msg("move.pref.hexNotStackedAdjacentSovietUnit"),
               (o) => unitsIn(base, o.hex, "soviet").length === 0 && adjacentHexesWith(base, o.hex, "soviet").length === 0),
-            prefer("9.22 method 6 d", "a hex in Soviet support", (o) => rules.inSovietSupport(state, o.hex)),
-            lowest("9.22 method 6 e", "the hex closest to a hex in support", (o) => ctx.supportDistance.get(o.hex) ?? null),
-            prefer("9.22 method 6 f", "a hex containing a village targeted for the unit's front",
+            prefer("9.22 method 6 d", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(state, o.hex)),
+            lowest("9.22 method 6 e", msg("move.pref.hexClosestHexSupport"), (o) => ctx.supportDistance.get(o.hex) ?? null),
+            prefer("9.22 method 6 f", msg("move.pref.hexContainingVillageTargetedUnitS"),
               (o) => board.hex(o.hex).village && targetedFor(o.hex, front)),
           ],
         };
       },
     },
-    { n: 7, title: "Cause Surround", order: "desc", opLimit: true, skip: () => null, find: causeSurround },
-    { n: 8, title: "Adjacent to German Unit", order: "desc", opLimit: true, skip: () => null, find: adjacentToGermanUnit },
-    { n: 9, title: "Relieve Garrison", order: "desc", opLimit: true, skip: notYet("4.6") },
+    { n: 7, title: msg("move.method.causeSurround"), order: "desc", opLimit: true, skip: () => null, find: causeSurround },
+    { n: 8, title: msg("move.method.adjacentGermanUnit"), order: "desc", opLimit: true, skip: () => null, find: adjacentToGermanUnit },
+    { n: 9, title: msg("move.method.relieveGarrison"), order: "desc", opLimit: true, skip: notYet("4.6") },
     {
-      n: 10, title: "Follow Movement Arrows", order: "asc", opLimit: true, skip: () => null,
+      n: 10, title: msg("move.method.followMovementArrows"), order: "asc", opLimit: true, skip: () => null,
       find(ctx, id) {
         const paths = arrowPaths(ctx, id);
-        if (paths === null) return { kind: "none", reason: "no movement arrow for its front in its hex" };
+        if (paths === null) return { kind: "none", reason: msg("move.skip.noMovementArrowFrontHex") };
         const start = hexOf(ctx.state, id), base = without(ctx.state, id);
         // "A move in the primary direction ending outside the operational limit or before all
         // MPs are spent": such moves are not candidates (opLimit, arrowPaths), so the
         // secondary direction is left.
         return {
-          kind: "options", options: paths, none: "no move along the arrows spends its entire movement allowance",
+          kind: "options", options: paths, none: msg("move.none.noMoveAlongArrowsSpendsEntire"),
           prefs: [
-            prefer("9.22 method 10 a", "a move that ends in an unoccupied hex", (o) => isUnoccupied(base, o.hex)),
-            highest("9.22 method 10 b", "a move that ends farthest in hexes from its start", (o) => board.distance(start, o.hex)),
-            prefer("9.22 method 10 c", "a move that follows primary movement arrows", (o) => !!o.primary),
+            prefer("9.22 method 10 a", msg("move.pref.moveEndsUnoccupiedHex"), (o) => isUnoccupied(base, o.hex)),
+            highest("9.22 method 10 b", msg("move.pref.moveEndsFarthestHexesStart"), (o) => board.distance(start, o.hex)),
+            prefer("9.22 method 10 c", msg("move.pref.moveFollowsPrimaryMovementArrows"), (o) => !!o.primary),
           ],
         };
       },
     },
     {
-      n: 11, title: "Proximate to German VP Hex", order: "asc", skip: () => null,
+      n: 11, title: msg("move.method.proximateGermanVPHex"), order: "asc", skip: () => null,
       find(ctx, id) {
         const targets = vpTargets(ctx);
-        if (!targets.length) return { kind: "none", reason: "no eligible German VP hex" };
+        if (!targets.length) return { kind: "none", reason: msg("move.skip.noEligibleGermanVPHex") };
         const state = ctx.state, start = hexOf(state, id);
         const reachFrom = (st: GameState) => movement.reachable(st, id, { ground: ctx.ground });
         const allowance = movement.faceValues(state, id).movement;
@@ -1005,7 +1009,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         const startReach = reachFrom(state);
         const already = near(start).find((t) => proximateToVp(state, id, start, t, startReach));
         // Q22: "becomes proximate": a unit already proximate is not concerned (no freeze).
-        if (already) return { kind: "none", reason: `already proximate to ${already}` };
+        if (already) return { kind: "none", reason: msg("move.skip.alreadyProximate", { hex: already }) };
         const options: Option[] = [];
         for (const o of destinations(ctx, id)) {
           const close = near(o.hex);
@@ -1014,12 +1018,12 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
           for (const t of close) if (proximateToVp(after, id, o.hex, t, reach)) options.push({ ...o, target: t });
         }
         return {
-          kind: "options", options, none: "no reachable hex from which a German VP hex is proximate",
+          kind: "options", options, none: msg("move.none.noReachableHexGermanVPHex"),
           prefs: [
-            prefer("9.22 method 11 a", "a hex adjacent to the VP hex", (o) => board.areAdjacent(o.hex, o.target!)),
-            prefer("9.22 method 11 b", "a hex from which Soviet supply can be traced",
+            prefer("9.22 method 11 a", msg("move.pref.hexAdjacentVPHex"), (o) => board.areAdjacent(o.hex, o.target!)),
+            prefer("9.22 method 11 b", msg("move.pref.hexSovietSupplyCanTraced"),
               (o) => rules.supplyTracesTo(moved(state, id, o.hex), "soviet", o.hex)),
-            lowest("9.22 method 11 c", "the hex closest to the VP hex", (o) => board.distance(o.hex, o.target!)),
+            lowest("9.22 method 11 c", msg("move.pref.hexClosestVPHex"), (o) => board.distance(o.hex, o.target!)),
           ],
         };
       },
@@ -1029,53 +1033,53 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   // ---------------------------------------------------------------- 9.26 methods
 
   /** A method of 9.26, tried in order for one unit at a time; `objective`: its army's marker. */
-  interface ArmyMethod { n: number; title: string; find(ctx: Ctx, id: string, objective: string): Found }
+  interface ArmyMethod { n: number; title: Message; find(ctx: Ctx, id: string, objective: string): Found }
 
   const METHODS_ARMY: ArmyMethod[] = [
     // "Identical to 9.21, Method 1, including urban infiltration."
-    { n: 1, title: "Take VP Hex", find: (ctx, id) => takeVpHex(ctx, id) },
+    { n: 1, title: msg("move.method.takeVPHex"), find: (ctx, id) => takeVpHex(ctx, id) },
     // "Identical to 9.21, Method 8."
-    { n: 2, title: "Adjacent to German Unit", find: (ctx, id) => adjacentToGermanUnit(ctx, id, "9.26 method 2") },
+    { n: 2, title: msg("move.method.adjacentGermanUnit"), find: (ctx, id) => adjacentToGermanUnit(ctx, id, "9.26 method 2") },
     {
-      n: 3, title: "Closer to German Unit & Army Objective",
+      n: 3, title: msg("move.method.closerGermanUnitArmyObjective"),
       find(ctx, id, objective) {
         const state = ctx.state, start = hexOf(state, id);
         // Q33: only German units in the army objective hex or proximate to it (9.3).
         const near = germansOnMap(state).filter(([g, s]) => s.at === objective || germanProximate(ctx, g, objective));
-        if (!near.length) return { kind: "none", reason: `no German unit in or proximate to the army objective ${hexName(objective)}` };
+        if (!near.length) return { kind: "none", reason: msg("move.army.noGermanNear", { objective: hexName(objective) }) };
         // In or closest to the objective; then a) in the hex closest to the moving unit; b) in the highest numbered hex.
         const toObjective = (hex: string) => board.distance(hex, objective);
         const [[g, s]] = [...near].sort(([, a], [, b]) => toObjective(a.at) - toObjective(b.at)
           || board.distance(start, a.at) - board.distance(start, b.at) || Number(b.at) - Number(a.at));
         const target = s.at, d = toObjective(target);
-        const what = `${known(g).designation} in ${target}, ${d ? `${d} hex${d === 1 ? "" : "es"} from` : "in"} the army objective ${hexName(objective)}`;
+        const where = { unit: known(g).designation, target, objective: hexName(objective) };
+        const what = d ? msg("move.army.what", { ...where, count: d }) : msg("move.army.whatIn", where);
         const tied = new Set(near.filter(([, x]) => toObjective(x.at) === d).map(([, x]) => x.at)).size;
-        const intro = `the German unit in or closest to the army objective: ${what}` +
-          (tied > 1 ? ` (${tied} hexes as close: a) the closest to the unit, b) the highest numbered)` : "");
-        if (board.areAdjacent(start, target)) return stays(start, `starts adjacent to ${what}`, true);
+        const intro = tied > 1 ? msg("move.army.introTied", { what, count: tied }) : msg("move.army.intro", { what });
+        if (board.areAdjacent(start, target)) return stays(start, msg("move.army.startsAdjacent", { what }), true);
         // Q33: a move only if it brings the unit closer to that German unit; method 4 otherwise.
         const d0 = board.distance(start, target);
         const options = destinations(ctx, id).filter((o) => board.distance(o.hex, target) < d0).map((o) => ({ ...o, target }));
         return {
-          kind: "options", options, none: `no reachable hex closer to ${what}`,
+          kind: "options", options, none: msg("move.army.noCloser", { what }),
           intro: { rule: "9.26 method 3", text: intro, kept: hexesOf(options), dropped: [] },
-          prefs: [lowest("9.26 method 3", `as close as possible to ${known(g).designation} in ${target}, adjacent if able`, (o) => board.distance(o.hex, target))],
+          prefs: [lowest("9.26 method 3", msg("move.army.asClose", { unit: known(g).designation, target }), (o) => board.distance(o.hex, target))],
         };
       },
     },
     {
-      n: 4, title: "Closer to Front Objective",
+      n: 4, title: msg("move.method.closerFrontObjective"),
       find(ctx, id, objective) {
         const front = ctx.objective;
-        if (!front) return { kind: "none", reason: "the active front's objective marker is not in play" };
+        if (!front) return { kind: "none", reason: msg("move.skip.activeFrontSObjectiveMarkerNot") };
         // Q33: a move only if it brings the unit closer to the front objective.
         const d0 = board.distance(hexOf(ctx.state, id), front.at);
         const options = destinations(ctx, id).filter((o) => board.distance(o.hex, front.at) < d0);
         return {
-          kind: "options", options, none: `no reachable hex closer to the front objective ${hexName(front.at)}`,
+          kind: "options", options, none: msg("move.army.noCloserFront", { objective: hexName(front.at) }),
           prefs: [
-            lowest("9.26 method 4", `as close as possible to the front objective ${hexName(front.at)}, in it if able`, (o) => board.distance(o.hex, front.at)),
-            lowest("9.26 method 4", `among them, closer to the army objective ${hexName(objective)}`, (o) => board.distance(o.hex, objective)),
+            lowest("9.26 method 4", msg("move.army.asCloseFront", { objective: hexName(front.at) }), (o) => board.distance(o.hex, front.at)),
+            lowest("9.26 method 4", msg("move.army.closerArmy", { objective: hexName(objective) }), (o) => board.distance(o.hex, objective)),
           ],
         };
       },
@@ -1147,10 +1151,10 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
    * front; by default, every unit of the army. Fails with a reason when the formation cannot
    * be activated.
    */
-  function activate(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | string {
+  function activate(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | Message {
     const members = units ?? Object.keys(state.units).filter((id) => unit(id)?.side === "soviet" && known(id).armyOrCorps === army);
     const active = members.filter((id) => isHex(state.units[id].at) || state.units[id].at === "reserve");
-    if (!active.length) return `No unit of the ${army} army on the map or in the reserve box.`;
+    if (!active.length) return msg("move.noUnit", { army });
     const front = known(active[0]).front!;
     // Step 1: the objective check (9.1); the movement starts from its outcome.
     const first = objectives.check(state, front, army);
@@ -1196,20 +1200,20 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
       const events: GameEvent[] = [header];
       const done = ctx.done;
       const overStacked: { unit: string; hex: string }[] = [];
-      const skipped = new Map<string, { method: string; reason: string }[]>(onMap.map((id) => [id, []]));
+      const skipped = new Map<string, { method: string; reason: Message }[]>(onMap.map((id) => [id, []]));
       const label = (m: Method) => `${book} method ${m.n}`;
 
-      const trace = (id: string, outcome: "moved" | "frozen" | "noMove", by: { method: string; title: string } | null, to: string, path: string[], steps: DecisionStep[]) =>
+      const trace = (id: string, outcome: "moved" | "frozen" | "noMove", by: By | null, to: string, path: string[], steps: DecisionStep[]) =>
         events.push({
           type: "DecisionTraced", unit: id, outcome, method: by?.method ?? null, title: by?.title ?? null,
           from: hexOf(ctx.state, id), to, path, steps, skipped: skipped.get(id)!,
         });
 
-      function moveTo(id: string, by: { method: string; title: string }, o: Option, steps: DecisionStep[]) {
+      function moveTo(id: string, by: By, o: Option, steps: DecisionStep[]) {
         if (o.leavers) {
           overStacked.push({ unit: id, hex: o.hex });
           steps.push({
-            rule: "10.4", text: `ends over-stacked: ${o.leavers.map((u) => known(u).designation).join(", ")}, active and still to move, are to leave the hex`,
+            rule: "10.4", text: msg("move.trace.endsOverStacked", { units: o.leavers.map((u) => known(u).designation) }),
             kept: [o.hex], dropped: [],
           });
         }
@@ -1223,7 +1227,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
        * One decision: 9.23 → the method's preferences → 9.25 if a destination is adjacent to a
        * German unit → 9.24. False if every option breaks a 9.23 restriction.
        */
-      function decide(id: string, by: { method: string; title: string }, found: Extract<Found, { kind: "options" }>, steps: DecisionStep[]): boolean {
+      function decide(id: string, by: By, found: Extract<Found, { kind: "options" }>, steps: DecisionStep[]): boolean {
         let options = restrict(ctx, id, found.options, steps);
         if (!options.length) return false;
         options = narrow(options, found.prefs, steps);
@@ -1244,25 +1248,25 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
       }
 
       /** A method's decision for the unit (`options`: what is left of the method's own); notes why when it does not apply. */
-      function tryMethod(id: string, by: { method: string; title: string }, found: Extract<Found, { kind: "options" }>, options: Option[]): boolean {
+      function tryMethod(id: string, by: By, found: Extract<Found, { kind: "options" }>, options: Option[]): boolean {
         if (decide(id, by, { ...found, options }, found.intro ? [found.intro] : [])) return true;
         skipped.get(id)!.push({
           method: by.method,
-          reason: !options.length ? found.none
-            : options.every((o) => o.refused) ? "every destination is over-stacked at the end of movement (10.4)"
-            : "every destination breaks a 9.23 restriction",
+          reason: !options.length ? found.none ?? msg("move.none.noDestination")
+            : options.every((o) => o.refused) ? msg("move.skip.everyDestinationOverStackedEndMovement")
+            : msg("move.skip.everyDestinationBreaks923Restriction"),
         });
         return false;
       }
 
       /** The methods in order for these units (9.2); `noteSkip` records a method skipped for all. */
-      function runMethods(ids: string[], noteSkip: (method: string, reason: string) => void) {
+      function runMethods(ids: string[], noteSkip: (method: string, reason: Message) => void) {
         for (const m of methods) {
           const skip = m.skip(ctx);
           if (skip) { noteSkip(label(m), skip); continue; }
           for (const id of sorted(ctx, ids, m.order)) {
             if (done.has(id)) continue;
-            const note = (reason: string) => skipped.get(id)!.push({ method: label(m), reason });
+            const note = (reason: Message) => skipped.get(id)!.push({ method: label(m), reason });
             const unitSkip = m.skipUnit?.(ctx, id);
             if (unitSkip) { note(unitSkip); continue; }
             const found = m.find!(ctx, id);
@@ -1270,7 +1274,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
             let options = found.options;
             if (m.opLimit) {
               options = options.filter((o) => o.stay || !beyond(ctx, o.hex));
-              if (!options.length && found.options.length) { note("every destination is beyond the operational limit"); continue; }
+              if (!options.length && found.options.length) { note(msg("move.skip.everyDestinationBeyondOperationalLimit")); continue; }
             }
             tryMethod(id, { method: label(m), title: m.title }, found, options);
           }
@@ -1306,24 +1310,24 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
 
       /** 9.27, for one out-of-supply or isolated unit. */
       function unsuppliedMove(id: string) {
-        const by = { method: "9.27", title: "Movement Methods For Unsupplied Units" };
-        const state = ctx.state, start = hexOf(state, id), note = (reason: string) => skipped.get(id)!.push({ method: "9.27", reason });
+        const by = { method: "9.27", title: msg("move.method.movementMethodsUnsuppliedUnits") };
+        const state = ctx.state, start = hexOf(state, id), note = (reason: Message) => skipped.get(id)!.push({ method: "9.27", reason });
         const isolated = rules.supplyStatus(state, id) === "isolated";
         if (movement.isSurrounded(state, id) || (isolated && adjacentToGerman(state, start))) {
           done.add(id);
-          const why = movement.isSurrounded(state, id) ? "surrounded" : "isolated and adjacent to a German unit";
-          trace(id, "frozen", by, start, [start], [{ rule: "9.27", text: `${why}: does not move`, kept: [start], dropped: [] }]);
+          const why = msg(movement.isSurrounded(state, id) ? "move.trace.surrounded" : "move.trace.isolatedAdjacent");
+          trace(id, "frozen", by, start, [start], [{ rule: "9.27", text: msg("move.trace.frozen927", { why }), kept: [start], dropped: [] }]);
           return;
         }
         // Able to trace supply: the methods of 9.21 or 9.22, within its supply state (13.2).
         if (rules.canTraceSupply(state, id)) {
           // Q34: with an Army Objective marker, 9.26.
           if (armyObjective(state, known(id).armyOrCorps)) {
-            note("able to trace supply: follows the movement methods of 9.26");
+            note(msg("move.skip.followsMethodsOf", { book: "9.26" }));
             armyMove(id);
             return;
           }
-          note("able to trace supply: follows the movement methods of " + book);
+          note(msg("move.skip.followsMethodsOf", { book }));
           runMethods([id], (method, reason) => skipped.get(id)!.push({ method, reason }));
           return;
         }
@@ -1333,10 +1337,10 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         if (inSupply.length) {
           const steps: DecisionStep[] = [];
           const ok = decide(id, by, {
-            kind: "options", options: inSupply, none: "",
+            kind: "options", options: inSupply,
             prefs: [
-              prefer("9.27 a", "a hex in Soviet support", (o) => rules.inSovietSupport(state, o.hex)),
-              lowest("9.27 b", "the closest hex", (o) => board.distance(start, o.hex)),
+              prefer("9.27 a", msg("move.pref.hexSovietSupport"), (o) => rules.inSovietSupport(state, o.hex)),
+              lowest("9.27 b", msg("move.pref.closestHex"), (o) => board.distance(start, o.hex)),
             ],
           }, steps);
           if (ok) return;
@@ -1347,14 +1351,14 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
         const options = all.filter((o) => !adjacentToGerman(state, o.hex));
         if (!adjacentToGerman(state, start)) options.push({ hex: start, path: [start], stay: true });
         const steps: DecisionStep[] = [{
-          rule: "9.27", text: "no reachable hex in Soviet supply: a hex not adjacent to any German unit",
+          rule: "9.27", text: msg("move.trace.noReachableHexSovietSupplyHex"),
           kept: hexesOf(options), dropped: hexesOf(all).filter((h) => !options.some((o) => o.hex === h)),
         }];
         const ok = options.length > 0 && decide(id, by, {
-          kind: "options", options, none: "",
-          prefs: [lowest("9.27", "a hex as close as possible to a hex in Soviet supply", (o) => supplied.get(o.hex) ?? null)],
+          kind: "options", options,
+          prefs: [lowest("9.27", msg("move.pref.hexClosePossibleHexSovietSupply"), (o) => supplied.get(o.hex) ?? null)],
         }, steps);
-        if (!ok) note(inSupply.length || options.length ? "every destination breaks a 9.23 restriction" : "no reachable hex in Soviet supply nor away from German units");
+        if (!ok) note(inSupply.length || options.length ? msg("move.skip.everyDestinationBreaks923Restriction") : msg("move.skip.noReachableHexSovietSupplyNor"));
       }
     }
   }

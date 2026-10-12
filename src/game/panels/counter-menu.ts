@@ -4,8 +4,9 @@
 // reductions of a set-up adjustment (2.4). Commands go through the engine like any other.
 import { isHex, type SupplyMarker } from "../../engine/types";
 
-const SUPPLY: [SupplyMarker | "supplied", string][] = [["supplied", "In supply"], ["outOfSupply", "Out of Supply"], ["isolated", "Isolated"]];
+const SUPPLY: (SupplyMarker | "supplied")[] = ["supplied", "outOfSupply", "isolated"];
 import type { GameSession } from "../state/session";
+import { t, type MessageKey } from "../../i18n/i18n";
 
 export interface CounterMenu {
   open(unitId: string, at: { clientX: number; clientY: number }): void;
@@ -34,18 +35,18 @@ export function createCounterMenu(session: GameSession): CounterMenu {
     const onMap = isHex(s.at);
     // Before Start every correction is locked: the menu says why instead of acting.
     const lock = engine.locked(state);
-    const item = (action: string, label: string, enabled: boolean, title = "") =>
-      `<button type="button" role="menuitem" data-action="${action}"${enabled && !lock ? "" : " disabled"}${title ? ` title="${title}"` : ""}>${label}</button>`;
-    menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${lock}</p>` : "") +
-      item("step", "Remove step", !last, last ? "Single step left: eliminate it instead" : "") +
-      item("eliminate", "Eliminate", last, last ? "" : "Only on the last step") +
-      item("disperse", s.dispersed ? "Remove Dispersed marker" : "Place Dispersed marker", onMap, onMap ? "" : "Only on the map") +
-      `<div class="menu-group" role="group" aria-label="Supply marker"><div class="menu-sep">Supply marker</div>` +
-      SUPPLY.map(([status, label]) => {
+    const item = (action: string, label: MessageKey, enabled: boolean, title?: MessageKey) =>
+      `<button type="button" role="menuitem" data-action="${action}"${enabled && !lock ? "" : " disabled"}${title ? ` title="${t(title)}"` : ""}>${t(label)}</button>`;
+    menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") +
+      item("step", "menu.removeStep", !last, last ? "menu.lastStep" : undefined) +
+      item("eliminate", "menu.eliminate", last, last ? undefined : "menu.onlyLastStep") +
+      item("disperse", s.dispersed ? "menu.removeDispersed" : "menu.placeDispersed", onMap, onMap ? undefined : "menu.onlyOnMap") +
+      `<div class="menu-group" role="group" aria-label="${t("menu.supplyMarker")}"><div class="menu-sep">${t("menu.supplyMarker")}</div>` +
+      SUPPLY.map((status) => {
         const current = (state.supply?.[id] ?? "supplied") === status;
         return `<button type="button" role="menuitemradio" aria-checked="${current}" data-supply="${status}"` +
-          `${onMap && !current && !lock ? "" : " disabled"}${onMap ? "" : ` title="Only on the map"`}>` +
-          `${label}<span class="check" aria-hidden="true">${current ? "✓" : ""}</span></button>`;
+          `${onMap && !current && !lock ? "" : " disabled"}${onMap ? "" : ` title="${t("menu.onlyOnMap")}"`}>` +
+          `${t(`menu.${status}`)}<span class="check" aria-hidden="true">${current ? "✓" : ""}</span></button>`;
       }).join("") + `</div>`;
     menu.dataset.unit = id;
     menu.hidden = false;

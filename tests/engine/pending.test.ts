@@ -8,6 +8,7 @@ import { createMovement } from "../../src/engine/movement";
 import { provisionalRules, type PendingRules } from "../../src/engine/pending";
 import { emptyState, type GameState } from "../../src/engine/types";
 import { terrain } from "./real-map";
+import { expectMessage } from "../i18n/expect-message";
 
 // The engine already asks the questions of task 4.6 (pending.ts), and those of task 4.3
 // answered by supply.ts. These tests swap the answers for other ones and check that
@@ -65,7 +66,7 @@ describe("Garrisons (task 4.6, 15.22 and 10.1)", () => {
 
   it("no strategic movement from next to a garrison (10.6)", () => {
     const { movement, state } = setup([unit("g", "german")], { g: "0404" }, garrisonIn("0405"));
-    expect(movement.whyNoStrategic(state, "g")).toBe("g starts adjacent to a garrison.");
+    expectMessage(movement.whyNoStrategic(state, "g"), "movement.strategic.adjacentGarrison", { unit: "g" });
   });
 
   it("9.3 proximate to a garrisoned hex: able to enter a hex next to it", () => {
@@ -95,6 +96,6 @@ describe("Supply answers (task 4.3) seen by movement", () => {
 
   it("no strategic movement for a unit out of supply in the Supply Phase (10.6: its status, not its trace)", () => {
     const { movement, state } = setup([unit("g", "german")], { g: "0401" }, { supplyStatus: () => "outOfSupply" });
-    expect(movement.whyNoStrategic(state, "g")).toBe("g is not in supply.");
+    expectMessage(movement.whyNoStrategic(state, "g"), "movement.strategic.notSupplied", { unit: "g" });
   });
 });

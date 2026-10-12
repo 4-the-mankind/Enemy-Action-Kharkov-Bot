@@ -4,7 +4,7 @@ import { ARROW_FRONT_COLOR, FRONT_COLOR } from "../../../ui/map-symbols";
 import { pointsAttr, type Layer } from "./layer";
 
 export const arrowsLayer: Layer = {
-  id: "arrows", label: "Movement arrows", description: "One-way movement arrows; filled = primary, outline = secondary; color = front",
+  id: "arrows", label: "layers.arrows.label", description: "layers.arrows.description",
   color: FRONT_COLOR.voronezh, plane: "data", defaultOn: false,
   render: ({ grid: g, sides: all, sideData, hexById }) => all.map((s) => {
     const a = resolveSide(sideData, s.id).arrow;

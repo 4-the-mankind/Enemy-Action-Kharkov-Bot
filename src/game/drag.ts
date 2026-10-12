@@ -8,12 +8,8 @@ import { faceImage } from "./data/game-data";
 import { pointsAttr } from "./map/layers/layer";
 import type { MapView } from "./map/map-view";
 import type { GameSession } from "./state/session";
+import { t } from "../i18n/i18n";
 
-const BOX_LABEL: Record<Box, string> = {
-  reserve: "Put in reserve",
-  reinforcements: "Back to its turn of entry",
-  eliminated: "Eliminate",
-};
 
 /** Edge band (px) of a scrollable panel where a held drag scrolls it, and top speed (px per second). */
 const SCROLL_BAND = 56;
@@ -100,7 +96,7 @@ export function createDragController(session: GameSession, view: MapView, data: 
       mark.style.display = hex ? "" : "none";
       label.hidden = !target;
       label.classList.toggle("refused", !!refusal);
-      label.textContent = refusal ?? (hex ? `Drop on ${hex.id}` : target ? BOX_LABEL[target as Box] : "");
+      label.textContent = refusal ? t(refusal) : hex ? t("drag.dropOn", { hex: hex.id }) : target ? t(`drag.${target as Box}`) : "";
     };
     const end = (e: PointerEvent) => {
       move(e);

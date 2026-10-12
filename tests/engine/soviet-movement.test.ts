@@ -7,6 +7,8 @@ import { createBoard } from "../../src/engine/board";
 import { createEngine } from "../../src/engine/engine";
 import { emptyState, type GameEvent, type GameState, type ObjectiveMarker } from "../../src/engine/types";
 import { json, realMap, terrain } from "./real-map";
+import { msg, semicolonList } from "../../src/i18n/message";
+import { expectMessage } from "../i18n/expect-message";
 
 type Traced = Extract<GameEvent, { type: "DecisionTraced" }>;
 type Activated = Extract<GameEvent, { type: "FormationActivated" }>;
@@ -90,13 +92,13 @@ describe("Booklet example p17: 3rd Tank Army on Game-turn 1 (9.21, reference tes
     expect(header.spearheads).toHaveLength(10);
     for (const id of Object.values(U))
       for (const n of [4, 5, 6, 7, 8])
-        expect(traceOf(events, id).skipped).toContainEqual({ method: `9.21 method ${n}`, reason: "spearhead unit (GT 1-2): skips methods 4-9" });
+        expect(traceOf(events, id).skipped).toContainEqual({ method: `9.21 method ${n}`, reason: msg("move.skip.spearheadUnitGT12Skips") });
     const moved = traces(events).filter((t) => t.outcome === "moved");
     expect(moved.map((t) => t.method)).toEqual(Array(6).fill("9.21 method 11"));
     // Method 10: the units are stopped by German ZOCs before spending their entire allowance.
-    expect(traceOf(events, U["01"]).skipped).toContainEqual({ method: "9.21 method 10", reason: "no move along the arrows spends its entire movement allowance" });
+    expect(traceOf(events, U["01"]).skipped).toContainEqual({ method: "9.21 method 10", reason: msg("move.none.noMoveAlongArrowsSpendsEntire") });
     // Method 12 does not apply to units adjacent to German units.
-    expect(traceOf(events, U["05"]).skipped).toContainEqual({ method: "9.21 method 12", reason: "starts adjacent to a German unit" });
+    expect(traceOf(events, U["05"]).skipped).toContainEqual({ method: "9.21 method 12", reason: msg("move.skip.startsAdjacentGermanUnit") });
   });
 
   it("explains each choice as the booklet does", () => {
@@ -135,8 +137,8 @@ describe("ActivateFormation", () => {
   it("refuses before Start and an army with no unit in play; 9.22 from GT 5 without objective, 9.21 before (errata)", () => {
     const { engine, state, activate } = setup({ units: [sov("s")], at: { s: "0402" } });
     expect(engine.step({ ...state, started: false }, { type: "ActivateFormation", army: "3T" }).events[0])
-      .toMatchObject({ type: "CommandRejected", reason: "Press Start to begin turn 1." });
-    expect(activate("69").events[0]).toMatchObject({ type: "CommandRejected", reason: "No unit of the 69 army on the map or in the reserve box." });
+      .toMatchObject({ type: "CommandRejected", reason: msg("reject.pressStart") });
+    expect(activate("69").events[0]).toMatchObject({ type: "CommandRejected", reason: msg("move.noUnit", { army: "69" }) });
     expect(activate("3T", { ...state, turn: 5 }).events[0]).toMatchObject({ type: "FormationActivated", methods: "9.22" });
     expect(activate("3T", { ...state, turn: 4 }).events[0]).toMatchObject({ type: "FormationActivated", methods: "9.21" });
   });
@@ -186,7 +188,7 @@ describe("Method 1: Take VP Hex (▼)", () => {
       hexes: { "0404": { terrain: "town", vp: 1 } },
     }).activate();
     expect([state.units.high.at, state.units.low.at]).toEqual(["0404", "0402"]);
-    expect(traceOf(events, "low").skipped[0]).toEqual({ method: "9.21 method 1", reason: "no empty German town or city, nor map-edge VP hex, within reach" });
+    expect(traceOf(events, "low").skipped[0]).toEqual({ method: "9.21 method 1", reason: msg("move.skip.noEmptyGermanTownCityNor") });
   });
 
   it("b) else enters an empty map-edge VP hex from which Soviet supply can be traced", () => {
@@ -275,7 +277,7 @@ describe("Method 5: To Soviet VP Hex (▼)", () => {
 
   it("not if no German unit is proximate to it; [GT 3+] German supply traceable to it is enough", () => {
     const far = setup({ hexes, sovietTowns: ["0404"], units: [sov("s"), ger("g", { movementValue: 2 })], at: { s: "0401", g: "0407" } }).activate();
-    expect(traceOf(far.events, "s").skipped).toContainEqual({ method: "9.21 method 5", reason: "no reachable Soviet VP hex of the front, unoccupied and threatened by the Germans" });
+    expect(traceOf(far.events, "s").skipped).toContainEqual({ method: "9.21 method 5", reason: msg("move.none.noReachableSovietVPHexFront") });
     // No German unit; a German map edge four hexes from the town.
     const edge = { ...hexes, "0408": { mapEdge: "german" as const } };
     const run = (turn: number) => setup({ hexes: edge, turn, sovietTowns: ["0404"], units: [sov("s")], at: { s: "0401" } }).activate();
@@ -316,7 +318,7 @@ describe("Method 6: Adjacent to German VP Hex (▲)", () => {
     const { events } = setup({ hexes: vp("southwest"), units: [sov("s"), ger("g")], at: { s: "0402", g: "0405" } }).activate();
     const t = traceOf(events, "s");
     expect(t.method).toBe("9.21 method 8");
-    expect(t.skipped).toContainEqual({ method: "9.21 method 6", reason: "no reachable hex adjacent to a German VP hex targeted for the front" });
+    expect(t.skipped).toContainEqual({ method: "9.21 method 6", reason: msg("move.none.noReachableHexAdjacentGermanVP") });
   });
 
   it("prefers the VP hex occupied by the least German strength", () => {
@@ -369,7 +371,7 @@ describe("Method 7: Adjacent to German Unit in Logistics Hex (▼)", () => {
   it("ignores logistics hexes of the other front; a unit starting next to a qualifying stack does not move", () => {
     const sw = { "0405": { logistics: "southwest" as const } };
     expect(traceOf(setup({ hexes: sw, units: [sov("s"), ger("g")], at: { s: "0402", g: "0405" } }).activate().events, "s").skipped)
-      .toContainEqual({ method: "9.21 method 7", reason: "no unsurrounded German unit in a logistics hex of the front" });
+      .toContainEqual({ method: "9.21 method 7", reason: msg("move.skip.noUnsurroundedGermanUnitLogisticsHex") });
     const { events } = setup({ hexes: logistics("0405"), units: [sov("s"), ger("g")], at: { s: "0404", g: "0405" } }).activate();
     const t = traceOf(events, "s");
     expect(t).toMatchObject({ outcome: "frozen", method: "9.21 method 7" });
@@ -462,7 +464,7 @@ describe("9.22 Soviet movement methods B (front objective removed, GT 5+)", () =
         hexes: { "0404": { terrain: "town", vp: 1 } }, sovietTowns: ["0404"],
         units: [...units, sov("u", { armyOrCorps: "69" })], at: { ...at, u: "0404" },
       }).activate();
-      expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.22 method 4", reason: "in a VP hex" });
+      expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.22 method 4", reason: msg("move.skip.vpHex") });
     });
   });
 
@@ -485,7 +487,7 @@ describe("9.22 Soviet movement methods B (front objective removed, GT 5+)", () =
     expect(traceOf(safe.events, "s")).toMatchObject({ method: "9.22 method 7", to: "0404" });
     const risky = b({ units, at: { ...at, g2: "0302" } }).activate();
     expect(traceOf(risky.events, "s").skipped).toContainEqual({
-      method: "9.22 method 7", reason: "no reachable hex would surround a German unit without the unit becoming nearly surrounded",
+      method: "9.22 method 7", reason: msg("move.none.noReachableHexWouldSurroundGerman"),
     });
     // 9.21 (Game-turn 4) has no such condition.
     expect(traceOf(setup({ turn: 4, units, at: { ...at, g2: "0302" } }).activate().events, "s")).toMatchObject({ method: "9.21 method 4", to: "0404" });
@@ -509,7 +511,7 @@ describe("Method 10: Follow Movement Arrows (▲)", () => {
   it("strict: does not move if the arrows run out with MPs left", () => {
     const { events } = setup({ units: [sov("s", { movementValue: 4 })], at: { s: "0402" }, sides: line }).activate();
     expect(traceOf(events, "s")).toMatchObject({ outcome: "noMove" });
-    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 10", reason: "no move along the arrows spends its entire movement allowance" });
+    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 10", reason: msg("move.none.noMoveAlongArrowsSpendsEntire") });
   });
 
   it("takes the secondary arrow when the primary direction is stopped by a ZOC before all MPs are spent", () => {
@@ -528,7 +530,7 @@ describe("Method 10: Follow Movement Arrows (▲)", () => {
       units: [sov("s", { movementValue: 3 })], at: { s: "0402" },
       sides: line.map(([a, b]) => arrow(a, b, "primary", "southwest")),
     }).activate();
-    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 10", reason: "no movement arrow for its front in its hex" });
+    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 10", reason: msg("move.skip.noMovementArrowFrontHex") });
   });
 });
 
@@ -565,7 +567,7 @@ describe("Method 12: Strengthen Potential Attack (▲)", () => {
 
   it("not for a unit starting adjacent to a German unit", () => {
     const { events } = setup({ hexes: corridor, units: [sov("a"), ger("g")], at: { a: "0403", g: "0404" }, objective: { at: "0408", face: "west" } }).activate();
-    expect(traceOf(events, "a").skipped).toContainEqual({ method: "9.21 method 12", reason: "starts adjacent to a German unit" });
+    expect(traceOf(events, "a").skipped).toContainEqual({ method: "9.21 method 12", reason: msg("move.skip.startsAdjacentGermanUnit") });
   });
 });
 
@@ -578,7 +580,7 @@ describe("Restrictions on Soviet movement (9.23)", () => {
       hexes: corridor, objective, units: [sov("s"), sov("t", { armyOrCorps: "69" }), ger("g")], at: { s: "0403", t: "0407", g: "0405" },
     }).activate();
     expect(state.units.s.at).toBe("0403");
-    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 11", reason: "every destination breaks a 9.23 restriction" });
+    expect(traceOf(events, "s").skipped).toContainEqual({ method: "9.21 method 11", reason: msg("move.skip.everyDestinationBreaks923Restriction") });
   });
 
   it("b) not if a German unit would become proximate to an empty Soviet town", () => {
@@ -606,7 +608,11 @@ describe("Restrictions on Soviet movement (9.23)", () => {
     // Without G1 the town was out of German reach: 0602 is refused; from 0503, S still blocks G2.
     const alone = setup({ hexes, objective: { at: "0602", face: "west" }, sovietTowns: ["0405"], units: [sov("s"), ger("g2")], at: { s: "0403", g2: "0401" } }).activate();
     expect(alone.state.units.s.at).toBe("0503");
-    expect(traceOf(alone.events, "s").steps[0]).toMatchObject({ rule: "9.23 b", dropped: ["0602"], text: "0602: g2 would become proximate to 0405" });
+    const step = traceOf(alone.events, "s").steps[0];
+    expect(step).toMatchObject({ rule: "9.23 b", dropped: ["0602"] });
+    expectMessage(step.text, "common.sentences", {
+      parts: semicolonList([msg("move.why923.item", { hex: "0602", why: msg("move.why923.becomesProximate", { unit: "g2", town: "0405" }) })]),
+    });
   });
 
   it("c) not if a map-edge VP hex would become vacant", () => {

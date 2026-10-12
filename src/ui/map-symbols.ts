@@ -2,14 +2,13 @@
 // given attribute always looks and reads the same on every page.
 import type { Front, LINE_KEYS, Logistics, MapEdgeSide, Terrain } from "../core/map-hexes";
 import type { ArrowFront, River } from "../core/map-hexsides";
+import { dynamicKey } from "../i18n/message";
+import { t } from "../i18n/i18n";
 
 export type LineKey = (typeof LINE_KEYS)[number];
 
-export const LINE_LABEL: Record<LineKey, string> = {
-  lineArtillery: "Artillery/East",
-  lineWest: "West",
-  lineFar: "Far",
-};
+/** Name of a support or operational limit line. */
+export const lineLabel = (k: LineKey) => t(`names.line.${k}`);
 export const LINE_COLOR: Record<LineKey, string> = {
   lineArtillery: "#d2691e",
   lineWest: "#2f8f8f",
@@ -27,9 +26,9 @@ export const RIVER_WIDTH: Record<River, number> = { minor: 2, donets: 4, dniepr:
 
 /** Display name of a front, logistics zone or map edge value. */
 export function label(v: string): string {
-  return v === "southwest" ? "Southwest" : v === "voronezh" ? "Voronezh" : v === "both" ? "Both" : v === "soviet" ? "Soviet" : "German";
+  return t(dynamicKey(v === "soviet" || v === "german" ? `names.side.${v}` : `names.frontShort.${v}`));
 }
 
 export function riverLabel(r: River): string {
-  return r === "minor" ? "Minor river" : r === "donets" ? "Donets" : r === "dniepr" ? "Dniepr" : "Dniepr (blocked)";
+  return t(`names.river.${r}`);
 }

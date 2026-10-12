@@ -1,14 +1,15 @@
 // Layers panel: one "acetate sheet" per layer, laid over the map or lifted off.
 // Keys 1…n toggle the layers in panel order.
 import type { LayerStack } from "../map/layer-stack";
+import { t } from "../../i18n/i18n";
 
 export function mountLayersPanel(root: HTMLElement, stack: LayerStack) {
   root.innerHTML = stack.layers.map((l, i) => `
     <li>
       <button type="button" class="sheet" data-layer="${l.id}" style="--ink: ${l.color}"
-        aria-pressed="false" aria-keyshortcuts="${i + 1}" title="${l.description}">
+        aria-pressed="false" aria-keyshortcuts="${i + 1}" title="${t(l.description)}">
         <span class="sheet-ink" aria-hidden="true"></span>
-        <span class="sheet-label">${l.label}</span>
+        <span class="sheet-label">${t(l.label)}</span>
         <kbd>${i + 1}</kbd>
       </button>
     </li>`).join("");

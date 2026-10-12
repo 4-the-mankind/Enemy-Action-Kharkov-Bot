@@ -1,14 +1,15 @@
 // Contract for a map layer: a named, toggleable group of SVG drawn into one plane.
 import type { Point } from "../../../core/geometry";
+import type { MessageKey } from "../../../i18n/message";
 import type { MapData } from "../../data/map-data";
 import type { Plane } from "../map-view";
 
 export interface Layer {
   /** Stable id: used as the DOM data attribute and the saved toggle key. */
   id: string;
-  label: string;
+  label: MessageKey;
   /** What the layer shows, in the player's words (tooltip and screen readers). */
-  description: string;
+  description: MessageKey;
   /** Grease-pencil color of the layer's swatch in the layers panel. */
   color: string;
   plane: Plane;

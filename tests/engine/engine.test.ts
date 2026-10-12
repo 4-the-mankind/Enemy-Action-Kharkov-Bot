@@ -4,6 +4,7 @@ import { parseUnits, type Unit } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { emptyState, type GameState } from "../../src/engine/types";
 import { realMap } from "./real-map";
+import { expectMessage } from "../i18n/expect-message";
 
 const realUnits = parseUnits(JSON.parse(readFileSync("data/units.json", "utf8"))).units;
 
@@ -58,7 +59,9 @@ describe("Set up turn 1", () => {
 
   it("is refused once done, and ClearSetUp empties the game", () => {
     const s = setUp();
-    expect(engine.step(s, { type: "SetUpTurn1" }).events[0]).toMatchObject({ type: "CommandRejected", reason: "Turn 1 is already set up." });
+    const again = engine.step(s, { type: "SetUpTurn1" }).events[0];
+    expect(again).toMatchObject({ type: "CommandRejected" });
+    expectMessage(again.type === "CommandRejected" ? again.reason : null, "reject.alreadySetUp");
     const cleared = engine.step(s, { type: "ClearSetUp" });
     expect(cleared.state).toEqual(emptyState());
     expect(cleared.events).toEqual([{ type: "SetUpCleared" }]);
@@ -94,10 +97,10 @@ describe("MoveUnits", () => {
   it("locks the Soviet reserve and refuses Soviet units in the reinforcements (D17)", () => {
     const s = setUp();
     const reason = (units: string[], to: string) => engine.whyNotMove(s, units, to);
-    expect(reason(["sRes"], "0305")).toBe("sRes is in the Soviet reserve: the bot places it.");
-    expect(reason(["s1"], "reserve")).toBe("Only the bot puts Soviet units in reserve.");
-    expect(reason(["s1"], "reinforcements")).toBe("Soviet units cannot go back to the reinforcements.");
-    expect(reason(["g1"], "reinforcements")).toBe("g1 has no later turn of entry.");
+    expectMessage(reason(["sRes"], "0305"), "reject.inSovietReserve", { unit: "sRes" });
+    expectMessage(reason(["s1"], "reserve"), "reject.onlyBotToReserve");
+    expectMessage(reason(["s1"], "reinforcements"), "reject.sovietToReinforcements");
+    expectMessage(reason(["g1"], "reinforcements"), "reject.noLaterEntry", { unit: "g1" });
     expect(reason(["sLate"], "0305")).toBeNull();
     expect(engine.canLift(s, "sRes")).toBe(false);
     expect(engine.canLift(s, "gRes")).toBe(true);
@@ -108,8 +111,8 @@ describe("MoveUnits", () => {
     const r = engine.step(s, { type: "MoveUnits", units: ["s1", "sRes"], to: "0305" });
     expect(r.state).toBe(s);
     expect(r.events[0]).toMatchObject({ type: "CommandRejected", command: "MoveUnits" });
-    expect(engine.whyNotMove(s, ["s1"], "0999")).toBe("0999 is not a playable hex.");
-    expect(engine.whyNotMove({ ...emptyState(), started: true }, ["s1"], "0105")).toBe("s1 is not in play.");
+    expectMessage(engine.whyNotMove(s, ["s1"], "0999"), "reject.notPlayable", { hex: "0999" });
+    expectMessage(engine.whyNotMove({ ...emptyState(), started: true }, ["s1"], "0105"), "reject.notInPlay", { unit: "s1" });
   });
 
   it("restacks a unit within its hex only, up, down, to the top or the bottom", () => {
@@ -123,7 +126,7 @@ describe("MoveUnits", () => {
     expect(inHex(r.state)).toEqual(["g1", "s2", "s1"]);
     expect(r.state.order.filter((id) => r.state.units[id].at !== "0105")).toEqual(s.order.filter((id) => s.units[id].at !== "0105"));
     expect(engine.step(r.state, { type: "Restack", unit: "s1", to: "top" }).events).toEqual([]);
-    expect(engine.step(s, { type: "Restack", unit: "sRes", to: "up" }).events[0]).toMatchObject({ type: "CommandRejected", reason: "sRes is not on the map." });
+    expect(engine.step(s, { type: "Restack", unit: "sRes", to: "up" }).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.notOnMap", params: { unit: "sRes" } } });
   });
 
   it("does nothing when the units are already there", () => {
@@ -153,7 +156,7 @@ describe("Set-up adjustment commands (2.4)", () => {
     expect(r.state.units.two.face).toBe("back");
     expect(r.events).toEqual([{ type: "StepRemoved", unit: "two", from: "front", to: "back" }]);
     expect(eng.step(r.state, { type: "RemoveStep", unit: "two" }).events[0])
-      .toMatchObject({ type: "CommandRejected", reason: "two has a single step left: eliminate it instead." });
+      .toMatchObject({ type: "CommandRejected", reason: { key: "reject.singleStep", params: { unit: "two" } } });
     s = eng.step(s, { type: "RemoveStep", unit: "three" }).state;
     expect(s.units.three.face).toBe("reduced");
     s = eng.step(s, { type: "RemoveStep", unit: "three" }).state;
@@ -165,7 +168,7 @@ describe("Set-up adjustment commands (2.4)", () => {
   it("places Dispersed markers on map units only, and drops them when the unit leaves the map", () => {
     let s = start();
     expect(eng.step(s, { type: "SetDispersed", units: ["sRes"], dispersed: true }).events[0])
-      .toMatchObject({ type: "CommandRejected", reason: "sRes is not on the map." });
+      .toMatchObject({ type: "CommandRejected", reason: { key: "reject.notOnMap", params: { unit: "sRes" } } });
     s = eng.step(s, { type: "SetDispersed", units: ["three", "one"], dispersed: true }).state;
     expect(s.units.three.dispersed).toBe(true);
     s = eng.step(s, { type: "MoveUnits", units: ["three"], to: "0305" }).state;
@@ -191,7 +194,7 @@ describe("Set-up adjustment commands (2.4)", () => {
     s = eng.step(s, { type: "PlaceObjective", front: "voronezh", face: "west", at: "0305" }).state;
     expect(s.objectives).toEqual({ voronezh: { at: "0305", face: "west" } });
     expect(eng.step(s, { type: "PlaceObjective", front: "southwest", face: "south", at: "0999" }).events[0])
-      .toMatchObject({ type: "CommandRejected", reason: "0999 is not a playable hex." });
+      .toMatchObject({ type: "CommandRejected", reason: { key: "reject.notPlayable", params: { hex: "0999" } } });
     s = eng.step(s, { type: "PlaceObjective", front: "voronezh", face: "west", at: null }).state;
     expect(s.objectives).toEqual({});
   });

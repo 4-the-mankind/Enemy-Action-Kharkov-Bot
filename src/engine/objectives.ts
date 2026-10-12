@@ -10,6 +10,8 @@
 // "Enters" includes the hexes a unit crosses (Q32). Every check and change is traced
 // (ObjectiveChanged), the checks that leave a marker in place included.
 import type { Unit } from "../core/units";
+import { dynamicKey, msg, semicolonList, type Message, type Param } from "../i18n/message";
+import { armyName, frontName } from "./names";
 import type { Board } from "./board";
 import type { Movement } from "./movement";
 import type { PendingRules } from "./pending";
@@ -19,14 +21,10 @@ import {
   type ObjectiveFront, type ObjectiveMarker,
 } from "./types";
 
-/** Names of the objective hexes, as the booklet's tables and markers give them. */
-const NAMES: Record<string, string> = {
-  "0215": "Gotnya", "0311": "Belgorod", "0608": "Volchansk", "0912": "Kharkov", "1009": "Chuguev", "1116": "Valki",
-  "1210": "Zmiyev", "1421": "Poltava", "1615": "Krasnograd", "1910": "Lozovaya", "2102": "Kramatorsk", "2120": "Pryadovka",
-  "2404": "Krasnoarmiysk", "2412": "Pavlograd", "2518": "Dnepropetrovsk", "2615": "Sinelnikowo", "3116": "Zaporozhe",
-};
+/** Objective hexes named by the booklet's tables and markers (names in en.json, names.place). */
+const NAMED = new Set(["0215", "0311", "0608", "0912", "1009", "1116", "1210", "1421", "1615", "1910", "2102", "2120", "2404", "2412", "2518", "2615", "3116"]);
 /** "Kharkov (0912)", or the bare hex number. */
-export const hexName = (hex: string) => (NAMES[hex] ? `${NAMES[hex]} (${hex})` : hex);
+export const hexName = (hex: string): Param => (NAMED.has(hex) ? msg("names.hex", { name: msg(dynamicKey(`names.place.${hex}`)), hex }) : hex);
 
 /** 9.11 Objective Placement Tables, by the marker's hex: the results of a roll of 1-6, 7-9, 10. */
 const FIRST_TO_SECOND: Record<string, [string, string, string]> = {
@@ -67,7 +65,6 @@ export function relocation(hex: string, roll: number): ObjectiveMarker | null {
 /** 9.13: the hexes on the back of each Army Objective marker, in order. */
 export const ARMY_OBJECTIVE_HEXES: Record<ObjectiveArmy, string[]> = { "40": ["0311", "1012", "0215"], "1G": ["2102", "2701"] };
 export const ARMY_OBJECTIVE_FRONT: Record<ObjectiveArmy, ObjectiveFront> = { "40": "voronezh", "1G": "southwest" };
-const ARMY_NAME: Record<ObjectiveArmy, string> = { "40": "40th Army", "1G": "1st Guards Army" };
 /** Army Objective markers are printed West only. */
 export const ARMY_OBJECTIVE_FACE: ObjectiveFace = "west";
 
@@ -81,8 +78,6 @@ export function armyObjective(state: GameState, army: string): string | null {
   if (!isObjectiveArmy(army) || !state.objectives[ARMY_OBJECTIVE_FRONT[army]]) return null;
   return state.armyObjectives?.[army] ?? null;
 }
-
-const frontName = (front: ObjectiveFront) => (front === "voronezh" ? "Voronezh Front" : "Southwest Front");
 
 export interface ObjectivesData {
   board: Board;
@@ -101,7 +96,7 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
   const unitsIn = (state: GameState, hex: string) => Object.keys(state.units).filter((id) => state.units[id].at === hex);
 
   /** 9.13: the front's marker leaves play, and the Army Objective marker of its army with it. */
-  function removeFront(state: GameState, front: ObjectiveFront, rule: string, why: string): Result {
+  function removeFront(state: GameState, front: ObjectiveFront, rule: string, why: Message): Result {
     const marker = state.objectives[front];
     if (!marker) return { state, events: [] };
     const objectives = { ...state.objectives };
@@ -112,7 +107,7 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
       const at = state.armyObjectives?.[army];
       if (ARMY_OBJECTIVE_FRONT[army] !== front || !at) continue;
       next = { ...next, armyObjectives: { ...next.armyObjectives, [army]: null } };
-      events.push({ type: "ObjectiveChanged", marker: army, from: at, to: null, rule: "9.13", why: `the ${frontName(front)} objective marker left play` });
+      events.push({ type: "ObjectiveChanged", marker: army, from: at, to: null, rule: "9.13", why: msg("objective.why.frontLeft", { front: frontName(front) }) });
     }
     return { state: next, events };
   }
@@ -121,18 +116,18 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
    * 9.11: units of the front that reach the marker, with how: in its hex; adjacent to it when
    * German units hold it; proximate (9.3) to it when no unit occupies it.
    */
-  function reachedBy(state: GameState, front: ObjectiveFront, hex: string): string[] {
+  function reachedBy(state: GameState, front: ObjectiveFront, hex: string): Message[] {
     const here = unitsIn(state, hex);
     const german = here.some((id) => unit(id)?.side === "german");
     const ground = rules.ground(state);
-    const out: string[] = [];
+    const out: Message[] = [];
     for (const [id, s] of Object.entries(state.units)) {
       const u = unit(id);
       if (!u || u.side !== "soviet" || u.front !== front || !isHex(s.at)) continue;
-      if (s.at === hex) out.push(`${u.designation} occupies it`);
-      else if (german && board.areAdjacent(s.at, hex)) out.push(`${u.designation} (${s.at}) is adjacent to it, German-occupied`);
+      if (s.at === hex) out.push(msg("objective.reach.occupies", { unit: u.designation }));
+      else if (german && board.areAdjacent(s.at, hex)) out.push(msg("objective.reach.adjacent", { unit: u.designation, hex: s.at }));
       else if (!here.length && board.hexCount(s.at, hex) <= Math.max(movement.faceValues(state, id).movement, 1) + 1
-        && movement.proximateToHex(state, id, hex, ground)) out.push(`${u.designation} (${s.at}) is proximate to it`);
+        && movement.proximateToHex(state, id, hex, ground)) out.push(msg("objective.reach.proximate", { unit: u.designation, hex: s.at }));
     }
     return out;
   }
@@ -147,26 +142,29 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
     if (state.turn > 7 || !marker) return { state, events: [] };
     const events: GameEvent[] = [];
     const stage = objectiveStage(marker.at);
-    const stays = (rule: string, why: string): GameEvent =>
+    const stays = (rule: string, why: Message): GameEvent =>
       ({ type: "ObjectiveChanged", marker: front, from: marker.at, to: marker.at, face: marker.face, rule, why });
-    if (stage === 3) events.push(stays("9.12", "third objective: the placement tables are no longer used"));
+    if (stage === 3) events.push(stays("9.12", msg("objective.why.third")));
     else {
       const reasons = reachedBy(state, front, marker.at);
-      if (!reasons.length) events.push(stays("9.11", `no unit of the ${frontName(front)} in it, adjacent to it while German-occupied, or proximate to it`));
+      if (!reasons.length) events.push(stays("9.11", msg("objective.why.notReached", { front: frontName(front) })));
       else {
         const die = rollDie(state);
         const to = relocation(marker.at, die.roll)!;
         state = { ...die.state, objectives: { ...die.state.objectives, [front]: to } };
         events.push({
           type: "ObjectiveChanged", marker: front, from: marker.at, to: to.at, face: to.face, roll: die.roll, rule: "9.11",
-          why: `${reasons.join("; ")}. Die ${die.roll} on the ${stage === 1 ? "1st to 2nd" : "2nd to 3rd"} objective table: ${hexName(to.at)} ${to.face === "west" ? "W" : "S"}`,
+          why: msg("objective.why.relocated", {
+            reasons: semicolonList(reasons), roll: die.roll, table: msg(stage === 1 ? "objective.table.first" : "objective.table.second"),
+            hex: hexName(to.at), face: msg(to.face === "west" ? "objective.faceShort.west" : "objective.faceShort.south"),
+          }),
         });
       }
     }
     if (isObjectiveArmy(army) && ARMY_OBJECTIVE_FRONT[army] === front && state.armyObjectives?.[army] === undefined) {
       const at = ARMY_OBJECTIVE_HEXES[army][0];
       state = { ...state, armyObjectives: { ...state.armyObjectives, [army]: at } };
-      events.push({ type: "ObjectiveChanged", marker: army, from: null, to: at, face: ARMY_OBJECTIVE_FACE, rule: "9.13", why: `first activation of the ${ARMY_NAME[army]}` });
+      events.push({ type: "ObjectiveChanged", marker: army, from: null, to: at, face: ARMY_OBJECTIVE_FACE, rule: "9.13", why: msg("objective.why.armyFirst", { army: armyName(army) }) });
     }
     return { state, events };
   }
@@ -180,7 +178,7 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
     const movers = ids.filter(soviet);
     const events: GameEvent[] = [];
     if (!movers.length) return { state, events };
-    const who = movers.map(name).join(", ");
+    const who = movers.map(name);
     for (const army of OBJECTIVE_ARMIES) {
       let at = armyObjective(state, army);
       if (!at) continue;
@@ -188,13 +186,13 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
       for (const hex of hexes) {
         if (hex === last) {
           state = { ...state, armyObjectives: { ...state.armyObjectives, [army]: null } };
-          events.push({ type: "ObjectiveChanged", marker: army, from: at, to: null, rule: "9.13", why: `${who} entered ${hexName(last)}, the last hex of the marker` });
+          events.push({ type: "ObjectiveChanged", marker: army, from: at, to: null, rule: "9.13", why: msg("objective.why.enteredLast", { units: who, hex: hexName(last) }) });
           break;
         }
         if (hex !== at) continue;
         const next: string = route[route.indexOf(at) + 1];
         state = { ...state, armyObjectives: { ...state.armyObjectives, [army]: next } };
-        events.push({ type: "ObjectiveChanged", marker: army, from: at, to: next, face: ARMY_OBJECTIVE_FACE, rule: "9.13", why: `${who} entered ${hexName(at)}` });
+        events.push({ type: "ObjectiveChanged", marker: army, from: at, to: next, face: ARMY_OBJECTIVE_FACE, rule: "9.13", why: msg("objective.why.entered", { units: who, hex: hexName(at) }) });
         at = next;
       }
     }
@@ -211,7 +209,7 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
     for (const front of OBJECTIVE_FRONTS) {
       const m = state.objectives[front];
       if (!m || objectiveStage(m.at) !== 3 || !enteredHexes.has(m.at)) continue;
-      const r = removeFront(state, front, "9.12", `a Soviet unit entered its third objective, ${hexName(m.at)}, in this activation`);
+      const r = removeFront(state, front, "9.12", msg("objective.why.thirdEntered", { hex: hexName(m.at) }));
       state = r.state;
       events.push(...r.events);
     }
@@ -229,9 +227,9 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
     for (const front of OBJECTIVE_FRONTS) {
       const m = state.objectives[front];
       if (!m) continue;
-      const stays = (why: string): GameEvent => ({ type: "ObjectiveChanged", marker: front, from: m.at, to: m.at, face: m.face, rule: "9.12", why });
+      const stays = (why: Message): GameEvent => ({ type: "ObjectiveChanged", marker: front, from: m.at, to: m.at, face: m.face, rule: "9.12", why });
       if (objectiveStage(m.at) !== 3) {
-        events.push(stays("not at its third objective: it stays until the end of Game-turn 7"));
+        events.push(stays(msg("objective.why.notThird")));
         continue;
       }
       const near = Object.keys(state.units).find((id) => {
@@ -239,10 +237,10 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
         return soviet(id) && isHex(at) && (at === m.at || board.areAdjacent(at, m.at)) && rules.reserveSupplyTracesTo(state, at);
       });
       if (near) {
-        events.push(stays(`${name(near)} (${state.units[near].at}) is next to it and can trace reserve supply`));
+        events.push(stays(msg("objective.why.reserveSupply", { unit: name(near), hex: state.units[near].at })));
         continue;
       }
-      const r = removeFront(state, front, "9.12", "Game-turn 7 Supply Phase: no Soviet unit in or next to it can trace reserve supply");
+      const r = removeFront(state, front, "9.12", msg("objective.why.gt7NoReserve"));
       state = r.state;
       events.push(...r.events);
     }
@@ -253,7 +251,7 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
   function endOfTurn7(state: GameState): Result {
     const events: GameEvent[] = [];
     for (const front of OBJECTIVE_FRONTS) {
-      const r = removeFront(state, front, "9.12", "end of Game-turn 7");
+      const r = removeFront(state, front, "9.12", msg("objective.why.endGt7"));
       state = r.state;
       events.push(...r.events);
     }

@@ -8,6 +8,8 @@ import { createEngine } from "../../src/engine/engine";
 import { createSupply } from "../../src/engine/supply";
 import { emptyState, type GameEvent, type GameState, type SupplyMarker } from "../../src/engine/types";
 import { terrain } from "./real-map";
+import { msg } from "../../src/i18n/message";
+import { expectMessage } from "../i18n/expect-message";
 
 // Supply (13.1-13.4), support (13.5), operational limit (9.8), 9.27 and the supply methods of
 // 9.21 / 9.22 (task 4.3). Synthetic 8 × 10 grid: every hex dead except column 04 (a corridor
@@ -172,12 +174,12 @@ describe("4.3b Supply lines and reasons shown to the player", () => {
   it("whyNoSupply names the constraint that closes the path", () => {
     const far = setup({ units: [sov("s")], at: { s: "0409" }, hexes: sovietEdge });
     expect(far.supply.whyNoSupply(far.state, "soviet", "0408")).toBeNull();
-    expect(far.supply.whyNoSupply(far.state, "soviet", "0409")).toMatch(/8 hexes away/);
+    expectMessage(far.supply.whyNoSupply(far.state, "soviet", "0409"), "supply.why.tooFar", { count: 8, side: msg("names.side.soviet") });
     // The German unit in 0505 controls 0404 and 0405, both on the path.
     const zoc = setup({ units: [sov("s"), ger("g")], at: { s: "0406", g: "0505" }, open: ["0505"], hexes: sovietEdge });
-    expect(zoc.supply.whyNoSupply(zoc.state, "soviet", "0406")).toMatch(/Enemy ZOC closes every path \(0405, 0404 on the shortest one\)/);
+    expectMessage(zoc.supply.whyNoSupply(zoc.state, "soviet", "0406"), "supply.why.zocAt", { hexes: ["0405", "0404"] });
     const town = setup({ units: [sov("s")], at: { s: "0406" }, hexes: { ...sovietEdge, "0404": { terrain: "town" as const, vp: 1 as const } } });
-    expect(town.supply.whyNoSupply(town.state, "soviet", "0406")).toMatch(/enemy towns or cities/);
+    expectMessage(town.supply.whyNoSupply(town.state, "soviet", "0406"), "supply.why.cutSoviet");
   });
 });
 
@@ -278,7 +280,7 @@ describe("9.27 Movement methods for unsupplied units", () => {
     const { activate } = setup({ units: [sov("s")], at: { s: "0406" }, hexes: sovietEdge, supply: { s: "outOfSupply" }, objective: "0402" });
     const t = traceOf(activate().events, "s");
     expect(t).toMatchObject({ outcome: "moved", method: "9.21 method 11", to: "0402" });
-    expect(t.skipped[0]).toEqual({ method: "9.27", reason: "able to trace supply: follows the movement methods of 9.21" });
+    expect(t.skipped[0]).toEqual({ method: "9.27", reason: msg("move.skip.followsMethodsOf", { book: "9.21" }) });
   });
 
   it("unable: to a hex in Soviet supply, the closest one", () => {
@@ -317,7 +319,7 @@ describe("9.21 method 3: Open Supply Line [GT 3+]", () => {
     const header = activate().events[0];
     expect(header).toMatchObject({ type: "FormationActivated", methods: "9.21" });
     expect((header as Extract<GameEvent, { type: "FormationActivated" }>).skipped)
-      .toContainEqual({ method: "9.21 method 3", reason: "Game-turn 3 and later" });
+      .toContainEqual({ method: "9.21 method 3", reason: msg("move.skip.gameTurn3Later") });
   });
 });
 
@@ -352,6 +354,6 @@ describe("9.22 Soviet movement methods B", () => {
       units: [sov("s", { movementValue: 4 }), ger("g", { steps: 1 })], at: { s: "0407", g: "0410" }, hexes, turn: 6, vp: 18,
     });
     const t = traceOf(activate().events, "s");
-    expect(t.skipped).toContainEqual({ method: "9.22 method 11", reason: "already proximate to 0410" });
+    expect(t.skipped).toContainEqual({ method: "9.22 method 11", reason: msg("move.skip.alreadyProximate", { hex: "0410" }) });
   });
 });

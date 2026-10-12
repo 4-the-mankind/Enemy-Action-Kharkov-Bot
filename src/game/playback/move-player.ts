@@ -27,6 +27,7 @@ export class MovePlayer {
   private running: Animation[] = [];
   private finishPlay: (() => void) | null = null;
   private current: Activation | null = null;
+  private readonly playingListeners: ((playing: boolean) => void)[] = [];
   speed: Speed = "normal";
 
   constructor(view: MapView, private readonly data: MapData) {
@@ -50,6 +51,15 @@ export class MovePlayer {
 
   get playing(): boolean { return this.finishPlay !== null; }
 
+  /** Called when an activation starts and stops playing (the supply lines wait for the end). */
+  onPlaying(f: (playing: boolean) => void) { this.playingListeners.push(f); }
+
+  private setPlaying(end: (() => void) | null) {
+    const was = this.playing;
+    this.finishPlay = end;
+    if (was !== this.playing) this.playingListeners.forEach((f) => f(this.playing));
+  }
+
   /**
    * Plays an activation: `beat(i)` when the bot takes up its i-th decision, `done` at the end
    * (also after skip). Without motion, everything lands at once.
@@ -67,10 +77,10 @@ export class MovePlayer {
       this.running = [];
       for (const d of moving) this.release(d);
       this.trails.querySelectorAll(".trail").forEach((t) => t.classList.add("drawn"));
-      this.finishPlay = null;
+      this.setPlaying(null);
       done();
     };
-    this.finishPlay = end;
+    this.setPlaying(end);
     if (reducedMotion() || !activation.decisions.length) { activation.decisions.forEach((_, i) => beat(i)); end(); return; }
     const step = STEP_MS[this.speed];
     let t = 0;
@@ -91,6 +101,12 @@ export class MovePlayer {
     this.walk(d, STEP_MS[this.speed], reducedMotion());
   }
 
+  /** True while trails of the last activation are on the map. */
+  get hasTrails(): boolean { return this.trails.childElementCount > 0; }
+
+  /** Wipes the trails off the map (the player's call); Replay all draws them again. */
+  clearTrails() { if (!this.playing) this.trails.innerHTML = ""; }
+
   /** Removes the trails and candidate rings (new game position, undo of the activation). */
   clear() {
     this.stop();
@@ -100,20 +116,20 @@ export class MovePlayer {
   }
 
   /**
-   * Outlines the hexes a decision weighed: its destination solid, every other candidate dashed;
-   * `stress` (hexes set aside by one step) in red.
+   * Outlines the hexes of a decision: its destination in red; `stress` (the hexes set aside by
+   * the step the player points at in "Why this move") dark and dashed. The other candidates
+   * are not drawn: they would cover the map around every move.
    */
   showOptions(d: Decision | null, stress: string[] = []) {
     if (!d) { this.options.innerHTML = ""; return; }
-    const candidates = new Set(d.steps.flatMap((s) => [...s.kept, ...s.dropped]));
-    candidates.delete(d.to);
-    // Hex outlines: a ring would hide under a stack.
+    // Hex outlines: a ring would hide under a stack. Classes: "option" (dark, dashed),
+    // "option chosen" (red, solid).
     const ring = (id: string, cls: string) => {
       const h = this.data.hexById.get(id);
       return h ? `<polygon class="${cls}" points="${hexCorners(this.data.grid, h).map((c) => `${c.x},${c.y}`).join(" ")}"/>` : "";
     };
-    this.options.innerHTML = [...candidates].map((id) => ring(id, stress.includes(id) ? "option stressed" : "option")).join("") +
-      ring(d.to, "option chosen");
+    // The destination last, on top; never also drawn as set aside.
+    this.options.innerHTML = stress.filter((id) => id !== d.to).map((id) => ring(id, "option")).join("") + ring(d.to, "option chosen");
     for (const t of this.trails.querySelectorAll<SVGElement>(".trail")) t.classList.toggle("focus", t.dataset.unit === d.unit);
   }
 
@@ -123,7 +139,7 @@ export class MovePlayer {
     this.running.forEach((a) => a.cancel());
     this.running = [];
     if (this.current) for (const d of this.current.decisions.filter(walks)) this.release(d);
-    this.finishPlay = null;
+    this.setPlaying(null);
   }
 
   private counter(unit: string) { return this.units.querySelector<SVGGElement>(`[data-unit="${CSS.escape(unit)}"]`); }

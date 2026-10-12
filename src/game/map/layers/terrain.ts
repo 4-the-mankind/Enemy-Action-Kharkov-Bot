@@ -4,7 +4,7 @@ import { TERRAIN_COLOR } from "../../../ui/map-symbols";
 import { pointsAttr, type Layer } from "./layer";
 
 export const terrainLayer: Layer = {
-  id: "terrain", label: "Terrain", description: "Terrain tint per hex (clear is left blank); white dot = village",
+  id: "terrain", label: "layers.terrain.label", description: "layers.terrain.description",
   color: "#b8a26a", plane: "data", defaultOn: false,
   render: ({ grid: g, hexes, hexData }) => {
     const r = hexRadius(g), hh = g.rowStep / 2;

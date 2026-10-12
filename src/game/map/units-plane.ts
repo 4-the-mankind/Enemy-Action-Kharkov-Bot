@@ -4,10 +4,11 @@ import type { MapData } from "../data/map-data";
 import { faceImage } from "../data/game-data";
 import type { Engine } from "../../engine/engine";
 import { armyObjective } from "../../engine/objectives";
-import { ARMY_NAMES } from "../../engine/soviet-cards";
 import { isHex, OBJECTIVE_ARMIES, OBJECTIVE_FRONTS, type GameState, type ObjectiveFace, type ObjectiveFront } from "../../engine/types";
 import type { Selection } from "../state/selection";
 import type { MapView } from "./map-view";
+import { t } from "../../i18n/i18n";
+import { objectiveName } from "../panels/objective-text";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 /** Counter side in grid px (a hex is about 190 grid px flat to flat). */
@@ -28,18 +29,15 @@ const SUPPLY_IMAGE = {
   german: { outOfSupply: "marker-germanoos.png", isolated: "marker-germanisolated.png" },
   soviet: { outOfSupply: "marker-sovietoos10-sml.png", isolated: "marker-sovietisolated-sml.png" },
 };
-const SUPPLY_LABEL = { outOfSupply: "Out of Supply", isolated: "Isolated" };
 
 export class UnitsPlane {
   private readonly root: SVGGElement;
-  private dimmed: (side: "german" | "soviet") => boolean = () => false;
 
   constructor(private readonly view: MapView, private readonly data: MapData, private readonly engine: Engine,
     private readonly selection: Selection) {
     this.root = view.plane("units");
   }
 
-  setDim(f: (side: "german" | "soviet") => boolean) { this.dimmed = f; }
 
 
   render(state: GameState, fly?: { clientX: number; clientY: number; units: string[] }) {
@@ -52,12 +50,12 @@ export class UnitsPlane {
       level.set(hex.id, k + 1);
       const x = hex.x - COUNTER / 2 - k * STACK_STEP, y = hex.y - COUNTER / 2 - k * STACK_STEP;
       const marker = state.supply?.[id];
-      parts.push(`<g class="counter ${u.side}${this.selection.has(id) ? " selected" : ""}${this.dimmed(u.side) ? " dim" : ""}" data-unit="${id}">` +
+      parts.push(`<g class="counter ${u.side}${this.selection.has(id) ? " selected" : ""}" data-unit="${id}">` +
         `<image href="${faceImage(u, s.face)}" x="${x}" y="${y}" width="${COUNTER}" height="${COUNTER}"><title>${u.designation}</title></image>` +
         (s.dispersed ? `<image class="marker" href="/assets/counters/others/${DISPERSED_IMAGE[u.side]}" x="${x + COUNTER - DISPERSED * 0.8}" ` +
-          `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>Dispersed</title></image>` : "") +
+          `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>${t("map.dispersed")}</title></image>` : "") +
         (marker ? `<image class="marker" href="/assets/counters/others/${SUPPLY_IMAGE[u.side][marker]}" x="${x - DISPERSED * 0.2}" ` +
-          `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>${SUPPLY_LABEL[marker]}</title></image>` : "") +
+          `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>${t(`map.supplyMarker.${marker}`)}</title></image>` : "") +
         `<rect class="sel-ring" x="${x}" y="${y}" width="${COUNTER}" height="${COUNTER}" rx="4"/></g>`);
     }
     // Front Objective markers sit on top of the hex, shifted down and right so the stack shows.
@@ -66,7 +64,7 @@ export class UnitsPlane {
       if (!m || !hex) continue;
       const x = hex.x - OBJECTIVE / 2 + 40, y = hex.y - OBJECTIVE / 2 + 40;
       parts.push(`<image class="objective" href="${objectiveImage(front, m.face)}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
-        `<title>${front === "voronezh" ? "Voronezh" : "Southwest"} Front Objective ${m.face === "west" ? "West" : "South"}</title></image>`);
+        `<title>${t(objectiveName(front, m.face))}</title></image>`);
     }
     // Army Objective markers in play (9.13): shifted down and left.
     for (const army of OBJECTIVE_ARMIES) {
@@ -74,14 +72,14 @@ export class UnitsPlane {
       if (!hex) continue;
       const x = hex.x - OBJECTIVE / 2 - 40, y = hex.y - OBJECTIVE / 2 + 40;
       parts.push(`<image class="objective" href="/assets/counters/others/${ARMY_OBJECTIVE_IMAGE[army]}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
-        `<title>${ARMY_NAMES[army]} Objective</title></image>`);
+        `<title>${t(objectiveName(army))}</title></image>`);
     }
     // Forward Support markers (13.53): on top of the hex, shifted up and right.
     for (const at of state.forwardSupport ?? []) {
       const hex = this.data.hexById.get(at);
       if (!hex) continue;
       parts.push(`<image class="objective" href="/assets/counters/others/marker-sovietfwrdsupp.png" x="${hex.x - OBJECTIVE / 2 + 40}" ` +
-        `y="${hex.y - OBJECTIVE / 2 - 40}" width="${OBJECTIVE}" height="${OBJECTIVE}"><title>Soviet Forward Support</title></image>`);
+        `y="${hex.y - OBJECTIVE / 2 - 40}" width="${OBJECTIVE}" height="${OBJECTIVE}"><title>${t("map.forwardSupport")}</title></image>`);
     }
     this.root.innerHTML = parts.join("");
     if (fly && !matchMedia("(prefers-reduced-motion: reduce)").matches) this.flyIn(fly);

@@ -3,6 +3,7 @@
 import type { GameState } from "../../engine/types";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
+import { t } from "../../i18n/i18n";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
@@ -12,9 +13,9 @@ export function mountReminders(root: HTMLElement, session: GameSession) {
     root.hidden = !list.length;
     root.innerHTML = list.map((r) =>
       `<article class="reminder"><img src="${cardImage(r.card)}" alt="" data-card="${r.card}" tabindex="0">` +
-      `<div><h2>${esc(r.title)}</h2><p>${esc(r.text)}</p>` +
-      `<p class="until">${r.until === "done" ? `From ${r.card.toUpperCase()}, turn ${r.turn}.` : `From ${r.card.toUpperCase()}, until the end of turn ${r.turn}.`}</p></div>` +
-      (r.until === "done" ? `<button type="button" class="btn" data-done="${r.id}">Done</button>` : "") + `</article>`).join("");
+      `<div><h2>${esc(t(r.title))}</h2><p>${esc(t(r.text))}</p>` +
+      `<p class="until">${t(`reminder.until.${r.until}`, { card: r.card.toUpperCase(), turn: r.turn })}</p></div>` +
+      (r.until === "done" ? `<button type="button" class="btn" data-done="${r.id}">${t("reminder.done")}</button>` : "") + `</article>`).join("");
   };
   root.addEventListener("click", (e) => {
     const id = (e.target as Element).closest<HTMLElement>("[data-done]")?.dataset.done;

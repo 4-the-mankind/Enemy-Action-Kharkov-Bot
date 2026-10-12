@@ -4,7 +4,7 @@ import { FRONT_COLOR, LOGI_COLOR } from "../../../ui/map-symbols";
 import { pointsAttr, pt, ring, type Layer } from "./layer";
 
 export const targetsLayer: Layer = {
-  id: "targets", label: "Objectives", description: "VP value; ring = front target; diamond = logistics hex; color = front",
+  id: "targets", label: "layers.targets.label", description: "layers.targets.description",
   color: FRONT_COLOR.southwest, plane: "data", defaultOn: false,
   render: ({ grid: g, hexes, hexData }) => {
     const r = hexRadius(g), hh = g.rowStep / 2;

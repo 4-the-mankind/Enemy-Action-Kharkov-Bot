@@ -28,6 +28,7 @@ import { MovePlayer } from "./playback/move-player";
 import { scenarioFromUrl } from "./scenarios";
 import { GameSession } from "./state/session";
 import { Selection } from "./state/selection";
+import { applyI18n, t } from "../i18n/i18n";
 
 /** Arrow keys pan the map (the map moves the other way, like dragging it); Shift = larger steps. */
 const PAN_KEYS: Record<string, [number, number]> = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
@@ -41,6 +42,7 @@ function status(msg: string, error = false) {
 }
 
 async function init() {
+  applyI18n();
   mountDossier($("unitsDossier"));
   const rail = mountDossier($("railDossier"));
 
@@ -59,7 +61,7 @@ async function init() {
   let loaded, game;
   try { [loaded, game] = await Promise.all([loadMapData(), loadGameData()]); }
   catch (err) {
-    status(`${(err as Error).message} Calibrate the map and check data/ first.`, true);
+    status(t("map.loadFailed", { error: (err as Error).message }), true);
     return;
   }
   const { data, warnings } = loaded;
@@ -67,7 +69,7 @@ async function init() {
   let w = 0, h = 0;
   for (const hex of data.hexes) for (const c of hexCorners(data.grid, hex)) { w = Math.max(w, c.x); h = Math.max(h, c.y); }
   view.setGrid(data.grid, w, h);
-  view.setBackground(data.grid).catch(() => status("The map image could not be loaded: showing the grid only.", true));
+  view.setBackground(data.grid).catch(() => status(t("map.imageFailed"), true));
 
   const stack = new LayerStack(view, data, DEBUG_LAYERS);
   mountLayersPanel($("layers"), stack);
@@ -90,10 +92,9 @@ async function init() {
     flyFrom = { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
     session.dispatch({ type: "SetUpTurn1" });
   };
-  const panel = mountUnitsPanel($("setup"), $("groups"), session, drag, game.calendar, setUpTurn1);
-  units.setDim((side) => panel.filter() !== "all" && panel.filter() !== side);
-  panel.onFilter(() => units.render(session.state));
+  mountUnitsPanel($("setup"), $("groups"), session, drag, game.calendar, setUpTurn1);
   const player = new MovePlayer(view, data);
+  player.onPlaying((playing) => supply.setHeld(playing));
   const why = mountWhyPanel($("why"), session, player);
   const scenario = scenarioFromUrl(session.engine);
   const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
@@ -167,7 +168,7 @@ async function init() {
   const setUnitsShown = (on: boolean) => {
     unitsPlane.style.display = on ? "" : "none";
     unitsButtons.forEach((b) => b.setAttribute("aria-pressed", String(on)));
-    $("unitsToggle").querySelector("[data-label]")!.textContent = on ? "Hide units" : "Show units";
+    $("unitsToggle").querySelector("[data-label]")!.textContent = t(on ? "map.hideUnits" : "map.showUnits");
     $("unitsToggle").classList.toggle("off", !on);
   };
   const unitsShown = () => unitsPlane.style.display !== "none";
@@ -189,7 +190,7 @@ async function init() {
   });
 
   view.fit();
-  if (warnings.length) status(`${warnings.join(" ")} Those layers stay empty.`, true);
+  if (warnings.length) status(t("map.layersEmpty", { warnings: warnings.join(" ") }), true);
 }
 
 init();

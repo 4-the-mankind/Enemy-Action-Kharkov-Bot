@@ -5,6 +5,7 @@ import { createEngine } from "../../src/engine/engine";
 import { ADJUSTMENTS, parseSetupAdjustments } from "../../src/engine/setup-adjustments";
 import { emptyState, type Command, type GameState, type StepResult } from "../../src/engine/types";
 import { realMap } from "./real-map";
+import { expectMessage } from "../i18n/expect-message";
 
 const json = (p: string) => JSON.parse(readFileSync(p, "utf8"));
 const file = parseSetupAdjustments(json("data/setup-adjustments.json"));
@@ -68,39 +69,40 @@ describe("Recorded set-up adjustments (data/setup-adjustments.json, p48-50)", ()
 
   it("is traced: the adjustment first, then the events of each command it played", () => {
     const r = engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "5-6", roll: 6 });
-    expect(r.events[0]).toEqual({ type: "SetUpAdjustmentApplied", id: "5-6", name: "Bloody Izyum", roll: 6, commands: file.adjustments[2].commands.length });
+    expect(r.events[0]).toEqual({ type: "SetUpAdjustmentApplied", id: "5-6", roll: 6, commands: file.adjustments[2].commands.length });
     expect(r.events.length).toBeGreaterThan(1);
     expect(r.state.adjustment).toEqual({ id: "5-6", roll: 6 });
   });
 
   it("can be replaced by another until Start, from the booklet set-up", () => {
     const r = engine.step(play("3-4"), { type: "ApplySetUpAdjustment", id: "7-8", roll: 8 });
-    expect(r.events[0]).toMatchObject({ type: "SetUpAdjustmentApplied", id: "7-8", replaces: "Slavyansk Liberated" });
+    expect(r.events[0]).toMatchObject({ type: "SetUpAdjustmentApplied", id: "7-8", replaces: "3-4" });
     expect(r.state).toEqual({ ...play("7-8"), adjustment: { id: "7-8", roll: 8 } });
   });
 
   it("locks the player until Start, which needs an adjustment", () => {
     const s = setUp(), move: Command = { type: "MoveUnits", units: ["sov_57G-Popov_infantry"], to: "1304" };
-    expect(refusal(engine.step(s, move))?.reason).toBe("Press Start to begin turn 1.");
+    expectMessage(refusal(engine.step(s, move))?.reason, "reject.pressStart");
     expect(engine.canLift(s, "sov_57G-Popov_infantry")).toBe(false);
-    expect(refusal(engine.step(s, { type: "StartGame" }))?.reason).toMatch(/set-up adjustment first/);
+    expectMessage(refusal(engine.step(s, { type: "StartGame" }))?.reason, "reject.chooseAdjustment");
     const started = engine.step(play("9-10"), { type: "StartGame" });
     expect(started.events).toEqual([{ type: "GameStarted" }]);
     expect(refusal(engine.step(started.state, move))).toBeUndefined();
-    expect(refusal(engine.step(started.state, { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason).toMatch(/has started/);
+    expectMessage(refusal(engine.step(started.state, { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason, "reject.adjustmentLocked");
   });
 
   it("is played after the set-up, with a roll that selects it", () => {
-    expect(refusal(engine.step(emptyState(), { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason).toMatch(/Set up turn 1 first/);
-    expect(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "1-2", roll: 3 }))?.reason).toMatch(/roll of 3/);
-    expect(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "11-12" }))?.reason).toMatch(/Unknown/);
+    expectMessage(refusal(engine.step(emptyState(), { type: "ApplySetUpAdjustment", id: "1-2" }))?.reason, "reject.setUpFirst");
+    expectMessage(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "1-2", roll: 3 }))?.reason, "reject.rollMismatch",
+      { roll: 3, adjustment: { key: "names.adjustment.1-2" } });
+    expectMessage(refusal(engine.step(setUp(), { type: "ApplySetUpAdjustment", id: "11-12" }))?.reason, "reject.unknownAdjustment", { id: "11-12" });
   });
 
   it("is all or nothing: a refused command leaves the state unchanged", () => {
     // 57G/Popov eliminated first (by hand, as the bot): the recorded step loss on it is refused.
     const state = engine.step(setUp(), { type: "MoveUnits", units: ["sov_57G-Popov_infantry"], to: "eliminated" }, "bot").state;
     const r = engine.step(state, { type: "ApplySetUpAdjustment", id: "1-2" });
-    expect(refusal(r)?.reason).toMatch(/Raus Overrun cannot be played/);
+    expectMessage(refusal(r)?.reason, "reject.adjustmentFailed", { adjustment: { key: "names.adjustment.1-2" } });
     expect(r.state).toBe(state);
   });
 

@@ -1,6 +1,8 @@
 // Contract between the UI and the engine (D12): step(state, command) → { state, events }.
 // The state is plain serializable JSON: hexes only, never pixels (§3). The UI computes
 // nothing; it sends commands, plays the events and keeps past states for undo.
+// Texts are messages (key + parameters, task 5.4): the UI renders them.
+import type { Message } from "../i18n/message";
 
 /** Off-map boxes of the game state (Q9): reserves, reinforcements by turn, eliminated units. */
 export type Box = "reserve" | "reinforcements" | "eliminated";
@@ -44,8 +46,8 @@ export interface Reminder {
   id: string;
   /** Card that set it, e.g. "e18". */
   card: string;
-  title: string;
-  text: string;
+  title: Message;
+  text: Message;
   turn: number;
   until: "done" | "endOfTurn";
 }
@@ -169,7 +171,7 @@ export interface DecisionStep {
   /** Rule applied, e.g. "9.21 method 11 a", "9.25 f", "9.24 c", "9.23 b". */
   rule: string;
   /** What it asks for. */
-  text: string;
+  text: Message;
   /** Destination hexes it kept, and the ones it set aside. */
   kept: string[];
   dropped: string[];
@@ -193,17 +195,18 @@ export type GameEvent =
    */
   | {
     type: "ObjectiveChanged"; marker: ObjectiveFront | ObjectiveArmy; from: string | null; to: string | null;
-    face?: ObjectiveFace; roll?: number; rule: string; why: string;
+    face?: ObjectiveFace; roll?: number; rule: string; why: Message;
   }
   /** Followed by the events of each command it played. */
-  | { type: "SetUpAdjustmentApplied"; id: string; name: string; roll?: number; commands: number; replaces?: string }
+  /** `replaces`: id of the adjustment it replaces. */
+  | { type: "SetUpAdjustmentApplied"; id: string; roll?: number; commands: number; replaces?: string }
   | { type: "GameStarted" }
   /** Start of a Soviet impulse (8.1): cards drawn, which is the command card and why. */
-  | { type: "SovietCardsDrawn"; cards: string[]; command: string; auxiliary: string | null; why: string; left: number }
+  | { type: "SovietCardsDrawn"; cards: string[]; command: string; auxiliary: string | null; why: Message; left: number }
   /** A card in the Command Card box: the first command, or the second one (8.1 step 3). */
   | { type: "SovietCommandCard"; card: string; second: boolean }
   /** One line of a card: played (followed by its events), or passed over with the reason. */
-  | { type: "SovietCommandChecked"; card: string; role: "command" | "auxiliary"; index: number; played: boolean; reason?: string }
+  | { type: "SovietCommandChecked"; card: string; role: "command" | "auxiliary"; index: number; played: boolean; reason?: Message }
   /** Command Delay: the auxiliary card goes back into the draw pile, shuffled. */
   | { type: "SovietCardReturned"; card: string; left: number }
   /** 8.2: STAVKA removed from the game. */
@@ -237,7 +240,7 @@ export type GameEvent =
     /** 9.22 Soviet Desperation (fewer than 19 VP): method 11 processed right after method 5. */
     desperation?: boolean;
     /** Methods skipped for every unit, and why. */
-    skipped: { method: string; reason: string }[];
+    skipped: { method: string; reason: Message }[];
     /** Spearhead units skipping methods 4-9 (9.21). */
     spearheads: string[];
     /** Out of supply or isolated units, moved last by 9.27. */
@@ -255,15 +258,15 @@ export type GameEvent =
     outcome: "moved" | "frozen" | "noMove";
     /** Deciding method, e.g. "9.21 method 11" or "9.27", and its title; null when no method applied. */
     method: string | null;
-    title: string | null;
+    title: Message | null;
     from: string;
     to: string;
     path: string[];
     steps: DecisionStep[];
     /** Earlier methods that did not apply to this unit, and why. */
-    skipped: { method: string; reason: string }[];
+    skipped: { method: string; reason: Message }[];
   }
-  | { type: "CommandRejected"; command: Command["type"]; reason: string };
+  | { type: "CommandRejected"; command: Command["type"]; reason: Message };
 
 export interface StepResult {
   state: GameState;

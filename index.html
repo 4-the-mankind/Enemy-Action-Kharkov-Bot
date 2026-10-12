@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EA Kharkov Bot</title>
+    <title data-i18n="home.title"></title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,48 +23,53 @@
       a { display: block; padding: 12px 4px; color: var(--paper); text-decoration: none; }
       a:hover { background: var(--feldgrau-deep); }
       a span { display: block; color: var(--paper-dim); font-size: 0.9rem; }
+      a span.name { color: var(--paper); font-size: 1rem; }
     </style>
   </head>
   <body>
     <main>
-      <h1>EA Kharkov Bot</h1>
-      <p>Soviet bot for Enemy Action: Kharkov, German Solo.</p>
-      <h2>Game</h2>
+      <h1 data-i18n="home.title"></h1>
+      <p data-i18n="home.intro"></p>
+      <h2 data-i18n="home.game"></h2>
       <ul>
         <li>
           <a href="/src/game/">
-            Situation map
-            <span>The game map, with overlays showing what the bot reads from it</span>
+            <span data-i18n="home.map" class="name"></span>
+            <span data-i18n="home.mapText"></span>
           </a>
         </li>
       </ul>
-      <h2 class="next">Tools</h2>
+      <h2 class="next" data-i18n="home.tools"></h2>
       <ul>
         <li>
           <a href="/src/tools/map-calibration/">
-            Map calibration
-            <span>Hex grid, background image, saved to data/map-grid.json</span>
+            <span data-i18n="home.calibration" class="name"></span>
+            <span data-i18n="home.calibrationText"></span>
           </a>
         </li>
         <li>
           <a href="/src/tools/map-painter/">
-            Map painter
-            <span>Paint per-hex and per-side engine data, saved to data/map-hexes.json and data/map-hexsides.json</span>
+            <span data-i18n="home.painter" class="name"></span>
+            <span data-i18n="home.painterText"></span>
           </a>
         </li>
         <li>
           <a href="/src/tools/units-index/">
-            Units index
-            <span>Every known unit counter with its decoded data, for checking against data/units.json (2.3)</span>
+            <span data-i18n="home.unitsIndex" class="name"></span>
+            <span data-i18n="home.unitsIndexText"></span>
           </a>
         </li>
         <li>
           <a href="/src/tools/soviet-cards/">
-            Soviet cards
-            <span>Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)</span>
+            <span data-i18n="home.sovietCards" class="name"></span>
+            <span data-i18n="home.sovietCardsText"></span>
           </a>
         </li>
       </ul>
     </main>
+    <script type="module">
+      import { applyI18n } from "/src/i18n/i18n.ts";
+      applyI18n();
+    </script>
   </body>
 </html>

@@ -5,7 +5,7 @@ import { RIVER_COLOR, RIVER_WIDTH } from "../../../ui/map-symbols";
 import { lerp, line, pt, type Layer } from "./layer";
 
 export const sidesLayer: Layer = {
-  id: "sides", label: "Roads and rivers", description: "Roads drawn center to center across the sides they cross; rivers along hex sides; red ticks = blocked Dniepr",
+  id: "sides", label: "layers.sides.label", description: "layers.sides.description",
   color: RIVER_COLOR, plane: "data", defaultOn: false,
   render: ({ grid: g, sides: all, sideData }) => {
     const r = hexRadius(g);

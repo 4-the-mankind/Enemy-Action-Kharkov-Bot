@@ -10,6 +10,8 @@ import { provisionalRules } from "../../src/engine/pending";
 import { rollDie } from "../../src/engine/random";
 import { emptyState, type GameEvent, type GameState, type ObjectiveMarker } from "../../src/engine/types";
 import { board as realBoard, json, realMap, terrain } from "./real-map";
+import { msg, semicolonList } from "../../src/i18n/message";
+import { expectMessage } from "../i18n/expect-message";
 
 type Changed = Extract<GameEvent, { type: "ObjectiveChanged" }>;
 type Traced = Extract<GameEvent, { type: "DecisionTraced" }>;
@@ -108,7 +110,7 @@ describe("Objective check, step 1 of an activation (9.11, real map)", () => {
     const { state, events } = activate(s);
     const e = changes(events)[0];
     expect(e).toMatchObject({ marker: "voronezh", from: "1009", rule: "9.11" });
-    expect(e.why).toContain("v occupies it");
+    expectMessage(e.why, "objective.why.relocated", { reasons: semicolonList([msg("objective.reach.occupies", { unit: "v" })]), roll: e.roll });
     expect(e.roll).toBe(rollDie(s).roll);
     expect(state.objectives.voronezh).toEqual(relocation("1009", e.roll!));
     expect(e.to).toBe(state.objectives.voronezh!.at);
@@ -121,7 +123,7 @@ describe("Objective check, step 1 of an activation (9.11, real map)", () => {
     const next = realBoard.neighbors("1009").find((n) => realBoard.areAdjacent("1009", n.hex))!.hex;
     const e = changes(activate(start({ g: "1009", v: next })).events)[0];
     expect(e.to).not.toBe("1009");
-    expect(e.why).toContain(`v (${next}) is adjacent to it, German-occupied`);
+    expectMessage(e.why, "objective.why.relocated", { reasons: semicolonList([msg("objective.reach.adjacent", { unit: "v", hex: next })]) });
   });
 
   it("relocates it when a unit is proximate to the unoccupied objective hex", () => {
@@ -129,7 +131,7 @@ describe("Objective check, step 1 of an activation (9.11, real map)", () => {
       && engine.movement.proximateToHex(start({ v: h }), "v", "1009", "frozen"))!;
     const e = changes(activate(start({ v: near })).events)[0];
     expect(e.to).not.toBe("1009");
-    expect(e.why).toContain(`v (${near}) is proximate to it`);
+    expectMessage(e.why, "objective.why.relocated", { reasons: semicolonList([msg("objective.reach.proximate", { unit: "v", hex: near })]) });
   });
 
   it("does not count a dispersed unit as proximate: it can't move (12.9)", () => {
@@ -298,7 +300,7 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
   it("moves those units first, one at a time, then the others by 9.21 (Q34)", () => {
     const { engine, state } = setup({ hexes: column(3), units: [forty("a"), sov("v"), ger("g")], at: { a: "0301", v: "0302", g: "0311" }, objective: "0314" });
     const r = engine.sovietMovement.activate(state, "40", ["a", "v"]);
-    if (typeof r === "string") throw new Error(r);
+    if ("key" in r) throw new Error(r.key);
     expect(r.events[0]).toMatchObject({ type: "FormationActivated", armyObjective: ["a"] });
     expect(traces(r.events).map((t) => [t.unit, t.method])).toEqual([["a", "9.26 method 3"], ["v", "9.21 method 11"]]);
   });
@@ -307,7 +309,7 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
     // 0303 is closer to the front objective (0301), 0305 to the army objective (0311).
     const { activate } = setup({ hexes: column(3, { "0303": town, "0305": town }), units: [forty("a"), ger("g")], at: { a: "0304", g: "0314" } });
     const t = traceOf(activate().events, "a");
-    expect(t).toMatchObject({ method: "9.26 method 1", title: "Take VP Hex", to: "0305" });
+    expect(t).toMatchObject({ method: "9.26 method 1", title: { key: "move.method.takeVPHex" }, to: "0305" });
     expect(t.steps.find((s) => s.rule === "9.24 a")).toMatchObject({ kept: ["0305"], dropped: ["0303"] });
   });
 
@@ -321,8 +323,9 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
   it("method 3: as close as possible to the German unit in the army objective hex", () => {
     const { activate } = setup({ hexes: column(3), units: [forty("a"), ger("g")], at: { a: "0301", g: "0311" } });
     const t = traceOf(activate().events, "a");
-    expect(t).toMatchObject({ method: "9.26 method 3", title: "Closer to German Unit & Army Objective", to: "0305" });
-    expect(t.steps[0]).toMatchObject({ rule: "9.26 method 3", text: expect.stringContaining("g in 0311, in the army objective") });
+    expect(t).toMatchObject({ method: "9.26 method 3", title: { key: "move.method.closerGermanUnitArmyObjective" }, to: "0305" });
+    expect(t.steps[0].rule).toBe("9.26 method 3");
+    expectMessage(t.steps[0].text, "move.army.intro", { what: msg("move.army.whatIn", { unit: "g", target: "0311", objective: msg("names.hex", { name: msg("names.place.0311"), hex: "0311" }) }) });
     expect(t.skipped.map((s) => s.method)).toEqual(["9.26 method 1", "9.26 method 2"]);
   });
 
@@ -330,15 +333,15 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
     const { activate } = setup({ hexes: column(3), units: [forty("a"), ger("g"), ger("h")], at: { a: "0301", g: "0309", h: "0313" } });
     const t = traceOf(activate().events, "a");
     expect(t).toMatchObject({ method: "9.26 method 3", to: "0305" });
-    expect(t.steps[0].text).toContain("g in 0309, 2 hexes from the army objective Belgorod (0311) (2 hexes as close");
+    expectMessage(t.steps[0].text, "move.army.introTied", { count: 2, what: msg("move.army.what", { unit: "g", target: "0309", count: 2, objective: msg("names.hex", { name: msg("names.place.0311"), hex: "0311" }) }) });
   });
 
   it("method 3 (Q33): no German unit in or proximate to the objective, method 4", () => {
     const { activate } = setup({ hexes: column(3), units: [forty("a"), ger("g", { movementValue: 1 })], at: { a: "0305", g: "0314" }, objective: "0301" });
     const t = traceOf(activate().events, "a");
-    expect(t.skipped.find((s) => s.method === "9.26 method 3")!.reason).toBe("no German unit in or proximate to the army objective Belgorod (0311)");
+    expectMessage(t.skipped.find((s) => s.method === "9.26 method 3")!.reason, "move.army.noGermanNear", { objective: msg("names.hex", { name: msg("names.place.0311"), hex: "0311" }) });
     // Into the front objective's hex, "if able".
-    expect(t).toMatchObject({ method: "9.26 method 4", title: "Closer to Front Objective", to: "0301" });
+    expect(t).toMatchObject({ method: "9.26 method 4", title: { key: "move.method.closerFrontObjective" }, to: "0301" });
   });
 
   it("method 4: among the hexes closest to the front objective, the one closer to the army objective", () => {
@@ -362,7 +365,7 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
     const hexes = column(3, { "0307": marsh, "0308": marsh, "0309": marsh, "0310": marsh });
     const { activate } = setup({ hexes, units: [forty("a", { type: "mechanized" }), ger("g")], at: { a: "0306", g: "0311" } });
     const t = traceOf(activate().events, "a");
-    expect(t.skipped.find((s) => s.method === "9.26 method 3")!.reason).toBe("every destination breaks a 9.23 restriction");
+    expectMessage(t.skipped.find((s) => s.method === "9.26 method 3")!.reason, "move.skip.everyDestinationBreaks923Restriction");
     expect(t).toMatchObject({ method: "9.26 method 4", to: "0302" });
   });
 
@@ -383,7 +386,8 @@ describe("Movement Methods For Units With Army Objectives (9.26)", () => {
     const { events } = activate();
     expect(events[0]).toMatchObject({ type: "FormationActivated", unsupplied: ["a"], armyObjective: [] });
     const t = traceOf(events, "a");
-    expect(t.skipped[0]).toEqual({ method: "9.27", reason: "able to trace supply: follows the movement methods of 9.26" });
+    expect(t.skipped[0].method).toBe("9.27");
+    expectMessage(t.skipped[0].reason, "move.skip.followsMethodsOf", { book: "9.26" });
     expect(t).toMatchObject({ method: "9.26 method 3", to: "0309" });
   });
 

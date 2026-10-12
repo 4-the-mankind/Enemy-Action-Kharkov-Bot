@@ -8,16 +8,16 @@ export interface AdjustmentInfo {
   /** Die results that select it ("1-2" … "9-10"). */
   id: string;
   die: [number, number];
-  name: string;
 }
 
-// Rulebook "SET-UP ADJUSTMENTS (German Solo Game)", one per pair of die results.
+// Rulebook "SET-UP ADJUSTMENTS (German Solo Game)", one per pair of die results (names in
+// en.json, names.adjustment).
 export const ADJUSTMENTS: AdjustmentInfo[] = [
-  { id: "1-2", die: [1, 2], name: "Raus Overrun" },
-  { id: "3-4", die: [3, 4], name: "Slavyansk Liberated" },
-  { id: "5-6", die: [5, 6], name: "Bloody Izyum" },
-  { id: "7-8", die: [7, 8], name: "Voronezh Front Breakout" },
-  { id: "9-10", die: [9, 10], name: "Drive on the Donets" },
+  { id: "1-2", die: [1, 2] },
+  { id: "3-4", die: [3, 4] },
+  { id: "5-6", die: [5, 6] },
+  { id: "7-8", die: [7, 8] },
+  { id: "9-10", die: [9, 10] },
 ];
 
 export interface RecordedAdjustment extends AdjustmentInfo {

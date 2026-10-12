@@ -5,6 +5,8 @@ import { createEngine } from "../../src/engine/engine";
 import { parseSetupAdjustments } from "../../src/engine/setup-adjustments";
 import { shuffle } from "../../src/engine/random";
 import { emptyState, type GameEvent, type GameState } from "../../src/engine/types";
+import { msg, type ListParam, type Message } from "../../src/i18n/message";
+import { expectMessage } from "../i18n/expect-message";
 import { board, json, realMap } from "./real-map";
 
 type Checked = Extract<GameEvent, { type: "SovietCommandChecked" }>;
@@ -64,17 +66,20 @@ describe("Draw pile (8.0, D16)", () => {
   });
 
   it("refuses an impulse before Start, and when the pile is empty", () => {
-    expect(impulse(setUp).events[0]).toMatchObject({ type: "CommandRejected", reason: "Press Start to begin turn 1." });
-    expect(impulse(withPile([])).events[0]).toMatchObject({ type: "CommandRejected", reason: expect.stringContaining("draw pile is empty") });
+    expect(impulse(setUp).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.pressStart" } });
+    expect(impulse(withPile([])).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "cards.pileDone" } });
   });
 });
 
 describe("Soviet impulse (8.1)", () => {
   it("chooses the command card: Primary, then higher Command Value, then lower ID", () => {
     const pick = (a: string, b: string) => engine.sovietCards!.choose([a, b]);
-    expect(pick("e03", "e17")).toMatchObject({ command: "e17", auxiliary: "e03", why: "the card marked Primary" });
-    expect(pick("e19", "e11")).toMatchObject({ command: "e11", why: "neither Primary: the higher Command Value" });
-    expect(pick("e13", "e01")).toMatchObject({ command: "e01", why: "both Primary, same Command Value: the lower card ID" });
+    expect(pick("e03", "e17")).toMatchObject({ command: "e17", auxiliary: "e03" });
+    expectMessage(pick("e03", "e17").why, "cards.choose.primary");
+    expect(pick("e19", "e11")).toMatchObject({ command: "e11" });
+    expectMessage(pick("e19", "e11").why, "cards.choose.higherValue", { both: msg("cards.choose.neitherPrimary") });
+    expect(pick("e13", "e01")).toMatchObject({ command: "e01" });
+    expectMessage(pick("e13", "e01").why, "cards.choose.lowerId", { both: msg("cards.choose.bothPrimary") });
     expect(engine.sovietCards!.choose(["e05"])).toMatchObject({ command: "e05", auxiliary: null });
   });
 
@@ -93,22 +98,26 @@ describe("Soviet impulse (8.1)", () => {
     const a = of(events, "FormationActivated")[0];
     // 0902: A/12 + B/12, strength 9; 0602: A/15 + B/15, strength 7. 1103 (VP hex) is not eligible.
     expect(a.units.sort()).toEqual(["sov_A12-3rdT_mech", "sov_A15-3rdT_armor", "sov_B12-3rdT_armor", "sov_B15-3rdT_mech"]);
-    expect(played(events)[0].reason).toMatch(/^Stacks chosen .*: 0902 .*; 0602 /);
+    // The detail: the chosen stacks first, 0902 then 0602.
+    const detail = played(events)[0].reason!;
+    expectMessage(detail, "common.sentences");
+    const chosen = (detail.params!.parts as ListParam).list[0] as Message;
+    expectMessage(chosen, "cards.armyUnits.chosen");
+    expect(((chosen.params!.stacks as ListParam).list as Message[]).map((m) => m.params!.hex)).toEqual(["0902", "0602"]);
   });
 
   it("passes over a command that cannot be carried out, then discards the card without effect", () => {
     const s = move(withPile(["e04"]), ["sov_100-40th_infantry", "sov_309-40th_infantry", "sov_305-40th_infantry"], "eliminated");
     const { state, events } = impulse(s);
-    expect(checked(events).map((c) => [c.index, c.played, c.reason])).toEqual([
-      [0, false, "no non-isolated unit of the 40th Army on the map or in the reserve box"],
-      [1, false, "Command Delay applies only to the auxiliary card"],
-    ]);
+    expect(checked(events).map((c) => [c.index, c.played])).toEqual([[0, false], [1, false]]);
+    expectMessage(checked(events)[0].reason, "cards.army.noUnit", { army: msg("names.army.40") });
+    expectMessage(checked(events)[1].reason, "cards.delay.auxOnly");
     expect(state.sovietDiscard).toEqual(["e04"]);
   });
 
   it("Command Delay on the auxiliary card: back into the draw pile, shuffled; no second impulse", () => {
     const { state, events } = impulse(withPile(["e06", "e17", "e01", "e02", "e04", "e05"]));
-    expect(played(events)[0]).toMatchObject({ card: "e06", role: "auxiliary", reason: "back into the draw pile, shuffled" });
+    expect(played(events)[0]).toMatchObject({ card: "e06", role: "auxiliary", reason: { key: "cards.delay.done" } });
     expect(of(events, "SovietCommandCard").map((e) => e.card)).toEqual(["e17"]);
     expect(state.sovietCards!.drawPile).toHaveLength(5);
     expect(state.sovietCards!.drawPile).toContain("e06");
@@ -129,22 +138,27 @@ describe("Soviet impulse (8.1)", () => {
   it("Front card [GT 4-7]: the army with the most supplied units on the map and in reserve", () => {
     const { events } = impulse(withPile(["e20"], 5));
     expect(of(events, "FormationActivated")[0].army).toBe("Popov");
-    expect(played(events)[0].reason).toMatch(/^Mobile Group Popov: the most units \(8\)/);
+    const r = played(events)[0].reason!;
+    expect(["cards.most.detail", "cards.most.detailStacked"]).toContain(r.key);
+    expectMessage(r, r.key, { army: msg("names.army.Popov"), why: msg("cards.most.mostUnits", { count: 8 }) });
   });
 
   it("Front card [GT 8+]: no unit outside the operational limit nor nearly surrounded, so as on GT 4", () => {
     const { events } = impulse(withPile(["e21"], 8));
-    expect(played(events)[0]).toMatchObject({ index: 2, reason: expect.stringMatching(/^No unit outside .* so as on GT 4: 3rd Tank Army/) });
+    expect(played(events)[0].index).toBe(2);
+    const r = played(events)[0].reason!;
+    expectMessage(r, "cards.most.asGt4");
+    expect((r.params!.rest as Message).params!.army).toEqual(msg("names.army.3T"));
   });
 });
 
 describe("Events (8.11)", () => {
   it("NKVD Operations: the German stack with the most adjacent Soviet strength; one Soviet step lost (12.6)", () => {
     const { state, events } = impulse(withPile(["e08"]));
-    expect(played(events)[0].reason).toMatch(/^Target 0205: Soviet strength 14 adjacent/);
+    expectMessage(played(events)[0].reason, "cards.nkvd.done", { hex: "0205", strength: 14 });
     expect(of(events, "StepRemoved")[0]).toMatchObject({ unit: "sov_309-40th_infantry" });
     expect(state.reminders).toHaveLength(1);
-    expect(state.reminders![0]).toMatchObject({ title: "NKVD Operations", until: "done" });
+    expect(state.reminders![0]).toMatchObject({ title: { key: "names.event.nkvdOperations" }, until: "done" });
   });
 
   it("Air Supply from the auxiliary card: the stack with the most steps back in supply", () => {
@@ -152,7 +166,8 @@ describe("Events (8.11)", () => {
     s = engine.step(s, { type: "SetSupplyStatus", units: ["sov_A12-3rdT_mech", "sov_B12-3rdT_armor"], status: "outOfSupply" }).state;
     s = engine.step(s, { type: "SetSupplyStatus", units: ["sov_111-3rdT_infantry"], status: "isolated" }).state;
     const { state, events } = impulse(s);
-    expect(played(events)[0]).toMatchObject({ card: "e07", role: "auxiliary", reason: expect.stringMatching(/^Air Supply in 0902/) });
+    expect(played(events)[0]).toMatchObject({ card: "e07", role: "auxiliary", reason: { params: { hex: "0902" } } });
+    expect(["cards.airSupply.done", "cards.airSupply.doneOthers"]).toContain(played(events)[0].reason!.key);
     expect(state.supply).toEqual({ "sov_111-3rdT_infantry": "isolated" });
     expect(state.sovietDiscard).toContain("e07");
   });
@@ -169,17 +184,18 @@ describe("Events (8.11)", () => {
     const s = move(withPile(["e13", "e01", "e02", "e03"], 5), ["sov_A12-3rdT_mech", "sov_B12-3rdT_armor"], "1017");
     const { state, events } = impulse(s);
     const fs = played(events).find((c) => c.card === "e13" && c.role === "auxiliary")!;
-    expect(fs.reason).toMatch(/^Forward Support in \d{4}: puts 2 supplied units in support/);
+    expect(["cards.forwardSupport.done", "cards.forwardSupport.doneTied"]).toContain(fs.reason!.key);
+    expectMessage(fs.reason, fs.reason!.key, { count: 2 });
     expect(state.forwardSupport).toHaveLength(1);
     expect(board.hexCount(state.forwardSupport![0], "1017")).toBeLessThanOrEqual(5);
     // Without them: fewer than 2 units would be put in support.
-    expect(checked(impulse(withPile(["e13", "e01", "e02", "e03"], 5)).events)[0].reason).toMatch(/^fewer than 2 units/);
+    expectMessage(checked(impulse(withPile(["e13", "e01", "e02", "e03"], 5)).events)[0].reason, "cards.forwardSupport.fewer");
   });
 
   it("Hitler Distracts: a reminder for the player, dismissed when done", () => {
     const { state } = impulse(withPile(["e18"], 6));
     const r = state.reminders![0];
-    expect(r).toMatchObject({ card: "e18", title: "Hitler Distracts", until: "done", turn: 6 });
+    expect(r).toMatchObject({ card: "e18", title: { key: "names.event.hitlerDistracts" }, until: "done", turn: 6 });
     const after = engine.step(state, { type: "DismissReminder", id: r.id });
     expect(after.state.reminders).toEqual([]);
     expect(after.events).toEqual([{ type: "ReminderDismissed", id: r.id }]);
@@ -201,7 +217,7 @@ describe("Next turn (4.0 V, I, II, III)", () => {
   it("ends the turn, brings in the calendar units and the new cards, reshuffles the discards", () => {
     let s: GameState = { ...withPile([]), sovietDiscard: ["e01", "e02"], forwardSupport: ["1010"] };
     s = engine.step(s, { type: "SetDispersed", units: ["sov_A12-3rdT_mech"], dispersed: true }).state;
-    s = { ...s, reminders: [{ id: "x", card: "e18", title: "t", text: "t", turn: 1, until: "endOfTurn" }] };
+    s = { ...s, reminders: [{ id: "x", card: "e18", title: msg("names.event.hitlerDistracts"), text: msg("cards.hitler.text"), turn: 1, until: "endOfTurn" }] };
     const { state, events } = engine.step(s, { type: "NextTurn" });
     expect(state.turn).toBe(2);
     expect(of(events, "TurnStarted")[0]).toMatchObject({ turn: 2, cardsAdded: ["e21"], toReserve: ["sov_259-1stGuards_infantry"], pile: 3 });

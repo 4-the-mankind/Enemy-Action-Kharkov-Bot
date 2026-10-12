@@ -127,7 +127,6 @@ kbd {
 /* Counters (plane "units"): images in grid px, outline and shadow in screen px. */
 .map-svg .counter { pointer-events: auto; cursor: grab; }
 .map-svg .counter image { filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.55)); }
-.map-svg .counter.dim { opacity: 0.3; }
 body.game-locked .map-svg .counter { cursor: default; }
 .map-svg .counter.lifted { opacity: 0.25; }
 /* Selection: a ring on the very edge of the selected counter. */
@@ -473,6 +472,19 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 /* An overlay sheet. Lifted (off): pushed right, dim, ink stripe faded.
    Laid (on): flush with the rail's edge, acetate sheen, ink stripe full. */
 .sheets { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+
+/* Overlays: what the bot's marks on the map mean (same strokes as on the map). */
+.legend { margin: 16px 18px 0 0; padding-top: 12px; border-top: 1px solid var(--feldgrau); }
+.legend h2 { margin: 0 0 8px; font-size: 0.95rem; font-weight: 600; }
+.legend dl { margin: 0; display: grid; gap: 8px; }
+.legend dl > div { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; }
+.legend dt { padding: 4px; background: var(--paper); border-radius: 2px; line-height: 0; }
+.legend svg { width: 36px; height: 22px; }
+.legend dd { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }
+.lg-trail { fill: none; stroke: var(--stab-red); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.lg-origin { fill: var(--paper); stroke: var(--stab-red); stroke-width: 1.8; }
+.lg-chosen { fill: rgb(192 39 45 / 0.12); stroke: var(--stab-red); stroke-width: 2.2; stroke-linejoin: round; }
+.lg-dropped { fill: rgb(38 46 41 / 0.08); stroke: var(--line); stroke-width: 1.4; stroke-dasharray: 4 2.6; stroke-linejoin: round; }
 .sheet {
   --ink: var(--paper);
   width: 100%;
@@ -626,9 +638,9 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .log-card img { width: 16px; margin-right: 3px; vertical-align: -5px; border-radius: 2px; }
 .log > li:not(.why-host) i { font-style: normal; color: var(--paper); }
 
-/* Reminders: paper slips pinned to the map's top left corner, one per event to keep in mind. */
+/* Reminders: paper slips pinned to the map's top right corner, one per event to keep in mind. */
 .reminders {
-  position: absolute; top: 14px; left: 14px; z-index: 5; display: grid; gap: 8px;
+  position: absolute; top: 14px; right: 14px; z-index: 6; display: grid; gap: 8px;
   width: min(340px, calc(100% - 28px));
 }
 .reminders[hidden] { display: none; }
@@ -686,12 +698,13 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .orders-area { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
 .orders-head p { margin: 0; font-size: 0.85rem; color: var(--paper-dim); }
 .orders-head .objective-check { margin-top: 2px; font-size: 0.8rem; }
-.playback { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 10px 0 8px; }
+.playback { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 10px 0 0; }
+.playback[hidden] { display: none; }
 .speed { display: flex; border: 1px solid var(--feldgrau-light); border-radius: 2px; overflow: hidden; }
 .speed button { padding: 3px 9px; font: inherit; font-size: 0.85rem; color: var(--paper-dim); background: transparent; border: 0; cursor: pointer; }
 .speed button[aria-pressed="true"] { color: var(--paper); font-weight: 600; background: var(--feldgrau-light); }
 .playback .switch { padding: 3px 12px; font-size: 0.85rem; }
-.playback-actions { display: flex; gap: 6px; }
+.playback-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 /* "Why this move" right under the order or the log line it explains. */
 .why-host { list-style: none; padding: 4px 0 8px; }
 .log > li.why-host { padding: 4px 0 8px; color: var(--slip-ink); border-bottom: 0; }
@@ -755,7 +768,6 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .bot-trails .trail:not(.drawn) { opacity: 0; }
 .bot-trails:not(:has(.focus)) .trail.drawn { opacity: 1; }
 .bot-options .option { fill: rgb(38 46 41 / 0.08); stroke: var(--line); stroke-width: 4; stroke-dasharray: 14 9; stroke-linejoin: round; }
-.bot-options .option.stressed { fill: rgb(192 39 45 / 0.14); stroke: var(--stab-red); stroke-width: 6; }
 .bot-options .option.chosen { fill: rgb(192 39 45 / 0.12); stroke: var(--stab-red); stroke-width: 7; stroke-dasharray: none; }
 .counter.walking { filter: drop-shadow(0 14px 10px rgb(0 0 0 / 0.5)); }
 
@@ -780,16 +792,17 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .restack button[disabled] { opacity: 0.25; cursor: default; }
 .restack svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Units on/off: a paper slip clipped to the map's top right corner, like the inspector.
+/* Map tools along the Units panel (pushed with it): units on/off, then supply analysis.
+   Units on/off: a paper slip clipped to the map's top left corner, like the inspector.
    The icon shows the action (struck-through stack = hide); red edge while the counters are off the map. */
 .map-tools {
   position: absolute;
   top: 14px;
   right: 14px;
   left: 14px;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 8px;
   pointer-events: none;
 }

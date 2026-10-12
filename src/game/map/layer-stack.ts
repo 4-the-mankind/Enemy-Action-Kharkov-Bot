@@ -1,15 +1,8 @@
 // Mounts layers into their planes, renders each one lazily on first show, and keeps
-// the on/off state (remembered per browser: a viewer convenience, not game state).
+// the on/off state (not remembered: every page load starts from each layer's default).
 import type { MapData } from "../data/map-data";
 import type { Layer } from "./layers/layer";
 import type { MapView } from "./map-view";
-
-const STORAGE_KEY = "ea-kharkov.game.layers";
-
-function loadSaved(): Record<string, boolean> {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") ?? {}; }
-  catch { return {}; }
-}
 
 export class LayerStack {
   private readonly groups = new Map<string, SVGGElement>();
@@ -18,8 +11,7 @@ export class LayerStack {
   private readonly listeners: (() => void)[] = [];
 
   constructor(private readonly view: MapView, private readonly data: MapData, readonly layers: Layer[]) {
-    const saved = loadSaved();
-    this.state = Object.fromEntries(layers.map((l) => [l.id, saved[l.id] ?? l.defaultOn]));
+    this.state = Object.fromEntries(layers.map((l) => [l.id, l.defaultOn]));
     for (const l of layers) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       g.dataset.layer = l.id;
@@ -36,7 +28,6 @@ export class LayerStack {
     if (!l || this.state[id] === on) return;
     this.state[id] = on;
     this.apply(l);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch { /* storage blocked */ }
     this.listeners.forEach((f) => f());
   }
 

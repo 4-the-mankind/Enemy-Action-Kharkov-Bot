@@ -1,7 +1,7 @@
 import { type Layer } from "./layer";
 
 export const idsLayer: Layer = {
-  id: "ids", label: "Hex numbers", description: "Hex number CCRR at the top of each hex",
+  id: "ids", label: "layers.ids.label", description: "layers.ids.description",
   color: "#e8e4d3", plane: "data", defaultOn: false,
   render: ({ grid: g, hexes }) =>
     `<g font-size="${(g.rowStep * 0.14).toFixed(1)}">` +

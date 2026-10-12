@@ -7,6 +7,7 @@
 // player's moves.
 import type { MoveClass, TerrainEffects } from "../core/terrain-effects";
 import type { Side, Unit } from "../core/units";
+import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
 import { provisionalRules, type Ground, type PendingRules } from "./pending";
 import { isHex, type GameState } from "./types";
@@ -131,17 +132,17 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
   }
 
   /** Why the unit may not use strategic movement (10.6), or null. */
-  function whyNoStrategic(state: GameState, id: string, ground: Ground = rules.ground(state)): string | null {
+  function whyNoStrategic(state: GameState, id: string, ground: Ground = rules.ground(state)): Message | null {
     const u = known(id);
-    if (u.side !== "german") return "Only German units use strategic movement.";
-    if (state.turn < 2) return "No German strategic movement before turn 2.";
-    if (ground !== "frozen") return "No German strategic movement in mud (18.34).";
+    if (u.side !== "german") return msg("movement.strategic.germanOnly");
+    if (state.turn < 2) return msg("movement.strategic.beforeTurn2");
+    if (ground !== "frozen") return msg("movement.strategic.mud");
     // "An active German unit in supply": its status of the Supply Phase (13.0).
-    if (rules.supplyStatus(state, id) !== "supplied") return `${u.designation} is not in supply.`;
+    if (rules.supplyStatus(state, id) !== "supplied") return msg("movement.strategic.notSupplied", { unit: u.designation });
     const start = hexOf(state, id), occ = occupancy(state);
     if (board.neighbors(start).some((n) => occupiedBy(occ, n.hex, "soviet") && board.areAdjacent(start, n.hex)))
-      return `${u.designation} starts adjacent to an enemy unit.`;
-    if (board.neighbors(start).some((n) => rules.garrisonAt(state, n.hex))) return `${u.designation} starts adjacent to a garrison.`;
+      return msg("movement.strategic.adjacentEnemy", { unit: u.designation });
+    if (board.neighbors(start).some((n) => rules.garrisonAt(state, n.hex))) return msg("movement.strategic.adjacentGarrison", { unit: u.designation });
     return null;
   }
 
@@ -155,7 +156,7 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     const strategic = !!opts.strategic;
     if (strategic) {
       const why = whyNoStrategic(state, id, ground);
-      if (why) throw new Error(why);
+      if (why) throw new Error(`${u.designation}: ${why.key}`);
     }
     const cls: MoveClass = u.type === "mechanized" ? "mech" : "inf";
     // 10.6: German infantry gains 2 MPs in strategic movement.

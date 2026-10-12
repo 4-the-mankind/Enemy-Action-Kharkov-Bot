@@ -77,6 +77,14 @@ export class SupplyPlane {
 
   isShown(side: Side): boolean { return this.shown.has(side); }
 
+  /**
+   * Off the map while the bot's counters walk: the lines are traced from where the counters
+   * end, so they show only once the moves are played.
+   */
+  setHeld(held: boolean) {
+    for (const g of [this.root, this.focusRoot]) g.style.display = held ? "none" : "";
+  }
+
   setShown(side: Side, on: boolean, state: GameState) {
     if (on) this.shown.add(side);
     else this.shown.delete(side);

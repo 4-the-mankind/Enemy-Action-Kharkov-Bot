@@ -5,7 +5,7 @@ import { EDGE_COLOR } from "../../../ui/map-symbols";
 import { lerp, line, pointsAttr, ring, type Layer } from "./layer";
 
 export const edgesLayer: Layer = {
-  id: "edges", label: "Map edges and supply", description: "Soviet/German map edges (dashed); black stubs = roads leaving the map (supply entry, 13.1)",
+  id: "edges", label: "layers.edges.label", description: "layers.edges.description",
   color: EDGE_COLOR.soviet, plane: "data", defaultOn: false,
   render: ({ grid: g, hexes, hexData, idSet }) => hexes.map((h) => {
     const d = resolveHex(hexData, h.id);

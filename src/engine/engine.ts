@@ -4,7 +4,9 @@
 import type { SovietCard } from "../core/soviet-cards";
 import type { TerrainEffects } from "../core/terrain-effects";
 import type { Unit } from "../core/units";
+import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
+import { adjustmentName } from "./names";
 import { createMovement, type Movement } from "./movement";
 import { createObjectives } from "./objectives";
 import type { RecordedAdjustment } from "./setup-adjustments";
@@ -36,9 +38,9 @@ export interface EngineData {
 export interface Engine {
   step(state: GameState, command: Command, actor?: Actor): StepResult;
   /** Why this actor (the player by default) may not move these units there, or null if the move is allowed. */
-  whyNotMove(state: GameState, units: string[], to: Location, actor?: Actor): string | null;
+  whyNotMove(state: GameState, units: string[], to: Location, actor?: Actor): Message | null;
   /** Why the actor (the player by default) may not act on the units at all yet, or null. */
-  locked(state: GameState, actor?: Actor): string | null;
+  locked(state: GameState, actor?: Actor): Message | null;
   /** True if the actor may pick up this unit at all (Soviet reserves are placed by the bot, D17). */
   canLift(state: GameState, unitId: string, actor?: Actor): boolean;
   /** Face the unit shows after losing one step, or null if it is on its last step. */
@@ -86,28 +88,28 @@ export function createEngine(data: EngineData): Engine {
   }
 
   // Until Start, the set-up belongs to the booklet and the bot (p48): the player only watches.
-  function locked(state: GameState, actor: Actor = "player"): string | null {
+  function locked(state: GameState, actor: Actor = "player"): Message | null {
     if (actor === "bot" || state.started) return null;
-    return state.setUp ? "Press Start to begin turn 1." : "Set up turn 1 first.";
+    return msg(state.setUp ? "reject.pressStart" : "reject.setUpFirst");
   }
 
-  function whyNotMove(state: GameState, ids: string[], to: Location, actor: Actor = "player"): string | null {
-    if (!ids.length) return "No unit to move.";
+  function whyNotMove(state: GameState, ids: string[], to: Location, actor: Actor = "player"): Message | null {
+    if (!ids.length) return msg("reject.noUnitToMove");
     const lock = locked(state, actor);
     if (lock) return lock;
     if (isHex(to)) {
-      if (!data.board.isPlayable(to)) return `${to} is not a playable hex.`;
+      if (!data.board.isPlayable(to)) return msg("reject.notPlayable", { hex: to });
     } else if (to !== "reserve" && to !== "reinforcements" && to !== "eliminated") {
-      return `Unknown destination "${to}".`;
+      return msg("reject.unknownDestination", { to });
     }
     for (const id of ids) {
       const u = byId.get(id), s = state.units[id];
-      if (!u || !s) return `${name(id)} is not in play.`;
-      if (actor === "player" && u.side === "soviet" && s.at === "reserve" && to !== "reserve") return `${u.designation} is in the Soviet reserve: the bot places it.`;
-      if (actor === "player" && u.side === "soviet" && to === "reserve" && s.at !== "reserve") return "Only the bot puts Soviet units in reserve.";
+      if (!u || !s) return msg("reject.notInPlay", { unit: name(id) });
+      if (actor === "player" && u.side === "soviet" && s.at === "reserve" && to !== "reserve") return msg("reject.inSovietReserve", { unit: u.designation });
+      if (actor === "player" && u.side === "soviet" && to === "reserve" && s.at !== "reserve") return msg("reject.onlyBotToReserve");
       if (to === "reinforcements") {
-        if (u.side === "soviet") return "Soviet units cannot go back to the reinforcements.";
-        if (!u.entryTurn || u.entryTurn < 2) return `${u.designation} has no later turn of entry.`;
+        if (u.side === "soviet") return msg("reject.sovietToReinforcements");
+        if (!u.entryTurn || u.entryTurn < 2) return msg("reject.noLaterEntry", { unit: u.designation });
       }
     }
     return null;
@@ -165,10 +167,10 @@ export function createEngine(data: EngineData): Engine {
 
   function removeStep(state: GameState, id: string): StepResult {
     const s = state.units[id];
-    if (!s) return reject(state, "RemoveStep", `${name(id)} is not in play.`);
-    if (s.at === "eliminated") return reject(state, "RemoveStep", `${name(id)} is already eliminated.`);
+    if (!s) return reject(state, "RemoveStep", msg("reject.notInPlay", { unit: name(id) }));
+    if (s.at === "eliminated") return reject(state, "RemoveStep", msg("reject.alreadyEliminated", { unit: name(id) }));
     const to = nextFace(id, s.face);
-    if (!to) return reject(state, "RemoveStep", `${name(id)} has a single step left: eliminate it instead.`);
+    if (!to) return reject(state, "RemoveStep", msg("reject.singleStep", { unit: name(id) }));
     return {
       state: { ...state, units: { ...state.units, [id]: { ...s, face: to } } },
       events: [{ type: "StepRemoved", unit: id, from: s.face, to }],
@@ -177,11 +179,11 @@ export function createEngine(data: EngineData): Engine {
 
   function setDispersed(state: GameState, ids: string[], dispersed: boolean): StepResult {
     const unique = [...new Set(ids)];
-    if (!unique.length) return reject(state, "SetDispersed", "No unit selected.");
+    if (!unique.length) return reject(state, "SetDispersed", msg("reject.noUnitSelected"));
     for (const id of unique) {
       const s = state.units[id];
-      if (!s) return reject(state, "SetDispersed", `${name(id)} is not in play.`);
-      if (!isHex(s.at)) return reject(state, "SetDispersed", `${name(id)} is not on the map.`);
+      if (!s) return reject(state, "SetDispersed", msg("reject.notInPlay", { unit: name(id) }));
+      if (!isHex(s.at)) return reject(state, "SetDispersed", msg("reject.notOnMap", { unit: name(id) }));
     }
     const changing = unique.filter((id) => !!state.units[id].dispersed !== dispersed);
     if (!changing.length) return { state, events: [] };
@@ -194,22 +196,22 @@ export function createEngine(data: EngineData): Engine {
   }
 
   function setVictoryPoints(state: GameState, vp: number): StepResult {
-    if (!Number.isInteger(vp) || vp < 0) return reject(state, "SetVictoryPoints", `${vp} is not a valid VP total.`);
+    if (!Number.isInteger(vp) || vp < 0) return reject(state, "SetVictoryPoints", msg("reject.invalidVp", { vp }));
     if (vp === state.vp) return { state, events: [] };
     return { state: { ...state, vp }, events: [{ type: "VictoryPointsSet", from: state.vp, to: vp }] };
   }
 
   function discardSovietCard(state: GameState, card: string, discarded: boolean): StepResult {
-    if (!SOVIET_CARDS.includes(card)) return reject(state, "DiscardSovietCard", `Unknown Soviet card "${card}".`);
+    if (!SOVIET_CARDS.includes(card)) return reject(state, "DiscardSovietCard", msg("reject.unknownCard", { card }));
     if (state.sovietDiscard.includes(card) === discarded) return { state, events: [] };
     const sovietDiscard = discarded ? [...state.sovietDiscard, card] : state.sovietDiscard.filter((c) => c !== card);
     return { state: { ...state, sovietDiscard }, events: [{ type: "SovietCardDiscarded", card, discarded }] };
   }
 
   function placeObjective(state: GameState, front: ObjectiveFront, face: ObjectiveFace, at: string | null): StepResult {
-    if (front !== "voronezh" && front !== "southwest") return reject(state, "PlaceObjective", `Unknown front "${front}".`);
-    if (face !== "west" && face !== "south") return reject(state, "PlaceObjective", `Unknown objective "${face}".`);
-    if (at !== null && !data.board.isPlayable(at)) return reject(state, "PlaceObjective", `${at} is not a playable hex.`);
+    if (front !== "voronezh" && front !== "southwest") return reject(state, "PlaceObjective", msg("reject.unknownFront", { front }));
+    if (face !== "west" && face !== "south") return reject(state, "PlaceObjective", msg("reject.unknownObjective", { face }));
+    if (at !== null && !data.board.isPlayable(at)) return reject(state, "PlaceObjective", msg("reject.notPlayable", { hex: at }));
     const cur = state.objectives[front];
     if (at === null ? !cur : cur?.at === at && cur.face === face) return { state, events: [] };
     const objectives = { ...state.objectives };
@@ -221,9 +223,9 @@ export function createEngine(data: EngineData): Engine {
   // Stacking order matters (2.2: later in `order` = higher); only units of the same hex swap.
   function restack(state: GameState, id: string, to: StackMove): StepResult {
     const s = state.units[id];
-    if (!s) return reject(state, "Restack", `${name(id)} is not in play.`);
-    if (!isHex(s.at)) return reject(state, "Restack", `${name(id)} is not on the map.`);
-    if (!["up", "down", "top", "bottom"].includes(to)) return reject(state, "Restack", `Unknown stack move "${to}".`);
+    if (!s) return reject(state, "Restack", msg("reject.notInPlay", { unit: name(id) }));
+    if (!isHex(s.at)) return reject(state, "Restack", msg("reject.notOnMap", { unit: name(id) }));
+    if (!["up", "down", "top", "bottom"].includes(to)) return reject(state, "Restack", msg("reject.unknownStackMove", { to }));
     const stack = state.order.filter((u) => state.units[u].at === s.at);
     const k = stack.indexOf(id);
     const target = to === "top" ? stack.length - 1 : to === "bottom" ? 0 : to === "up" ? Math.min(k + 1, stack.length - 1) : Math.max(k - 1, 0);
@@ -240,11 +242,11 @@ export function createEngine(data: EngineData): Engine {
   // entirety. Played as the bot, all or nothing, so a single undo takes it back.
   function applySetUpAdjustment(state: GameState, id: string, roll: number | undefined): StepResult {
     const type = "ApplySetUpAdjustment";
-    if (!state.setUp) return reject(state, type, "Set up turn 1 first.");
-    if (state.started) return reject(state, type, "The game has started: the set-up adjustment can no longer change.");
+    if (!state.setUp) return reject(state, type, msg("reject.setUpFirst"));
+    if (state.started) return reject(state, type, msg("reject.adjustmentLocked"));
     const a = data.adjustments?.find((x) => x.id === id);
-    if (!a) return reject(state, type, `Unknown set-up adjustment "${id}".`);
-    if (roll !== undefined && !a.die.includes(roll)) return reject(state, type, `A roll of ${roll} does not select ${a.name}.`);
+    if (!a) return reject(state, type, msg("reject.unknownAdjustment", { id }));
+    if (roll !== undefined && !a.die.includes(roll)) return reject(state, type, msg("reject.rollMismatch", { roll, adjustment: adjustmentName(a.id) }));
     // Another choice before Start: back to the booklet set-up first (nothing else can have
     // changed since, the player being locked until Start).
     const replaced = state.adjustment && data.adjustments?.find((x) => x.id === state.adjustment!.id);
@@ -253,40 +255,40 @@ export function createEngine(data: EngineData): Engine {
     for (const [k, c] of a.commands.entries()) {
       const r = step(next, c, "bot");
       const refused = r.events.find((e) => e.type === "CommandRejected");
-      if (refused) return reject(state, type, `${a.name} cannot be played on this map (step ${k + 1}: ${refused.reason})`);
+      if (refused) return reject(state, type, msg("reject.adjustmentFailed", { adjustment: adjustmentName(a.id), step: k + 1, reason: refused.reason }));
       next = r.state;
       events.push(...r.events);
     }
     next = { ...next, adjustment: roll === undefined ? { id } : { id, roll } };
-    const applied: GameEvent = { type: "SetUpAdjustmentApplied", id, name: a.name, roll, commands: a.commands.length };
-    if (replaced) applied.replaces = replaced.name;
+    const applied: GameEvent = { type: "SetUpAdjustmentApplied", id, roll, commands: a.commands.length };
+    if (replaced) applied.replaces = replaced.id;
     return { state: next, events: [applied, ...events] };
   }
 
   function startGame(state: GameState, seed = 1): StepResult {
-    if (!state.setUp) return reject(state, "StartGame", "Set up turn 1 first.");
-    if (state.started) return reject(state, "StartGame", "The game has already started.");
-    if (!state.adjustment) return reject(state, "StartGame", "Roll or choose the set-up adjustment first.");
+    if (!state.setUp) return reject(state, "StartGame", msg("reject.setUpFirst"));
+    if (state.started) return reject(state, "StartGame", msg("reject.alreadyStarted"));
+    if (!state.adjustment) return reject(state, "StartGame", msg("reject.chooseAdjustment"));
     // §3: the initial Soviet cards left after the set-up adjustment, shuffled into the draw pile.
     const next = sovietCards ? sovietCards.startPiles(state, seed) : state;
     return { state: { ...next, started: true }, events: [{ type: "GameStarted" }] };
   }
 
   function runBotImpulse(state: GameState): StepResult {
-    if (!state.started) return reject(state, "RunBotImpulse", "Press Start to begin turn 1.");
-    if (!sovietCards) return reject(state, "RunBotImpulse", "The Soviet cards are not loaded.");
+    if (!state.started) return reject(state, "RunBotImpulse", msg("reject.pressStart"));
+    if (!sovietCards) return reject(state, "RunBotImpulse", msg("reject.cardsNotLoaded"));
     const r = sovietCards.runImpulse(state);
-    return typeof r === "string" ? reject(state, "RunBotImpulse", r) : r;
+    return "key" in r ? reject(state, "RunBotImpulse", r) : r;
   }
 
   // End of turn (4.0 V) and start of the next: Reserve Phase (I), Soviet draw pile (II),
   // Supply Phase (III). TODO 4.6: victory check (17.2) and garrison removal (15.3).
   function nextTurn(state: GameState): StepResult {
-    if (!state.started) return reject(state, "NextTurn", "Press Start to begin turn 1.");
-    if (!sovietCards || !state.sovietCards) return reject(state, "NextTurn", "The Soviet cards are not loaded.");
+    if (!state.started) return reject(state, "NextTurn", msg("reject.pressStart"));
+    if (!sovietCards || !state.sovietCards) return reject(state, "NextTurn", msg("reject.cardsNotLoaded"));
     const left = state.sovietCards.drawPile.length;
-    if (left) return reject(state, "NextTurn", `${left} Soviet card${left === 1 ? "" : "s"} left: the turn goes on until the Soviet draw pile is empty (4.0 IV.3).`);
-    if (state.turn >= LAST_TURN) return reject(state, "NextTurn", `Game-turn ${LAST_TURN} is the last turn.`);
+    if (left) return reject(state, "NextTurn", msg("reject.cardsLeft", { count: left }));
+    if (state.turn >= LAST_TURN) return reject(state, "NextTurn", msg("reject.lastTurn", { turn: LAST_TURN }));
     // V: Dispersed and Forward Support markers off the map; [GT 7] objective markers out of play (9.12).
     const units = { ...state.units };
     for (const [id, u] of Object.entries(units)) if (u.dispersed) { const { dispersed: _, ...rest } = u; units[id] = rest; }
@@ -308,7 +310,7 @@ export function createEngine(data: EngineData): Engine {
   }
 
   function dismissReminder(state: GameState, id: string): StepResult {
-    if (!state.reminders?.some((r) => r.id === id)) return reject(state, "DismissReminder", "No such reminder.");
+    if (!state.reminders?.some((r) => r.id === id)) return reject(state, "DismissReminder", msg("reject.noReminder"));
     return { state: { ...state, reminders: state.reminders.filter((r) => r.id !== id) }, events: [{ type: "ReminderDismissed", id }] };
   }
 
@@ -316,9 +318,9 @@ export function createEngine(data: EngineData): Engine {
   // of the phase, German and Soviet alike; then the markers change (13.2) and stacks already
   // isolated surrender (13.23). [GT 7] Step 5: front objective removal (9.12).
   function supplyPhase(state: GameState): StepResult {
-    if (!state.started) return reject(state, "SupplyPhase", "Press Start to begin turn 1.");
+    if (!state.started) return reject(state, "SupplyPhase", msg("reject.pressStart"));
     // 13.0: all units supplied on GT 1; Soviet units throughout GT 2-3.
-    if (state.turn < 2) return reject(state, "SupplyPhase", "There is no Supply Phase on Game-turn 1.");
+    if (state.turn < 2) return reject(state, "SupplyPhase", msg("reject.noSupplyPhaseGt1"));
     const sides = state.turn >= 4 ? ["german", "soviet"] : ["german"];
     const traced = new Map<string, boolean>();
     for (const [id, s] of Object.entries(state.units)) {
@@ -369,10 +371,10 @@ export function createEngine(data: EngineData): Engine {
 
   function setSupplyStatus(state: GameState, ids: string[], status: SupplyMarker | "supplied"): StepResult {
     const unique = [...new Set(ids)];
-    if (!unique.length) return reject(state, "SetSupplyStatus", "No unit selected.");
-    if (!["supplied", "outOfSupply", "isolated"].includes(status)) return reject(state, "SetSupplyStatus", `Unknown supply status "${status}".`);
+    if (!unique.length) return reject(state, "SetSupplyStatus", msg("reject.noUnitSelected"));
+    if (!["supplied", "outOfSupply", "isolated"].includes(status)) return reject(state, "SetSupplyStatus", msg("reject.unknownSupplyStatus", { status }));
     for (const id of unique)
-      if (!state.units[id] || !isHex(state.units[id].at)) return reject(state, "SetSupplyStatus", `${name(id)} is not on the map.`);
+      if (!state.units[id] || !isHex(state.units[id].at)) return reject(state, "SetSupplyStatus", msg("reject.notOnMap", { unit: name(id) }));
     const changing = unique.filter((id) => rules.supplyStatus(state, id) !== status);
     if (!changing.length) return { state, events: [] };
     const supply = { ...state.supply };
@@ -385,9 +387,9 @@ export function createEngine(data: EngineData): Engine {
 
   function setForwardSupport(state: GameState, hexes: string[]): StepResult {
     const unique = [...new Set(hexes)];
-    if (unique.length > MAX_FORWARD_SUPPORT) return reject(state, "SetForwardSupport", `At most ${MAX_FORWARD_SUPPORT} Forward Support markers (13.53).`);
+    if (unique.length > MAX_FORWARD_SUPPORT) return reject(state, "SetForwardSupport", msg("reject.forwardSupportMax", { max: MAX_FORWARD_SUPPORT }));
     const bad = unique.find((h) => !data.board.isPlayable(h));
-    if (bad) return reject(state, "SetForwardSupport", `${bad} is not a playable hex.`);
+    if (bad) return reject(state, "SetForwardSupport", msg("reject.notPlayable", { hex: bad }));
     const cur = state.forwardSupport ?? [];
     if (cur.length === unique.length && cur.every((h) => unique.includes(h))) return { state, events: [] };
     return { state: { ...state, forwardSupport: unique }, events: [{ type: "ForwardSupportSet", hexes: unique }] };
@@ -395,9 +397,9 @@ export function createEngine(data: EngineData): Engine {
 
   // Steps 1-2 of a Soviet activation (9.0): objective check (9.1), movement methods (9.2).
   function activateFormation(state: GameState, army: string): StepResult {
-    if (!state.started) return reject(state, "ActivateFormation", "Press Start to begin turn 1.");
+    if (!state.started) return reject(state, "ActivateFormation", msg("reject.pressStart"));
     const r = sovietMovement.activate(state, army);
-    return typeof r === "string" ? reject(state, "ActivateFormation", r) : r;
+    return "key" in r ? reject(state, "ActivateFormation", r) : r;
   }
 
   /** Commands the player may only send once the game has started. */
@@ -411,7 +413,7 @@ export function createEngine(data: EngineData): Engine {
     if (lock) return reject(state, command.type, lock);
     switch (command.type) {
       case "SetUpTurn1":
-        return state.setUp ? reject(state, command.type, "Turn 1 is already set up.") : setUpTurn1();
+        return state.setUp ? reject(state, command.type, msg("reject.alreadySetUp")) : setUpTurn1();
       case "ClearSetUp":
         return state.setUp ? { state: emptyState(), events: [{ type: "SetUpCleared" }] } : { state, events: [] };
       case "MoveUnits":
@@ -467,7 +469,7 @@ export function createEngine(data: EngineData): Engine {
   };
 }
 
-function reject(state: GameState, command: Command["type"], reason: string): StepResult {
+function reject(state: GameState, command: Command["type"], reason: Message): StepResult {
   const event: GameEvent = { type: "CommandRejected", command, reason };
   return { state, events: [event] };
 }

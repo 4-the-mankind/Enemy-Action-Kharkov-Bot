@@ -4,17 +4,19 @@ import { ADJUSTMENTS } from "../../engine/setup-adjustments";
 import { newSeed } from "../../engine/random";
 import type { GameState } from "../../engine/types";
 import type { GameSession } from "../state/session";
+import { adjustmentName } from "../../engine/names";
+import { t } from "../../i18n/i18n";
 
 function content(state: GameState): string {
-  if (!state.setUp) return `<h2>Set up turn 1</h2>
-    <p>Click on ‘Set up turn 1’ below or on the top left Units panel. Counters stay locked until the game starts.</p>
-    <button type="button" class="btn ink" data-action="set-up">Set up turn 1</button>`;
+  if (!state.setUp) return `<h2>${t("start.setUp.title")}</h2>
+    <p>${t("start.setUp.text")}</p>
+    <button type="button" class="btn ink" data-action="set-up">${t("start.setUp.button")}</button>`;
   const a = state.adjustment && ADJUSTMENTS.find((x) => x.id === state.adjustment!.id);
-  if (!a) return `<h2>The Soviets strike first</h2>
-    <p>Roll the die or choose a set-up adjustment in the Units panel: the bot plays the outcome of the Soviet initial assault. Counters stay locked until you press Start.</p>`;
-  return `<h2>${a.name}</h2>
-    <p>Press Start to begin the first German impulse and unlock your counters.</p>
-    <button type="button" class="btn ink" data-action="start">Start</button>`;
+  if (!a) return `<h2>${t("start.strike.title")}</h2>
+    <p>${t("start.strike.text")}</p>`;
+  return `<h2>${t(adjustmentName(a.id))}</h2>
+    <p>${t("start.ready.text")}</p>
+    <button type="button" class="btn ink" data-action="start">${t("start.ready.button")}</button>`;
 }
 
 /** `setUp`: the same action as the Units panel's "Set up turn 1" button (counters fly from the button pressed). */

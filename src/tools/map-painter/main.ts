@@ -18,7 +18,7 @@ import {
 } from "../../core/map-hexsides";
 import { allSides, arrowPolygon, isOffMapEdge } from "../../core/map-sides";
 import {
-  ARROW_FRONT_COLOR, EDGE_COLOR, FRONT_COLOR, LINE_LABEL, LINE_COLOR, LOGI_COLOR, RIVER_WIDTH, TERRAIN_COLOR,
+  ARROW_FRONT_COLOR, EDGE_COLOR, FRONT_COLOR, lineLabel, LINE_COLOR, LOGI_COLOR, RIVER_WIDTH, TERRAIN_COLOR,
   label, riverLabel,
 } from "../../ui/map-symbols";
 
@@ -502,7 +502,7 @@ function describeHex(id: string): string {
   if (d.logistics) parts.push(`logistics: ${label(d.logistics)}`);
   if (d.mapEdge) parts.push(`${label(d.mapEdge)} edge`);
   if (d.edgeRoad) parts.push("supply entry (road off map)");
-  const lines = LINE_KEYS.filter((k) => d[k]).map((k) => `${LINE_LABEL[k]}: ${d[k]}`);
+  const lines = LINE_KEYS.filter((k) => d[k]).map((k) => `${lineLabel(k)}: ${d[k]}`);
   if (lines.length) parts.push(lines.join(", "));
   return parts.join(" · ");
 }

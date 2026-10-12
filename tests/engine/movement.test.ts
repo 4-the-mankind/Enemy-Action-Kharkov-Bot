@@ -8,6 +8,7 @@ import { createEngine } from "../../src/engine/engine";
 import { createMovement, type MoveOptions } from "../../src/engine/movement";
 import { emptyState, type GameState } from "../../src/engine/types";
 import { board as realBoard, terrain } from "./real-map";
+import { expectMessage } from "../i18n/expect-message";
 
 // Synthetic 8 × 8 grid (even columns half a hex down). Hexes of one column are neighbors
 // ("0402"-"0403"); 0402 and 0403 share 0303 and 0503. Around 0404: 0403, 0405, 0304, 0305, 0504, 0505.
@@ -221,12 +222,12 @@ describe("enemy units, zones of control and towns (10.1, 11.1, 14.1)", () => {
 describe("German strategic movement (10.6)", () => {
   it("is refused on turn 1, in mud, or next to an enemy unit", () => {
     const { movement, state } = setup({ units: [mech("g", 4, "german"), inf("s")], at: { g: "0404", s: "0406" }, turn: 1 });
-    expect(movement.whyNoStrategic(state, "g")).toMatch(/turn 2/);
+    expectMessage(movement.whyNoStrategic(state, "g"), "movement.strategic.beforeTurn2");
     const t2 = { ...state, turn: 2 };
     expect(movement.whyNoStrategic(t2, "g")).toBeNull();
-    expect(movement.whyNoStrategic(t2, "g", "lightMud")).toMatch(/mud/);
-    expect(movement.whyNoStrategic(t2, "s")).toMatch(/Only German/);
-    expect(movement.whyNoStrategic({ ...t2, units: { ...t2.units, s: { at: "0405", face: "front" } } }, "g")).toMatch(/adjacent/);
+    expectMessage(movement.whyNoStrategic(t2, "g", "lightMud"), "movement.strategic.mud");
+    expectMessage(movement.whyNoStrategic(t2, "s"), "movement.strategic.germanOnly");
+    expectMessage(movement.whyNoStrategic({ ...t2, units: { ...t2.units, s: { at: "0405", face: "front" } } }, "g"), "movement.strategic.adjacentEnemy", { unit: "g" });
     expect(() => movement.reachable(state, "g", { strategic: true })).toThrow();
   });
 

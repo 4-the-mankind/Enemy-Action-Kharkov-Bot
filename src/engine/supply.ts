@@ -7,6 +7,8 @@
 // the moment: "supply determinations made for units in the Supply Phase apply throughout
 // the game-turn". canTraceSupply is the trace of the moment (9.23 d, 9.27, method 3).
 import type { Front, Side, Unit } from "../core/units";
+import { msg, type Message } from "../i18n/message";
+import { sideName } from "./names";
 import type { Board } from "./board";
 import { isHex, type GameState, type SupportLine } from "./types";
 
@@ -38,7 +40,7 @@ export interface SupplyRules {
   /** The supply path and the road route behind its head, or null (4.3b). */
   supplyLine(state: GameState, side: Side, hex: string): SupplyLine | null;
   /** Why that side cannot trace supply from the hex (13.1), or null if it can (4.3b). */
-  whyNoSupply(state: GameState, side: Side, hex: string): string | null;
+  whyNoSupply(state: GameState, side: Side, hex: string): Message | null;
   /** 13.51, 13.53: the hex is in Soviet support. */
   inSovietSupport(state: GameState, hex: string): boolean;
   /** 9.8: the line in use, or null when the entire map is within the limit (GT 1-5). */
@@ -202,28 +204,26 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     return out;
   }
 
-  const sideName = (side: Side) => (side === "soviet" ? "Soviet" : "German");
-
   /**
    * 13.1, read back for the player (4.3b): each constraint is lifted in turn, and the one
    * whose removal opens a path is the reason. Path length first, then enemy ZOC.
    */
-  function whyNoSupply(state: GameState, side: Side, hex: string): string | null {
+  function whyNoSupply(state: GameState, side: Side, hex: string): Message | null {
     const s = hypothetical(state, side, hex);
     if (supplyMap(s, side).supplied.has(hex)) return null;
     const far = supplyMap(s, side, { noLimit: true });
     if (far.supplied.has(hex))
-      return `The nearest ${sideName(side)} supply head is ${far.dist.get(hex)} hexes away; a supply path enters seven hexes at most (13.1).`;
+      return msg("supply.why.tooFar", { side: sideName(side), count: far.dist.get(hex)! });
     const open = supplyMap(s, side, { noZoc: true });
     const path = pathIn(open, hex);
     if (path) {
       const closed = supplyMap(s, side).zocClosed;
       const zoc = path.slice(1).filter((h) => closed.has(h));
-      return `Enemy ZOC closes every path${zoc.length ? ` (${zoc.join(", ")} on the shortest one)` : ""}: a supply path enters an enemy ZOC only where a friendly unit is (13.1).`;
+      return zoc.length ? msg("supply.why.zocAt", { hexes: zoc }) : msg("supply.why.zoc");
     }
     if (supplyMap(s, side, { noLimit: true, noZoc: true }).supplied.has(hex))
-      return `Every path is either longer than seven hexes or enters an enemy ZOC without a friendly unit (13.1).`;
-    return `Enemy units, enemy towns or cities${side === "german" ? ", garrisons" : ""} or the Dniepr cut every path to a ${sideName(side)} supply head (13.1).`;
+      return msg("supply.why.tooFarOrZoc");
+    return msg(side === "german" ? "supply.why.cutGerman" : "supply.why.cutSoviet");
   }
 
   function inSovietSupport(state: GameState, hex: string): boolean {

@@ -1,7 +1,8 @@
 // Wiring only: load data/soviet-cards.json and lay each card scan beside the bot's reading of
 // it (4.1), for the dev to check. The plain-words reading mirrors src/engine/soviet-cards.ts.
 import { parseSovietCards, type CardCommand, type SovietCard } from "../../core/soviet-cards";
-import { ARMY_NAMES } from "../../engine/soviet-cards";
+import { armyName, frontName } from "../../engine/names";
+import { t } from "../../i18n/i18n";
 
 interface Named { id: string; name: string }
 
@@ -11,7 +12,7 @@ const errorEl = document.getElementById("error") as HTMLElement;
 const tabs = document.getElementById("front-tabs") as HTMLElement;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-const army = (a: string) => ARMY_NAMES[a] ?? `${a} Army`;
+const army = (a: string) => t(a === "voronezh" || a === "southwest" ? frontName(a) : armyName(a));
 const scan = (id: string) => `/assets/cards/EAKh-sovECcards-E-${id.slice(1)}.png`;
 const FRONT = { voronezh: "Voronezh Front", southwest: "Southwest Front" } as const;
 const TIE = { voronezh: "a supplied unit closest to the west map edge", southwest: "a supplied unit closest to the 3300 hexrow", stavka: "a supplied unit closest to hex 1923" };

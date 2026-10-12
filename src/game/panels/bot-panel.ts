@@ -1,9 +1,10 @@
 // Bot tab of the rail (§3bis D): the Soviet cards on the deck, "Run bot impulse" and "Next
 // turn", how the bot read the cards of its last impulse (8.1), the activations being played
 // (each formation, its units in the order the bot moved them, the current one lit), playback
-// speed, and the "Why this move" slip below. Plus the Soviet state kept so far.
+// controls under the impulse buttons (speed, replay, skip, clear trails), and the "Why this
+// move" slip below. Plus the Soviet state kept so far.
 import type { CardCommand } from "../../core/soviet-cards";
-import { ARMY_NAMES } from "../../engine/soviet-cards";
+import { adjustmentName, armyName, frontName } from "../../engine/names";
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
 import { isHex, SOVIET_CARDS, type GameEvent, type GameState } from "../../engine/types";
 import { faceImage } from "../data/game-data";
@@ -13,9 +14,8 @@ import type { GameSession } from "../state/session";
 import { CARD_BACK, cardImage } from "./card-zoom";
 import { objectiveChange, objectiveName } from "./objective-text";
 import type { mountWhyPanel } from "./why-panel";
+import { t } from "../../i18n/i18n";
 
-const armyName = (token: string) => ARMY_NAMES[token] ?? `${token} Army`;
-const frontName = (f: string) => (f === "voronezh" ? "Voronezh Front" : "Southwest Front");
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 interface Parts { deck: HTMLElement; activate: HTMLElement; reading: HTMLElement; orders: HTMLElement; status: HTMLElement }
@@ -23,11 +23,13 @@ interface Parts { deck: HTMLElement; activate: HTMLElement; reading: HTMLElement
 type Checked = Extract<GameEvent, { type: "SovietCommandChecked" }>;
 
 /** The cards of an impulse as the bot read them, in play order. */
+type Fate = "discarded" | "returned" | "removed";
+
 interface Reading {
   depth: number;
   drawn: Extract<GameEvent, { type: "SovietCardsDrawn" }>;
   /** One block per card read: the auxiliary card's event check, then each command card. */
-  blocks: { card: string; role: "auxiliary" | "command" | "second"; checks: Checked[]; fate: string }[];
+  blocks: { card: string; role: "auxiliary" | "command" | "second"; checks: Checked[]; fate: Fate | null }[];
 }
 
 function readImpulse(events: GameEvent[], depth: number): Reading | null {
@@ -35,7 +37,7 @@ function readImpulse(events: GameEvent[], depth: number): Reading | null {
   if (!drawn) return null;
   const blocks: Reading["blocks"] = [];
   const block = (card: string, role: Reading["blocks"][number]["role"]) => {
-    const b = { card, role, checks: [] as Checked[], fate: "" };
+    const b = { card, role, checks: [] as Checked[], fate: null as Fate | null };
     blocks.push(b);
     return b;
   };
@@ -45,9 +47,9 @@ function readImpulse(events: GameEvent[], depth: number): Reading | null {
     else if (e.type === "SovietCommandChecked") {
       if (e.role === "auxiliary" && cur?.card !== e.card) cur = block(e.card, "auxiliary");
       cur!.checks.push(e);
-    } else if (cur && e.type === "SovietCardDiscarded" && e.card === cur.card) cur.fate = "Discarded.";
-    else if (cur && e.type === "SovietCardReturned" && e.card === cur.card) cur.fate = "Shuffled back into the draw pile.";
-    else if (cur && e.type === "SovietCardRemoved" && e.card === cur.card) cur.fate = "Removed from the game (8.2).";
+    } else if (cur && e.type === "SovietCardDiscarded" && e.card === cur.card) cur.fate = "discarded";
+    else if (cur && e.type === "SovietCardReturned" && e.card === cur.card) cur.fate = "returned";
+    else if (cur && e.type === "SovietCardRemoved" && e.card === cur.card) cur.fate = "removed";
   }
   return { depth, drawn, blocks };
 }
@@ -77,38 +79,39 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     // The command card stays face up until the next impulse.
     const aux = fresh && !matchMedia("(prefers-reduced-motion: reduce)").matches ? drawnAux : undefined;
     // A drawn card leaves the pile face down, then turns over (two faces, card-back.png behind).
-    const flip = (id: string, role: string, extra: string) =>
-      `<div class="card flip${extra}${fresh ? " drawn" : ""}" role="img" aria-label="${role} ${id.toUpperCase()}" data-card="${id}" tabindex="0">` +
+    const flip = (id: string, role: "bot.deck.auxiliary" | "bot.deck.command", extra: string) =>
+      `<div class="card flip${extra}${fresh ? " drawn" : ""}" role="img" aria-label="${t(role, { card: id.toUpperCase() })}" data-card="${id}" tabindex="0">` +
       `<img class="back" src="${CARD_BACK}" alt=""><img class="face" src="${cardImage(id)}" alt=""></div>`;
     const face = command
-      ? (aux ? flip(aux, "Auxiliary card", " aux") : "") + flip(command, "Command card", "")
+      ? (aux ? flip(aux, "bot.deck.auxiliary", " aux") : "") + flip(command, "bot.deck.command", "")
       : left
-        ? `<img class="card" src="${CARD_BACK}" alt="Soviet draw pile, face down">`
-        : `<div class="card empty">No card left</div>`;
+        ? `<img class="card" src="${CARD_BACK}" alt="${t("bot.deck.faceDown")}">`
+        : `<div class="card empty">${t("bot.deck.noCardLeft")}</div>`;
     parts.deck.innerHTML = `<div class="deck${aux ? " pair" : ""}" style="--left:${left}"><div class="edges">${edges}</div>${face}</div>` +
-      `<p class="deck-count"><b>${left}</b> card${left === 1 ? "" : "s"} left</p>` +
-      (command ? `<p class="deck-note">Point at a card to read it, click to keep it up.</p>`
-        : `<p class="deck-note">The bot draws two cards at each impulse: one commands, the other is the auxiliary card (8.1).</p>`);
+      `<p class="deck-count">${t("bot.deck.left", { count: left })}</p>` +
+      `<p class="deck-note">${t(command ? "bot.deck.readHint" : "bot.deck.drawHint")}</p>`;
     shownCard = command ?? null;
   };
 
   // ---- Controls: the bot's impulse, the next turn.
   parts.activate.innerHTML = `<p class="turn-line"></p>
     <div class="impulse-row">
-      <button type="button" class="btn ink" data-action="impulse">Run bot impulse</button>
-      <button type="button" class="btn switch" data-action="next-turn">Next turn</button>
+      <button type="button" class="btn ink" data-action="impulse">${t("bot.runImpulse")}</button>
+      <button type="button" class="btn switch" data-action="next-turn">${t("bot.nextTurn")}</button>
     </div>
-    <p class="activate-reason" role="status"></p>` +
-    (dev ? `<details class="dev-activate"><summary>Activate an army (dev scenario)</summary>
-      <div class="activate-row"><select class="army-select" aria-label="Soviet army"></select><button type="button" class="btn switch" data-action="activate">Activate</button></div></details>` : "");
+    <p class="activate-reason" role="status"></p>
+    <div class="playback" hidden></div>` +
+    (dev ? `<details class="dev-activate"><summary>${t("bot.devActivate")}</summary>
+      <div class="activate-row"><select class="army-select" aria-label="${t("bot.devArmy")}"></select><button type="button" class="btn switch" data-action="activate">${t("bot.activate")}</button></div></details>` : "");
   const turnLine = parts.activate.querySelector<HTMLElement>(".turn-line")!;
   const runButton = parts.activate.querySelector<HTMLButtonElement>("[data-action=impulse]")!;
   const nextButton = parts.activate.querySelector<HTMLButtonElement>("[data-action=next-turn]")!;
   const reason = parts.activate.querySelector<HTMLElement>(".activate-reason")!;
   const select = parts.activate.querySelector<HTMLSelectElement>(".army-select");
+  const playback = parts.activate.querySelector<HTMLElement>(".playback")!;
   const send = (command: Parameters<GameSession["dispatch"]>[0]) => {
     const refused = session.dispatch(command).find((e) => e.type === "CommandRejected");
-    reason.textContent = refused ? refused.reason : "";
+    reason.textContent = refused ? t(refused.reason) : "";
   };
   parts.activate.addEventListener("click", (e) => {
     const action = (e.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
@@ -121,13 +124,12 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     const lock = engine.locked(state);
     const pile = state.sovietCards?.drawPile.length ?? 0;
     const impulses = state.sovietImpulses ?? 0;
-    turnLine.innerHTML = state.started
-      ? `<b>Game-turn ${state.turn}</b>${impulses ? `, after Soviet impulse ${impulses}` : ", no Soviet impulse yet"}`
-      : "<b>Game-turn 1</b>, before Start";
+    turnLine.innerHTML = !state.started ? t("bot.turnLine.beforeStart")
+      : impulses ? t("bot.turnLine.started", { turn: state.turn, impulse: impulses }) : t("bot.turnLine.noImpulse", { turn: state.turn });
     runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing;
-    runButton.title = lock ?? (!pile && state.started ? "The Soviet draw pile is empty." : "Ends your German impulse: the bot plays its Soviet impulse.");
+    runButton.title = lock ? t(lock) : t(!pile && state.started ? "bot.runTitle.pileEmpty" : "bot.runTitle.endsImpulse");
     nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing;
-    nextButton.title = pile ? `Once the Soviet draw pile is empty (${pile} left) and your cards are played.` : "End this turn and start the next.";
+    nextButton.title = pile ? t("bot.nextTitle.waitPile", { count: pile }) : t("bot.nextTitle.ready");
     if (select) {
       const armies = new Map<string, string>();
       for (const [id, s] of Object.entries(state.units)) {
@@ -136,7 +138,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       }
       const keep = select.value;
       select.innerHTML = [...armies].sort(([, a], [, b]) => a.localeCompare(b))
-        .map(([a, f]) => `<option value="${a}">${armyName(a)} (${frontName(f)})</option>`).join("");
+        .map(([a, f]) => `<option value="${a}">${t("bot.armyOption", { army: armyName(a), front: frontName(f) })}</option>`).join("");
       if (armies.has(keep)) select.value = keep;
     }
   };
@@ -146,31 +148,39 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     const c = checks.find((x) => x.index === i);
     const badge = l.turns ? `<span class="gt">${l.turns}</span>` : "";
     const cls = c ? (c.played ? "played" : "passed") : role === "auxiliary" && l.kind !== "event" ? "idle" : "unread";
-    const note = c ? (c.played ? `<span class="note">${esc(c.reason ?? "Done.")}</span>` : `<span class="note">Passed over: ${esc(c.reason ?? "")}.</span>`) : "";
-    return `<li class="${cls}">${c?.played ? '<span class="mark" aria-label="played">▶</span>' : ""}${badge}<span class="text">${esc(l.text)}</span>${note}</li>`;
+    const note = !c ? "" : c.played ? `<span class="note">${esc(c.reason ? t(c.reason) : t("bot.reading.done"))}</span>`
+      : `<span class="note">${esc(t("bot.reading.passed", { reason: c.reason ?? "" }))}</span>`;
+    return `<li class="${cls}">${c?.played ? `<span class="mark" aria-label="${t("bot.reading.played")}">▶</span>` : ""}${badge}<span class="text">${esc(l.text)}</span>${note}</li>`;
   };
-  const roleName = { auxiliary: "Auxiliary card: event check", command: "Command card", second: "Second impulse: the auxiliary card commands" } as const;
 
   const renderReading = () => {
     if (!reading || !cards) { parts.reading.hidden = true; parts.reading.innerHTML = ""; return; }
     parts.reading.hidden = false;
     const d = reading.drawn;
-    parts.reading.innerHTML = `<header class="reading-head"><h2>Soviet impulse</h2><p>Drew ${d.cards.map((c) => c.toUpperCase()).join(" and ")}: ${esc(d.why)}.</p></header>` +
+    const drew = d.cards.map((c) => c.toUpperCase()).join(t("bot.reading.and"));
+    parts.reading.innerHTML = `<header class="reading-head"><h2>${t("bot.reading.title")}</h2><p>${esc(t("bot.reading.drew", { cards: drew, why: d.why }))}</p></header>` +
       reading.blocks.map((b) => {
         const c = cards.card(b.card)!;
         return `<article class="read-card"><h3><img src="${cardImage(b.card)}" alt="" data-card="${b.card}" tabindex="0">` +
-          `<span>${b.card.toUpperCase()} ${esc(c.title)}<small>${roleName[b.role]}</small></span></h3>` +
+          `<span>${b.card.toUpperCase()} ${esc(c.title)}<small>${t(`bot.reading.role.${b.role}`)}</small></span></h3>` +
           `<ol class="lines">${c.commands.map((l, i) => lineStatus(l, i, b.checks, b.role)).join("")}</ol>` +
-          (b.fate ? `<p class="fate">${b.fate}</p>` : "") + `</article>`;
+          (b.fate ? `<p class="fate">${t(`bot.reading.fate.${b.fate}`)}</p>` : "") + `</article>`;
       }).join("");
   };
 
   // ---- Orders: the units of each activation, in the order the bot handled them.
   const outcome = (d: Decision) =>
-    d.outcome === "moved" ? `${d.from} to ${d.to}` : d.outcome === "frozen" ? `stays in ${d.from}` : "no method";
+    d.outcome === "moved" ? t("bot.order.moved", { from: d.from, to: d.to }) : d.outcome === "frozen" ? t("bot.order.stays", { from: d.from }) : t("bot.order.noMethod");
+  /** "Method 11", "Army objective method 3" (9.26), or "No method". */
+  const methodLabel = (method: string | null) => {
+    const n = method?.match(/ method (\d+)$/)?.[1];
+    if (!method) return t("bot.order.noMethodLabel");
+    if (!n) return method;
+    return t(method.startsWith("9.26") ? "bot.order.armyMethod" : "bot.order.method", { n });
+  };
 
   const renderOrders = () => {
-    if (!current) { parts.orders.innerHTML = ""; parts.orders.hidden = true; return; }
+    if (!current) { parts.orders.innerHTML = ""; parts.orders.hidden = true; playback.hidden = true; return; }
     parts.orders.hidden = false;
     const { formations, decisions } = current.activation;
     const shown = why.shown();
@@ -180,20 +190,22 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       const state = i === current!.lit && player.playing ? "current" : i > current!.lit ? "pending" : "";
       return `<li><button type="button" data-order="${i}" class="${state}${d === shown ? " shown" : ""}${d.outcome === "moved" ? "" : " still"}">` +
         (u ? `<img src="${faceImage(u, s?.face ?? "front")}" alt="">` : "") +
-        `<span class="name">${u?.designation ?? d.unit}<small>${d.method ? d.method.replace(/^9\.2[12] method/, "Method").replace(/^9\.26 method/, "Army objective method") : "No method"}</small></span>` +
+        `<span class="name">${u?.designation ?? d.unit}<small>${methodLabel(d.method)}</small></span>` +
         `<span class="where">${outcome(d)}</span></button></li>`;
     };
-    parts.orders.innerHTML = `<div class="playback"><div class="speed" role="group" aria-label="Animation speed">` +
-      speeds.map((s) => `<button type="button" data-speed="${s}" aria-pressed="${player.speed === s}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("") +
+    playback.hidden = false;
+    playback.innerHTML = `<div class="speed" role="group" aria-label="${t("bot.speed.group")}">` +
+      speeds.map((s) => `<button type="button" data-speed="${s}" aria-pressed="${player.speed === s}">${t(`bot.speed.${s}`)}</button>`).join("") +
       `</div><div class="playback-actions">` +
-      `<button type="button" class="switch" data-action="replay-all"${player.playing ? " disabled" : canReplayAll() ? "" : ` disabled title="Counters have moved since."`}>Replay all moves</button>` +
-      `<button type="button" class="switch" data-action="skip"${player.playing ? "" : " disabled"}>Skip</button></div></div>` +
-      formations.map(({ formation, first, objectives }, k) => {
+      `<button type="button" class="switch" data-action="replay-all"${player.playing ? " disabled" : canReplayAll() ? "" : ` disabled title="${t("bot.replayAllMoved")}"`}>${t("bot.replayAll")}</button>` +
+      `<button type="button" class="switch" data-action="skip"${player.playing ? "" : " disabled"}>${t("bot.skip")}</button>` +
+      `<button type="button" class="switch" data-action="clear-trails"${!player.playing && player.hasTrails ? "" : " disabled"} title="${t("bot.clearTrailsTitle")}">${t("bot.clearTrails")}</button></div>`;
+    parts.orders.innerHTML = formations.map(({ formation, first, objectives }, k) => {
         const end = formations[k + 1]?.first ?? decisions.length;
         // Step 1 (9.0): the objective check, and any marker the moves reached.
-        const marks = objectives.map((e) => `<p class="objective-check" title="${esc(e.why)} (${e.rule})">` +
-          `${objectiveName(e.marker, e.face)} ${objectiveChange(e)}.</p>`).join("");
-        return `<header class="orders-head"><h2>${armyName(formation.army)}</h2><p>${frontName(formation.front)}, movement methods ${formation.methods}</p>${marks}</header>` +
+        const marks = objectives.map((e) => `<p class="objective-check" title="${esc(t(e.why))} (${e.rule})">` +
+          `${t("objective.change.line", { marker: objectiveName(e.marker, e.face), change: objectiveChange(e) })}</p>`).join("");
+        return `<header class="orders-head"><h2>${t(armyName(formation.army))}</h2><p>${t("bot.formation.front", { front: frontName(formation.front), methods: formation.methods })}</p>${marks}</header>` +
           `<ol class="orders">${decisions.slice(first, end).map((d, j) => order(d, first + j)).join("")}</ol>`;
       }).join("");
     placeWhy();
@@ -230,15 +242,19 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     });
   }
 
-  parts.orders.addEventListener("click", (e) => {
+  playback.addEventListener("click", (e) => {
     const t = e.target as Element;
     const speed = t.closest<HTMLElement>("[data-speed]")?.dataset.speed as Speed | undefined;
     if (speed) { player.setSpeed(speed); renderOrders(); return; }
     if (t.closest("[data-action=skip]")) { player.skip(); return; }
+    if (t.closest("[data-action=clear-trails]")) { player.clearTrails(); renderOrders(); return; }
     if (t.closest("[data-action=replay-all]")) {
       if (!player.playing && canReplayAll()) { picked = false; why.place(null); why.show(null); playCurrent(); }
-      return;
     }
+  });
+
+  parts.orders.addEventListener("click", (e) => {
+    const t = e.target as Element;
     const order = t.closest<HTMLElement>("[data-order]");
     if (order && current) { picked = true; why.place(null); why.show(current.activation.decisions[Number(order.dataset.order)]); renderOrders(); }
   });
@@ -247,10 +263,11 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   const renderStatus = (s: GameState) => {
     const adj = s.adjustment && ADJUSTMENTS.find((a) => a.id === s.adjustment!.id);
     const removed = s.sovietCards?.removed ?? [];
-    parts.status.innerHTML = (adj ? `<div><dt>Set-up adjustment</dt><dd>${adj.name}${s.adjustment!.roll ? ` (rolled ${s.adjustment!.roll})` : ""}</dd></div>` : "") +
-      `<div><dt>Soviet VP</dt><dd>${s.vp}</dd></div>` +
-      `<div><dt>Soviet discard</dt><dd>${s.sovietDiscard.length ? s.sovietDiscard.map((c) => c.toUpperCase()).join(", ") : "None"}</dd></div>` +
-      (removed.length ? `<div><dt>Out of the game</dt><dd>${removed.map((c) => c.toUpperCase()).join(", ")}</dd></div>` : "");
+    const roll = s.adjustment?.roll;
+    parts.status.innerHTML = (adj ? `<div><dt>${t("bot.status.adjustment")}</dt><dd>${roll ? t("bot.status.adjustmentRolled", { adjustment: adjustmentName(adj.id), roll }) : t(adjustmentName(adj.id))}</dd></div>` : "") +
+      `<div><dt>${t("bot.status.vp")}</dt><dd>${s.vp}</dd></div>` +
+      `<div><dt>${t("bot.status.discard")}</dt><dd>${s.sovietDiscard.length ? s.sovietDiscard.map((c) => c.toUpperCase()).join(t("list.comma")) : t("bot.status.none")}</dd></div>` +
+      (removed.length ? `<div><dt>${t("bot.status.removed")}</dt><dd>${removed.map((c) => c.toUpperCase()).join(t("list.comma"))}</dd></div>` : "");
   };
 
   const render = (state: GameState) => { renderDeck(state); renderControls(state); renderReading(); renderOrders(); renderStatus(state); };
