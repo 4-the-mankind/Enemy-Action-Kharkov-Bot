@@ -3,8 +3,7 @@
 // Pure functions of the game state: nothing is cached between calls, the state changes
 // with every unit that moves. Supply markers come from the Supply Phase (supply.ts, 13.2);
 // garrisons and the ground condition from the PendingRules (pending.ts) until task 4.6.
-// TODO 5.1: a German unit ends its move where it can trace supply (10.5), checked on the
-// player's moves.
+// The player's German moves are checked with them in german-moves.ts (10.5, task 5.1).
 import type { MoveClass, TerrainEffects } from "../core/terrain-effects";
 import type { Side, Unit } from "../core/units";
 import { msg, type Message } from "../i18n/message";
@@ -21,6 +20,8 @@ export interface MoveOptions {
   strategic?: boolean;
   /** Soviet urban infiltration (9.21 method 1): into an adjacent empty German town/city regardless of German ZOCs. */
   urbanInfiltration?: boolean;
+  /** Movement allowance in place of the printed one: how far a hex is when the MPs are not the limit (refusal messages). */
+  allowance?: number;
 }
 
 /** Why a unit must stop in a hex it reaches. */
@@ -160,7 +161,7 @@ export function createMovement({ board, terrain, unit, rules = provisionalRules(
     }
     const cls: MoveClass = u.type === "mechanized" ? "mech" : "inf";
     // 10.6: German infantry gains 2 MPs in strategic movement.
-    const allowance = faceValues(state, id).movement + (strategic && cls === "inf" ? 2 : 0);
+    const allowance = opts.allowance ?? faceValues(state, id).movement + (strategic && cls === "inf" ? 2 : 0);
     const budget = allowance * 2;
     const foe = enemyOf(u.side), occ = occupancy(state), enemyZoc = zoc(state, foe);
     const enemyTown = (hex: string) => townOwner(state, hex) === foe;

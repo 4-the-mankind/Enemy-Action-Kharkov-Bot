@@ -22,8 +22,8 @@ const CLICK_SLOP = 4;
 /** Press time (ms) on a counter before it is lifted for a drag (D17): a shorter press is a click. */
 export const HOLD_MS = 250;
 
-/** What a click landed on besides the hex: a counter (data-unit), and whether Ctrl/Cmd was held. */
-export interface ClickInfo { unit: string | null; toggle: boolean }
+/** What a click landed on besides the hex: a counter (data-unit), whether Ctrl/Cmd was held, and Shift. */
+export interface ClickInfo { unit: string | null; toggle: boolean; shift: boolean }
 
 export interface MapViewEvents {
   hover?: (target: PointerTarget | null) => void;
@@ -204,7 +204,7 @@ export class MapView {
       if (drag) clearTimeout(drag.hold);
       if (drag && !drag.moved && e.button === 0) {
         const t = this.targetAt(e.clientX, e.clientY);
-        if (t) this.events.click?.(t, { unit: drag.unit, toggle: e.ctrlKey || e.metaKey });
+        if (t) this.events.click?.(t, { unit: drag.unit, toggle: e.ctrlKey || e.metaKey, shift: e.shiftKey });
       }
       if (drag && !drag.moved && e.button === 2 && drag.unit) this.events.menu?.(drag.unit, e);
       drag = null;

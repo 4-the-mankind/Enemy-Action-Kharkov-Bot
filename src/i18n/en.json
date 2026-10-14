@@ -175,6 +175,28 @@
       "unitInCombat": "This unit is in the combat on {{hex}}: the Combat tab says what to do.",
       "unknownTactic": "Unknown combat tactic: {{tactic}}.",
       "reinforceArmy": "{{unit}} is not in the same army as a unit in the combat ({{armies}})."
+    },
+    "move": {
+      "enemyHex": "{{hex}} is held by enemy units (10.1).",
+      "noSupply": "{{unit}} cannot end its move in {{hex}}: no German supply path from there (10.5).",
+      "dispersed": "{{unit}} is dispersed and cannot move (12.9).",
+      "tooFar": "{{unit}} needs {{cost}} MP to reach {{hex}} and has {{mp}} (10.0).",
+      "isolated": "{{unit}} is isolated: one hex at most, and not out of an enemy ZOC (13.22).",
+      "isolatedMech": "{{unit}} is isolated: a mechanized unit cannot move (13.22).",
+      "outOfSupplyMech": "{{unit}} is out of supply: two hexes at most (13.21).",
+      "noPath": "{{unit}} cannot reach {{hex}}: enemy units, their zones of control or a river bar every path (10.1, 11.1)."
+    },
+    "attack": {
+      "sovietImpulse": "The Soviet impulse is not over: finish its combat first.",
+      "noAttacker": "Choose at least one attacking unit.",
+      "noSoviet": "No Soviet unit in {{hex}} to attack.",
+      "notGerman": "{{unit}} is a Soviet unit: only your units attack.",
+      "notAdjacent": "{{unit}} is not adjacent to {{hex}} (12.1).",
+      "blockedDniepr": "{{unit}} faces {{hex}} across a blocked Dniepr hexside: they are not adjacent (9.3).",
+      "dispersed": "{{unit}} is dispersed and may not attack (12.1).",
+      "isolated": "{{unit}} is isolated and may not attack (12.1).",
+      "noneSupplied": "Out of Supply units attack only alongside a supplied unit (12.1).",
+      "noneToCancel": "No German attack to cancel."
     }
   },
   "movement": {
@@ -740,7 +762,9 @@
       "reinforcements": "{{who}} back to the reinforcements.",
       "reinforcementsFrom": "{{who}} back to the reinforcements from {{from}}.",
       "hex": "{{who}} moved to {{to}}.",
-      "hexFrom": "{{who}} moved to {{to}} from {{from}}."
+      "hexFrom": "{{who}} moved to {{to}} from {{from}}.",
+      "hexFree": "{{who}} placed on {{to}} without the movement check.",
+      "hexFromFree": "{{who}} placed on {{to}} from {{from}} without the movement check."
     },
     "restacked": {
       "up": "<b>{{unit}}</b> moved up the stack in {{hex}}.",
@@ -842,7 +866,9 @@
       "noAdvance": "{{unit}} does not advance: {{why}}.",
       "ended": "Combat on {{hex}} over.",
       "activationEnded": "End of the activation: {{army}}.",
-      "full": "{{unit}} does not advance into {{hex}}: {{route}}, {{count}} Soviet units there already."
+      "full": "{{unit}} does not advance into {{hex}}: {{route}}, {{count}} Soviet units there already.",
+      "germanDeclared": "German attack on {{hex}}: {{attackers}} against {{defenders}}, {{german}} to {{soviet}}.",
+      "cancelled": "German attack on {{hex}} cancelled."
     },
     "reserve": {
       "placed": "{{unit}} placed from the reserve box in {{hex}} ({{rule}}).",
@@ -1016,7 +1042,11 @@
     "reinforcements": "Back to its turn of entry",
     "eliminated": "Eliminate",
     "dropOn": "Drop on {{hex}}",
-    "outOfPlay": "Out of play"
+    "outOfPlay": "Out of play",
+    "dropCost": "Drop on {{hex}}: {{cost}} of {{mp}} MP",
+    "dropStrategic": "Drop on {{hex}}: strategic move, {{cost}} of {{mp}} MP",
+    "free": "Place on {{hex}} without the movement check",
+    "altHint": "Hold Alt to place it without the movement check."
   },
   "map": {
     "supplyMarker": {
@@ -1252,7 +1282,8 @@
   "combatSheet": {
     "title": {
       "sovietAttack": "Soviet attack on {{hex}}",
-      "nkvdOperations": "{{event}} on {{hex}}"
+      "nkvdOperations": "{{event}} on {{hex}}",
+      "germanAttack": "German attack on {{hex}}"
     },
     "where": "{{place}}, {{terrain}}",
     "whereVp": "{{place}}, {{terrain}}, {{vp}} VP",
@@ -1272,7 +1303,10 @@
       "advance": "Soviet advance",
       "cleanUp": "Clean up",
       "target": "Target",
-      "sovietLoss": "Soviet step"
+      "sovietLoss": "Soviet step",
+      "declare": "Target and attackers",
+      "sovietCard": "Soviet card",
+      "yourAdvance": "Your advance"
     },
     "sum": {
       "none": "None",
@@ -1404,6 +1438,25 @@
       "choose": "Several German stacks tie for the two hits: choose one.",
       "pick": "{{hex}}"
     },
-    "die": "Die: {{roll}}"
+    "die": "Die: {{roll}}",
+    "germanAttack": {
+      "from": "Your units attack from {{hexes}}.",
+      "declared_one": "{{count}} unit",
+      "declared_other": "{{count}} units",
+      "attacker": "{{unit}}, from {{hex}}",
+      "later": "The next steps of a German attack (your tactics, the Soviet card, the chits and the hits) are not on this sheet yet. Cancel the attack to go on with your impulse.",
+      "cancel": "Cancel attack"
+    }
+  },
+  "germanBar": {
+    "label": "German impulse",
+    "hint": "Drag a counter to move it; the hexes it can reach light up.",
+    "attack": "Attack a hex",
+    "pickAttackers": "Click your attacking units. Shift+click takes a whole stack.",
+    "pickTarget": "Click the Soviet hex to attack, or more of your units.",
+    "attackers": "Attacking units",
+    "remove": "Take {{unit}} out of the attack",
+    "cancel": "Cancel",
+    "combatOpen": "Combat on {{hex}}: the Combat tab leads it."
   }
 }

@@ -2,7 +2,9 @@
 // arrows across the hexsides, drawn like pastel on the paper map (a roughened, grainy stroke);
 // while the German losses are taken, the hexes open to the retreat (12.7: the only drops the
 // engine accepts, Q45) and the paths taken; once the bot has played, its advances. Drawn from
-// the game state only, so an undo redraws it.
+// the game state only, so an undo redraws it. The attacker's color: staff red for the Soviets,
+// Prussian blue for a German attack (task 5.1), whose arrows show first in dashes while the
+// player points at the hex to attack.
 import { hexCorners } from "../../core/geometry";
 import type { Engine } from "../../engine/engine";
 import { isHex, type Combat, type GameState } from "../../engine/types";
@@ -24,6 +26,7 @@ const PASTEL_FILTER = `<filter id="pastel" x="-25%" y="-25%" width="150%" height
 export class CombatPlane {
   private readonly under: SVGGElement;
   private readonly over: SVGGElement;
+  private readonly ghost: SVGGElement;
 
   constructor(private readonly view: MapView, private readonly data: MapData, private readonly engine: Engine) {
     const defs = document.createElementNS(SVG_NS, "defs");
@@ -34,7 +37,9 @@ export class CombatPlane {
     view.plane("marks").append(this.under);
     this.over = document.createElementNS(SVG_NS, "g");
     this.over.classList.add("combat-arrows");
-    view.plane("moves").append(this.over);
+    this.ghost = document.createElementNS(SVG_NS, "g");
+    this.ghost.classList.add("combat-arrows", "ghost");
+    view.plane("moves").append(this.over, this.ghost);
   }
 
   private center(hex: string) { return this.data.hexById.get(hex); }
@@ -46,12 +51,15 @@ export class CombatPlane {
 
   /** One arrow per attacking hex, across the hexside into the target. */
   private arrows(c: Combat, state: GameState): string {
-    const t = this.center(c.target);
+    return this.arrowsFrom([...new Set(c.attackers.filter((a) => isHex(state.units[a]?.at ?? "") || c.from[a]).map((a) => c.from[a] ?? state.units[a].at))], c.target);
+  }
+
+  private arrowsFrom(from: string[], target: string): string {
+    const t = this.center(target);
     if (!t) return "";
-    const from = [...new Set(c.attackers.filter((a) => isHex(state.units[a]?.at ?? "") || c.from[a]).map((a) => c.from[a] ?? state.units[a].at))];
     return from.map((h) => {
       const p = this.center(h);
-      if (!p || h === c.target) return "";
+      if (!p || h === target) return "";
       const dx = t.x - p.x, dy = t.y - p.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
       const s = { x: p.x + dx * 0.28, y: p.y + dy * 0.28 }, e = { x: t.x - dx * 0.36, y: t.y - dy * 0.36 };
       const tip = { x: e.x + ux * 40, y: e.y + uy * 40 }, nx = -uy * 30, ny = ux * 30;
@@ -84,7 +92,7 @@ export class CombatPlane {
       if (c?.choices) this.under.innerHTML = c.choices.map((h) => this.outline(h, "choice")).join("");
       return;
     }
-    const side = "soviet"; // 4.5a: the bot attacks (NKVD Operations too); German attacks come with 4.5b.
+    const side = c.kind === "germanAttack" ? "german" : "soviet";
     const paths = Object.values(c.losses?.paths ?? {}).filter((p) => p.length > 1).map((p) => this.line(p, "path german"));
     const advances = (c.advance ?? []).filter((a) => a.advanced && a.hex).reduce((m, a) => {
       m.set(a.unit, [...(m.get(a.unit) ?? [c.from[a.unit]]), a.hex!]);
@@ -98,6 +106,11 @@ export class CombatPlane {
   private outline(hex: string, cls: string): string {
     const h = this.data.hexById.get(hex);
     return h ? `<polygon class="${cls}" points="${pointsAttr(hexCorners(this.data.grid, h))}"/>` : "";
+  }
+
+  /** The arrows of a German attack the player points at, before it is declared (from the attackers' hexes); null clears them. */
+  preview(from: string[] | null, target?: string) {
+    this.ghost.innerHTML = from && target ? `<g class="german">${this.arrowsFrom(from, target)}</g>` : "";
   }
 
   /** Brings the hex attacked into view when a combat opens (D18). */

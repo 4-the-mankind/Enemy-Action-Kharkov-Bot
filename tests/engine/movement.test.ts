@@ -382,9 +382,10 @@ describe("town ownership in the engine (14.1)", () => {
     expect(r.events).toContainEqual({ type: "TownCaptured", hex: "1009", owner: "soviet" });
     s = r.state;
     expect(s.sovietTowns).toContain("1009");
-    const back = engine.step(s, { type: "MoveUnits", units: ["g"], to: "1009" });
+    s = engine.step(s, { type: "MoveUnits", units: ["s"], to: "1008" }, "bot").state;
+    const back = engine.step(s, { type: "MoveUnits", units: ["g"], to: "1009", free: true });
     expect(back.state.sovietTowns).not.toContain("1009");
-    expect(engine.step(start(), { type: "MoveUnits", units: ["g"], to: "1009" }).events).toHaveLength(1);
+    expect(engine.step(start(), { type: "MoveUnits", units: ["g"], to: "1009", free: true }).events).toHaveLength(1);
     expect(engine.step(start(), { type: "MoveUnits", units: ["s"], to: "1008" }).events).toHaveLength(1); // not a town
   });
 });

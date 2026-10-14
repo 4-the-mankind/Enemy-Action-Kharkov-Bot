@@ -538,5 +538,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
   return {
     checks, sorted, combat, auxiliaryApplies, auxiliaryTactics, tacticApplies, reinforcements, assaultUnits,
     sovietStrength, inBarrageZone, supported, flanked, hexesOf, canAttack, unitsIn,
+    /** The same halvings for German attackers (12.41, task 5.1). */
+    attackStrength: sovietStrength,
   };
 }

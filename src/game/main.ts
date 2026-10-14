@@ -23,6 +23,7 @@ import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
 import { mountCardZoom } from "./panels/card-zoom";
 import { mountCombatPanel } from "./panels/combat-panel";
+import { mountGermanBar, type GermanBar } from "./panels/german-bar";
 import { mountReminders } from "./panels/reminders";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountWhyPanel } from "./panels/why-panel";
@@ -49,12 +50,13 @@ async function init() {
   const rail = mountDossier($("railDossier"));
 
   let inspector: ReturnType<typeof mountInspector> | null = null;
+  let bar: GermanBar | null = null;
   // Map clicks and lifts need the session, created once the data is loaded.
   let onClick: Pick<MapViewEvents, "click" | "lift" | "menu"> = {};
   // The supply line of the hovered hex (or the pinned one) comes forward (4.3b).
   let hovered: string | null = null, focusSupply = () => {};
   const view = new MapView($("viewport"), {
-    hover: (t) => { inspector?.hover(t); hovered = t?.hex.id ?? null; focusSupply(); },
+    hover: (t) => { inspector?.hover(t); hovered = t?.hex.id ?? null; focusSupply(); bar?.hover(hovered); },
     click: (t, info) => onClick.click?.(t, info),
     lift: (unit, at) => onClick.lift?.(unit, at),
     menu: (unit, at) => onClick.menu?.(unit, at),
@@ -85,6 +87,7 @@ async function init() {
   const supply = new SupplyPlane(view, data, session.engine);
   const combatPlane = new CombatPlane(view, data, session.engine);
   const menu = createCounterMenu(session);
+  const germanBar = bar = mountGermanBar($("germanBar"), session, { units, combat: combatPlane, selection });
   inspector = mountInspector($("inspector"), view, data, stackRenderer(session, selection, drag, menu));
   const insp = inspector;
 
@@ -155,6 +158,8 @@ async function init() {
   // elsewhere, the inspector pins or releases the target as before.
   onClick = {
     click: (t, info) => {
+      // Attack a hex (F): clicks pick the attackers, then the hex attacked.
+      if (germanBar.attacking()) { germanBar.mapClick(t.hex.id, info); return; }
       const at = info.unit ? session.state.units[info.unit]?.at : null;
       if (!info.unit || !at || !isHex(at)) { insp.click(t); selection.clear(); return; }
       const sameHex = insp.pinnedHex() === at;
@@ -194,7 +199,11 @@ async function init() {
   document.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.matches("input, select, textarea")) return;
     if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) { e.preventDefault(); session.undo(); return; }
-    if (e.key === "Escape") { selection.clear(); insp.release(); }
+    if (e.key === "Escape") {
+      if (germanBar.attacking()) germanBar.cancel();
+      else { selection.clear(); insp.release(); }
+    }
+    else if ((e.key === "a" || e.key === "A") && !e.ctrlKey && !e.metaKey && !e.altKey) germanBar.toggle();
     else if (e.key === "0") view.resetView();
     else if (e.key in PAN_KEYS && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const [dx, dy] = PAN_KEYS[e.key], step = e.shiftKey ? 240 : 80;

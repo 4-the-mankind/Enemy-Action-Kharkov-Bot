@@ -1,5 +1,7 @@
-// The combat sheet (12.0, task 4.5a, D18): a Soviet attack from its step 2 on, and the NKVD
-// Operations event (two hits "as if combat occurred"). The bot plays its own steps (2: its
+// The combat sheet (12.0, task 4.5a, D18): a Soviet attack from its step 2 on, the NKVD
+// Operations event (two hits "as if combat occurred"), and a German attack declared by the
+// player (task 5.1: step 1 of the German combat sequence; the next steps come with task
+// 4.5b). In a Soviet attack the bot plays its own steps (2: its
 // combat tactics; 7: its losses; 8: its advance; 9: the cards used); the player plays his (3:
 // his tactics; 4: the chits; 5: the hits on the chits kept; 6: his losses on the map, only as
 // the rules allow, Q45). Every step is a command, so an undo takes back one step (D12).
@@ -322,6 +324,71 @@ export function createCombat(data: CombatData) {
     if (c.auxiliary) tacticsEvent.auxiliary = c.auxiliary;
     if (c.noCard) tacticsEvent.noCard = c.noCard;
     return { state: { ...state, combat: c }, events: [...events, tacticsEvent, { type: "CombatStarted", combat: c }] };
+  }
+
+  // ---------------------------------------------------------------- German attack (task 5.1)
+
+  /** Why these units may not attack that hex now (12.0 German combat sequence step 1, 12.1), or null. */
+  function whyNotAttack(state: GameState, attackers: string[], target: string): Message | null {
+    if (state.combat) return msg("reject.combat.open", { hex: state.combat.target });
+    if (state.botImpulse) return msg("reject.attack.sovietImpulse");
+    const ids = [...new Set(attackers)];
+    if (!ids.length) return msg("reject.attack.noAttacker");
+    if (!isHex(target) || !board.isPlayable(target)) return msg("reject.notPlayable", { hex: target });
+    if (!attacks.unitsIn(state, target, "soviet").length) return msg("reject.attack.noSoviet", { hex: target });
+    for (const id of ids) {
+      const u = unit(id), s = state.units[id];
+      if (!u || !s) return msg("reject.notInPlay", { unit: id });
+      if (u.side !== "german") return msg("reject.attack.notGerman", { unit: u.designation });
+      if (!isHex(s.at)) return msg("reject.notOnMap", { unit: u.designation });
+      if (!board.areAdjacent(s.at, target)) {
+        // 9.3 Adjacent: not across a blocked Dniepr hexside.
+        const blocked = board.neighbors(s.at).some((n) => n.hex === target);
+        return msg(blocked ? "reject.attack.blockedDniepr" : "reject.attack.notAdjacent", { unit: u.designation, hex: target });
+      }
+      if (s.dispersed) return msg("reject.attack.dispersed", { unit: u.designation });
+      if (status(state, id) === "isolated") return msg("reject.attack.isolated", { unit: u.designation });
+    }
+    // 12.1: Out of Supply German units attack only alongside a supplied one.
+    if (!ids.some((id) => status(state, id) === "supplied")) return msg("reject.attack.noneSupplied");
+    return null;
+  }
+
+  /** 12.41 in a German attack: the German attackers (Dniepr and marsh halvings) against the Soviet defenders (marsh). */
+  const germanAttackStrengths = (state: GameState, c: Combat) =>
+    ({ german: attacks.attackStrength(state, attackersOn(state, c), c.target), soviet: Math.max(germanStrength(state, c), 0) });
+
+  /**
+   * DeclareAttack: step 1 of the German combat sequence. The sheet opens on step 2.
+   * TODO 4.5b: steps 2-9 (12.39, 12.4, 12.53, 12.7, 12.8), 12.74 for the Soviet units that
+   * retreated into the hex during the German impulse (D14), Defender Adjacent (attackedThisImpulse).
+   */
+  function startGermanAttack(state: GameState, attackers: string[], target: string): Outcome {
+    const why = whyNotAttack(state, attackers, target);
+    if (why) return why;
+    const ids = state.order.filter((id) => attackers.includes(id));
+    const c: Combat = {
+      kind: "germanAttack", stage: "tactics", target, attackers: ids, from: Object.fromEntries(ids.map((id) => [id, state.units[id].at])),
+      defenders: attacks.unitsIn(state, target, "soviet"), bystanders: [], joined: [], reserves: [], commandValue: 0,
+      tactics: [], germanTactics: [], reinforcing: [], chits: { min: 0, max: 0 },
+    };
+    const n = chitCount(state, c);
+    c.chits = { min: n.min, max: n.max };
+    const { german, soviet } = germanAttackStrengths(state, c);
+    return {
+      state: { ...state, combat: c },
+      events: [{ type: "GermanAttackDeclared", target, attackers: ids, defenders: c.defenders, german, soviet }, { type: "CombatStarted", combat: c }],
+    };
+  }
+
+  /** CancelAttack: the German attack taken back before its hits are entered (§3bis I). */
+  function cancelAttack(state: GameState): Outcome {
+    const c = state.combat;
+    if (!c || c.kind !== "germanAttack") return msg("reject.attack.noneToCancel");
+    // TODO 4.5b: also from steps 3-4 (tactics played and Soviet card drawn taken back), never once the hits are entered.
+    if (c.stage !== "tactics") return msg("reject.combat.notNow");
+    const { combat: _, ...rest } = state;
+    return { state: rest, events: [{ type: "AttackCancelled", target: c.target }] };
   }
 
   // ---------------------------------------------------------------- NKVD Operations
@@ -692,12 +759,14 @@ export function createCombat(data: CombatData) {
     const c = state.combat;
     if (!c || !ids.length) return null;
     if (ids.some((id) => inCombat(c, id))) {
-      if (c.stage === "losses" && ids.every((id) => c.defenders.includes(id) && onMap(state, id))) {
+      if (c.kind !== "germanAttack" && c.stage === "losses" && ids.every((id) => c.defenders.includes(id) && onMap(state, id))) {
         if (isHex(to)) return retreatMove(state, c, ids, to);
         if (to === "eliminated" && ids.length === 1) return loseStep(state, c, ids[0], true);
       }
       return msg("reject.combat.unitInCombat", { hex: c.target });
     }
+    // TODO 4.5b: units joining a German attack (Reinforce Battle, Assault Coordination), the German advance.
+    if (c.kind === "germanAttack") return null;
     if (to === c.target && ids.every((id) => sideOf(id) === "german")) return reinforceDefense(state, c, ids, to);
     if (to === c.target) return msg("reject.combat.notIntoCombat", { hex: c.target });
     return null;
@@ -1021,11 +1090,21 @@ export function createCombat(data: CombatData) {
     const c = state.combat;
     if (!c) return null;
     const n = chitCount(state, c);
+    if (c.kind === "germanAttack") {
+      // TODO 4.5b: the steps after the declaration (tactics, chits, situations, hits, losses).
+      const s = germanAttackStrengths(state, c);
+      return {
+        soviet: s.soviet, german: s.german, attack: s.german, defense: s.soviet, odds: roundOdds(s.german, s.soviet),
+        terrain: terrainOf(c.target), vp: board.hex(c.target).vp, chits: n, situations: [],
+        tactics: Object.fromEntries(GERMAN_DEFENSE_TACTICS.map((t) => [t, null])) as Record<GermanDefenseTactic, Message | null>,
+        tacticsLock: null, replacementUnits: [], adjustments: null, lossOptions: [], owed: 0,
+      };
+    }
     const hits = c.stage === "hits" ? adjustments(state, c) : null;
     // Once the hits are in, the strengths of the combat as fought (the German units may have left).
     const soviet = c.strengths?.soviet ?? sovietStrength(state, c), german = c.strengths?.german ?? Math.max(germanStrength(state, c), 0);
     return {
-      soviet, german, odds: roundOdds(soviet, german), terrain: terrainOf(c.target), vp: board.hex(c.target).vp,
+      soviet, german, attack: soviet, defense: german, odds: roundOdds(soviet, german), terrain: terrainOf(c.target), vp: board.hex(c.target).vp,
       chits: n, situations: situations(state),
       tactics: Object.fromEntries(GERMAN_DEFENSE_TACTICS.map((t) => [t, tacticLock(state, c, t)])) as Record<GermanDefenseTactic, Message | null>,
       tacticsLock: tacticLock(state, c),
@@ -1038,6 +1117,6 @@ export function createCombat(data: CombatData) {
 
   return {
     startAttack, startNkvd, chooseTarget, playTactics, chitsDrawn, enterHits, chooseLosses, hitsApplied, finish,
-    playerMove, playerRemoveStep, whyNotRemoveStep, retreatHexes, view, preview,
+    playerMove, playerRemoveStep, whyNotRemoveStep, retreatHexes, view, preview, whyNotAttack, startGermanAttack, cancelAttack,
   };
 }

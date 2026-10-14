@@ -31,6 +31,9 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       const who = e.units.length > 1 ? msg("log.moved.many", { count: e.units.length, units: e.units.map(name) }) : msg("log.moved.one", { unit: name(e.units[0]) });
       const from = [...new Set(e.from)];
       const kind = isHex(e.to) ? "hex" : MOVED[e.to as keyof typeof MOVED];
+      // Placed with Alt, without the movement rules (Q59).
+      if (e.free && isHex(e.to))
+        return line(from.length === 1 ? t("log.moved.hexFromFree", { who, to: e.to, from: where(from[0]) }) : t("log.moved.hexFree", { who, to: e.to }));
       return line(from.length === 1
         ? t(`log.moved.${kind}From`, { who, to: e.to, from: where(from[0]) })
         : t(`log.moved.${kind}`, { who, to: e.to }));
@@ -127,6 +130,10 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     case "CombatStarted":
     case "CombatCleanedUp":
       return null;
+    case "GermanAttackDeclared":
+      return line(esc(t("log.attack.germanDeclared", { hex: e.target, attackers: e.attackers.map(name), defenders: e.defenders.map(name), german: e.german, soviet: e.soviet })));
+    case "AttackCancelled":
+      return line(esc(t("log.attack.cancelled", { hex: e.target })));
     case "SovietTacticsApplied": {
       const used = e.tactics.filter((x) => x.applies).map((x) => x.card ? `${x.name} (${x.card.toUpperCase()})` : x.name);
       return line(used.length ? t("log.attack.tactics", { hex: e.target, tactics: used })

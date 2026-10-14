@@ -71,10 +71,10 @@ describe("Set up turn 1", () => {
 describe("MoveUnits", () => {
   it("moves a stack on top of the destination, keeping its order, and reports where each unit came from", () => {
     const s = setUp();
-    const { state, events } = engine.step(s, { type: "MoveUnits", units: ["s2", "s1"], to: "0204" });
-    expect(state.units.s1.at).toBe("0204");
+    const { state, events } = engine.step(s, { type: "MoveUnits", units: ["s2", "s1"], to: "0305" });
+    expect(state.units.s1.at).toBe("0305");
     expect(state.order.slice(-2)).toEqual(["s1", "s2"]);
-    expect(events).toEqual([{ type: "UnitsMoved", units: ["s1", "s2"], from: ["0105", "0105"], to: "0204" }]);
+    expect(events).toEqual([{ type: "UnitsMoved", units: ["s1", "s2"], from: ["0105", "0105"], to: "0305" }]);
   });
 
   it("does not change the input state", () => {
@@ -117,13 +117,13 @@ describe("MoveUnits", () => {
 
   it("restacks a unit within its hex only, up, down, to the top or the bottom", () => {
     let s = setUp();
-    s = engine.step(s, { type: "MoveUnits", units: ["g1"], to: "0105" }).state; // 0105: s1, s2, g1 (bottom to top)
+    s = engine.step(s, { type: "MoveUnits", units: ["sLate"], to: "0105" }).state; // 0105: s1, s2, sLate (bottom to top)
     const inHex = (st: GameState) => st.order.filter((id) => st.units[id].at === "0105");
-    let r = engine.step(s, { type: "Restack", unit: "g1", to: "bottom" });
-    expect(inHex(r.state)).toEqual(["g1", "s1", "s2"]);
-    expect(r.events).toEqual([{ type: "UnitRestacked", unit: "g1", at: "0105", to: "bottom" }]);
+    let r = engine.step(s, { type: "Restack", unit: "sLate", to: "bottom" });
+    expect(inHex(r.state)).toEqual(["sLate", "s1", "s2"]);
+    expect(r.events).toEqual([{ type: "UnitRestacked", unit: "sLate", at: "0105", to: "bottom" }]);
     r = engine.step(r.state, { type: "Restack", unit: "s1", to: "up" });
-    expect(inHex(r.state)).toEqual(["g1", "s2", "s1"]);
+    expect(inHex(r.state)).toEqual(["sLate", "s2", "s1"]);
     expect(r.state.order.filter((id) => r.state.units[id].at !== "0105")).toEqual(s.order.filter((id) => s.units[id].at !== "0105"));
     expect(engine.step(r.state, { type: "Restack", unit: "s1", to: "top" }).events).toEqual([]);
     expect(engine.step(s, { type: "Restack", unit: "sRes", to: "up" }).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.notOnMap", params: { unit: "sRes" } } });
@@ -171,7 +171,8 @@ describe("Set-up adjustment commands (2.4)", () => {
       .toMatchObject({ type: "CommandRejected", reason: { key: "reject.notOnMap", params: { unit: "sRes" } } });
     s = eng.step(s, { type: "SetDispersed", units: ["three", "one"], dispersed: true }).state;
     expect(s.units.three.dispersed).toBe(true);
-    s = eng.step(s, { type: "MoveUnits", units: ["three"], to: "0305" }).state;
+    // A dispersed unit cannot move (12.9): placed freely, as a correction.
+    s = eng.step(s, { type: "MoveUnits", units: ["three"], to: "0305", free: true }).state;
     expect(s.units.three.dispersed).toBe(true);
     // 12.62: a unit with one step at full strength is removed from play when eliminated (Q52).
     s = eng.step(s, { type: "MoveUnits", units: ["one"], to: "eliminated" }).state;

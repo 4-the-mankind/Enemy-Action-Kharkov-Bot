@@ -188,8 +188,11 @@ export interface GameState {
 export type Command =
   | { type: "SetUpTurn1" }
   | { type: "ClearSetUp" }
-  /** Player move: one unit or a selection, to a hex or a box. All or nothing. */
-  | { type: "MoveUnits"; units: string[]; to: Location }
+  /**
+   * Player move: one unit or a selection, to a hex or a box. All or nothing. German units are
+   * moved by the movement rules (Q59, german-moves.ts) unless `free` (Alt + drag: corrections).
+   */
+  | { type: "MoveUnits"; units: string[]; to: Location; free?: boolean }
   /** One step lost: the counter flips (or its "R" counter comes in). The last step is lost with an elimination. */
   | { type: "RemoveStep"; unit: string }
   | { type: "SetDispersed"; units: string[]; dispersed: boolean }
@@ -230,6 +233,10 @@ export type Command =
   | { type: "SetForwardSupport"; hexes: string[] }
   /** Places or removes the Improved Position marker of a hex (14.2): German IPs (14.21), corrections. */
   | { type: "SetImprovedPosition"; hex: string; placed: boolean }
+  /** German combat sequence, step 1 (12.0, 12.1): the Soviet hex attacked and the German units attacking it. */
+  | { type: "DeclareAttack"; target: string; attackers: string[] }
+  /** Takes back the German attack declared, before its hits are entered (§3bis I). */
+  | { type: "CancelAttack" }
   /** NKVD Operations: the player's choice among the German stacks tied for the two hits. */
   | { type: "CombatTarget"; hex: string }
   /**
@@ -267,7 +274,8 @@ export type GameEvent =
   | { type: "SetUpApplied"; placed: string[]; reserve: string[]; reinforcements: string[] }
   | { type: "SetUpCleared" }
   /** `path`: hexes crossed, start and end included, when the engine knows them (bot moves). */
-  | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location; path?: string[] }
+  /** `free`: placed by the player without the movement rules (Q59). */
+  | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location; path?: string[]; free?: boolean }
   | { type: "UnitRestacked"; unit: string; at: Location; to: StackMove }
   | { type: "StepRemoved"; unit: string; from: Face; to: Face }
   /** Battlefield Replacements: a one-step unit flipped back to its two-step side. */
@@ -406,6 +414,10 @@ export type GameEvent =
   | { type: "ActivationEnded"; army: string }
   /** A combat opens on the combat sheet (12.0): the Soviet attack after its step 1, or NKVD Operations. */
   | { type: "CombatStarted"; combat: Combat }
+  /** Step 1 of a German attack (12.0): the hex attacked, the units on both sides and their strengths (12.41). */
+  | { type: "GermanAttackDeclared"; target: string; attackers: string[]; defenders: string[]; german: number; soviet: number }
+  /** The German attack taken back before its hits (CancelAttack). */
+  | { type: "AttackCancelled"; target: string }
   /** Step 2 of a Soviet attack: the Soviet combat tactics, the card drawn and the Auxiliary card (12.3, 12.31). */
   | { type: "SovietTacticsApplied"; target: string; tactics: CombatTactic[]; card?: Combat["card"]; auxiliary?: Combat["auxiliary"]; noCard?: Message }
   /** Reinforce Battle: a Soviet stack moved next to the hex attacked. Followed by its UnitsMoved. */
@@ -521,8 +533,11 @@ export interface AdvanceCheck {
 export interface CardFate { card: string; fate: "discarded" | "reused" | "removed" | "keptInDiscard" }
 
 export interface Combat {
-  /** A Soviet attack (12.0); NKVD Operations: two hits as if combat occurred, then the advance. */
-  kind: "sovietAttack" | "nkvdOperations";
+  /**
+   * A Soviet attack (12.0); NKVD Operations: two hits as if combat occurred, then the advance;
+   * a German attack (12.0 German combat sequence: declared in task 5.1, resolved in 4.5b).
+   */
+  kind: "sovietAttack" | "nkvdOperations" | "germanAttack";
   stage: CombatStage;
   target: string;
   /** NKVD Operations: hexes tied for the target, before the player picks one. */

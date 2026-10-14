@@ -8,6 +8,7 @@ import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
 import { createAdvance } from "./advance";
 import { createCombat, type Combats } from "./combat";
+import { createGermanMoves, type GermanMoves } from "./german-moves";
 import { adjustmentName } from "./names";
 import { createMovement, type Movement } from "./movement";
 import { createObjectives } from "./objectives";
@@ -82,13 +83,19 @@ export interface Engine {
   readonly rules: PendingRules;
   /** Soviet draw pile and commands (8.0), when the cards are loaded. */
   readonly sovietCards: SovietCards | null;
-  /** The combat sheet (12.0, task 4.5): what it shows, where defenders may retreat, why a step may not be lost. */
-  readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep">;
+  /**
+   * The combat sheet (12.0, task 4.5): what it shows, where defenders may retreat, why a step
+   * may not be lost, why units may not attack a hex (German attack, task 5.1).
+   */
+  readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep" | "whyNotAttack">;
+  /** Where German units may end a move of the player (Q59, task 5.1): to light the hexes during a drag. */
+  readonly germanMoves: Pick<GermanMoves, "checked" | "reach">;
   /**
    * Why the player may not drop these units there (a drag on the map or the Units panel): the
-   * rules of the move, then those of the combat open (retreats, reinforcement, Q45), or null.
+   * rules of the boxes, those of the combat open (retreats, reinforcement, Q45), then the
+   * movement rules of German units unless `free` (Alt + drag, Q59), or null.
    */
-  whyNotDrop(state: GameState, units: string[], to: Location): Message | null;
+  whyNotDrop(state: GameState, units: string[], to: Location, free?: boolean): Message | null;
 }
 
 export function createEngine(data: EngineData): Engine {
@@ -97,6 +104,7 @@ export function createEngine(data: EngineData): Engine {
   const name = (id: string) => byId.get(id)?.designation ?? id;
   const rules = data.rules ?? provisionalRules(data.board, (id) => byId.get(id));
   const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id), rules });
+  const germanMoves = createGermanMoves({ movement, unit: (id) => byId.get(id), rules });
   const objectives = createObjectives({ board: data.board, movement, unit: (id) => byId.get(id), rules });
   const sovietMovement = createSovietMovement({
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives,
@@ -175,7 +183,37 @@ export function createEngine(data: EngineData): Engine {
         if (!u.entryTurn || u.entryTurn < 2) return msg("reject.noLaterEntry", { unit: u.designation });
       }
     }
+    // 10.1: never into an enemy-occupied hex, not even placed freely (Q59).
+    if (actor === "player" && isHex(to)) {
+      const side = byId.get(ids[0])!.side;
+      if (state.order.some((id) => state.units[id]?.at === to && byId.get(id) && byId.get(id)!.side !== side))
+        return msg("reject.move.enemyHex", { hex: to });
+    }
     return null;
+  }
+
+  /**
+   * A move entered by the player: the rules of the boxes (D17), those of the combat open
+   * (retreats, Reinforce Battle, Q45), then the movement rules of German units (Q59) unless
+   * placed freely. Refused with the reason of the first rule broken, or null.
+   */
+  function whyNotPlayerMove(state: GameState, ids: string[], to: Location, free: boolean): { reason: Message } | { combat: StepResult } | null {
+    const base = whyNotMove(state, ids, to);
+    if (base) return { reason: base };
+    const r = state.combat ? combat.playerMove(state, ids, to) : null;
+    if (r) return "key" in r ? { reason: r } : { combat: r };
+    const why = free ? null : germanMoves.whyNot(state, ids, to);
+    return why ? { reason: why } : null;
+  }
+
+  function playerMove(state: GameState, units: string[], to: Location, free: boolean): StepResult {
+    const ids = [...new Set(units)];
+    const r = whyNotPlayerMove(state, ids, to, free);
+    if (r && "reason" in r) return reject(state, "MoveUnits", r.reason);
+    if (r) return r.combat;
+    const moved = moveUnits(state, ids, to, "player");
+    if (!free) return moved;
+    return { state: moved.state, events: moved.events.map((e) => (e.type === "UnitsMoved" ? { ...e, free: true } : e)) };
   }
 
   /**
@@ -549,7 +587,7 @@ export function createEngine(data: EngineData): Engine {
   /** Commands the player may only send once the game has started. */
   const PLAY = new Set<Command["type"]>([
     "MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
-    "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition",
+    "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition", "DeclareAttack", "CancelAttack",
   ]);
   /** Commands that move the game on: refused while a Soviet attack waits for its combat (Q37). */
   const ON = new Set<Command["type"]>(["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation"]);
@@ -561,11 +599,12 @@ export function createEngine(data: EngineData): Engine {
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
     if (lock) return reject(state, command.type, lock);
     if (state.botImpulse && ON.has(command.type)) return reject(state, command.type, pendingAttack(state));
-    // While a combat is open, the player's moves and step losses of its units go through it (Q45).
-    if (actor === "player" && state.combat && (command.type === "MoveUnits" || command.type === "RemoveStep")) {
-      const base = command.type === "MoveUnits" ? whyNotMove(state, [...new Set(command.units)], command.to, actor) : null;
-      if (base) return reject(state, command.type, base);
-      const r = command.type === "MoveUnits" ? combat.playerMove(state, [...new Set(command.units)], command.to) : combat.playerRemoveStep(state, command.unit);
+    // A German attack declared: the bot waits for its combat too.
+    if (state.combat && ON.has(command.type)) return reject(state, command.type, msg("reject.combat.open", { hex: state.combat.target }));
+    if (actor === "player" && command.type === "MoveUnits") return playerMove(state, command.units, command.to, !!command.free);
+    // While a combat is open, the player's step losses of its units go through it (Q45).
+    if (actor === "player" && state.combat && command.type === "RemoveStep") {
+      const r = combat.playerRemoveStep(state, command.unit);
       if (r) return combatStep(state, command.type, r);
     }
     switch (command.type) {
@@ -609,6 +648,10 @@ export function createEngine(data: EngineData): Engine {
         return setImprovedPosition(state, command.hex, command.placed);
       case "ActivateFormation":
         return activateFormation(state, command.army);
+      case "DeclareAttack":
+        return combatStep(state, command.type, combat.startGermanAttack(state, command.attackers, command.target));
+      case "CancelAttack":
+        return combatStep(state, command.type, combat.cancelAttack(state));
       case "CombatTarget":
         return combatStep(state, command.type, combat.chooseTarget(state, command.hex));
       case "CombatTactics":
@@ -624,12 +667,9 @@ export function createEngine(data: EngineData): Engine {
     }
   }
 
-  function whyNotDrop(state: GameState, ids: string[], to: Location): Message | null {
-    const unique = [...new Set(ids)];
-    const base = whyNotMove(state, unique, to);
-    if (base || !state.combat) return base;
-    const r = combat.playerMove(state, unique, to);
-    return r && "key" in r ? r : null;
+  function whyNotDrop(state: GameState, ids: string[], to: Location, free = false): Message | null {
+    const r = whyNotPlayerMove(state, [...new Set(ids)], to, free);
+    return r && "reason" in r ? r.reason : null;
   }
 
   return {
@@ -648,7 +688,8 @@ export function createEngine(data: EngineData): Engine {
     activate,
     sovietCards,
     rules,
-    combat: { view: combat.view, preview: combat.preview, retreatHexes: combat.retreatHexes, whyNotRemoveStep: combat.whyNotRemoveStep },
+    combat: { view: combat.view, preview: combat.preview, retreatHexes: combat.retreatHexes, whyNotRemoveStep: combat.whyNotRemoveStep, whyNotAttack: combat.whyNotAttack },
+    germanMoves: { checked: germanMoves.checked, reach: germanMoves.reach },
     whyNotDrop,
     unit: (id) => byId.get(id),
   };
