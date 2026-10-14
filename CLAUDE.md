@@ -16,4 +16,4 @@
 - **Serveur de dev : port 5173 uniquement.** Le dev ne peut ouvrir que ce port dans son navigateur ; ne pas lancer de serveur sur un autre port. Si l'instance du 5173 sert du code périmé (modification non prise en compte), l'IA peut la redémarrer (arrêter le processus `vite` en cours, puis relancer la configuration `map` de `.claude/launch.json`) pour mettre à jour la page du dev.
 - Modèle, effort et économie de tokens : `PLANNING.md` §7.
 - Git : ne commiter que sur demande du dev.
-- Toujours demander au dev la permission avant de commencer à éditer les fichiers / coder.
+- **Ne JAMAIS commencer sans le « go » explicite du dev** : aucune édition de fichier (code, données, `PLANNING.md`…) ni aucun code avant ce go. Répondre d'abord à **toutes** ses questions, et reposer clairement toute question qu'il n'a pas comprise, sans trancher à sa place. Une réponse à une question n'est pas un go.

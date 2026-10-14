@@ -201,8 +201,8 @@ export function createObjectives({ board, movement, unit, rules }: ObjectivesDat
 
   /**
    * 9.12: at the end of a Soviet activation, the third objective of a front leaves play if a
-   * Soviet unit entered it during the activation. TODO 4.4: once attacks and advances are part
-   * of the activation, call this after its last step.
+   * Soviet unit entered it during the activation (moves, reserves placed, advances after combat):
+   * called after step 7 (soviet-activation.ts).
    */
   function endActivation(state: GameState, enteredHexes: Set<string>): Result {
     const events: GameEvent[] = [];

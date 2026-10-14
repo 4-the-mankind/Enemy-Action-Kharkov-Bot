@@ -106,6 +106,15 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     }
     case "CommandRejected":
       return { html: t("log.rejected", { reason: e.reason }), refused: true };
+    // TODO 4.5: attacks, reserves, removals and IPs shown with the combat sheet (D18); no interface in 4.4 (Q37).
+    case "ReservePlaced":
+    case "AttackChecked":
+    case "AttackLeadRefused":
+    case "SovietAttackDeclared":
+    case "RemovalChecked":
+    case "ImprovedPositionSet":
+    case "ActivationEnded":
+      return null;
   }
 }
 

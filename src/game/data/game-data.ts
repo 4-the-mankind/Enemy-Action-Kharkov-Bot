@@ -5,7 +5,8 @@ import { parseTerrainEffects, type TerrainEffects } from "../../core/terrain-eff
 import { parseUnits, type Unit } from "../../core/units";
 import { parseSetupAdjustments, type RecordedAdjustment } from "../../engine/setup-adjustments";
 
-export interface CalendarTurn { turn: number; dates: string }
+/** A calendar space: its dates, and the Fixed Artillery Range (FAR, 12.3) the engine reads. */
+export interface CalendarTurn { turn: number; dates: string; far: number }
 
 export interface GameData {
   units: Unit[];
@@ -26,8 +27,8 @@ function parseCalendar(raw: unknown): CalendarTurn[] {
   if (!Array.isArray(turns)) throw new Error("data/calendar.json: missing \"turns\" array.");
   return turns.map((t, i) => {
     const r = t as Record<string, unknown>;
-    if (!Number.isInteger(r.turn) || typeof r.dates !== "string") throw new Error(`data/calendar.json: invalid turn [${i}].`);
-    return { turn: r.turn as number, dates: r.dates };
+    if (!Number.isInteger(r.turn) || typeof r.dates !== "string" || !Number.isInteger(r.far)) throw new Error(`data/calendar.json: invalid turn [${i}].`);
+    return { turn: r.turn as number, dates: r.dates, far: r.far as number };
   });
 }
 

@@ -76,7 +76,7 @@ async function init() {
 
   // Game session (D12): the engine owns the rules, the views play its events.
   const board = createBoard({ grid: data.grid, hexData: data.hexData, sideData: data.sideData });
-  const session = new GameSession(createEngine({ units: game.units, board, terrain: game.terrain, adjustments: game.adjustments, cards: game.cards }));
+  const session = new GameSession(createEngine({ units: game.units, board, terrain: game.terrain, adjustments: game.adjustments, cards: game.cards, calendar: game.calendar }));
   const selection = new Selection();
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);

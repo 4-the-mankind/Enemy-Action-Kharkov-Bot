@@ -79,6 +79,51 @@ export type SupportLine = "west" | "east";
 /** 13.53: up to two Soviet Forward Support markers on the map. */
 export const MAX_FORWARD_SUPPORT = 2;
 
+/**
+ * A Soviet activation under way (9.0 steps 3-7), kept in the state while the bot waits for
+ * the player to resolve a Soviet attack (Q37). Serializable, like the rest of the state (D16).
+ */
+export interface SovietActivation {
+  /** Formation activated: an army token, or a front for the [GT 8+] Front cards (8.13). */
+  army: string;
+  front: "voronezh" | "southwest";
+  /** Active units (9.3): on the map or in the reserve box when the activation began. */
+  units: string[];
+  /** Command Value of the activating command card (9.4 Tactical Value). */
+  commandValue: number;
+  /** STAVKA activation: every attack receives the NKVD combat tactic (12.35). */
+  nkvd: boolean;
+  /** Active units that moved (step 2, or an advance after combat): no removal, no IP (9.6, 9.7, Q40). */
+  moved: string[];
+  /** Units placed from the reserve box in this activation (12.2, 9.5). */
+  fromReserve: string[];
+  /** Units that took part in an attack in this activation (9.43). */
+  attacked: string[];
+  /** German-occupied hexes already the target of an attack check (9.42). */
+  checked: string[];
+  /** Q38: units that led a check, or could lead none, in the current pass of attack checks. */
+  led: string[];
+  /** Q38: attack checks made in the current pass (another pass follows only if one was made). */
+  passChecks: number;
+  /** Units already traced as unable to lead a check (AttackLeadRefused), once per activation. */
+  refused: string[];
+  /** Hexes Soviet units entered during the activation (9.12, Q32). */
+  entered: string[];
+  /** The attack declared and waiting for its combat (Q37): target, attacking units and their hexes. */
+  attack?: { target: string; units: string[]; at: Record<string, string> };
+}
+
+/** A Soviet impulse paused on an attack (8.1, Q37): what is left to play once the combat is resolved. */
+export interface BotImpulse {
+  /** Card in the Command Card box; null for an activation without a card (tests). */
+  card: string | null;
+  /** The auxiliary card played as a second command card (8.1 step 3). */
+  second: boolean;
+  /** Auxiliary card still in its box (first command card only): its tactics (12.31), then the second impulse. */
+  auxiliary: string | null;
+  activation: SovietActivation;
+}
+
 export interface GameState {
   version: 1;
   turn: number;
@@ -107,6 +152,10 @@ export interface GameState {
   forwardSupport?: string[];
   /** [GT 8+] Soviet support line chosen in step 4 of the Supply Phase (13.51). */
   supportLine?: SupportLine;
+  /** Hexes with an Improved Position marker (14.2); the IP belongs to the units in the hex. */
+  improvedPositions?: string[];
+  /** A Soviet impulse paused on a Soviet attack, until ContinueBotImpulse (Q37). */
+  botImpulse?: BotImpulse;
   /** Soviet cards outside the discard pile (8.0), from Start on. */
   sovietCards?: SovietCardPiles;
   /** Things the player has to do or keep in mind, set by the bot (events, specials). */
@@ -145,6 +194,11 @@ export type Command =
   /** IV.1: the bot plays a Soviet impulse (8.1); the player's German impulse is over (D14). */
   | { type: "RunBotImpulse" }
   /**
+   * Resumes the Soviet impulse paused on a Soviet attack (Q37), once the player has resolved
+   * the combat: the next attack checks, steps 4-7 of the activation, then the rest of the impulse.
+   */
+  | { type: "ContinueBotImpulse" }
+  /**
    * End of the turn (V, minimal) and start of the next one: Reserve Phase (I), Soviet draw
    * pile (II), Supply Phase (III). Only once the Soviet draw pile is empty.
    */
@@ -160,6 +214,8 @@ export type Command =
   | { type: "SetSupplyStatus"; units: string[]; status: SupplyMarker | "supplied" }
   /** Hexes of the Soviet Forward Support markers (13.53), at most two; [] removes them. */
   | { type: "SetForwardSupport"; hexes: string[] }
+  /** Places or removes the Improved Position marker of a hex (14.2): German IPs (14.21), corrections. */
+  | { type: "SetImprovedPosition"; hex: string; placed: boolean }
   /**
    * Soviet activation of a whole army (dev scenarios; the cards choose their units, 8.13):
    * steps 1 (objective check, 9.1) and 2 (movement methods, 9.2) of 9.0.
@@ -266,7 +322,63 @@ export type GameEvent =
     /** Earlier methods that did not apply to this unit, and why. */
     skipped: { method: string; reason: Message }[];
   }
+  /** A Soviet unit placed from the reserve box (12.2 in an attack, 9.5 in step 4), or not (hex null). Followed by its UnitsMoved. */
+  | { type: "ReservePlaced"; unit: string; hex: string | null; rule: "12.2" | "9.5"; steps: DecisionStep[]; reason?: Message }
+  /**
+   * 9.4: one attack check. `targets`: every hex this lead unit could check, with its
+   * situational ratio rounded for the defender (Q39); `steps`: the choice among them (9.41).
+   */
+  | {
+    type: "AttackChecked"; lead: string; target: string;
+    targets: { hex: string; ratio: Odds }[];
+    steps: DecisionStep[];
+    /** Soviet units counted: active units adjacent to the target, active reserves that could be placed (and where), units added by Assault Coordination. */
+    units: string[];
+    reserves: { unit: string; hex: string }[];
+    assault: string[];
+    soviet: number;
+    german: number;
+    /** Defender situations added to the German strength (9.4 table). */
+    modifiers: AttackFactor[];
+    /** Situational strengths (Soviet, German after the modifiers, at least 1), and their ratio rounded for the defender (Q39). */
+    situational: [number, number];
+    ratio: Odds;
+    /** Tactical Value factors, when the ratio falls between 1:1 and 3:1. */
+    tactical?: { factors: AttackFactor[]; total: number };
+    attack: boolean;
+    reason: Message;
+  }
+  /** 9.4: an active unit adjacent to German units it may not lead a check against (dispersed, unsupplied, one step…). */
+  | { type: "AttackLeadRefused"; unit: string; targets: string[]; reason: Message }
+  /**
+   * A Soviet attack is on (12.0): its reserves are placed (12.2, events before this one). The
+   * impulse waits for the combat (Q37), then ContinueBotImpulse.
+   */
+  | {
+    type: "SovietAttackDeclared"; target: string; lead: string; defenders: string[]; attackers: string[];
+    reserves: string[];
+    /** Non-active units that join if the Auxiliary card's Assault Coordination is applied (12.31, task 4.5). */
+    assault: string[];
+    /** Combat strengths (12.41: marsh and Dniepr halve) and their odds rounded for the defender. */
+    soviet: number; german: number; odds: Odds;
+    /** 12.38 Overwhelming Attack; 12.3: the attack is in Soviet support. */
+    overwhelming: boolean; supported: boolean;
+    /** 12.4: chits to draw (required minimum, and maximum with the tactics known so far), and those tactics. */
+    chits: { min: number; max: number }; tactics: Message[];
+  }
+  /** 9.6: an active unit checked for removal to the Soviet Reserve Units box. Followed by its UnitsMoved when removed. */
+  | { type: "RemovalChecked"; unit: string; hex: string; removed: boolean; reason: Message }
+  /** An Improved Position marker placed or removed (14.2): by the bot (rule, preferences), the player, or because its hex emptied. */
+  | { type: "ImprovedPositionSet"; hex: string; placed: boolean; rule?: string; steps?: DecisionStep[]; reason?: Message }
+  /** The activation is over (9.0, after step 7). */
+  | { type: "ActivationEnded"; army: string }
   | { type: "CommandRejected"; command: Command["type"]; reason: Message };
+
+/** Combat odds or a strength ratio as attack:defense levels (Q39): [3, 1], [1.5, 1], [1, 2]… */
+export type Odds = [number, number];
+
+/** One line of the 9.4 tables: a defender situation or a Tactical Value factor, and what it adds. */
+export interface AttackFactor { rule: string; text: Message; value: number }
 
 export interface StepResult {
   state: GameState;

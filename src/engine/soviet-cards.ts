@@ -2,7 +2,8 @@
 // picks the command card (8.1), checks the auxiliary card's command event, plays the first
 // command of the card that can be carried out (8.11-8.13), then the auxiliary card as a
 // second command card. Each line of a card it reads is traced (SovietCommandChecked).
-// Steps 3-7 of an activation (attacks, reserves, removals, IP, undisperse) come with 4.4.
+// An activation stops on each Soviet attack (Q37): the impulse is kept in the state
+// (botImpulse) and goes on with `resume` once the player has resolved the combat.
 import { onTurn, type CardCommand, type SovietCard } from "../core/soviet-cards";
 import type { Front, Unit } from "../core/units";
 import { msg, sentences, semicolonList, type Message } from "../i18n/message";
@@ -10,9 +11,12 @@ import type { Board } from "./board";
 import type { Movement } from "./movement";
 import { armyName, frontName } from "./names";
 import type { PendingRules } from "./pending";
-import { shuffle } from "./random";
-import type { SovietMovement } from "./soviet-movement";
-import { isHex, MAX_FORWARD_SUPPORT, type Command, type GameEvent, type GameState, type Reminder, type SovietCardPiles, type StepResult } from "./types";
+import { drawIndex, shuffle } from "./random";
+import type { ActivationRun, SovietActivations } from "./soviet-activation";
+import {
+  isHex, MAX_FORWARD_SUPPORT, type Command, type GameEvent, type GameState, type Reminder, type SovietActivation,
+  type SovietCardPiles, type StepResult,
+} from "./types";
 
 export interface SovietCardsData {
   cards: SovietCard[];
@@ -20,7 +24,8 @@ export interface SovietCardsData {
   movement: Movement;
   unit(id: string): Unit | undefined;
   rules: PendingRules;
-  sovietMovement: SovietMovement;
+  /** Whole activations (9.0): movement, attacks, reserves, removals, IP. */
+  activations: SovietActivations;
   /** Runs an engine command as the bot (moves, markers). */
   step(state: GameState, command: Command): StepResult;
 }
@@ -33,14 +38,23 @@ const ARMY_NUMBER: Record<string, number> = { Popov: 0 };
 const armyNumber = (army: string) => ARMY_NUMBER[army] ?? (Number.parseInt(army, 10) || 0);
 
 type Role = "command" | "auxiliary";
-/** Outcome of one card line: why it cannot be carried out, or what it did. */
-type Played = { state: GameState; events: GameEvent[]; detail?: Message; returned?: boolean };
+/**
+ * Outcome of one card line: why it cannot be carried out, or what it did. `pending`: the
+ * activation stopped on a Soviet attack (Q37).
+ */
+type Played = { state: GameState; events: GameEvent[]; detail?: Message; returned?: boolean; pending?: SovietActivation };
 type Outcome = Message | Played;
-const refused = (r: Outcome | StepResult): r is Message => "key" in r;
+const refused = (r: Outcome | StepResult | ActivationRun): r is Message => "key" in r;
+
+/** The card being carried out, and the Auxiliary card still in its box (8.1). */
+interface Impulse { card: string; auxiliary: string | null }
+
+/** Soviet Engineers event: three hexes. */
+const ENGINEERS_HEXES = 3;
 
 export type SovietCards = ReturnType<typeof createSovietCards>;
 
-export function createSovietCards({ cards, board, movement, unit, rules, sovietMovement, step }: SovietCardsData) {
+export function createSovietCards({ cards, board, movement, unit, rules, activations, step }: SovietCardsData) {
   const byId = new Map(cards.map((c) => [c.id, c]));
   const card = (id: string) => {
     const c = byId.get(id);
@@ -139,23 +153,25 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
     return sovietIds(state).filter((id) => !ids.includes(id) && hexes.has(state.units[id].at) && known(id).front === front);
   }
 
-  function activation(state: GameState, label: string, ids: string[], detail: Message): Outcome {
-    const r = sovietMovement.activate(state, label, ids);
-    return refused(r) ? r : { ...r, detail };
+  /** Steps 1-7 of the activation (9.0), with what the command card brings (9.4, 12.35). */
+  function activation(state: GameState, label: string, ids: string[], detail: Message, imp: Impulse): Outcome {
+    const c = card(imp.card);
+    const r = activations.start(state, label, ids, { commandValue: c.commandValue, nkvd: !!c.nkvdAttacks, auxiliary: imp.auxiliary });
+    return refused(r) ? r : { state: r.state, events: r.events, detail, ...(r.pending ? { pending: r.pending } : {}) };
   }
 
-  function activateArmy(state: GameState, army: string, stacked: boolean): Outcome {
+  function activateArmy(state: GameState, army: string, stacked: boolean, imp: Impulse): Outcome {
     const ids = armyUnits(state, army);
     if (!canActivate(state, ids)) return msg("cards.army.noUnit", { army: armyName(army) });
     const extra = stacked ? stackedWith(state, ids) : [];
     const detail = extra.length
       ? msg("cards.army.detailStacked", { army: armyName(army), count: ids.length, units: extra.map(name) })
       : msg("cards.army.detail", { army: armyName(army), count: ids.length });
-    return activation(state, army, [...ids, ...extra], detail);
+    return activation(state, army, [...ids, ...extra], detail, imp);
   }
 
   /** ARMY UNITS CARD: up to two units/stacks not in a VP hex, preferences a-e (8.3), plus all army reserves. */
-  function activateArmyUnits(state: GameState, army: string): Outcome {
+  function activateArmyUnits(state: GameState, army: string, imp: Impulse): Outcome {
     const ids = armyUnits(state, army);
     if (!canActivate(state, ids)) return msg("cards.army.noUnit", { army: armyName(army) });
     const reserves = ids.filter((id) => state.units[id].at === "reserve");
@@ -187,18 +203,18 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
       ...(passed.length ? [msg("cards.armyUnits.notChosen", { hexes: passed })] : []),
       ...(reserves.length ? [msg("cards.armyUnits.reserves", { units: reserves.map(name) })] : []),
     ]);
-    return activation(state, army, [...chosen.flatMap((s) => s.units), ...reserves], detail);
+    return activation(state, army, [...chosen.flatMap((s) => s.units), ...reserves], detail, imp);
   }
 
   /** Front [GT 4-7] / STAVKA [GT 5-7]: the army with the most supplied units on the map plus reserves. */
-  function activateMostUnits(state: GameState, front: Front | null, asGt4 = false): Outcome {
+  function activateMostUnits(state: GameState, front: Front | null, imp: Impulse, asGt4 = false): Outcome {
     // GT 8+ with no endangered unit: "so as on GT 4", said before what follows.
-    const r = mostUnits(state, front);
+    const r = mostUnits(state, front, imp);
     if (!asGt4) return r;
     return refused(r) ? msg("cards.most.asGt4", { rest: r }) : { ...r, detail: msg("cards.most.asGt4", { rest: r.detail! }) };
   }
 
-  function mostUnits(state: GameState, front: Front | null): Outcome {
+  function mostUnits(state: GameState, front: Front | null, imp: Impulse): Outcome {
     const armies = new Map<string, string[]>();
     for (const id of sovietIds(state)) {
       const u = known(id);
@@ -224,17 +240,17 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
     const counts = ranked.map((a) => msg("cards.most.count", { army: armyName(a.army), count: a.n }));
     const params = { army: armyName(best.army), why, counts };
     const detail = extra.length ? msg("cards.most.detailStacked", { ...params, units: extra.map(name) }) : msg("cards.most.detail", params);
-    return activation(state, best.army, [...best.ids, ...extra], detail);
+    return activation(state, best.army, [...best.ids, ...extra], detail, imp);
   }
 
   /** Front [GT 8+]: front units outside the operational limit or nearly surrounded; else as on GT 4. */
-  function activateEndangered(state: GameState, front: Front): Outcome {
+  function activateEndangered(state: GameState, front: Front, imp: Impulse): Outcome {
     const ids = sovietIds(state).filter((id) => known(id).front === front && onMap(state, id)
       && (rules.beyondOperationalLimit(state, front, state.units[id].at) || movement.isNearlySurrounded(state, id)));
-    if (!ids.length) return activateMostUnits(state, front, true);
+    if (!ids.length) return activateMostUnits(state, front, imp, true);
     if (!canActivate(state, ids)) return msg("cards.endangered.isolated");
     const why = (id: string) => msg(rules.beyondOperationalLimit(state, front, state.units[id].at) ? "cards.endangered.outsideLimit" : "cards.endangered.nearlySurrounded");
-    return activation(state, front, ids, msg("cards.endangered.detail", { front: frontName(front), units: ids.map((id) => msg("cards.endangered.unit", { unit: name(id), why: why(id) })) }));
+    return activation(state, front, ids, msg("cards.endangered.detail", { front: frontName(front), units: ids.map((id) => msg("cards.endangered.unit", { unit: name(id), why: why(id) })) }), imp);
   }
 
   // ---- 8.11 Events (EVENTS player aid, data/events.json).
@@ -376,6 +392,51 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
     };
   }
 
+  /**
+   * Soviet Engineers: in three different hexes in Soviet support, remove a German IP adjacent
+   * to a supplied Soviet unit, picked at random (Q41); if this can't be done, instead place an IP
+   * on an IP-eligible supplied Soviet unit to which a supplied German unit is proximate, a)
+   * adjacent to a German unit, b) the Soviet unit with the highest selector (then the lowest
+   * hex number). Does not apply if fewer than three hexes qualify.
+   */
+  function engineers(state: GameState): Outcome {
+    const support = (h: string) => rules.inSovietSupport(state, h);
+    const ips = state.improvedPositions ?? [];
+    const occupants = (h: string) => Object.keys(state.units).filter((u) => state.units[u].at === h);
+    const adjacentTo = (h: string, side: "german" | "soviet", test: (u: string) => boolean = () => true) =>
+      board.neighbors(h).some((n) => board.areAdjacent(h, n.hex) && occupants(n.hex).some((u) => unit(u)?.side === side && test(u)));
+    const removals = ips.filter((h) => support(h) && occupants(h).some((u) => unit(u)?.side === "german")
+      && adjacentTo(h, "soviet", (u) => supplied(state, u))).sort();
+    // 14.22: not in a town or city nor an IP hex, on an undispersed supplied unit.
+    const germans = Object.keys(state.units).filter((g) => unit(g)?.side === "german" && onMap(state, g) && supplied(state, g));
+    const eligible = (u: string) => onMap(state, u) && !state.units[u].dispersed && supplied(state, u);
+    const placements = [...new Set(sovietIds(state).filter(eligible).map((u) => state.units[u].at))].filter((h) => {
+      const t = board.hex(h).terrain;
+      return support(h) && t !== "town" && t !== "city" && !ips.includes(h)
+        && occupants(h).some((u) => unit(u)?.side === "soviet" && eligible(u) && germans.some((g) => movement.proximateToUnit(state, g, u)));
+    });
+    if (removals.length + placements.length < ENGINEERS_HEXES)
+      return msg("cards.engineers.fewer", { count: removals.length + placements.length });
+    let s = state;
+    const removed: string[] = [];
+    const pool = [...removals];
+    while (removed.length < ENGINEERS_HEXES && pool.length) {
+      const d = drawIndex(s, pool.length);
+      s = d.state;
+      removed.push(pool.splice(d.index, 1)[0]);
+    }
+    const best = (h: string) => Math.max(...occupants(h).filter((u) => unit(u)?.side === "soviet" && eligible(u)).map((u) => movement.faceValues(state, u).selector));
+    const placed = [...placements].sort((a, b) => Number(adjacentTo(b, "german")) - Number(adjacentTo(a, "german")) || best(b) - best(a) || a.localeCompare(b))
+      .slice(0, ENGINEERS_HEXES - removed.length);
+    const r = run(s, [...removed.map((hex) => ({ type: "SetImprovedPosition", hex, placed: false }) as Command),
+      ...placed.map((hex) => ({ type: "SetImprovedPosition", hex, placed: true }) as Command)]);
+    if (!r) return msg("cards.engineers.cannot");
+    const detail = !placed.length ? msg("cards.engineers.removed", { hexes: removed })
+      : !removed.length ? msg("cards.engineers.placed", { hexes: placed })
+      : msg("cards.engineers.both", { removed, placed });
+    return { ...r, detail };
+  }
+
   function event(state: GameState, id: string, line: Extract<CardCommand, { kind: "event" | "special" }>, role: Role): Outcome {
     if (line.kind === "special" && role === "auxiliary") return msg("cards.specialOnAux");
     switch (line.event) {
@@ -394,20 +455,16 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
         const hexes = rules.garrisonPlacements(state, line.front!);
         return msg(hexes.length ? "cards.garrison.notCoded" : "cards.garrison.none");
       }
-      case "soviet-engineers": {
-        // TODO 4.4: remove German IPs / place Soviet IPs once IP markers are in the game state.
-        const hexes = rules.engineerHexes(state);
-        return msg(hexes.length >= 3 ? "cards.engineers.notCoded" : "cards.engineers.fewer");
-      }
+      case "soviet-engineers": return engineers(state);
     }
   }
 
-  function line(state: GameState, id: string, l: CardCommand, role: Role): Outcome {
+  function line(state: GameState, id: string, l: CardCommand, role: Role, imp: Impulse): Outcome {
     switch (l.kind) {
-      case "activateArmy": return activateArmy(state, l.army, !!l.stacked);
-      case "activateArmyUnits": return activateArmyUnits(state, l.army);
-      case "activateMostUnits": return activateMostUnits(state, l.front);
-      case "activateEndangered": return activateEndangered(state, l.front);
+      case "activateArmy": return activateArmy(state, l.army, !!l.stacked, imp);
+      case "activateArmyUnits": return activateArmyUnits(state, l.army, imp);
+      case "activateMostUnits": return activateMostUnits(state, l.front, imp);
+      case "activateEndangered": return activateEndangered(state, l.front, imp);
       case "replacement": {
         // TODO 4.6: assign the replacement step (16.1) to this unit.
         const u = rules.replacementFor(state, l.army);
@@ -419,25 +476,50 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
 
   const turnsReason = (turns: string) => msg(/^\d+$/.test(turns) ? "cards.onlyTurn" : "cards.onlyTurns", { turns });
 
-  /** 8.1 step 2: the first command of the card that can be carried out, then the discard. */
-  function playCommandCard(state: GameState, id: string, second: boolean): Played {
+  /**
+   * 8.1 step 2: the first command of the card that can be carried out, then the discard; then
+   * step 3, the second impulse with the auxiliary card still in its box. Stops on a Soviet
+   * attack (Q37): the rest waits in `botImpulse`.
+   */
+  function playCommandCard(state: GameState, id: string, second: boolean, auxiliary: string | null): StepResult {
     const events: GameEvent[] = [{ type: "SovietCommandCard", card: id, second }];
     for (const [index, l] of card(id).commands.entries()) {
       if (!onTurn(l.turns, state.turn)) {
         events.push({ type: "SovietCommandChecked", card: id, role: "command", index, played: false, reason: turnsReason(l.turns!) });
         continue;
       }
-      const r = line(state, id, l, "command");
+      const r = line(state, id, l, "command", { card: id, auxiliary });
       if (refused(r)) {
         events.push({ type: "SovietCommandChecked", card: id, role: "command", index, played: false, reason: r });
         continue;
       }
       events.push({ type: "SovietCommandChecked", card: id, role: "command", index, played: true, reason: r.detail }, ...r.events);
       state = r.state;
+      if (r.pending) return { state: { ...state, botImpulse: { card: id, second, auxiliary, activation: r.pending } }, events };
       break;
     }
+    const rest = finishCommand(state, id, second, auxiliary);
+    return { state: rest.state, events: [...events, ...rest.events] };
+  }
+
+  /** The command card is done: discarded; then the auxiliary card, if still in its box, as a second command card (8.1 step 3). */
+  function finishCommand(state: GameState, id: string, second: boolean, auxiliary: string | null): StepResult {
     const d = discard(state, id);
-    return { state: d.state, events: [...events, ...d.events] };
+    if (second || !auxiliary) return d;
+    const next = playCommandCard(d.state, auxiliary, true, null);
+    return { state: next.state, events: [...d.events, ...next.events] };
+  }
+
+  /** ContinueBotImpulse (Q37): the paused activation goes on, then the rest of the impulse. */
+  function resume(state: GameState): StepResult | Message {
+    const imp = state.botImpulse;
+    if (!imp) return msg("reject.noBotImpulse");
+    const { botImpulse: _, ...rest } = state;
+    const r = activations.resume(rest, imp.activation, imp.auxiliary);
+    if (r.pending) return { state: { ...r.state, botImpulse: { ...imp, activation: r.pending } }, events: r.events };
+    if (imp.card === null) return { state: r.state, events: r.events };
+    const end = finishCommand(r.state, imp.card, imp.second, imp.auxiliary);
+    return { state: end.state, events: [...r.events, ...end.events] };
   }
 
   /** IV.1 Soviet impulse (8.1). A reason instead when there is no card to draw. */
@@ -473,13 +555,9 @@ export function createSovietCards({ cards, board, movement, unit, rules, sovietM
       }
     }
     // 2. The command card; 3. the auxiliary card, still in its box, as a second command card.
-    for (const [id, second] of [[command, false], ...(aux ? [[aux, true]] : [])] as [string, boolean][]) {
-      const r = playCommandCard(s, id, second);
-      s = r.state;
-      events.push(...r.events);
-    }
-    return { state: s, events };
+    const r = playCommandCard(s, command, false, aux);
+    return { state: r.state, events: [...events, ...r.events] };
   }
 
-  return { startPiles, preparePile, runImpulse, choose, card: (id: string) => byId.get(id) };
+  return { startPiles, preparePile, runImpulse, resume, choose, card: (id: string) => byId.get(id) };
 }

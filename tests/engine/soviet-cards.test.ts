@@ -17,7 +17,16 @@ const setUp = engine.step(emptyState(), { type: "SetUpTurn1" }).state;
 /** Booklet set-up (§3) without adjustment, game started, with a given draw pile (top first). */
 const withPile = (drawPile: string[], turn = 1, s: GameState = setUp): GameState =>
   ({ ...s, started: true, turn, sovietCards: { drawPile, removed: [], lastDrawn: [], seed: 7 } });
-const impulse = (s: GameState) => engine.step(s, { type: "RunBotImpulse" });
+/** RunBotImpulse, then ContinueBotImpulse after each Soviet attack (its combat left unresolved, Q37), to the end of the impulse. */
+function impulse(s: GameState): { state: GameState; events: GameEvent[] } {
+  let r = engine.step(s, { type: "RunBotImpulse" });
+  const events = [...r.events];
+  while (r.state.botImpulse && !r.events.some((e) => e.type === "CommandRejected")) {
+    r = engine.step(r.state, { type: "ContinueBotImpulse" });
+    events.push(...r.events);
+  }
+  return { state: r.state, events };
+}
 const checked = (events: GameEvent[]) => events.filter((e): e is Checked => e.type === "SovietCommandChecked");
 const played = (events: GameEvent[]) => checked(events).filter((c) => c.played);
 const of = <T extends GameEvent["type"]>(events: GameEvent[], type: T) => events.filter((e): e is Extract<GameEvent, { type: T }> => e.type === type);
@@ -150,6 +159,24 @@ describe("Soviet impulse (8.1)", () => {
     expectMessage(r, "cards.most.asGt4");
     expect((r.params!.rest as Message).params!.army).toEqual(msg("names.army.3T"));
   });
+
+  it("stops on a Soviet attack, the cards in their boxes; ContinueBotImpulse plays the rest of the impulse (Q37)", () => {
+    // E01 (Primary) is the command card, E17 the auxiliary card.
+    const paused = engine.step(withPile(["e17", "e01"]), { type: "RunBotImpulse" });
+    expect(paused.state.botImpulse).toMatchObject({ card: "e01", second: false, auxiliary: "e17", activation: { attack: { target: "1802" } } });
+    expect(paused.state.sovietDiscard).toEqual([]);
+    expect(engine.step(paused.state, { type: "RunBotImpulse" }).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.attackPending" } });
+    let r = engine.step(paused.state, { type: "ContinueBotImpulse" });
+    const events = [...r.events];
+    while (r.state.botImpulse) {
+      r = engine.step(r.state, { type: "ContinueBotImpulse" });
+      events.push(...r.events);
+    }
+    // The command card is discarded once its activation is over, then the auxiliary card is the second command card.
+    expect(events.filter((e) => e.type === "SovietCardDiscarded" || e.type === "SovietCommandCard").map((e) => [e.type, "card" in e ? e.card : null]))
+      .toEqual([["SovietCardDiscarded", "e01"], ["SovietCommandCard", "e17"], ["SovietCardDiscarded", "e17"]]);
+    expect(r.state.sovietDiscard).toEqual(["e01", "e17"]);
+  });
 });
 
 describe("Events (8.11)", () => {
@@ -206,6 +233,27 @@ describe("Events (8.11)", () => {
     expect(played(events).find((c) => c.card === "e14")).toMatchObject({ index: 0 });
     expect(state.units["sov_152-6th_infantry"].at).toBe("reserve");
     expect(state.units["sov_11C-3rdT_cav"].at).toBe("reinforcements");
+  });
+
+  it("Engineers: German IPs next to supplied Soviet units removed at random (Q41)", () => {
+    // E01 (Primary) is the command card; E16, the auxiliary card, has the event on GT 4-6.
+    const s = { ...withPile(["e01", "e16", "e02", "e03", "e04", "e05"], 4), improvedPositions: ["1003", "0604", "0803", "1203"] };
+    const first = impulse(s), again = impulse(s);
+    const engineers = played(first.events).find((c) => c.card === "e16")!;
+    expect(engineers).toMatchObject({ role: "auxiliary", index: 1 });
+    expectMessage(engineers.reason, "cards.engineers.removed");
+    const removed = (engineers.reason!.params!.hexes as string[]);
+    expect(removed).toHaveLength(3);
+    expect(removed.every((h) => s.improvedPositions.includes(h))).toBe(true);
+    expect(first.state.improvedPositions!.filter((h) => s.improvedPositions.includes(h))).toHaveLength(1);
+    // Same seed, same draw (D16).
+    expect(played(again.events).find((c) => c.card === "e16")!.reason).toEqual(engineers.reason);
+  });
+
+  it("Engineers: Soviet IPs where no German IP can be removed, next to German units first", () => {
+    const s = { ...withPile(["e01", "e16", "e02", "e03", "e04", "e05"], 4), improvedPositions: ["1003"] };
+    const engineers = played(impulse(s).events).find((c) => c.card === "e16")!;
+    expectMessage(engineers.reason, "cards.engineers.both", { removed: ["1003"], placed: ["0703", "1002"] });
   });
 });
 

@@ -22,7 +22,7 @@
 // Step 1 of the activation (objective check, 9.1) comes first: objectives.ts. Units with an
 // Army Objective marker (9.26) move first, one at a time (Q34), then the 9.2 loop, then 9.27.
 // The army marker a unit reaches moves on at once (the engine's MoveUnits), a front's third
-// objective goes at the end of the activation (9.12).
+// objective goes at the end of the activation (9.12), after step 7 (soviet-activation.ts).
 //
 // 9.21 methods 1-8, 10-12; 9.22 methods 1-8, 10, 11; 9.26; 9.27. TODO 4.6: method 9 of 9.21
 // and 9.22. Supply, support and the operational limit come from supply.ts; garrisons and the
@@ -1143,15 +1143,30 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   }
 
   /**
-   * Steps 1 and 2 of the activation of a formation (9.0): the objective check (9.1), then its
-   * on-map undispersed units move: those with an Army Objective marker by 9.26, the others by
-   * the methods of 9.21 or 9.22, then the unsupplied units (9.27). At the end, a front's third
-   * objective entered leaves play (9.12). `army` names the formation (an army, or a front for
-   * the [GT 8+] Front cards); `units`, the active units the card chose (8.13), all of one
-   * front; by default, every unit of the army. Fails with a reason when the formation cannot
-   * be activated.
+   * Steps 1 and 2 of the activation of a formation (9.0), then its end (9.12): a front's third
+   * objective entered leaves play. For an activation stopping after its movement (dev
+   * scenarios); a whole activation calls `moveFormation`, then steps 3-7 (soviet-activation.ts).
    */
   function activate(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | Message {
+    const r = moveFormation(state, army, units);
+    if ("key" in r) return r;
+    const end = objectives.endActivation(r.state, enteredHexes(r.events));
+    return { events: [...r.events, ...end.events], state: end.state };
+  }
+
+  /** Hexes entered by the moves of these events, crossed hexes included (9.12, Q32). */
+  const enteredHexes = (events: GameEvent[]) =>
+    new Set(events.flatMap((e) => (e.type === "UnitsMoved" && isHex(e.to) ? (e.path?.slice(1) ?? [e.to]) : [])));
+
+  /**
+   * Steps 1 and 2 of the activation of a formation (9.0): the objective check (9.1), then its
+   * on-map undispersed units move: those with an Army Objective marker by 9.26, the others by
+   * the methods of 9.21 or 9.22, then the unsupplied units (9.27). `army` names the formation
+   * (an army, or a front for the [GT 8+] Front cards); `units`, the active units the card chose
+   * (8.13), all of one front; by default, every unit of the army. Fails with a reason when the
+   * formation cannot be activated.
+   */
+  function moveFormation(state: GameState, army: string, units?: string[]): { events: GameEvent[]; state: GameState } | Message {
     const members = units ?? Object.keys(state.units).filter((id) => unit(id)?.side === "soviet" && known(id).armyOrCorps === army);
     const active = members.filter((id) => isHex(state.units[id].at) || state.units[id].at === "reserve");
     if (!active.length) return msg("move.noUnit", { army });
@@ -1169,11 +1184,8 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
       const run = attempt(refused);
       const bad = [...run.overStacked].reverse().find(({ hex }) => !stackingOk(run.state, hex));
       if (bad) { refused.add(`${bad.unit}>${bad.hex}`); continue; }
-      // 9.12: a front's third objective entered (crossed included, Q32) leaves play at the end.
-      const entered = new Set(run.events.flatMap((e) => (e.type === "UnitsMoved" && isHex(e.to) ? (e.path?.slice(1) ?? [e.to]) : [])));
-      const end = objectives.endActivation(run.state, entered);
       const [header, ...rest] = run.events;
-      return { events: [header, ...first.events, ...rest, ...end.events], state: end.state };
+      return { events: [header, ...first.events, ...rest], state: run.state };
     }
 
     function attempt(refused: Set<string>) {
@@ -1363,5 +1375,5 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     }
   }
 
-  return { activate };
+  return { activate, moveFormation, enteredHexes };
 }

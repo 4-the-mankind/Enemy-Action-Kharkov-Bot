@@ -19,7 +19,7 @@ const TIE = { voronezh: "a supplied unit closest to the west map edge", southwes
 
 /** Task that will code the line, when the bot passes it over for now. */
 const PENDING: Record<string, string> = {
-  replacement: "4.6", "soviet-garrison-front": "4.6", "soviet-engineers": "4.4",
+  replacement: "4.6", "soviet-garrison-front": "4.6",
 };
 
 function reading(l: CardCommand, events: Map<string, string>): { what: string; rule: string; waits?: string; note?: string } {

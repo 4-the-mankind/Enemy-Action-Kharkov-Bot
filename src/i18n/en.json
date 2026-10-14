@@ -119,7 +119,11 @@
     "noReminder": "No such reminder.",
     "noSupplyPhaseGt1": "There is no Supply Phase on Game-turn 1.",
     "unknownSupplyStatus": "Unknown supply status \"{{status}}\".",
-    "forwardSupportMax": "At most {{max}} Forward Support markers (13.53)."
+    "forwardSupportMax": "At most {{max}} Forward Support markers (13.53).",
+    "attackPending": "A Soviet attack on {{hex}} waits for its combat: resolve it, then continue the Soviet impulse.",
+    "noBotImpulse": "No Soviet impulse is waiting for a combat.",
+    "ipTownCity": "{{hex}} is a town or city: no Improved Position there (14.22).",
+    "ipNoUnit": "No unit in {{hex}} to hold an Improved Position."
   },
   "movement": {
     "strategic": {
@@ -289,12 +293,134 @@
       "none": "no garrison marker can be newly placed (garrisons come with task 4.6)"
     },
     "engineers": {
-      "notCoded": "IP markers are not coded yet (task 4.4)",
-      "fewer": "fewer than three hexes qualify (IP markers come with task 4.4)"
+      "fewer": "fewer than three hexes qualify ({{count}})",
+      "cannot": "the IP markers could not be changed",
+      "removed": "German IPs removed in {{hexes}}",
+      "placed": "Soviet IPs placed in {{hexes}}",
+      "both": "German IPs removed in {{removed}}; Soviet IPs placed in {{placed}}"
     },
     "replacement": {
       "notCoded": "replacements are not coded yet (task 4.6)",
       "none": "no unit of the {{army}} is eligible for replacement (replacements come with task 4.6)"
+    }
+  },
+  "attack": {
+    "lead": {
+      "dispersed": "dispersed: may not lead an attack check",
+      "outOfSupply": "out of supply: may not lead an attack check",
+      "isolated": "isolated: may not lead an attack check",
+      "oneStep": "one step only: may not lead a check against a supplied target",
+      "vpHex": "in VP hex {{hex}} with {{steps}} steps (fewer than three): may not lead a check against a supplied target"
+    },
+    "mod": {
+      "ip": "defender in an Improved Position",
+      "adjacentSupplied": "defender adjacent to a supplied German unit",
+      "acrossRiver": "all attackers across Donets or Dniepr hexsides",
+      "outsideSupport": "all attackers and defenders outside Soviet support",
+      "dispersed": "all German units dispersed",
+      "outOfSupply": "all German units out of supply"
+    },
+    "tv": {
+      "commandValue": "Command Value of the activating card",
+      "twoToOne": "situational strength ratio of 2:1 or more",
+      "barrage": "Soviet Artillery Barrage bonus",
+      "supported": "attack in Soviet support",
+      "armor": "only the Soviet units have armor",
+      "attackerSurrounded": "an attacking unit is surrounded",
+      "flank": "flank attack",
+      "defenderSurrounded": "defender surrounded and unable to trace supply",
+      "vpHex": "target hex worth 2 VP or more",
+      "vpValue": "VP value of the target hex (fewer than 20 Soviet VP): {{vp}}",
+      "auxiliary": "every combat tactic of the auxiliary card {{card}} applies",
+      "fewCards": "fewer than four cards in the Soviet draw pile ({{count}})"
+    },
+    "reason": {
+      "isolated": "all defending units are isolated: the attack is conducted",
+      "threeToOne": "situational strength ratio of 3:1 or more: the attack is conducted",
+      "belowOneToOne": "situational strength ratio below 1:1: no attack",
+      "tactical": "Tactical Value {{total}}, 7 or more: the attack is conducted",
+      "tacticalLow": "Tactical Value {{total}}, less than 7: no attack"
+    },
+    "pref": {
+      "ratio": "the target with the highest rounded ratio",
+      "vpHex": "a VP hex",
+      "westernmost": "the westernmost hex",
+      "highestHex": "the highest hex number"
+    },
+    "tactic": {
+      "barrage": "Artillery (Soviet Artillery Barrage)",
+      "nkvd": "NKVD (STAVKA)"
+    }
+  },
+  "reserve": {
+    "req": {
+      "reserveSupply": "Soviet reserve supply can be traced to the hex",
+      "stacking": "within the stacking limits",
+      "limit": "within the operational limit, and not a German town or city",
+      "support": "in Soviet support (the front objective marker is removed)",
+      "frontUnit": "a unit of the front, other than a reserve placed in this attack, is in or proximate to the hex",
+      "unoccupied": "empty, or holding only a garrison",
+      "withinLimit": "not beyond the operational limit",
+      "notAdjacentSoviet": "not adjacent to a Soviet unit, unless a VP hex",
+      "notNearlySurrounded": "in a village hex, the unit would not be nearly surrounded"
+    },
+    "pref": {
+      "support": "a hex in Soviet support",
+      "surround": "a hex causing surround of the defender",
+      "notAcrossDniepr": "a hex not across a Dniepr River hexside from the defender",
+      "flank": "a hex causing the defender to be flanked",
+      "unoccupied": "an unoccupied hex",
+      "highestHex": "the highest hex number",
+      "germanThreat": "a hex to which German supply can be traced or a German unit is proximate",
+      "garrison": "a garrisoned hex",
+      "adjacentGerman": "a hex adjacent to a German unit",
+      "city": "a city hex",
+      "vpHex": "a VP hex",
+      "closestArmy": "closest to a supplied unit of the active army not placed from reserve in this activation",
+      "closestFront": "closest to a supplied unit of the active front",
+      "lowestHex": "the lowest hex number"
+    },
+    "why": {
+      "overwhelming": "the attack is overwhelming: no more reserves",
+      "noHex": "no hex qualifies"
+    }
+  },
+  "removal": {
+    "moved": "moved in this activation",
+    "attacked": "attacked in this activation",
+    "fromReserve": "placed from the reserve box in this activation",
+    "notAdjacent": "not adjacent to a German unit",
+    "kharkov": "in Kharkov",
+    "noSupply": "unable to trace supply",
+    "noSituation": "in none of the four removal situations",
+    "unsurrounds": "its removal would let {{unit}} out of surround",
+    "cutsSupply": "its removal would leave {{unit}} unable to trace supply",
+    "exposes": "its removal would leave {{unit}} nearly surrounded",
+    "why": {
+      "village": "in or adjacent to {{hex}}, a village targeted only by the other front",
+      "vpStack": "in a VP hex with {{steps}} other steps",
+      "stacked": "in a non-VP hex within the operational limit, stacked with another unit",
+      "adjacent": "in a non-VP hex within the operational limit, adjacent to {{count}} Soviet-occupied hexes",
+      "stackedBeyond": "in a non-VP hex beyond the operational limit, stacked with another unit",
+      "adjacentBeyond": "in a non-VP hex beyond the operational limit, adjacent to {{count}} Soviet-occupied hexes"
+    }
+  },
+  "ip": {
+    "req": {
+      "support": "in Soviet support",
+      "townCity": "not a town or city",
+      "already": "no IP marker already",
+      "unfit": "not all its units dispersed, out of supply or isolated"
+    },
+    "pref": {
+      "adjacentGerman": "adjacent to a hex occupied by a supplied German unit",
+      "proximateGerman": "a supplied German unit is proximate to it",
+      "leastStrength": "the least Soviet strength",
+      "lowestHex": "the lowest hex number"
+    },
+    "why": {
+      "allAttack": "all the units in the hex attack",
+      "vacated": "the hex is left unoccupied"
     }
   },
   "move": {

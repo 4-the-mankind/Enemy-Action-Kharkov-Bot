@@ -35,3 +35,10 @@ export function rollDie(state: GameState): { roll: number; state: GameState } {
   const roll = Math.floor(r.value * 10) + 1;
   return { roll, state: state.sovietCards ? { ...state, sovietCards: { ...state.sovietCards, seed: r.seed } } : state };
 }
+
+/** A random index below `count`, drawn from the seed of the Soviet draw pile like rollDie. */
+export function drawIndex(state: GameState, count: number): { index: number; state: GameState } {
+  const r = random(state.sovietCards?.seed ?? 0);
+  const index = Math.floor(r.value * count);
+  return { index, state: state.sovietCards ? { ...state, sovietCards: { ...state.sovietCards, seed: r.seed } } : state };
+}

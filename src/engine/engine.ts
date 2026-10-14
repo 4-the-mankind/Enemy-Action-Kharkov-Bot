@@ -11,6 +11,8 @@ import { createMovement, type Movement } from "./movement";
 import { createObjectives } from "./objectives";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
+import { createSovietActivation, type SovietActivations } from "./soviet-activation";
+import { createSovietAttacks } from "./soviet-attacks";
 import { createSovietCards, type SovietCards } from "./soviet-cards";
 import { createSovietMovement, type SovietMovement } from "./soviet-movement";
 import {
@@ -33,6 +35,20 @@ export interface EngineData {
   cards?: SovietCard[];
   /** Supply (supply.ts) and the rules of tasks not coded yet (garrisons, ground…): pending.ts. */
   rules?: PendingRules;
+  /** Calendar spaces (data/calendar.json): the Fixed Artillery Range of each game-turn (12.3). */
+  calendar?: { turn: number; far: number }[];
+}
+
+/** A whole Soviet activation without a card (tests, booklet examples): what a card would bring. */
+export interface ActivationRequest {
+  army: string;
+  /** Active units (8.13); by default, the whole army. */
+  units?: string[];
+  commandValue: number;
+  /** Card in the Auxiliary card box (12.31). */
+  auxiliary?: string;
+  /** STAVKA's NKVD combat tactic (12.35). */
+  nkvd?: boolean;
 }
 
 export interface Engine {
@@ -52,6 +68,13 @@ export interface Engine {
   readonly movement: Movement;
   /** Soviet movement methods (3.3). */
   readonly sovietMovement: SovietMovement;
+  /** Whole Soviet activations (9.0): movement, attacks, reserves, removals, IP. */
+  readonly sovietActivations: SovietActivations;
+  /**
+   * Steps 1-7 of a Soviet activation without a card (tests, booklet examples), as by a card of
+   * that Command Value; stops on an attack like an impulse (ContinueBotImpulse goes on).
+   */
+  activate(state: GameState, request: ActivationRequest): StepResult;
   /** Supply (4.3) and the rules of tasks not coded yet: read by the supply analysis (4.3b). */
   readonly rules: PendingRules;
   /** Soviet draw pile and commands (8.0), when the cards are loaded. */
@@ -69,8 +92,24 @@ export function createEngine(data: EngineData): Engine {
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives,
     move: (state, id, to, path) => moveUnits(state, [id], to, "bot", path),
   });
+  const cardsById = new Map((data.cards ?? []).map((c) => [c.id, c]));
+  const attacks = createSovietAttacks({
+    board: data.board, movement, unit: (id) => byId.get(id), rules, card: (id) => cardsById.get(id),
+    far: (turn) => data.calendar?.find((t) => t.turn === turn)?.far ?? 0,
+    move: (state, ids, to) => moveUnits(state, ids, to, "bot"),
+    setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
+  });
+  const sovietActivations = createSovietActivation({
+    board: data.board, movement, unit: (id) => byId.get(id), rules, objectives, sovietMovement, attacks,
+    move: (state, ids, to) => moveUnits(state, ids, to, "bot"),
+    setDispersed: (state, ids, dispersed) => setDispersed(state, ids, dispersed),
+    setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
+  });
   const sovietCards = data.cards
-    ? createSovietCards({ cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, sovietMovement, step: (s, c) => step(s, c, "bot") })
+    ? createSovietCards({
+      cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, activations: sovietActivations,
+      step: (s, c) => step(s, c, "bot"),
+    })
     : null;
 
   // Booklet set-up (§3): start hex → on the map; turn 1 → reserve; later turn → reinforcements.
@@ -141,6 +180,12 @@ export function createEngine(data: EngineData): Engine {
       for (const id of ordered) delete next.supply[id];
     }
     const events: GameEvent[] = [{ type: "UnitsMoved", units: ordered, from, to }];
+    // 14.24: an IP marker left in an unoccupied hex is removed; it never moves with a unit.
+    const vacated = [...new Set(from)].filter((h) => next.improvedPositions?.includes(h) && !Object.values(next.units).some((u) => u.at === h));
+    if (vacated.length) {
+      next.improvedPositions = next.improvedPositions!.filter((h) => !vacated.includes(h));
+      for (const hex of vacated) events.push({ type: "ImprovedPositionSet", hex, placed: false, rule: "14.24", reason: msg("ip.why.vacated") });
+    }
     // 14.1: a town or city changes hands the moment an enemy unit enters it.
     const sides = new Set(ordered.map((id) => byId.get(id)!.side));
     const owner = isHex(to) ? movement.townOwner(next, to) : null;
@@ -395,6 +440,44 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, forwardSupport: unique }, events: [{ type: "ForwardSupportSet", hexes: unique }] };
   }
 
+  // 14.2: an IP marker on a hex with units, never in a town or city (14.22).
+  function setImprovedPosition(state: GameState, hex: string, placed: boolean): StepResult {
+    if (!data.board.isPlayable(hex)) return reject(state, "SetImprovedPosition", msg("reject.notPlayable", { hex }));
+    const ips = state.improvedPositions ?? [];
+    if (ips.includes(hex) === placed) return { state, events: [] };
+    if (placed) {
+      const t = data.board.hex(hex).terrain;
+      if (t === "town" || t === "city") return reject(state, "SetImprovedPosition", msg("reject.ipTownCity", { hex }));
+      if (!Object.values(state.units).some((u) => u.at === hex)) return reject(state, "SetImprovedPosition", msg("reject.ipNoUnit", { hex }));
+    }
+    const improvedPositions = placed ? [...ips, hex] : ips.filter((h) => h !== hex);
+    return { state: { ...state, improvedPositions }, events: [{ type: "ImprovedPositionSet", hex, placed }] };
+  }
+
+  /** Q37: the Soviet impulse paused on an attack goes on, once the player has resolved the combat. */
+  function continueBotImpulse(state: GameState): StepResult {
+    const imp = state.botImpulse;
+    if (!imp) return reject(state, "ContinueBotImpulse", msg("reject.noBotImpulse"));
+    if (sovietCards) {
+      const r = sovietCards.resume(state);
+      return "key" in r ? reject(state, "ContinueBotImpulse", r) : r;
+    }
+    const { botImpulse: _, ...rest } = state;
+    const r = sovietActivations.resume(rest, imp.activation, imp.auxiliary);
+    return { state: r.pending ? { ...r.state, botImpulse: { ...imp, activation: r.pending } } : r.state, events: r.events };
+  }
+
+  function activate(state: GameState, { army, units, commandValue, auxiliary, nkvd = false }: ActivationRequest): StepResult {
+    if (!state.started) return reject(state, "ActivateFormation", msg("reject.pressStart"));
+    if (state.botImpulse) return reject(state, "ActivateFormation", pendingAttack(state));
+    const r = sovietActivations.start(state, army, units, { commandValue, nkvd, auxiliary: auxiliary ?? null });
+    if ("key" in r) return reject(state, "ActivateFormation", r);
+    const botImpulse = r.pending ? { card: null, second: false, auxiliary: auxiliary ?? null, activation: r.pending } : undefined;
+    return { state: botImpulse ? { ...r.state, botImpulse } : r.state, events: r.events };
+  }
+
+  const pendingAttack = (state: GameState) => msg("reject.attackPending", { hex: state.botImpulse?.activation.attack?.target ?? "" });
+
   // Steps 1-2 of a Soviet activation (9.0): objective check (9.1), movement methods (9.2).
   function activateFormation(state: GameState, army: string): StepResult {
     if (!state.started) return reject(state, "ActivateFormation", msg("reject.pressStart"));
@@ -405,12 +488,15 @@ export function createEngine(data: EngineData): Engine {
   /** Commands the player may only send once the game has started. */
   const PLAY = new Set<Command["type"]>([
     "MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
-    "SetSupplyStatus", "SetForwardSupport",
+    "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition",
   ]);
+  /** Commands that move the game on: refused while a Soviet attack waits for its combat (Q37). */
+  const ON = new Set<Command["type"]>(["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation"]);
 
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
     if (lock) return reject(state, command.type, lock);
+    if (state.botImpulse && ON.has(command.type)) return reject(state, command.type, pendingAttack(state));
     switch (command.type) {
       case "SetUpTurn1":
         return state.setUp ? reject(state, command.type, msg("reject.alreadySetUp")) : setUpTurn1();
@@ -436,6 +522,8 @@ export function createEngine(data: EngineData): Engine {
         return startGame(state, command.seed);
       case "RunBotImpulse":
         return runBotImpulse(state);
+      case "ContinueBotImpulse":
+        return continueBotImpulse(state);
       case "NextTurn":
         return nextTurn(state);
       case "DismissReminder":
@@ -446,6 +534,8 @@ export function createEngine(data: EngineData): Engine {
         return setSupplyStatus(state, command.units, command.status);
       case "SetForwardSupport":
         return setForwardSupport(state, command.hexes);
+      case "SetImprovedPosition":
+        return setImprovedPosition(state, command.hex, command.placed);
       case "ActivateFormation":
         return activateFormation(state, command.army);
     }
@@ -463,6 +553,8 @@ export function createEngine(data: EngineData): Engine {
     units,
     movement,
     sovietMovement,
+    sovietActivations,
+    activate,
     sovietCards,
     rules,
     unit: (id) => byId.get(id),
