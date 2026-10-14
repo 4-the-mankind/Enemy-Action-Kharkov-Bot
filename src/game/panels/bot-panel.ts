@@ -32,16 +32,20 @@ interface Reading {
   blocks: { card: string; role: "auxiliary" | "command" | "second"; checks: Checked[]; fate: Fate | null }[];
 }
 
-function readImpulse(events: GameEvent[], depth: number): Reading | null {
-  const drawn = events.find((e): e is Reading["drawn"] => e.type === "SovietCardsDrawn");
+/**
+ * The cards of an impulse as read so far: from its first step (the cards drawn), or `before`
+ * carried on by a later step of the same impulse (ContinueBotImpulse after a combat, 4.5a).
+ */
+function readImpulse(events: GameEvent[], depth: number, before?: Reading): Reading | null {
+  const drawn = events.find((e): e is Reading["drawn"] => e.type === "SovietCardsDrawn") ?? before?.drawn;
   if (!drawn) return null;
-  const blocks: Reading["blocks"] = [];
+  const blocks: Reading["blocks"] = before?.blocks.map((b) => ({ ...b, checks: [...b.checks] })) ?? [];
   const block = (card: string, role: Reading["blocks"][number]["role"]) => {
     const b = { card, role, checks: [] as Checked[], fate: null as Fate | null };
     blocks.push(b);
     return b;
   };
-  let cur: Reading["blocks"][number] | null = null;
+  let cur: Reading["blocks"][number] | null = blocks.at(-1) ?? null;
   for (const e of events) {
     if (e.type === "SovietCommandCard") cur = block(e.card, e.second ? "second" : "command");
     else if (e.type === "SovietCommandChecked") {
@@ -59,6 +63,8 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   const cards = engine.sovietCards;
   /** The activation on show, and the undo depth that takes it back. */
   let current: { activation: Activation; depth: number; lit: number } | null = null;
+  /** The reading after each step of the impulse (an impulse may pause on its combats), the last one shown. */
+  let readings: Reading[] = [];
   let reading: Reading | null = null;
   /** A decision the player picked: the slip stays on it while the play goes on. */
   let picked = false;
@@ -100,6 +106,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       <button type="button" class="btn switch" data-action="next-turn">${t("bot.nextTurn")}</button>
     </div>
     <p class="activate-reason" role="status"></p>
+    <p class="combat-wait" role="status" hidden></p>
     <div class="playback" hidden></div>` +
     (dev ? `<details class="dev-activate"><summary>${t("bot.devActivate")}</summary>
       <div class="activate-row"><select class="army-select" aria-label="${t("bot.devArmy")}"></select><button type="button" class="btn switch" data-action="activate">${t("bot.activate")}</button></div></details>` : "");
@@ -109,6 +116,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   const reason = parts.activate.querySelector<HTMLElement>(".activate-reason")!;
   const select = parts.activate.querySelector<HTMLSelectElement>(".army-select");
   const playback = parts.activate.querySelector<HTMLElement>(".playback")!;
+  const wait = parts.activate.querySelector<HTMLElement>(".combat-wait")!;
   const send = (command: Parameters<GameSession["dispatch"]>[0]) => {
     const refused = session.dispatch(command).find((e) => e.type === "CommandRejected");
     reason.textContent = refused ? t(refused.reason) : "";
@@ -126,9 +134,13 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     const impulses = state.sovietImpulses ?? 0;
     turnLine.innerHTML = !state.started ? t("bot.turnLine.beforeStart")
       : impulses ? t("bot.turnLine.started", { turn: state.turn, impulse: impulses }) : t("bot.turnLine.noImpulse", { turn: state.turn });
-    runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing;
+    // A Soviet impulse paused on a combat (4.5a): it goes on from the Combat tab.
+    const paused = !!state.botImpulse;
+    wait.hidden = !state.combat;
+    wait.textContent = state.combat ? t("bot.waitCombat", { hex: state.combat.target }) : "";
+    runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing || paused;
     runButton.title = lock ? t(lock) : t(!pile && state.started ? "bot.runTitle.pileEmpty" : "bot.runTitle.endsImpulse");
-    nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing;
+    nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing || paused;
     nextButton.title = pile ? t("bot.nextTitle.waitPile", { count: pile }) : t("bot.nextTitle.ready");
     if (select) {
       const armies = new Map<string, string>();
@@ -276,8 +288,11 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   function onStep(state: GameState, events: GameEvent[], undo: boolean) {
     const activation = undo ? null : readActivation(events);
     const impulse = undo ? null : readImpulse(events, session.depth);
-    if (impulse) reading = impulse;
-    else if (reading && session.depth < reading.depth) reading = null;
+    readings = readings.filter((r) => r.depth <= session.depth);
+    if (impulse) readings = [impulse];
+    else if (!undo && readings.length && events.some((e) => e.type === "CombatEnded"))
+      readings.push(readImpulse(events, session.depth, readings[readings.length - 1])!);
+    reading = readings.at(-1) ?? null;
     if (activation) {
       current = { activation, depth: session.depth, lit: -1 };
       picked = false;

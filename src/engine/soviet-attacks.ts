@@ -8,9 +8,8 @@
 // 1:2, 1:3… below 1:1). Q40: armor = a mechanized unit; a target is supplied unless every
 // unit in it has an Out of Supply or Isolated marker.
 //
-// TODO 4.5: the combat itself (tactic card drawn, auxiliary tactics applied, Assault
-// Coordination units joining, chits, hits, advance). Until then the impulse stops on each
-// attack and the player resolves the combat by hand (Q37).
+// The combat itself, from its step 2 on, is combat.ts (task 4.5): the impulse stops on each
+// attack until the player has resolved it on the combat sheet (Q37, D18).
 import { onTurn, type CardTactic, type SovietCard } from "../core/soviet-cards";
 import type { Unit } from "../core/units";
 import { msg, type Message } from "../i18n/message";
@@ -34,6 +33,8 @@ export interface SovietAttacksData {
   move(state: GameState, ids: string[], to: string): StepResult;
   /** Places or removes an Improved Position marker as the bot: the engine's SetImprovedPosition. */
   setImprovedPosition(state: GameState, hex: string, placed: boolean): StepResult;
+  /** Reinforce Battle: where a Soviet unit would move to end next to the hex attacked (9.23-9.25), or null. */
+  reinforceDestination(state: GameState, front: "voronezh" | "southwest", active: string[], id: string, target: string): { hex: string; path: string[]; steps: DecisionStep[] } | null;
 }
 
 /** A lettered preference among hexes (8.3): a test (hexes passing it are kept) or a score (lowest kept). */
@@ -109,7 +110,7 @@ interface Assessment {
 
 export type SovietAttacks = ReturnType<typeof createSovietAttacks>;
 
-export function createSovietAttacks({ board, movement, unit, rules, card, far, move, setImprovedPosition }: SovietAttacksData) {
+export function createSovietAttacks({ board, movement, unit, rules, card, far, move, setImprovedPosition, reinforceDestination }: SovietAttacksData) {
   const known = (id: string) => {
     const u = unit(id);
     if (!u) throw new Error(`Unknown unit "${id}".`);
@@ -173,10 +174,14 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
     return groups[0] + Math.floor(groups[1] / 2) + Math.floor(groups[2] / 4);
   }
 
-  /** Defending strength: mechanized units defending in marsh are halved. */
-  function germanStrength(state: GameState, target: string): number {
+  /**
+   * Defending strength: mechanized units defending in marsh are halved. 12.74: units that
+   * retreated into the hex earlier in the activation contribute nothing.
+   */
+  function germanStrength(state: GameState, target: string, act?: SovietActivation): number {
     let plain = 0, halved = 0;
     for (const g of germansIn(state, target)) {
+      if (act?.retreated?.includes(g)) continue;
       if (mechanized(g) && terrainOf(target) === "marsh") halved += values(state, g).combat;
       else plain += values(state, g).combat;
     }
@@ -275,10 +280,10 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
   /** The combat as it stands with these attackers: strengths, odds, chits, overwhelming, support. */
   function combat(state: GameState, act: SovietActivation, attackers: string[], target: string) {
     const germans = germansIn(state, target);
-    const soviet = sovietStrength(state, attackers, target), german = germanStrength(state, target);
+    const soviet = sovietStrength(state, attackers, target), german = germanStrength(state, target, act);
     const isSupported = supported(state, hexesOf(state, attackers), target);
     // Tactics known in advance, counted from step 1 (Q42): the artillery barrage (12.36) and STAVKA's NKVD (12.35);
-    // none in an unsupported attack (13.52). TODO 4.5: the card drawn, the Auxiliary card.
+    // none in an unsupported attack (13.52). The card drawn and the Auxiliary card come at step 2 (combat.ts).
     const tactics: Message[] = [];
     if (isSupported && state.turn <= 2 && inBarrageZone(target)) tactics.push(msg("attack.tactic.barrage"));
     if (isSupported && act.nkvd) tactics.push(msg("attack.tactic.nkvd"));
@@ -297,13 +302,17 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
 
   // ---- The Auxiliary card's combat tactics (12.31).
 
-  /** Units that could reinforce this attack (Reinforce Battle tactic): same front, idle, able to reach the combat. */
+  /**
+   * Units that could reinforce this attack (Reinforce Battle tactic): same front, did not move
+   * or attack in the activation, able to end next to the hex attacked within 9.23 (no German
+   * unit is active during a Soviet impulse).
+   */
   function reinforcements(state: GameState, act: SovietActivation, target: string, inAttack: string[]): string[] {
     const defender = germansIn(state, target)[0];
-    // No German unit is active during a Soviet impulse. TODO 4.5: the 9.23 restrictions on the reinforcing move.
     return Object.keys(state.units).filter((id) => sideOf(id) === "soviet" && known(id).front === act.front && canAttack(state, id)
       && !inAttack.includes(id) && !act.moved.includes(id) && !act.attacked.includes(id)
-      && (board.areAdjacent(state.units[id].at, target) || movement.proximateToUnit(state, id, defender)));
+      && (board.areAdjacent(state.units[id].at, target)
+        || (movement.proximateToUnit(state, id, defender) && !!reinforceDestination(state, act.front, act.units, id, target))));
   }
 
   /** 12.31: the tactic gives this attack a benefit other than a chit draw. */
@@ -347,10 +356,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
       reserves.push({ unit: r, hex });
       s = withUnitAt(s, r, hex);
     }
-    const assault = auxiliaryTactics(state, aux).some((t) => t.tactic === "soviet-assault-coordination")
-      ? sorted(state, Object.keys(state.units).filter((id) => sideOf(id) === "soviet" && !act.units.includes(id) && !act.attacked.includes(id)
-        && canAttack(state, id) && board.areAdjacent(state.units[id].at, target)), "asc")
-      : [];
+    const assault = auxiliaryTactics(state, aux).some((t) => t.tactic === "soviet-assault-coordination") ? assaultUnits(state, act, target, []) : [];
     return { units, reserves, assault, state: s };
   }
 
@@ -372,7 +378,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
   function assess(state: GameState, act: SovietActivation, aux: string | null, lead: string, target: string): Assessment {
     const g = group(state, act, aux, lead, target);
     const all = [...g.units, ...g.reserves.map((r) => r.unit), ...g.assault];
-    const soviet = sovietStrength(g.state, all, target), german = germanStrength(g.state, target);
+    const soviet = sovietStrength(g.state, all, target), german = germanStrength(g.state, target, act);
     const mods = modifiers(g.state, target, all);
     const defense = Math.max(1, german + mods.reduce((n, m) => n + m.value, 0));
     return { target, group: g, soviet, german, modifiers: mods, situational: [soviet, defense], ratio: roundOdds(soviet, defense) };
@@ -469,7 +475,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
     const c = combat(state, act, attackers, target);
     events.push({
       type: "SovietAttackDeclared", target, lead, defenders: germansIn(state, target), attackers, reserves: placed,
-      assault: [], // TODO 4.5: units added by the Auxiliary card's Assault Coordination when its tactics are applied (12.31).
+      assault: [], // units added by Assault Coordination join at step 2 (combat.ts)
       soviet: c.soviet, german: c.german, odds: c.odds, overwhelming: c.overwhelming, supported: c.supported, chits: c.chits, tactics: c.tactics,
     });
     const at = Object.fromEntries(attackers.map((id) => [id, state.units[id].at]));
@@ -523,6 +529,14 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
     }
   }
 
-  // `combat` and `auxiliaryApplies` serve the combat sequence too (task 4.5).
-  return { checks, sorted, combat, auxiliaryApplies };
+  /** Non-active units next to the target that Assault Coordination adds to the attack (12.3, combat tactics aid). */
+  const assaultUnits = (state: GameState, act: SovietActivation, target: string, inAttack: string[]) =>
+    sorted(state, Object.keys(state.units).filter((id) => sideOf(id) === "soviet" && !act.units.includes(id) && !act.attacked.includes(id)
+      && !inAttack.includes(id) && canAttack(state, id) && board.areAdjacent(state.units[id].at, target)), "asc");
+
+  // The combat sequence (combat.ts) uses the same strengths, flanks and tactics.
+  return {
+    checks, sorted, combat, auxiliaryApplies, auxiliaryTactics, tacticApplies, reinforcements, assaultUnits,
+    sovietStrength, inBarrageZone, supported, flanked, hexesOf, canAttack, unitsIn,
+  };
 }

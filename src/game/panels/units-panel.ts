@@ -89,7 +89,7 @@ export function mountUnitsPanel(setupRoot: HTMLElement, groupsRoot: HTMLElement,
 
   function renderSetup(state: GameState) {
     const n = (box: string) => Object.values(state.units).filter((s) => s.at === box).length;
-    const onMap = Object.values(state.units).length - n("reserve") - n("reinforcements") - n("eliminated");
+    const onMap = Object.values(state.units).length - n("reserve") - n("reinforcements") - n("eliminated") - n("outOfPlay");
     setupRoot.innerHTML = state.setUp
       ? `<div class="recap"><h2>${t("units.recap.title")}</h2>
           <dl><div><dt>${t("units.recap.onMap")}</dt><dd>${onMap}</dd></div><div><dt>${t("units.recap.inReserve")}</dt><dd>${n("reserve")}</dd></div>
@@ -138,10 +138,19 @@ export function mountUnitsPanel(setupRoot: HTMLElement, groupsRoot: HTMLElement,
 
     // "R" counters set aside: swapped in automatically when a unit loses a step (no handling).
     const spare = state.setUp
-      ? engine.units.filter((u) => u.images.reduced && shown(u) && state.units[u.id] && state.units[u.id].face !== "reduced" && state.units[u.id].at !== "eliminated")
+      ? engine.units.filter((u) => u.images.reduced && shown(u) && state.units[u.id] && state.units[u.id].face !== "reduced"
+        && state.units[u.id].at !== "eliminated" && state.units[u.id].at !== "outOfPlay")
       : [];
     groupsRoot.append(group(t("units.group.reduced"), spare.length, well(null, t(state.setUp ? "units.none" : "units.setAsideAtSetUp"), spare, state, (u) => counterUrl(u.images.reduced!))));
-    groupsRoot.append(group(t("units.group.eliminated"), at("eliminated").length, well("eliminated", empty, at("eliminated"), state)));
+    // Units removed from play (12.62) show with the eliminated ones, marked: they never come back (Q52).
+    const gone = well("eliminated", empty, [...at("eliminated"), ...at("outOfPlay")], state);
+    for (const u of at("outOfPlay")) {
+      const img = gone.querySelector<HTMLElement>(`[data-unit="${CSS.escape(u.id)}"]`);
+      if (!img) continue;
+      img.classList.add("out-of-play");
+      img.title = t("units.outOfPlay", { unit: u.designation, army: u.armyOrCorps });
+    }
+    groupsRoot.append(group(t("units.group.eliminated"), at("eliminated").length + at("outOfPlay").length, gone));
   }
 
   setupRoot.addEventListener("click", (e) => {

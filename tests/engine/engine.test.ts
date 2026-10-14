@@ -173,8 +173,9 @@ describe("Set-up adjustment commands (2.4)", () => {
     expect(s.units.three.dispersed).toBe(true);
     s = eng.step(s, { type: "MoveUnits", units: ["three"], to: "0305" }).state;
     expect(s.units.three.dispersed).toBe(true);
+    // 12.62: a unit with one step at full strength is removed from play when eliminated (Q52).
     s = eng.step(s, { type: "MoveUnits", units: ["one"], to: "eliminated" }).state;
-    expect(s.units.one).toEqual({ at: "eliminated", face: "front" });
+    expect(s.units.one).toEqual({ at: "outOfPlay", face: "front" });
     const r = eng.step(s, { type: "SetDispersed", units: ["three"], dispersed: false });
     expect(r.state.units.three).toEqual({ at: "0305", face: "front" });
     expect(r.events).toEqual([{ type: "DispersedSet", units: ["three"], dispersed: false }]);

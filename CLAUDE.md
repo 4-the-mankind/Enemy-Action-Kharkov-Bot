@@ -17,3 +17,10 @@
 - Modèle, effort et économie de tokens : `PLANNING.md` §7.
 - Git : ne commiter que sur demande du dev.
 - **Ne JAMAIS commencer sans le « go » explicite du dev** : aucune édition de fichier (code, données, `PLANNING.md`…) ni aucun code avant ce go. Répondre d'abord à **toutes** ses questions, et reposer clairement toute question qu'il n'a pas comprise, sans trancher à sa place. Une réponse à une question n'est pas un go.
+- **Questions et choix proposés au dev** : chaque question finit par un point d'interrogation et se comprend sans relire la conversation. Elle donne, dans l'ordre :
+  1. le contexte : règle citée avec son titre, situation de jeu, exemple chiffré si utile ;
+  2. les options, numérotées, chacune avec ses conséquences concrètes (partie, interface, code, tâches suivantes) ;
+  3. la recommandation de l'IA et sa raison ;
+  4. la question elle-même, en gras.
+
+  Une question = un seul choix ; les sous-questions sont lettrées (a, b…). La même question va dans `PLANNING.md` §6 en forme courte, avec la recommandation. Une réponse ambiguë est reposée, sans trancher à la place du dev.

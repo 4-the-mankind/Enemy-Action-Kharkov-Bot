@@ -83,6 +83,21 @@
     "compass": {
       "west": "west",
       "south": "south"
+    },
+    "tactic": {
+      "german-airpower-artillery": "Airpower and Artillery",
+      "german-battlefield-replacements": "Battlefield Replacements",
+      "german-combat-engineer": "Combat Engineer",
+      "german-intelligence": "Intelligence",
+      "german-panzer-battalion": "Panzer Battalion",
+      "german-pull-out": "Pull Out",
+      "german-screen": "Screen",
+      "german-reinforce-battle": "Reinforce Battle"
+    },
+    "germanArmy": {
+      "1Pz": "1st Panzer Army",
+      "4Pz": "4th Panzer Army",
+      "Kempf": "Army Detachment Kempf"
     }
   },
   "reject": {
@@ -123,7 +138,44 @@
     "attackPending": "A Soviet attack on {{hex}} waits for its combat: resolve it, then continue the Soviet impulse.",
     "noBotImpulse": "No Soviet impulse is waiting for a combat.",
     "ipTownCity": "{{hex}} is a town or city: no Improved Position there (14.22).",
-    "ipNoUnit": "No unit in {{hex}} to hold an Improved Position."
+    "ipNoUnit": "No unit in {{hex}} to hold an Improved Position.",
+    "combat": {
+      "badHits": "Enter whole numbers of hits.",
+      "chooseFirst": "Choose on the combat sheet how your units take their hits first.",
+      "dragReinforcement": "Drag the reinforcing stack into {{hex}} first, then play Reinforce Battle.",
+      "eliminateLast": "{{unit}} has its last step: eliminate it (right-click, Eliminate).",
+      "evenLosses": "{{units}} must lose a step first (12.61: one step from each unit before a second).",
+      "firstLoss": "12.6: the first step lost comes from a 3-step or armor unit: {{units}}.",
+      "lossOption": "Your units cannot take their hits that way.",
+      "noRetreatHex": "No hex is open to this retreat.",
+      "noRetreatPlanned": "You chose to take every hit as a step loss: undo that choice to retreat.",
+      "noStepOwed": "No step loss is owed: your units have taken their hits.",
+      "notATarget": "{{hex}} is not one of the stacks tied: {{hexes}}.",
+      "notIntoCombat": "{{hex}} is under attack: only Reinforce Battle brings a stack in, at step 3.",
+      "notNow": "The combat sheet is not at that step.",
+      "oneStack": "Reinforce Battle brings in one stack only.",
+      "open": "The combat on {{hex}} is not finished: complete the combat sheet first.",
+      "pullOutPlan": "Pull Out: your units retreat two hexes.",
+      "reinforceAdjacent": "A stack next to an active Soviet unit cannot reinforce.",
+      "reinforceReach": "{{unit}} cannot reach {{hex}} in one move.",
+      "reinforceStacking": "{{hex}} would be over the stacking limits.",
+      "reinforceUnfit": "{{unit}} must be supplied and undispersed to reinforce.",
+      "reinforcingUnticked": "A stack reinforced the defense: tick Reinforce Battle, or undo its move.",
+      "removeStepFirst": "{{unit}} has steps left: remove them one at a time.",
+      "replacementChoice": "Battlefield Replacements: choose a unit to flip back, or one hit less.",
+      "replacementUnit": "{{unit}} is not a defending one-step infantry unit with a two-step side.",
+      "retreatDone": "These units have retreated as far as chosen.",
+      "retreatHex": "{{hex}} is not open to this retreat (12.7). Allowed: {{hexes}}.",
+      "retreatOwed_one": "{{units}}: {{count}} more hex to retreat.",
+      "retreatOwed_other": "{{units}}: {{count}} more hexes to retreat.",
+      "stayTogether": "The stack retreats together (12.73): {{units}}.",
+      "stepsOwed_one": "{{count}} more step loss is owed.",
+      "stepsOwed_other": "{{count}} more step losses are owed.",
+      "undoFirst": "Undo the losses already taken on the map before changing this choice.",
+      "unitInCombat": "This unit is in the combat on {{hex}}: the Combat tab says what to do.",
+      "unknownTactic": "Unknown combat tactic: {{tactic}}.",
+      "reinforceArmy": "{{unit}} is not in the same army as a unit in the combat ({{armies}})."
+    }
   },
   "movement": {
     "strategic": {
@@ -277,11 +329,8 @@
     "nkvd": {
       "noTarget": "no German unit is adjacent to a Soviet unit",
       "targetTown": "{{hex}} ({{terrain}}: the hits are not reduced)",
-      "chooseText": "Choose the German stack among {{targets}} (Soviet strength {{strength}} adjacent to each) and assign it two hits. Then remove one step from the Soviet units adjacent to it: the unit with the most steps, then the higher selector (12.6). If your units retreated, the Soviet units advance after combat (12.83).",
       "tie": "{{count}} German stacks tie at Soviet strength {{strength}}: you choose",
-      "cannot": "the Soviet step loss cannot be applied",
-      "assignText": "Assign two hits to the German units in {{target}}. If they retreated, the Soviet units adjacent to it advance after combat (12.83): not coded yet, play it by hand.",
-      "done": "Target {{hex}}: Soviet strength {{strength}} adjacent ({{units}}). Soviet step lost by {{unit}} (12.6: most steps, then higher selector)"
+      "target": "Target {{hex}}: Soviet strength {{strength}} adjacent ({{units}}). Two hits on your units, then one Soviet step lost and the advance: see the Combat tab"
     },
     "specialOnAux": "special events on the auxiliary card are not implemented (8.1)",
     "hitler": {
@@ -420,7 +469,10 @@
     },
     "why": {
       "allAttack": "all the units in the hex attack",
-      "vacated": "the hex is left unoccupied"
+      "vacated": "the hex is left unoccupied",
+      "combatEngineers": "Soviet Combat Engineers remove it",
+      "firstHit": "it takes the first hit (12.51)",
+      "germanEngineers": "your Combat Engineer tactic"
     }
   },
   "move": {
@@ -664,13 +716,15 @@
       "discard": "Soviet discard",
       "none": "None",
       "removed": "Out of the game"
-    }
+    },
+    "waitCombat": "The Soviet impulse waits for the combat on {{hex}}: see the Combat tab."
   },
   "log": {
     "where": {
       "reserve": "the reserve",
       "reinforcements": "the reinforcements",
-      "eliminated": "the eliminated units"
+      "eliminated": "the eliminated units",
+      "outOfPlay": "out of play"
     },
     "setUp": "<b>Turn 1 set up.</b> {{placed}} counters on their start hex, {{reserve}} in reserve, {{reinforcements}} in the reinforcements.",
     "setUpCleared": "<b>Set up undone.</b> All counters removed.",
@@ -679,6 +733,8 @@
       "one": "<b>{{unit}}</b>",
       "eliminated": "{{who}} eliminated.",
       "eliminatedFrom": "{{who}} eliminated from {{from}}.",
+      "outOfPlay": "{{who}} removed from play (12.62).",
+      "outOfPlayFrom": "{{who}} removed from play from {{from}} (12.62).",
       "reserve": "{{who}} put in reserve.",
       "reserveFrom": "{{who}} put in reserve from {{from}}.",
       "reinforcements": "{{who}} back to the reinforcements.",
@@ -760,7 +816,46 @@
     },
     "rejected": "<b>Not done:</b> {{reason}}",
     "newGame": "New game. Set up turn 1 from the Units panel.",
-    "showWhy": "Show why"
+    "showWhy": "Show why",
+    "attack": {
+      "checked": "{{unit}} checks an attack on {{hex}} ({{soviet}} to {{german}}): {{reason}}",
+      "declared": "Soviet attack on {{hex}}: {{attackers}} against {{defenders}}, {{soviet}} to {{german}}.",
+      "tactics": "Soviet tactics on {{hex}}: {{tactics}}",
+      "noTactics": "Soviet tactics on {{hex}}: none. {{why}}",
+      "reinforce": "{{unit}} reinforces the attack, to {{hex}}.",
+      "target": "You choose {{hex}} for the two hits.",
+      "german": "Your tactics: {{tactics}}.",
+      "germanNone": "No German tactic.",
+      "restored": "{{unit}} flips back to two steps (Battlefield Replacements).",
+      "chits_one": "{{count}} chit drawn.",
+      "chits_other": "{{count}} chits drawn.",
+      "hits": "Hits: your units {{german}}, Soviet units {{soviet}} (chits {{chitsGerman}} and {{chitsSoviet}}).",
+      "losses": "Your losses: {{steps}} steps, {{hexes}} hexes of retreat.",
+      "retreat": "{{units}} retreats from {{from}} to {{to}} (12.7, priority {{priority}}).",
+      "retreatStep": "{{units}} retreats from {{from}} to {{to}} (12.7, priority {{priority}}): one more step to lose.",
+      "applied": "Your hits are taken: the bot plays its losses, advance and cards.",
+      "sovietLosses": "Soviet losses on {{hex}}: {{units}}.",
+      "sovietNoLoss": "No Soviet loss on {{hex}}.",
+      "advanced": "{{unit}} advances into {{hex}}: {{route}}.",
+      "advancedRoll": "{{unit}} advances into {{hex}}: {{route}}, die {{roll}} (1 to {{need}}).",
+      "stays": "{{unit}} does not advance into {{hex}}: {{route}}, die {{roll}} (1 to {{need}}).",
+      "noAdvance": "{{unit}} does not advance: {{why}}.",
+      "ended": "Combat on {{hex}} over.",
+      "activationEnded": "End of the activation: {{army}}.",
+      "full": "{{unit}} does not advance into {{hex}}: {{route}}, {{count}} Soviet units there already."
+    },
+    "reserve": {
+      "placed": "{{unit}} placed from the reserve box in {{hex}} ({{rule}}).",
+      "notPlaced": "{{unit}} stays in the reserve box: {{reason}}."
+    },
+    "removal": "{{unit}} goes back to the reserve box from {{hex}}: {{reason}}.",
+    "ip": {
+      "placed": "Improved Position placed in {{hex}}.",
+      "placedRule": "Improved Position placed in {{hex}} ({{rule}}).",
+      "removed": "Improved Position removed from {{hex}}.",
+      "removedWhy": "Improved Position removed from {{hex}}: {{reason}}."
+    },
+    "dispersedUnit": "{{unit}} dispersed"
   },
   "units": {
     "counter": "{{unit}} ({{army}})",
@@ -804,7 +899,8 @@
       "reduced": "Reduced counters",
       "eliminated": "Eliminated"
     },
-    "turn": "Turn {{turn}}"
+    "turn": "Turn {{turn}}",
+    "outOfPlay": "{{unit}} ({{army}}), out of play: it cannot come back (12.62)"
   },
   "inspector": {
     "terrain": "Terrain",
@@ -875,7 +971,9 @@
     "supplyMarker": "Supply marker",
     "supplied": "In supply",
     "outOfSupply": "Out of Supply",
-    "isolated": "Isolated"
+    "isolated": "Isolated",
+    "placeIp": "Place Improved Position",
+    "removeIp": "Remove Improved Position"
   },
   "why": {
     "moved": "{{from}} to {{to}}",
@@ -917,7 +1015,8 @@
     "reserve": "Put in reserve",
     "reinforcements": "Back to its turn of entry",
     "eliminated": "Eliminate",
-    "dropOn": "Drop on {{hex}}"
+    "dropOn": "Drop on {{hex}}",
+    "outOfPlay": "Out of play"
   },
   "map": {
     "supplyMarker": {
@@ -930,7 +1029,8 @@
     "imageFailed": "The map image could not be loaded: showing the grid only.",
     "layersEmpty": "{{warnings}} Those layers stay empty.",
     "hideUnits": "Hide units",
-    "showUnits": "Show units"
+    "showUnits": "Show units",
+    "improvedPosition": "Improved Position"
   },
   "layers": {
     "grid": {
@@ -967,7 +1067,9 @@
     }
   },
   "scenario": {
-    "p17": "<b>Booklet example p17 loaded:</b> turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev scenario)."
+    "p17": "<b>Booklet example p17 loaded:</b> turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev scenario).",
+    "combat1802": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E17, E01, E11, E02, E03. Run bot impulse: the 1st Guards Army attacks 1802, the combat sheet opens.",
+    "nkvd": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E08. Run bot impulse: NKVD Operations puts two hits on the German stack in 0205."
   },
   "page": {
     "title": "Situation map",
@@ -989,7 +1091,8 @@
     "tab": {
       "bot": "Bot",
       "log": "Log",
-      "overlays": "Overlays"
+      "overlays": "Overlays",
+      "combat": "Combat"
     },
     "home": "Home",
     "sovietCardsRead": "Soviet cards read",
@@ -1000,7 +1103,8 @@
     "overlaysHint": "Lay a sheet on the map to check what the bot reads from it.",
     "printedMap": "Printed map",
     "unitsSwitch": "Units",
-    "fitMap": "Fit map"
+    "fitMap": "Fit map",
+    "combatNone": "No combat in progress: the tab opens by itself when one begins."
   },
   "legend": {
     "title": "Bot moves legend",
@@ -1023,5 +1127,283 @@
     "unitsIndexText": "Every known unit counter with its decoded data, for checking against data/units.json (2.3)",
     "sovietCards": "Soviet cards",
     "sovietCardsText": "Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)"
+  },
+  "advance": {
+    "route": {
+      "vpHex": "into a VP hex",
+      "primary": "in the primary forward direction",
+      "enablesSupply": "enables supply",
+      "riverCloser": "across a river, closer to its objective",
+      "secondary": "in the secondary forward direction",
+      "retreatPath": "along the path of retreat",
+      "surround": "causes surround",
+      "closer": "closer to its objective",
+      "attackedHex": "into the attacked hex",
+      "other": "another route"
+    },
+    "no": {
+      "stacking": "over the stacking limits",
+      "marsh": "a mechanized unit does not advance into marsh",
+      "townProximate": "a German unit would become proximate to {{town}}",
+      "townSupply": "German supply would reach {{town}}",
+      "mapEdgeVacated": "map-edge VP hex {{hex}} would be left vacant",
+      "cutsSupply": "{{unit}} would be unable to trace supply",
+      "surrounded": "the hex is surrounded or nearly surrounded",
+      "secondHex": "no second hex to advance into",
+      "joined": "joined by a combat tactic: no advance (12.8)",
+      "dispersed": "dispersed: no advance",
+      "moved": "no longer next to the attacked hex"
+    }
+  },
+  "combat": {
+    "noCard": {
+      "overwhelming": "No card drawn: the attack is overwhelming (12.38).",
+      "unsupported": "No card drawn: the attack is not in Soviet support (12.3).",
+      "noCards": "No card drawn: no Soviet card left in the draw pile or the discard pile."
+    },
+    "aux": {
+      "overwhelming": "the attack is overwhelming",
+      "noTactic": "no combat tactic for an attack this turn",
+      "fails": "{{tactic}} does not apply: {{why}}"
+    },
+    "tactic": {
+      "no": {
+        "identical": "already applied in this combat",
+        "partisans": "not against a woods, town or city hex",
+        "barrage": "the artillery barrage already applies",
+        "far": "beyond the Fixed Artillery Range",
+        "reinforce": "no Soviet unit can reinforce",
+        "stavka": "STAVKA's NKVD already applies",
+        "townCity": "not against a town or city",
+        "defense": "for defense only"
+      }
+    },
+    "chits": {
+      "units_one": "1 attacking unit of 1 or 2 steps",
+      "units_other": "{{count}} attacking units of 1 or 2 steps",
+      "threeStep_one": "1 attacking unit of 3 steps",
+      "threeStep_other": "{{count}} attacking units of 3 steps",
+      "isolated": "your units isolated",
+      "outOfSupply": "your units out of supply",
+      "screen": "your Screen",
+      "lightMud": "light mud: 6 at most",
+      "barrage": "artillery barrage, turns 1-2",
+      "stavka": "NKVD, STAVKA",
+      "card": "card {{card}}, {{name}}",
+      "auxiliary": "auxiliary card {{card}}, {{name}}"
+    },
+    "adj": {
+      "nkvd": "NKVD",
+      "partisans": "Partisans in a {{terrain}} hex",
+      "intelligence": "Intelligence, command value {{value}}",
+      "replacements": "your Battlefield Replacements",
+      "townCity": "defending in a {{terrain}}",
+      "ip": "Improved Position, removed",
+      "rivers": "all attackers across the Donets or Dniepr",
+      "isolated": "all your units isolated: Soviet hits ignored",
+      "dispersedOrOos": "all your units dispersed or out of supply",
+      "partisansCity": "Partisans in a city",
+      "brigade": "{{name}}",
+      "assaultAlone": "Assault Coordination without a unit"
+    },
+    "german": {
+      "no": {
+        "intelligence": "Soviet Intelligence: no German combat tactic in this combat",
+        "noneSupplied": "none of your units in the combat is supplied and undispersed (12.3)",
+        "partisans": "not against Partisans",
+        "townCity": "not in a town or city: {{hex}}",
+        "sovietEngineers": "not against Soviet Combat Engineers",
+        "pullOutDispersed": "not with a dispersed or isolated unit",
+        "pullOutRoute": "no two-hex retreat ending in German supply"
+      }
+    },
+    "situation": {
+      "aboveThree": "3:1 or more ({{attack}} to {{defense}})",
+      "aboveOne": "above 1:1 ({{attack}} to {{defense}})",
+      "belowTwo": "below 2:1 ({{attack}} to {{defense}})",
+      "aboveEight": "8:1 or more ({{attack}} to {{defense}})",
+      "belowOneHalf": "below 1.5:1 ({{attack}} to {{defense}})",
+      "terrain": {
+        "clear": "clear",
+        "broken": "broken",
+        "woods": "woods",
+        "town": "town",
+        "city": "city"
+      },
+      "sovietAirpower": "Soviet airpower",
+      "sovietArtillery": "Soviet artillery",
+      "germanAirpower": "German airpower",
+      "germanArtillery": "German artillery",
+      "combatEngineers": "combat engineers",
+      "defenderAdjacent": "defender adjacent ({{units}})",
+      "defenderAdjacentNo": "defender adjacent",
+      "dispersedOrUnsupplied": "dispersed or unsupplied",
+      "flank": "flank attack",
+      "large": "large attack ({{chits}} chits)",
+      "ipCrossfire": "IP crossfire",
+      "oneHex": "one-hex attack",
+      "onlyAttackerArmor": "only attacker armor",
+      "onlyDefenderArmor": "only defender armor",
+      "commandValue": "command value {{value}}",
+      "nkvd": "NKVD",
+      "notSupported": "attack not supported"
+    }
+  },
+  "combatSheet": {
+    "title": {
+      "sovietAttack": "Soviet attack on {{hex}}",
+      "nkvdOperations": "{{event}} on {{hex}}"
+    },
+    "where": "{{place}}, {{terrain}}",
+    "whereVp": "{{place}}, {{terrain}}, {{vp}} VP",
+    "by": "{{army}}, card {{card}}, command value {{value}}.",
+    "byNoCard": "{{army}}, command value {{value}}.",
+    "byNkvd": "Card {{card}}: two hits as if combat occurred.",
+    "soviets": "Soviets",
+    "germans": "Germans",
+    "step": {
+      "reserves": "Soviet reserves",
+      "tactics": "Soviet tactics",
+      "yourTactics": "Your tactics",
+      "chits": "Draw chits",
+      "hits": "Hits",
+      "yourLosses": "Your losses",
+      "sovietLosses": "Soviet losses",
+      "advance": "Soviet advance",
+      "cleanUp": "Clean up",
+      "target": "Target",
+      "sovietLoss": "Soviet step"
+    },
+    "sum": {
+      "none": "None",
+      "chits_one": "{{count}} chit",
+      "chits_other": "{{count}} chits",
+      "hits": "yours {{german}}, Soviets {{soviet}}",
+      "losses": "{{steps}} steps, {{hexes}} hexes",
+      "pullOut": "Pull Out",
+      "eliminated": "eliminated",
+      "advanced_one": "{{count}} advanced",
+      "advanced_other": "{{count}} advanced",
+      "noAdvance": "no advance",
+      "sovietHits_one": "{{count}} hit",
+      "sovietHits_other": "{{count}} hits"
+    },
+    "reserves": {
+      "none": "No reserve placed: the attack did not need one, or none could be.",
+      "placed": "{{unit}} leaves the reserve box for {{hex}}."
+    },
+    "tactics": {
+      "barrage": "Artillery barrage, turns 1-2 (12.36)",
+      "stavka": "NKVD, STAVKA (12.35)",
+      "card": "Card drawn {{card}}: {{name}}",
+      "cardFromDiscard": "Card {{card}}, drawn from the discard pile (12.37): {{name}}",
+      "auxiliary": "Auxiliary card {{card}}: {{name}}",
+      "joined": "Joined: {{units}}.",
+      "noUnit": "No unit joins.",
+      "ipRemoved": "The IP in the hex is removed.",
+      "chits_one": "+{{count}} chit",
+      "chits_other": "+{{count}} chits",
+      "noBenefit": "No effect: {{why}}.",
+      "auxStays": "Auxiliary card {{card}} stays in its box: {{why}}.",
+      "cardNoTactic": "Card drawn {{card}}: no combat tactic for an attack this turn."
+    },
+    "yourTactics": {
+      "hint": "Tick the cards you play from your hand. A German Army or Army Group South card counts as any tactic (12.33).",
+      "reinforceHint": "Reinforce Battle: first drag one stack into {{hex}}.",
+      "reinforcing": "Reinforcing: {{units}}.",
+      "replacementHit": "One hit less",
+      "replacementUnit": "Flip {{unit}} back to two steps",
+      "play_one": "Play this tactic",
+      "play_other": "Play these {{count}} tactics",
+      "none": "Continue without tactics"
+    },
+    "chits": {
+      "draw": "chits to draw from the cup",
+      "note": "The Soviets always draw the maximum (12.4). Never fewer than {{min}}, the steps of your units.",
+      "total": "Chits to draw",
+      "keep": "Keep a chit when one of its sides holds",
+      "others": "Does not hold ({{count}})",
+      "done": "Chits drawn"
+    },
+    "hits": {
+      "hint": "Enter only the hits printed on the chits you kept. The total can be negative (D−1 chits): the bot adds the hits due to the situation.",
+      "german": "Hits on your units",
+      "germanSub": "D and G chits",
+      "soviet": "Hits on Soviet units",
+      "sovietSub": "A and S chits",
+      "less": "One hit less",
+      "more": "One hit more",
+      "yours": "Your units",
+      "theirs": "Soviet units",
+      "chitsKept": "Chits kept",
+      "total": "Hits",
+      "floor": "A total never goes below 0.",
+      "resolve": "Resolve combat"
+    },
+    "losses": {
+      "head_one": "{{count}} hit on your units.",
+      "head_other": "{{count}} hits on your units.",
+      "choose": "Choose how your units take them (12.52):",
+      "steps_one": "Lose {{count}} step",
+      "steps_other": "Lose {{count}} steps",
+      "stepsRetreat": "Lose {{steps}} and retreat {{hexes}}",
+      "retreatOne": "1 hex",
+      "retreatTwo": "2 hexes",
+      "stepWord_one": "{{count}} step",
+      "stepWord_other": "{{count}} steps",
+      "retreat2": "Retreat 2 hexes and disperse",
+      "retreat1": "Retreat 1 hex",
+      "eliminated": "All your units are eliminated",
+      "pullOut": "Pull Out: your units retreat two hexes, without Dispersed marker, ending in German supply.",
+      "how": "Then do it on the map: right-click a counter to remove a step (Eliminate on its last step); drag the stack to retreat, one hex at a time. Only the hexes open to the retreat accept it (12.7), lit on the map. A retreat into a hex in Soviet control costs one more step.",
+      "tallySteps": "Step losses: {{done}} of {{need}}",
+      "tallyRetreat_one": "Retreat: {{done}} of {{count}} hex",
+      "tallyRetreat_other": "Retreat: {{done}} of {{count}} hexes",
+      "applied": "Hits applied",
+      "nkvdTwo": "Two hits, as if combat occurred"
+    },
+    "soviet": {
+      "none": "No hit on the Soviet units.",
+      "reduced": "12.55: {{count}} hits fewer, your units all eliminated.",
+      "first": "First hit: {{unit}} loses a step (12.6: most steps, then the higher selector).",
+      "firstTied": "First hit: {{unit}} loses a step, drawn among {{units}} (12.6).",
+      "table": "{{hits}} hits left on {{steps}} steps (12.54): {{result}}.",
+      "parenthetical": "fewer than four cards in the Soviet draw pile",
+      "dispersed": "all the attackers dispersed",
+      "stepsDispersed_one": "{{count}} more step and all dispersed",
+      "stepsDispersed_other": "{{count}} more steps and all dispersed",
+      "eliminate": "all the attackers eliminated",
+      "steps_one": "{{count}} more step",
+      "steps_other": "{{count}} more steps",
+      "removed": "Steps removed: {{units}}.",
+      "eliminated": "Eliminated: {{units}}.",
+      "nkvd": "One step from the adjacent Soviet units (12.6): {{unit}}.",
+      "nkvdNone": "No Soviet unit is left next to the hex."
+    },
+    "advance": {
+      "held": "Your units still hold {{hex}}: no advance.",
+      "intro": "Your units left {{hex}}. Each Soviet unit checks its advance, lowest selector first (12.83).",
+      "auto": "advances",
+      "needs": "needs 1 to {{need}}",
+      "advances": "advances",
+      "stays": "stays",
+      "no": "no advance: {{why}}",
+      "second": "second hex {{hex}}",
+      "noSecond": "no second hex",
+      "route": "{{route}}, {{count}} there"
+    },
+    "cleanUp": {
+      "discarded": "{{card}} discarded.",
+      "reused": "{{card}} back in the Soviet draw pile, shuffled: its tactic says Re-use (12.32).",
+      "removed": "{{card}} removed from the game (8.2).",
+      "keptInDiscard": "{{card}} back in the discard pile (12.37).",
+      "chits": "Set the drawn chits aside (12.42).",
+      "continue": "Continue the Soviet impulse"
+    },
+    "target": {
+      "choose": "Several German stacks tie for the two hits: choose one.",
+      "pick": "{{hex}}"
+    },
+    "die": "Die: {{roll}}"
   }
 }

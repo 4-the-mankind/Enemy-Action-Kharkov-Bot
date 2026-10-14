@@ -7,6 +7,7 @@ import { createBoard } from "../engine/board";
 import { loadGameData } from "./data/game-data";
 import { loadMapData } from "./data/map-data";
 import { createDragController } from "./drag";
+import { CombatPlane } from "./map/combat-plane";
 import { LayerStack } from "./map/layer-stack";
 import { SUPPLY_SIDES, SupplyPlane } from "./map/supply-plane";
 import { DEBUG_LAYERS } from "./map/layers";
@@ -21,6 +22,7 @@ import { stackRenderer } from "./panels/stack-list";
 import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
 import { mountCardZoom } from "./panels/card-zoom";
+import { mountCombatPanel } from "./panels/combat-panel";
 import { mountReminders } from "./panels/reminders";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountWhyPanel } from "./panels/why-panel";
@@ -81,6 +83,7 @@ async function init() {
   const drag = createDragController(session, view, data);
   const units = new UnitsPlane(view, data, session.engine, selection);
   const supply = new SupplyPlane(view, data, session.engine);
+  const combatPlane = new CombatPlane(view, data, session.engine);
   const menu = createCounterMenu(session);
   inspector = mountInspector($("inspector"), view, data, stackRenderer(session, selection, drag, menu));
   const insp = inspector;
@@ -100,12 +103,27 @@ async function init() {
   const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
   mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
+  mountCombatPanel($("combat"), session);
   mountCardZoom();
   // A log line's "Why this move" opens right under it, in the Log tab.
   mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); }, scenario?.note);
   const undo = $<HTMLButtonElement>("undo");
   undo.addEventListener("click", () => session.undo());
   session.subscribe(() => { undo.disabled = !session.canUndo(); });
+
+  // The Combat tab (D18): enabled only during a combat, opened when one begins, closed after it.
+  let hadCombat = false;
+  session.subscribe((state, events) => {
+    const has = !!state.combat;
+    rail.enable("combat", has);
+    // The bot's move details step aside while a combat is on the map.
+    document.body.classList.toggle("in-combat", has);
+    if (has && !hadCombat) rail.open("combat");
+    else if (!has && hadCombat && rail.selected() === "combat") rail.open("bot");
+    if (events.some((e) => e.type === "CombatStarted")) combatPlane.reveal(state);
+    hadCombat = has;
+    combatPlane.render(state);
+  });
 
   session.subscribe((state, events, undone) => {
     const setUp = events.find((e) => e.type === "SetUpApplied");

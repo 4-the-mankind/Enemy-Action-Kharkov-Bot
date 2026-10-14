@@ -28,6 +28,8 @@ export interface SovietCardsData {
   activations: SovietActivations;
   /** Runs an engine command as the bot (moves, markers). */
   step(state: GameState, command: Command): StepResult;
+  /** NKVD Operations on the combat sheet (combat.ts): the German stacks tied for the two hits. */
+  startNkvd(state: GameState, hexes: string[]): StepResult;
 }
 
 const KHARKOV = "0912";
@@ -40,9 +42,9 @@ const armyNumber = (army: string) => ARMY_NUMBER[army] ?? (Number.parseInt(army,
 type Role = "command" | "auxiliary";
 /**
  * Outcome of one card line: why it cannot be carried out, or what it did. `pending`: the
- * activation stopped on a Soviet attack (Q37).
+ * activation stopped on a Soviet attack (Q37); `paused`: an event waits for its combat sheet.
  */
-type Played = { state: GameState; events: GameEvent[]; detail?: Message; returned?: boolean; pending?: SovietActivation };
+type Played = { state: GameState; events: GameEvent[]; detail?: Message; returned?: boolean; pending?: SovietActivation; paused?: boolean };
 type Outcome = Message | Played;
 const refused = (r: Outcome | StepResult | ActivationRun): r is Message => "key" in r;
 
@@ -54,7 +56,7 @@ const ENGINEERS_HEXES = 3;
 
 export type SovietCards = ReturnType<typeof createSovietCards>;
 
-export function createSovietCards({ cards, board, movement, unit, rules, activations, step }: SovietCardsData) {
+export function createSovietCards({ cards, board, movement, unit, rules, activations, step, startNkvd }: SovietCardsData) {
   const byId = new Map(cards.map((c) => [c.id, c]));
   const card = (id: string) => {
     const c = byId.get(id);
@@ -352,10 +354,11 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
 
   /**
    * NKVD Operations: two hits on the German unit/stack adjacent to Soviet units with the most
-   * total combat strength (the player applies them), then one Soviet step lost per 12.6.
-   * TODO 4.5: the Soviet advance after combat (12.83) is left to the player until combat is coded.
+   * total combat strength, as if combat occurred, on the combat sheet (combat.ts): the player
+   * picks among stacks tied and takes the hits on the map; then one Soviet step is lost by 12.6
+   * and the Soviet units advance after combat (12.83). The impulse waits for it.
    */
-  function nkvdOperations(state: GameState, id: string): Outcome {
+  function nkvdOperations(state: GameState): Outcome {
     const germanHexes = new Set(Object.keys(state.units).filter((g) => unit(g)?.side === "german" && onMap(state, g)).map((g) => state.units[g].at));
     const sovietOnMap = sovietIds(state).filter((s) => onMap(state, s));
     const options = [...germanHexes].map((hex) => {
@@ -368,28 +371,12 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
       const t = board.hex(hex).terrain;
       return t === "town" || t === "city" ? msg("cards.nkvd.targetTown", { hex, terrain: msg(t === "town" ? "names.terrain.town" : "names.terrain.city") }) : hex;
     };
-    if (tied.length > 1) {
-      const r = remind(state, {
-        card: id, title: msg("names.event.nkvdOperations"), until: "done",
-        text: msg("cards.nkvd.chooseText", { targets: tied.map((o) => target(o.hex)), strength: options[0].strength }),
-      });
-      return { state: r.state, events: [r.event], detail: msg("cards.nkvd.tie", { count: tied.length, strength: options[0].strength }) };
-    }
+    const r = startNkvd(state, tied.map((o) => o.hex));
     const best = options[0];
-    // 12.6: the unit with the most steps, then the higher selector.
-    const loser = [...best.adjacent].sort((a, b) => movement.faceValues(state, b).steps - movement.faceValues(state, a).steps
-      || movement.faceValues(state, b).selector - movement.faceValues(state, a).selector)[0];
-    const lastStep = movement.faceValues(state, loser).steps <= 1;
-    // TODO 4.5: an eliminated one-step or isolated unit is removed from play (12.62).
-    const r = run(state, [lastStep ? { type: "MoveUnits", units: [loser], to: "eliminated" } : { type: "RemoveStep", unit: loser }]);
-    if (!r) return msg("cards.nkvd.cannot");
-    const note = remind(r.state, {
-      card: id, title: msg("names.event.nkvdOperations"), until: "done", text: msg("cards.nkvd.assignText", { target: target(best.hex) }),
-    });
-    return {
-      state: note.state, events: [...r.events, note.event],
-      detail: msg("cards.nkvd.done", { hex: best.hex, strength: best.strength, units: best.adjacent.map(name), unit: name(loser) }),
-    };
+    const detail = tied.length > 1
+      ? msg("cards.nkvd.tie", { count: tied.length, strength: best.strength })
+      : msg("cards.nkvd.target", { hex: target(best.hex), strength: best.strength, units: best.adjacent.map(name) });
+    return { state: r.state, events: r.events, detail, paused: true };
   }
 
   /**
@@ -445,7 +432,7 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
       case "soviet-air-supply": return airSupply(state);
       case "soviet-partisan-uprisings": return partisanUprisings(state);
       case "soviet-expedited-reserves": return expeditedReserves(state);
-      case "soviet-nkvd-operations": return nkvdOperations(state, id);
+      case "soviet-nkvd-operations": return nkvdOperations(state);
       case "soviet-hitler-distracts": {
         const r = remind(state, { card: id, title: msg("names.event.hitlerDistracts"), until: "done", text: msg("cards.hitler.text") });
         return { state: r.state, events: [r.event], detail: msg("cards.hitler.done") };
@@ -495,7 +482,7 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
       }
       events.push({ type: "SovietCommandChecked", card: id, role: "command", index, played: true, reason: r.detail }, ...r.events);
       state = r.state;
-      if (r.pending) return { state: { ...state, botImpulse: { card: id, second, auxiliary, activation: r.pending } }, events };
+      if (r.pending || r.paused) return { state: { ...state, botImpulse: { card: id, second, auxiliary, ...(r.pending ? { activation: r.pending } : {}) } }, events };
       break;
     }
     const rest = finishCommand(state, id, second, auxiliary);
@@ -515,11 +502,17 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
     const imp = state.botImpulse;
     if (!imp) return msg("reject.noBotImpulse");
     const { botImpulse: _, ...rest } = state;
-    const r = activations.resume(rest, imp.activation, imp.auxiliary);
-    if (r.pending) return { state: { ...r.state, botImpulse: { ...imp, activation: r.pending } }, events: r.events };
-    if (imp.card === null) return { state: r.state, events: r.events };
-    const end = finishCommand(r.state, imp.card, imp.second, imp.auxiliary);
-    return { state: end.state, events: [...r.events, ...end.events] };
+    let s: GameState = rest;
+    const events: GameEvent[] = [];
+    if (imp.activation) {
+      const r = activations.resume(rest, imp.activation, imp.auxiliary);
+      if (r.pending) return { state: { ...r.state, botImpulse: { ...imp, activation: r.pending } }, events: r.events };
+      s = r.state;
+      events.push(...r.events);
+    }
+    if (imp.card === null) return { state: s, events };
+    const end = finishCommand(s, imp.card, imp.second, imp.auxiliary);
+    return { state: end.state, events: [...events, ...end.events] };
   }
 
   /** IV.1 Soviet impulse (8.1). A reason instead when there is no card to draw. */

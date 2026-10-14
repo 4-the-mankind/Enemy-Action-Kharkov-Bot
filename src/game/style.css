@@ -871,3 +871,157 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .supply-note { margin: 6px 0 0; padding-left: 8px; font-size: 0.82rem; line-height: 1.3; border-left: 3px solid var(--stab-red); }
 .supply-note.german { border-left-color: var(--prussian); }
 .supply-note.cut { border-left-style: dashed; }
+
+/* ---------- Combat tab (D18, task 4.5a): the combat sheet ---------- */
+/* A paper slip in the rail, its hem in the attacker's color; the 12.0 steps numbered, the
+   current one open. The same sheet as the validated mockup, out of the map. */
+
+.folder-tab[disabled] { color: rgb(38 46 41 / 0.45); background: #8d8a78; cursor: default; }
+.folder-tab[disabled]:hover { background: #8d8a78; }
+.combat-section { padding-right: 18px; }
+.combat-wait { margin: 8px 0 0; padding-left: 8px; font-size: 0.85rem; color: var(--paper); border-left: 3px solid var(--stab-red); }
+.combat-wait[hidden] { display: none; }
+
+.combat-sheet { --hem: var(--stab-red); color: var(--slip-ink); background: var(--slip); box-shadow: 0 4px 14px rgb(0 0 0 / 0.35); }
+.combat-sheet .hem { height: 10px; background: var(--hem); box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.22), inset 0 3px 0 rgb(255 255 255 / 0.12); }
+.combat-sheet .b-head { padding: 10px 14px 8px; }
+.combat-sheet .b-head h2 { margin: 0; font-size: 1.12rem; font-weight: 600; line-height: 1.2; }
+.combat-sheet .b-head p { margin: 2px 0 0; font-size: 0.84rem; color: var(--slip-dim); line-height: 1.3; }
+
+.combat-sheet .forces { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin: 0 14px; padding: 8px 0 10px; border-top: 1.5px solid var(--slip-ink); border-bottom: 1.5px solid var(--slip-ink); }
+.combat-sheet .side { display: flex; align-items: center; gap: 3px; min-width: 0; flex-wrap: wrap; }
+.combat-sheet .side.right { justify-content: flex-end; }
+.combat-sheet .side img { width: 30px; height: 30px; border-radius: 2px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.4); }
+.combat-sheet .side b { font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: 0 5px; }
+.combat-sheet .side .who { display: block; font-size: 0.72rem; color: var(--slip-dim); font-weight: 500; }
+.combat-sheet .odds { font-size: 1.8rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+.combat-sheet .steps { list-style: none; margin: 0; padding: 4px 14px 6px; }
+.combat-sheet .step { border-bottom: 1px solid rgb(38 46 41 / 0.2); }
+.combat-sheet .step:last-child { border-bottom: 0; }
+.combat-sheet .s-row {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%;
+  padding: 7px 0; font: inherit; color: inherit; text-align: left; background: none; border: 0;
+}
+.combat-sheet button.s-row { cursor: pointer; }
+.combat-sheet button.s-row:hover h3 { text-decoration: underline; text-underline-offset: 2px; }
+.combat-sheet .n { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.78rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.combat-sheet .done .n { color: var(--slip); background: var(--slip-ink); }
+.combat-sheet .current .n { color: #fff; background: var(--hem); box-shadow: 0 0 0 3px rgb(192 39 45 / 0.22); }
+.combat-sheet .todo .n { color: var(--slip-dim); border: 1.5px solid rgb(38 46 41 / 0.35); }
+.combat-sheet .s-row h3 { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.combat-sheet .todo h3 { font-weight: 500; color: var(--slip-dim); }
+.combat-sheet .s-sum { font-size: 0.82rem; color: var(--slip-dim); font-variant-numeric: tabular-nums; text-align: right; }
+
+.combat-sheet .s-body { position: relative; padding: 0 0 12px 32px; font-size: 0.87rem; line-height: 1.4; }
+.combat-sheet .s-body::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 12px; width: 2px; background: var(--hem); }
+.combat-sheet .done .s-body::before { background: var(--slip-ink); opacity: 0.35; }
+.combat-sheet .s-body p { margin: 0 0 8px; }
+.combat-sheet .s-body p:last-child { margin-bottom: 0; }
+.combat-sheet .note { font-size: 0.8rem; color: var(--slip-dim); }
+.combat-sheet .s-body h4 { margin: 10px 0 4px; font-size: 0.86rem; font-weight: 600; }
+
+.combat-sheet .lines { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.combat-sheet .lines li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.combat-sheet .lines li.plain { grid-template-columns: minmax(0, 1fr) auto; }
+.combat-sheet .lines img.card { width: 30px; border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); cursor: zoom-in; }
+.combat-sheet .lines img.unit { width: 30px; height: 30px; border-radius: 2px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.4); }
+.combat-sheet .lines .tag { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.combat-sheet .lines .tag.no { color: var(--slip-dim); font-weight: 500; white-space: normal; text-align: right; max-width: 11em; }
+.combat-sheet .lines .what small { display: block; font-size: 0.8rem; color: var(--slip-dim); }
+.combat-sheet .why-steps { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 3px; font-size: 0.8rem; }
+.combat-sheet .rule { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.combat-sheet .hexes { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.combat-sheet .hexes span { padding: 0 5px; font-size: 0.78rem; font-variant-numeric: tabular-nums; border-radius: 2px; }
+.combat-sheet .hexes .kept { color: var(--slip); background: var(--slip-ink); }
+.combat-sheet .hexes .dropped { color: var(--slip-dim); text-decoration: line-through; border: 1px solid rgb(38 46 41 / 0.3); }
+
+.combat-sheet .tactics { list-style: none; margin: 0 0 6px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+.combat-sheet .tactics li.wide { grid-column: 1 / -1; }
+.combat-sheet .tactics label, .combat-sheet .choices label { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; padding: 3px 4px; border-radius: 2px; cursor: pointer; }
+.combat-sheet .tactics label:hover, .combat-sheet .choices label:hover { background: rgb(38 46 41 / 0.07); }
+.combat-sheet .tactics input, .combat-sheet .choices input { position: absolute; opacity: 0; pointer-events: none; }
+.combat-sheet .box { width: 16px; height: 16px; margin-top: 2px; border: 1.5px solid var(--slip-ink); border-radius: 2px; display: grid; place-items: center; }
+.combat-sheet input:checked + .box { background: var(--slip-ink); }
+.combat-sheet input:checked + .box::after { content: ""; width: 8px; height: 4px; margin-top: -2px; border: solid var(--slip); border-width: 0 0 2px 2px; transform: rotate(-45deg); }
+.combat-sheet input:focus-visible + .box, .combat-sheet input:focus-visible + .dot { outline: 2px solid var(--hem); outline-offset: 2px; }
+.combat-sheet .t-name small { display: block; font-size: 0.78rem; color: var(--slip-dim); }
+.combat-sheet .tactics label.off { cursor: not-allowed; color: var(--slip-dim); }
+.combat-sheet .tactics label.off:hover { background: none; }
+.combat-sheet .tactics label.off .box { border-color: rgb(38 46 41 / 0.3); }
+.combat-sheet .choices { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 2px; }
+.combat-sheet .dot { width: 16px; height: 16px; margin-top: 2px; border: 1.5px solid var(--slip-ink); border-radius: 50%; display: grid; place-items: center; }
+.combat-sheet input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--slip-ink); }
+
+.combat-sheet .draw { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; margin-bottom: 8px; }
+.combat-sheet .draw .big { font-size: 2.6rem; font-weight: 600; line-height: 0.9; font-variant-numeric: tabular-nums; color: var(--hem); }
+.combat-sheet .draw b { display: block; font-size: 1rem; }
+.combat-sheet .draw small { display: block; font-size: 0.8rem; color: var(--slip-dim); }
+.combat-sheet .sum { margin: 0 0 8px; display: grid; grid-template-columns: 1fr auto; font-size: 0.82rem; }
+.combat-sheet .sum dt, .combat-sheet .sum dd { padding: 2px 0; border-bottom: 1px dotted rgb(38 46 41 / 0.3); }
+.combat-sheet .sum dd { margin: 0; padding-left: 8px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.combat-sheet .sum .total { border-bottom: 0; border-top: 1.5px solid var(--slip-ink); font-weight: 600; }
+.combat-sheet .sum .neg { color: var(--stab-red); }
+.combat-sheet .situ { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; font-size: 0.82rem; }
+.combat-sheet .situ li { position: relative; padding-left: 15px; line-height: 1.25; }
+.combat-sheet .situ.yes li::before { content: ""; position: absolute; left: 0; top: 3px; width: 9px; height: 5px; border: solid var(--hem); border-width: 0 0 2.5px 2.5px; transform: rotate(-45deg); }
+.combat-sheet .situ.no li { color: var(--slip-dim); }
+.combat-sheet .situ.no li::before { content: ""; position: absolute; left: 1px; top: 7px; width: 8px; height: 1.5px; background: var(--slip-dim); }
+.combat-sheet details.more { margin-top: 6px; font-size: 0.82rem; }
+.combat-sheet details.more summary { cursor: pointer; color: var(--slip-dim); }
+.combat-sheet details.more .situ { margin-top: 5px; }
+
+.combat-sheet .hits { display: grid; gap: 8px; margin-bottom: 10px; }
+.combat-sheet .hit-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.combat-sheet .hit-row b { display: block; font-weight: 600; }
+.combat-sheet .hit-row small { display: block; font-size: 0.8rem; color: var(--slip-dim); }
+.combat-sheet .stepper { display: grid; grid-template-columns: 30px 38px 30px; border: 1.5px solid var(--slip-ink); border-radius: 3px; overflow: hidden; }
+.combat-sheet .stepper button { font: inherit; font-size: 1.1rem; line-height: 1; color: var(--slip-ink); background: none; border: 0; cursor: pointer; }
+.combat-sheet .stepper button:hover:not([disabled]) { background: rgb(38 46 41 / 0.1); }
+.combat-sheet .stepper button[disabled] { opacity: 0.3; cursor: default; }
+.combat-sheet .stepper output { display: grid; place-items: center; font-size: 1.2rem; font-weight: 600; font-variant-numeric: tabular-nums; border-left: 1px solid rgb(38 46 41 / 0.2); border-right: 1px solid rgb(38 46 41 / 0.2); }
+.combat-sheet .ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.combat-sheet .ledger h4 { margin: 0 0 2px; }
+
+.combat-sheet .tally { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.85rem; }
+.combat-sheet .tally li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: center; padding: 4px 6px; background: rgb(38 46 41 / 0.06); border: 1px dashed rgb(38 46 41 / 0.35); border-radius: 2px; }
+.combat-sheet .tally .mark { width: 14px; height: 14px; border: 1.5px solid var(--slip-ink); border-radius: 2px; }
+.combat-sheet .tally .ok { background: transparent; border-style: solid; border-color: rgb(38 46 41 / 0.2); }
+.combat-sheet .tally .ok .mark { background: var(--slip-ink); }
+.combat-sheet .d10 { display: inline-grid; width: 24px; height: 28px; padding-top: 4px; font-size: 0.85rem; }
+.combat-sheet .d10.hold { background: var(--hem); }
+.combat-sheet .target-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.combat-sheet .target-choices .btn { border-color: var(--slip-ink); font-variant-numeric: tabular-nums; }
+
+.combat-sheet .b-foot { padding: 10px 14px 12px; border-top: 1.5px solid var(--slip-ink); }
+.combat-sheet .foot-row { display: flex; gap: 8px; }
+.combat-sheet .undo { flex: none; padding: 8px 14px; font: inherit; color: var(--slip-ink); background: transparent; border: 1.5px solid var(--slip-ink); border-radius: 3px; cursor: pointer; }
+.combat-sheet .undo:hover:not([disabled]) { background: rgb(38 46 41 / 0.1); }
+.combat-sheet .undo[disabled] { opacity: 0.4; cursor: not-allowed; }
+.combat-sheet .act { flex: 1; width: 100%; padding: 8px 12px; font: inherit; font-weight: 600; color: var(--slip); background: var(--slip-ink); border: 1.5px solid var(--slip-ink); border-radius: 3px; cursor: pointer; }
+.combat-sheet .act:hover:not([disabled]) { background: var(--feldgrau); border-color: var(--feldgrau); }
+.combat-sheet .act[disabled] { color: var(--slip-dim); background: rgb(38 46 41 / 0.1); border-color: rgb(38 46 41 / 0.25); cursor: not-allowed; }
+.combat-sheet .act:focus-visible, .combat-sheet button:focus-visible, .combat-sheet summary:focus-visible { outline: 2px solid var(--hem); outline-offset: 2px; }
+.combat-reason { margin: 8px 0 0; font-size: 0.84rem; color: var(--stab-red); }
+.combat-reason:empty { display: none; }
+
+/* ---------- the combat on the map: pastel arrows, the hex attacked, retreats ---------- */
+/* Drawn on the map like pastel: the strokes scale with it (grid units, not the non-scaling
+   strokes of the other marks), roughened and grained by the #pastel filter. */
+.combat-marks *, .combat-arrows * { vector-effect: none; }
+.combat-marks .target { fill: rgb(192 39 45 / 0.10); stroke: var(--stab-red); stroke-width: 13; stroke-linejoin: round; filter: url(#pastel); }
+.combat-marks .choice { fill: rgb(192 39 45 / 0.06); stroke: var(--stab-red); stroke-width: 11; stroke-dasharray: 30 20; filter: url(#pastel); }
+.combat-marks .retreat-hex { fill: rgb(31 79 154 / 0.18); stroke: var(--prussian); stroke-width: 9; stroke-dasharray: 26 16; stroke-linejoin: round; }
+.combat-marks .path { fill: none; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; filter: url(#pastel); }
+.combat-marks .path.german { stroke: var(--prussian); stroke-dasharray: 36 26; }
+.combat-marks .path.soviet { stroke: var(--stab-red); }
+.combat-arrows .soviet { --pastel: var(--stab-red); }
+.combat-arrows .faded { opacity: 0.45; }
+.combat-arrows .arrow { filter: url(#pastel); opacity: 0.94; }
+.combat-arrows .arrow line { stroke: var(--pastel); stroke-width: 28; stroke-linecap: round; }
+.combat-arrows .arrow polygon { fill: var(--pastel); stroke: var(--pastel); stroke-width: 10; stroke-linejoin: round; }
+
+body.in-combat .bot-options { display: none; }
+
+/* Units removed from play (12.62) with the eliminated ones. */
+.tray-counter.out-of-play { filter: grayscale(1) contrast(0.8); opacity: 0.55; }

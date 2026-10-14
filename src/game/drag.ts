@@ -2,7 +2,7 @@
 // a ghost follows the pointer, the target hex or box is highlighted with what a drop
 // would do, and the drop sends one MoveUnits command. The engine says what is allowed.
 import { hexCorners } from "../core/geometry";
-import type { Box, Location } from "../engine/types";
+import type { Location } from "../engine/types";
 import type { MapData } from "./data/map-data";
 import { faceImage } from "./data/game-data";
 import { pointsAttr } from "./map/layers/layer";
@@ -87,7 +87,7 @@ export function createDragController(session: GameSession, view: MapView, data: 
       well = over?.closest<HTMLElement>("[data-drop]") ?? null;
       const hex = !well && view.contains(over) ? view.hexAtClient(e.clientX, e.clientY) : null;
       target = hex?.id ?? (well?.dataset.drop as Location | undefined) ?? null;
-      const refusal = target ? engine.whyNotMove(state, ids, target) : null;
+      const refusal = target ? engine.whyNotDrop(state, ids, target) : null;
       well?.classList.add(refusal ? "drop-refused" : "drop-target");
       if (hex) {
         mark.setAttribute("points", pointsAttr(hexCorners(data.grid, hex)));
@@ -96,7 +96,7 @@ export function createDragController(session: GameSession, view: MapView, data: 
       mark.style.display = hex ? "" : "none";
       label.hidden = !target;
       label.classList.toggle("refused", !!refusal);
-      label.textContent = refusal ? t(refusal) : hex ? t("drag.dropOn", { hex: hex.id }) : target ? t(`drag.${target as Box}`) : "";
+      label.textContent = refusal ? t(refusal) : hex ? t("drag.dropOn", { hex: hex.id }) : target ? t(`drag.${target as "reserve" | "reinforcements" | "eliminated"}`) : "";
     };
     const end = (e: PointerEvent) => {
       move(e);

@@ -15,3 +15,6 @@ Thumbs.db
 .env.local
 
 assets/scans/
+
+# throwaway UI mockups (served by the dev server, never committed)
+mockups/

@@ -1375,5 +1375,28 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     }
   }
 
-  return { activate, moveFormation, enteredHexes };
+  /**
+   * Reinforce Battle in a Soviet attack (combat tactic): where the unit moves to end next to the
+   * hex attacked, by the restrictions of 9.23, then 9.25 (it ends next to a German unit, and
+   * "applies to Soviet units moving via the Reinforce Battle combat tactic"), then 9.24. Its own
+   * hex when it is already next to it; null when it cannot get there.
+   */
+  function reinforceDestination(state: GameState, front: Front, active: string[], id: string, target: string): { hex: string; path: string[]; steps: DecisionStep[] } | null {
+    const at = hexOf(state, id);
+    if (board.areAdjacent(at, target)) return { hex: at, path: [at], steps: [] };
+    const ctx: Ctx = {
+      state, book: "9.21", army: known(id).armyOrCorps, front, inactive: front === "voronezh" ? "southwest" : "voronezh",
+      active: new Set(active), objective: state.objectives[front] ?? null, ground: rules.ground(state),
+      supportDistance: supportDistances(state), done: new Set(), refused: new Set(),
+    };
+    const steps: DecisionStep[] = [];
+    let options = destinations(ctx, id).filter((o) => board.areAdjacent(o.hex, target) && !o.leavers);
+    options = restrict(ctx, id, options, steps);
+    if (!options.length) return null;
+    options = narrow(options, tactical(ctx, id), steps);
+    options = narrow(options, tiebreakers(ctx, id), steps);
+    return { hex: options[0].hex, path: options[0].path, steps };
+  }
+
+  return { activate, moveFormation, enteredHexes, reinforceDestination };
 }

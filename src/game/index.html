@@ -61,6 +61,7 @@
         <button type="button" class="folder-tab" role="tab" data-tab="bot" data-i18n="page.tab.bot"></button>
         <button type="button" class="folder-tab" role="tab" data-tab="log" data-i18n="page.tab.log"></button>
         <button type="button" class="folder-tab" role="tab" data-tab="overlays" data-i18n="page.tab.overlays"></button>
+        <button type="button" class="folder-tab combat-tab" role="tab" data-tab="combat" data-i18n="page.tab.combat" disabled></button>
       </nav>
       <div class="dossier-body rail">
         <header class="panel-head">
@@ -83,6 +84,10 @@
           </div>
           <p class="hint" data-i18n="page.undoHint"></p>
           <ol id="log" class="log"></ol>
+        </section>
+
+        <section data-tabpanel="combat" class="rail-section combat-section" data-i18n-aria-label="page.tab.combat">
+          <div id="combat" aria-live="polite"></div>
         </section>
 
         <section data-tabpanel="overlays" class="rail-section" data-i18n-aria-label="page.tab.overlays">

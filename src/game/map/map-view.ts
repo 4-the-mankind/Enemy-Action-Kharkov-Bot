@@ -136,6 +136,17 @@ export class MapView {
     this.stage.style.transform = `translate(${this.view.tx}px, ${this.view.ty}px) scale(${this.view.z})`;
   }
 
+  /** Pans so a grid point stands in the viewport, `margin` px from its edges (the combat in view, D18). */
+  ensureVisible(p: Point, margin = 40) {
+    const r = this.viewport.getBoundingClientRect();
+    const x = this.view.tx + p.x * this.view.z, y = this.view.ty + p.y * this.view.z;
+    if (x >= margin && x <= r.width - margin && y >= margin && y <= r.height - margin) return;
+    this.view.tx = r.width / 2 - p.x * this.view.z;
+    this.view.ty = r.height / 2 - p.y * this.view.z;
+    this.userMoved = true;
+    this.apply();
+  }
+
   /** Pans by a screen distance (arrow keys). */
   panBy(dx: number, dy: number) {
     this.view.tx += dx;

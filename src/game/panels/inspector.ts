@@ -17,7 +17,7 @@ type Row = [string, string | null];
 function hexRows(data: MapData, id: string): Row[] {
   const d = resolveHex(data.hexData, id);
   return [
-    [t("inspector.terrain"), d.playable ? t(dynamicKey(`names.terrain.${d.terrain}`)) : t("inspector.deadHex")],
+    [t("inspector.terrain"), d.playable ? t(dynamicKey(`names.terrain.${d.terrain ?? "clear"}`)) : t("inspector.deadHex")],
     [t("inspector.village"), d.village ? t("inspector.yes") : null],
     [t("inspector.vp"), d.vp ? String(d.vp) : null],
     [t("inspector.frontTarget"), d.frontTarget && label(d.frontTarget)],

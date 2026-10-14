@@ -7,6 +7,7 @@ import { shuffle } from "../../src/engine/random";
 import { emptyState, type GameEvent, type GameState } from "../../src/engine/types";
 import { msg, type ListParam, type Message } from "../../src/i18n/message";
 import { expectMessage } from "../i18n/expect-message";
+import { finishImpulse, settleCombat } from "./combat-helpers";
 import { board, json, realMap } from "./real-map";
 
 type Checked = Extract<GameEvent, { type: "SovietCommandChecked" }>;
@@ -17,16 +18,8 @@ const setUp = engine.step(emptyState(), { type: "SetUpTurn1" }).state;
 /** Booklet set-up (§3) without adjustment, game started, with a given draw pile (top first). */
 const withPile = (drawPile: string[], turn = 1, s: GameState = setUp): GameState =>
   ({ ...s, started: true, turn, sovietCards: { drawPile, removed: [], lastDrawn: [], seed: 7 } });
-/** RunBotImpulse, then ContinueBotImpulse after each Soviet attack (its combat left unresolved, Q37), to the end of the impulse. */
-function impulse(s: GameState): { state: GameState; events: GameEvent[] } {
-  let r = engine.step(s, { type: "RunBotImpulse" });
-  const events = [...r.events];
-  while (r.state.botImpulse && !r.events.some((e) => e.type === "CommandRejected")) {
-    r = engine.step(r.state, { type: "ContinueBotImpulse" });
-    events.push(...r.events);
-  }
-  return { state: r.state, events };
-}
+/** RunBotImpulse, then each combat settled with no hits (combat-helpers.ts) and ContinueBotImpulse, to the end of the impulse. */
+const impulse = (s: GameState): { state: GameState; events: GameEvent[] } => finishImpulse(engine, engine.step(s, { type: "RunBotImpulse" }));
 const checked = (events: GameEvent[]) => events.filter((e): e is Checked => e.type === "SovietCommandChecked");
 const played = (events: GameEvent[]) => checked(events).filter((c) => c.played);
 const of = <T extends GameEvent["type"]>(events: GameEvent[], type: T) => events.filter((e): e is Extract<GameEvent, { type: T }> => e.type === type);
@@ -93,12 +86,16 @@ describe("Soviet impulse (8.1)", () => {
   });
 
   it("plays the command card, then the auxiliary card as a second command card", () => {
-    const { state, events } = impulse(withPile(["e17", "e03", "e10"]));
-    expect(of(events, "SovietCardsDrawn")[0]).toMatchObject({ command: "e17", auxiliary: "e03", left: 1 });
-    expect(of(events, "SovietCommandCard").map((e) => [e.card, e.second])).toEqual([["e17", false], ["e03", true]]);
-    expect(of(events, "FormationActivated").map((e) => e.army)).toEqual(["Popov", "3T"]);
-    expect(state.sovietDiscard).toEqual(["e17", "e03"]);
-    expect(state.sovietCards).toMatchObject({ drawPile: ["e10"], lastDrawn: ["e17", "e03"] });
+    // E12's Fixed Artillery does not apply in the artillery barrage zone on turn 1 (12.31): it stays
+    // in the auxiliary box through Popov's attacks. E10, the last card of the pile, is drawn for the
+    // combat tactics of the attack on 1802 (12.3), then from the discard pile for 1604 (12.37, Q48).
+    const { state, events } = impulse(withPile(["e17", "e12", "e10"]));
+    expect(of(events, "SovietCardsDrawn")[0]).toMatchObject({ command: "e17", auxiliary: "e12", left: 1 });
+    expect(of(events, "SovietCommandCard").map((e) => [e.card, e.second])).toEqual([["e17", false], ["e12", true]]);
+    expect(of(events, "FormationActivated").map((e) => e.army)).toEqual(["Popov", "6"]);
+    expect(of(events, "SovietTacticsApplied").map((e) => e.card ?? null)).toEqual([null, { id: "e10", fromDiscard: false }, { id: "e10", fromDiscard: true }]);
+    expect(state.sovietDiscard).toEqual(["e10", "e17", "e12"]);
+    expect(state.sovietCards).toMatchObject({ drawPile: [], lastDrawn: ["e17", "e12"] });
     expect(state.sovietImpulses).toBe(1);
   });
 
@@ -128,10 +125,11 @@ describe("Soviet impulse (8.1)", () => {
     const { state, events } = impulse(withPile(["e06", "e17", "e01", "e02", "e04", "e05"]));
     expect(played(events)[0]).toMatchObject({ card: "e06", role: "auxiliary", reason: { key: "cards.delay.done" } });
     expect(of(events, "SovietCommandCard").map((e) => e.card)).toEqual(["e17"]);
-    expect(state.sovietCards!.drawPile).toHaveLength(5);
+    // Five cards with E06 shuffled back, then one drawn for the combat tactics of the attack on 1802 (12.3).
+    expect(state.sovietCards!.drawPile).toHaveLength(4);
     expect(state.sovietCards!.drawPile).toContain("e06");
     expect(state.sovietCards!.lastDrawn).toEqual(["e17"]);
-    expect(state.sovietDiscard).toEqual(["e17"]);
+    expect(state.sovietDiscard).toEqual(["e05", "e17"]);
     // Fewer than four cards left: Command Delay does not apply, the card is a second command card.
     const short = impulse(withPile(["e06", "e17", "e01"]));
     expect(of(short.events, "SovietCommandCard").map((e) => e.card)).toEqual(["e17", "e06"]);
@@ -166,26 +164,41 @@ describe("Soviet impulse (8.1)", () => {
     expect(paused.state.botImpulse).toMatchObject({ card: "e01", second: false, auxiliary: "e17", activation: { attack: { target: "1802" } } });
     expect(paused.state.sovietDiscard).toEqual([]);
     expect(engine.step(paused.state, { type: "RunBotImpulse" }).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.attackPending" } });
-    let r = engine.step(paused.state, { type: "ContinueBotImpulse" });
-    const events = [...r.events];
-    while (r.state.botImpulse) {
-      r = engine.step(r.state, { type: "ContinueBotImpulse" });
-      events.push(...r.events);
-    }
-    // The command card is discarded once its activation is over, then the auxiliary card is the second command card.
+    expectMessage((engine.step(paused.state, { type: "ContinueBotImpulse" }).events[0] as Extract<GameEvent, { type: "CommandRejected" }>).reason,
+      "reject.combat.open", { hex: "1802" });
+    const r = finishImpulse(engine, settleCombat(engine, paused.state));
+    const events = r.events;
+    // E17's Assault Coordination applies to the attack on 1802 (12.31): the auxiliary card is
+    // discarded with the combat, so no second command card; then the command card, once its
+    // activation is over.
     expect(events.filter((e) => e.type === "SovietCardDiscarded" || e.type === "SovietCommandCard").map((e) => [e.type, "card" in e ? e.card : null]))
-      .toEqual([["SovietCardDiscarded", "e01"], ["SovietCommandCard", "e17"], ["SovietCardDiscarded", "e17"]]);
-    expect(r.state.sovietDiscard).toEqual(["e01", "e17"]);
+      .toEqual([["SovietCardDiscarded", "e17"], ["SovietCardDiscarded", "e01"]]);
+    expect(r.state.sovietDiscard).toEqual(["e17", "e01"]);
   });
 });
 
 describe("Events (8.11)", () => {
   it("NKVD Operations: the German stack with the most adjacent Soviet strength; one Soviet step lost (12.6)", () => {
-    const { state, events } = impulse(withPile(["e08"]));
-    expectMessage(played(events)[0].reason, "cards.nkvd.done", { hex: "0205", strength: 14 });
-    expect(of(events, "StepRemoved")[0]).toMatchObject({ unit: "sov_309-40th_infantry" });
-    expect(state.reminders).toHaveLength(1);
-    expect(state.reminders![0]).toMatchObject({ title: { key: "names.event.nkvdOperations" }, until: "done" });
+    const paused = engine.step(withPile(["e08"]), { type: "RunBotImpulse" });
+    expectMessage(played(paused.events)[0].reason, "cards.nkvd.target", { hex: "0205", strength: 14, units: ["100 40", "219 69", "309 40", "37 69"] });
+    // The combat sheet waits for the player's two hits; the impulse waits for it.
+    expect(paused.state.combat).toMatchObject({ kind: "nkvdOperations", stage: "losses", target: "0205", hits: { german: 2 } });
+    expect(paused.state.botImpulse).toMatchObject({ card: "e08" });
+    expect(paused.state.botImpulse!.activation).toBeUndefined();
+    const { state, events } = finishImpulse(engine, paused);
+    // Two steps from the German units (one each, 12.61), then one Soviet step: 309, most steps, then higher selector (12.6).
+    expect(of(events, "SovietLossesApplied")[0].report.first).toEqual({ unit: "sov_309-40th_infantry" });
+    expect(of(events, "StepRemoved").at(-1)).toMatchObject({ unit: "sov_309-40th_infantry" });
+    expect(state.reminders ?? []).toHaveLength(0);
+    expect(state.sovietDiscard).toEqual(["e08"]);
+    expect(state.botImpulse).toBeUndefined();
+  });
+
+  it("NKVD Operations: an Improved Position still takes the first hit (Q58: only towns and cities do not reduce them)", () => {
+    const paused = engine.step({ ...withPile(["e08"]), improvedPositions: ["0205"] }, { type: "RunBotImpulse" });
+    expect(paused.state.combat!.hits).toMatchObject({ german: 1, germanAdjustments: [{ rule: "12.51", value: -1 }] });
+    expectMessage(paused.state.combat!.hits!.germanAdjustments[0].text, "combat.adj.ip");
+    expect(paused.state.improvedPositions).toEqual([]);
   });
 
   it("Air Supply from the auxiliary card: the stack with the most steps back in supply", () => {
@@ -229,7 +242,8 @@ describe("Events (8.11)", () => {
   });
 
   it("Expedited Reserves: next turn's Soviet units enter the reserve box (four or more cards left)", () => {
-    const { state, events } = impulse(withPile(["e14", "e02", "e03", "e04", "e05", "e06", "e07"], 9));
+    // E14 (command value 3) over E06 (1): the command card, its special event first.
+    const { state, events } = impulse(withPile(["e14", "e06", "e03", "e04", "e05", "e07", "e08"], 9));
     expect(played(events).find((c) => c.card === "e14")).toMatchObject({ index: 0 });
     expect(state.units["sov_152-6th_infantry"].at).toBe("reserve");
     expect(state.units["sov_11C-3rdT_cav"].at).toBe("reinforcements");

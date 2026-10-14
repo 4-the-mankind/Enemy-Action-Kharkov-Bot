@@ -8,6 +8,8 @@ export type Side = "german" | "soviet";
 // handled identically — "considered Armor in combat"), so "armor" and "mechanized" are merged.
 export type UnitType = "infantry" | "mechanized" | "cavalry";
 export type Front = "voronezh" | "southwest";
+/** German armies of the corps (Q57): 1st Panzer Army (III, XL), 4th Panzer Army (XLVIII, LVII, IISS), Army Detachment Kempf (Raus). */
+export type GermanArmy = "1Pz" | "4Pz" | "Kempf";
 
 export interface UnitImages {
   /** Front face (full strength). Absent only for the handful of single-step counters with no back/red scan. */
@@ -34,6 +36,8 @@ export interface Unit {
   designation: string;
   /** Rightmost top-band token: army (Soviet) or corps (German), e.g. "40", "3T", "IISS", "LVII". */
   armyOrCorps: string;
+  /** German units: the army of their corps (Q57; Reinforce Battle, 12.3). Absent for Soviet units. */
+  germanArmy?: GermanArmy;
   type: UnitType;
   combatValue: number;
   /** Two-digit code printed bottom-center, used by the bot's selector/precedence rules (9.21+). Kept as printed (leading zero). */
@@ -66,6 +70,7 @@ export interface UnitsFile {
 export const SIDES: Side[] = ["german", "soviet"];
 export const UNIT_TYPES: UnitType[] = ["infantry", "mechanized", "cavalry"];
 export const FRONTS: Front[] = ["voronezh", "southwest"];
+export const GERMAN_ARMIES: GermanArmy[] = ["1Pz", "4Pz", "Kempf"];
 
 function assert(cond: boolean, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
@@ -105,6 +110,8 @@ function parseUnit(raw: unknown, index: number): Unit {
   assert(typeof r.notUsedInSolo === "boolean", `Unit "${id}": invalid "notUsedInSolo".`);
   assert(r.front === null || FRONTS.includes(r.front as Front), `Unit "${id}": invalid "front".`);
   assert(r.side !== "german" || r.front === null, `Unit "${id}": German units have no front.`);
+  assert(r.side === "german" ? GERMAN_ARMIES.includes(r.germanArmy as GermanArmy) : r.germanArmy === undefined,
+    `Unit "${id}": invalid "germanArmy" (German units only).`);
   assert(typeof r.isReducedReplacement === "boolean", `Unit "${id}": invalid "isReducedReplacement".`);
   const images = r.images as Record<string, unknown> | undefined;
   assert(!!images && typeof images === "object", `Unit "${id}": missing "images".`);
@@ -116,6 +123,7 @@ function parseUnit(raw: unknown, index: number): Unit {
     side: r.side as Side,
     designation: r.designation as string,
     armyOrCorps: r.armyOrCorps as string,
+    ...(r.side === "german" ? { germanArmy: r.germanArmy as GermanArmy } : {}),
     type: r.type as UnitType,
     combatValue: r.combatValue as number,
     selector: r.selector as string,

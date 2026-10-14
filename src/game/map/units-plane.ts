@@ -74,6 +74,15 @@ export class UnitsPlane {
       parts.push(`<image class="objective" href="/assets/counters/others/${ARMY_OBJECTIVE_IMAGE[army]}" x="${x}" y="${y}" width="${OBJECTIVE}" height="${OBJECTIVE}">` +
         `<title>${t(objectiveName(army))}</title></image>`);
     }
+    // Improved Positions (14.2): on top of the hex, shifted up and left, the side of its units.
+    for (const at of state.improvedPositions ?? []) {
+      const hex = this.data.hexById.get(at);
+      if (!hex) continue;
+      const side = state.order.map((id) => this.engine.unit(id)).find((u) => u && state.units[u.id]?.at === at)?.side ?? "german";
+      const img = side === "german" ? "marker-germanimprvdposit.png" : "marker-sovietimprvdposit-sml.png";
+      parts.push(`<image class="objective" href="/assets/counters/others/${img}" x="${hex.x - OBJECTIVE / 2 - 40}" ` +
+        `y="${hex.y - OBJECTIVE / 2 - 40}" width="${OBJECTIVE}" height="${OBJECTIVE}"><title>${t("map.improvedPosition")}</title></image>`);
+    }
     // Forward Support markers (13.53): on top of the hex, shifted up and right.
     for (const at of state.forwardSupport ?? []) {
       const hex = this.data.hexById.get(at);

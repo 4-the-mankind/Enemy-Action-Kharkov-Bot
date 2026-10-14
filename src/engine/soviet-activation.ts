@@ -4,8 +4,9 @@
 // markers removed (12.9), then the end of the activation (9.12).
 //
 // Q37: a valid attack stops the activation. Its progress (SovietActivation) is kept in the
-// state while the player resolves the combat by hand; `resume` goes on from there. Attackers
-// found in another hex at that time have advanced after combat: they moved (Q40).
+// state while the player resolves the combat on the combat sheet (combat.ts, D18); `resume`
+// goes on from there. Attackers found in another hex at that time have advanced after combat:
+// they moved (Q40).
 import type { Unit } from "../core/units";
 import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
@@ -28,6 +29,8 @@ export interface SovietActivationData {
   move(state: GameState, ids: string[], to: string): StepResult;
   setDispersed(state: GameState, ids: string[], dispersed: boolean): StepResult;
   setImprovedPosition(state: GameState, hex: string, placed: boolean): StepResult;
+  /** Step 2 of the attack declared (combat.ts): the combat sheet opens, with the reserves placed at step 1. */
+  startCombat(state: GameState, act: SovietActivation, auxiliary: string | null, reserves: { unit: string; hex: string; steps: DecisionStep[] }[]): StepResult;
 }
 
 /** What the activating card brings (8.13, 9.4, 12.35). */
@@ -48,7 +51,7 @@ const KHARKOV = "0912";
 export type SovietActivations = ReturnType<typeof createSovietActivation>;
 
 export function createSovietActivation(data: SovietActivationData) {
-  const { board, movement, unit, rules, objectives, sovietMovement, attacks, move, setDispersed, setImprovedPosition } = data;
+  const { board, movement, unit, rules, objectives, sovietMovement, attacks, move, setDispersed, setImprovedPosition, startCombat } = data;
   const known = (id: string) => {
     const u = unit(id);
     if (!u) throw new Error(`Unknown unit "${id}".`);
@@ -114,13 +117,15 @@ export function createSovietActivation(data: SovietActivationData) {
   }
 
   function proceed(state: GameState, act: SovietActivation, auxiliary: string | null): ActivationRun {
-    // Step 3: attack checks (9.4); a valid attack stops the activation (Q37).
+    // Step 3: attack checks (9.4); a valid attack stops the activation (Q37) and opens the combat sheet.
     const placedBefore = act.fromReserve.length;
     const c = attacks.checks(state, act, auxiliary);
     if (c.declared) {
       const placed = c.act.fromReserve.slice(placedBefore);
       const pending = { ...c.act, entered: [...new Set([...c.act.entered, ...placed.map((id) => c.state.units[id].at)])] };
-      return { state: c.state, events: c.events, pending };
+      const reserves = c.events.flatMap((e) => (e.type === "ReservePlaced" && e.rule === "12.2" && e.hex && placed.includes(e.unit) ? [{ unit: e.unit, hex: e.hex, steps: e.steps }] : []));
+      const sheet = startCombat(c.state, pending, auxiliary, reserves);
+      return { state: sheet.state, events: [...c.events, ...sheet.events], pending };
     }
     state = c.state;
     act = c.act;

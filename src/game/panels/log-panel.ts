@@ -3,19 +3,20 @@ import type { Engine } from "../../engine/engine";
 import { adjustmentName, armyName, frontName, sideName } from "../../engine/names";
 import { isHex, type GameEvent, type Location } from "../../engine/types";
 import { msg, t, type Param } from "../../i18n/i18n";
+import { dynamicKey } from "../../i18n/message";
 import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
 import { objectiveChange, objectiveName } from "./objective-text";
 
-const where = (at: Location): Param => (isHex(at) ? at : msg(`log.where.${at as "reserve" | "reinforcements" | "eliminated"}`));
+const where = (at: Location): Param => (isHex(at) ? at : msg(`log.where.${at as "reserve" | "reinforcements" | "eliminated" | "outOfPlay"}`));
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 /** A card named in the log: its number, with the scan held up on hover (card-zoom). */
 const card = (id: string) => `<span class="log-card" data-card="${id}" tabindex="0"><img src="${cardImage(id)}" alt="">${id.toUpperCase()}</span>`;
 
-const MOVED = { eliminated: "eliminated", reserve: "reserve", reinforcements: "reinforcements" } as const;
+const MOVED = { eliminated: "eliminated", outOfPlay: "outOfPlay", reserve: "reserve", reinforcements: "reinforcements" } as const;
 
 /** One log line for the event, or null when it adds nothing to the lines around it. */
 function describe(e: GameEvent, engine: Engine): { html: string; refused?: boolean } | null {
@@ -106,15 +107,64 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     }
     case "CommandRejected":
       return { html: t("log.rejected", { reason: e.reason }), refused: true };
-    // TODO 4.5: attacks, reserves, removals and IPs shown with the combat sheet (D18); no interface in 4.4 (Q37).
-    case "ReservePlaced":
+    // Soviet attacks (4.4) and the combat sheet (4.5a, D18).
     case "AttackChecked":
+      return line(esc(t("log.attack.checked", { unit: name(e.lead), hex: e.target, soviet: e.situational[0], german: e.situational[1], reason: e.reason })));
     case "AttackLeadRefused":
-    case "SovietAttackDeclared":
-    case "RemovalChecked":
-    case "ImprovedPositionSet":
-    case "ActivationEnded":
       return null;
+    case "ReservePlaced":
+      return e.hex ? line(esc(t("log.reserve.placed", { unit: name(e.unit), hex: e.hex, rule: e.rule })))
+        : line(esc(t("log.reserve.notPlaced", { unit: name(e.unit), reason: e.reason ?? "" })));
+    case "SovietAttackDeclared":
+      return line(esc(t("log.attack.declared", { hex: e.target, attackers: e.attackers.map(name), defenders: e.defenders.map(name), soviet: e.soviet, german: e.german })));
+    case "RemovalChecked":
+      return e.removed ? line(esc(t("log.removal", { unit: name(e.unit), hex: e.hex, reason: e.reason }))) : null;
+    case "ImprovedPositionSet":
+      return line(esc(e.placed ? (e.rule ? t("log.ip.placedRule", { hex: e.hex, rule: e.rule }) : t("log.ip.placed", { hex: e.hex }))
+        : e.reason ? t("log.ip.removedWhy", { hex: e.hex, reason: e.reason }) : t("log.ip.removed", { hex: e.hex })));
+    case "ActivationEnded":
+      return line(esc(t("log.attack.activationEnded", { army: armyName(e.army) })));
+    case "CombatStarted":
+    case "CombatCleanedUp":
+      return null;
+    case "SovietTacticsApplied": {
+      const used = e.tactics.filter((x) => x.applies).map((x) => x.card ? `${x.name} (${x.card.toUpperCase()})` : x.name);
+      return line(used.length ? t("log.attack.tactics", { hex: e.target, tactics: used })
+        : esc(t("log.attack.noTactics", { hex: e.target, why: e.noCard ?? "" })));
+    }
+    case "ReinforcementMoved":
+      return line(esc(t("log.attack.reinforce", { unit: name(e.unit), hex: e.hex })));
+    case "CombatTargetChosen":
+      return line(t("log.attack.target", { hex: e.hex }));
+    case "GermanTacticsPlayed":
+      return line(e.tactics.length ? esc(t("log.attack.german", { tactics: e.tactics.map((x) => msg(dynamicKey(`names.tactic.${x}`))) })) : t("log.attack.germanNone"));
+    case "StepRestored":
+      return line(esc(t("log.attack.restored", { unit: name(e.unit) })));
+    case "CombatChitsDrawn":
+      return line(t("log.attack.chits", { count: e.chits }));
+    case "CombatHitsEntered":
+      return line(t("log.attack.hits", { german: e.hits.german, soviet: e.hits.soviet, chitsGerman: e.chitHits.german, chitsSoviet: e.chitHits.soviet }));
+    case "GermanLossesChosen":
+      return line(t("log.attack.losses", { steps: e.steps, hexes: e.retreat }));
+    case "RetreatEntered":
+      return line(esc(t(e.costsStep ? "log.attack.retreatStep" : "log.attack.retreat", { units: e.units.map(name), from: e.from, to: e.to, priority: e.priority })));
+    case "GermanHitsApplied":
+      return line(t("log.attack.applied"));
+    case "SovietLossesApplied": {
+      const r = e.report, hit = [...(r.first ? [r.first.unit] : []), ...r.removed];
+      return line(esc(hit.length || r.dispersed.length ? t("log.attack.sovietLosses", { hex: e.target, units: [...hit, ...r.dispersed.map((d) => msg("log.dispersedUnit", { unit: name(d) }))].map((u) => (typeof u === "string" ? name(u) : u)) })
+        : t("log.attack.sovietNoLoss", { hex: e.target })));
+    }
+    case "AdvanceChecked": {
+      const c = e.check;
+      if (!c.hex || (c.reason && c.chance == null)) return line(esc(t("log.attack.noAdvance", { unit: name(c.unit), why: c.reason ?? msg("advance.no.secondHex") })));
+      if (c.chance === "advance") return line(esc(t("log.attack.advanced", { unit: name(c.unit), hex: c.hex, route: c.route! })));
+      if (typeof c.chance === "number" && c.roll !== undefined)
+        return line(esc(t(c.advanced ? "log.attack.advancedRoll" : "log.attack.stays", { unit: name(c.unit), hex: c.hex, route: c.route!, roll: c.roll, need: c.chance })));
+      return line(esc(t("log.attack.full", { unit: name(c.unit), hex: c.hex, route: c.route ?? "", count: c.occupants ?? 2 })));
+    }
+    case "CombatEnded":
+      return line(t("log.attack.ended", { hex: e.target }));
   }
 }
 
@@ -149,7 +199,7 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
     const lines: HTMLLIElement[] = [];
     // A set-up adjustment is one step: its own actions are listed under it, in play order.
     // So is a Soviet impulse, and the start of a turn.
-    const grouped = ["SetUpAdjustmentApplied", "SovietCardsDrawn", "TurnStarted"].includes(events[0]?.type);
+    const grouped = ["SetUpAdjustmentApplied", "SovietCardsDrawn", "TurnStarted", "GermanHitsApplied", "CombatEnded", "CombatHitsEntered"].includes(events[0]?.type);
     let anchor: HTMLLIElement | null = null;
     for (const [i, e] of events.entries()) {
       const line = describe(e, session.engine);

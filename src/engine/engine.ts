@@ -6,11 +6,14 @@ import type { TerrainEffects } from "../core/terrain-effects";
 import type { Unit } from "../core/units";
 import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
+import { createAdvance } from "./advance";
+import { createCombat, type Combats } from "./combat";
 import { adjustmentName } from "./names";
 import { createMovement, type Movement } from "./movement";
 import { createObjectives } from "./objectives";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
+import { createRetreat } from "./retreat";
 import { createSovietActivation, type SovietActivations } from "./soviet-activation";
 import { createSovietAttacks } from "./soviet-attacks";
 import { createSovietCards, type SovietCards } from "./soviet-cards";
@@ -79,6 +82,13 @@ export interface Engine {
   readonly rules: PendingRules;
   /** Soviet draw pile and commands (8.0), when the cards are loaded. */
   readonly sovietCards: SovietCards | null;
+  /** The combat sheet (12.0, task 4.5): what it shows, where defenders may retreat, why a step may not be lost. */
+  readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep">;
+  /**
+   * Why the player may not drop these units there (a drag on the map or the Units panel): the
+   * rules of the move, then those of the combat open (retreats, reinforcement, Q45), or null.
+   */
+  whyNotDrop(state: GameState, units: string[], to: Location): Message | null;
 }
 
 export function createEngine(data: EngineData): Engine {
@@ -93,22 +103,36 @@ export function createEngine(data: EngineData): Engine {
     move: (state, id, to, path) => moveUnits(state, [id], to, "bot", path),
   });
   const cardsById = new Map((data.cards ?? []).map((c) => [c.id, c]));
+  const reinforceDestination = sovietMovement.reinforceDestination;
   const attacks = createSovietAttacks({
     board: data.board, movement, unit: (id) => byId.get(id), rules, card: (id) => cardsById.get(id),
     far: (turn) => data.calendar?.find((t) => t.turn === turn)?.far ?? 0,
     move: (state, ids, to) => moveUnits(state, ids, to, "bot"),
     setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
+    reinforceDestination,
+  });
+  const combat = createCombat({
+    board: data.board, movement, unit: (id) => byId.get(id), rules, card: (id) => cardsById.get(id), attacks,
+    retreat: createRetreat({ board: data.board, movement, unit: (id) => byId.get(id), rules }),
+    advance: createAdvance({ board: data.board, movement, unit: (id) => byId.get(id), rules }),
+    move: (state, ids, to, path) => moveUnits(state, ids, to, "bot", path),
+    removeStep: (state, id) => removeStep(state, id),
+    nextFace: (id, face) => nextFace(id, face),
+    setDispersed: (state, ids, dispersed) => setDispersed(state, ids, dispersed),
+    setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
+    reinforceDestination,
   });
   const sovietActivations = createSovietActivation({
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives, sovietMovement, attacks,
     move: (state, ids, to) => moveUnits(state, ids, to, "bot"),
     setDispersed: (state, ids, dispersed) => setDispersed(state, ids, dispersed),
     setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
+    startCombat: (state, act, auxiliary, reserves) => combat.startAttack(state, act, auxiliary, reserves),
   });
   const sovietCards = data.cards
     ? createSovietCards({
       cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, activations: sovietActivations,
-      step: (s, c) => step(s, c, "bot"),
+      step: (s, c) => step(s, c, "bot"), startNkvd: (s, hexes) => combat.startNkvd(s, hexes),
     })
     : null;
 
@@ -154,11 +178,27 @@ export function createEngine(data: EngineData): Engine {
     return null;
   }
 
-  /** `path`: hexes crossed by a bot move, start and end included (army objectives entered, Q32). */
+  /**
+   * `path`: hexes crossed by a bot move, start and end included (army objectives entered, Q32).
+   * 12.62: an eliminated unit that had one step at full strength, or was isolated, is removed
+   * from play instead (Q52).
+   */
   function moveUnits(state: GameState, ids: string[], to: Location, actor: Actor, path?: string[]): StepResult {
     const unique = [...new Set(ids)];
     const reason = whyNotMove(state, unique, to, actor);
     if (reason) return reject(state, "MoveUnits", reason);
+    if (to === "eliminated") {
+      const out = unique.filter((id) => byId.get(id)!.steps === 1 || state.supply?.[id] === "isolated");
+      if (out.length) {
+        const a = place(state, unique.filter((id) => !out.includes(id)), "eliminated");
+        const b = place(a.state, out, "outOfPlay");
+        return { state: b.state, events: [...a.events, ...b.events] };
+      }
+    }
+    return place(state, unique, to, path);
+  }
+
+  function place(state: GameState, unique: string[], to: Location, path?: string[]): StepResult {
     const moving = unique.filter((id) => state.units[id].at !== to);
     if (!moving.length) return { state, events: [] };
     // Keep the moving units' relative stacking order; they land on top of the destination.
@@ -213,7 +253,7 @@ export function createEngine(data: EngineData): Engine {
   function removeStep(state: GameState, id: string): StepResult {
     const s = state.units[id];
     if (!s) return reject(state, "RemoveStep", msg("reject.notInPlay", { unit: name(id) }));
-    if (s.at === "eliminated") return reject(state, "RemoveStep", msg("reject.alreadyEliminated", { unit: name(id) }));
+    if (s.at === "eliminated" || s.at === "outOfPlay") return reject(state, "RemoveStep", msg("reject.alreadyEliminated", { unit: name(id) }));
     const to = nextFace(id, s.face);
     if (!to) return reject(state, "RemoveStep", msg("reject.singleStep", { unit: name(id) }));
     return {
@@ -322,7 +362,8 @@ export function createEngine(data: EngineData): Engine {
   function runBotImpulse(state: GameState): StepResult {
     if (!state.started) return reject(state, "RunBotImpulse", msg("reject.pressStart"));
     if (!sovietCards) return reject(state, "RunBotImpulse", msg("reject.cardsNotLoaded"));
-    const r = sovietCards.runImpulse(state);
+    const { attackedThisImpulse: _, ...fresh } = state;
+    const r = sovietCards.runImpulse(fresh);
     return "key" in r ? reject(state, "RunBotImpulse", r) : r;
   }
 
@@ -403,7 +444,7 @@ export function createEngine(data: EngineData): Engine {
       if (!adjacent) continue;
       const unit = [...ids].sort((a, b) => movement.faceValues(state, b).selector - movement.faceValues(state, a).selector)[0];
       sovietSurrender.push({ hex, unit });
-      // The last step lost: the unit is destroyed. TODO 4.6: it can't return via replacement (13.22).
+      // The last step lost: the unit is destroyed, out of play (13.22, 12.62: it is isolated).
       const r = nextFace(unit, next.units[unit].face) ? removeStep(next, unit) : moveUnits(next, [unit], "eliminated", "bot");
       next = r.state;
       losses.push(...r.events);
@@ -454,17 +495,37 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, improvedPositions }, events: [{ type: "ImprovedPositionSet", hex, placed }] };
   }
 
-  /** Q37: the Soviet impulse paused on an attack goes on, once the player has resolved the combat. */
+  /**
+   * Q37: the Soviet impulse paused on a combat goes on, once the combat sheet is done: the sheet
+   * closes (what the activation keeps of it), then the rest of the impulse.
+   */
   function continueBotImpulse(state: GameState): StepResult {
-    const imp = state.botImpulse;
-    if (!imp) return reject(state, "ContinueBotImpulse", msg("reject.noBotImpulse"));
-    if (sovietCards) {
-      const r = sovietCards.resume(state);
-      return "key" in r ? reject(state, "ContinueBotImpulse", r) : r;
+    if (!state.botImpulse) return reject(state, "ContinueBotImpulse", msg("reject.noBotImpulse"));
+    const events: GameEvent[] = [];
+    if (state.combat) {
+      if (state.combat.stage !== "done") return reject(state, "ContinueBotImpulse", msg("reject.combat.open", { hex: state.combat.target }));
+      const f = combat.finish(state);
+      state = f.state;
+      events.push(...f.events);
     }
-    const { botImpulse: _, ...rest } = state;
-    const r = sovietActivations.resume(rest, imp.activation, imp.auxiliary);
-    return { state: r.pending ? { ...r.state, botImpulse: { ...imp, activation: r.pending } } : r.state, events: r.events };
+    const imp = state.botImpulse!;
+    let r: StepResult;
+    if (sovietCards) {
+      const x = sovietCards.resume(state);
+      if ("key" in x) return reject(state, "ContinueBotImpulse", x);
+      r = x;
+    } else {
+      const { botImpulse: _, ...rest } = state;
+      const a = imp.activation ? sovietActivations.resume(rest, imp.activation, imp.auxiliary) : { state: rest, events: [], pending: null };
+      r = { state: a.pending ? { ...a.state, botImpulse: { ...imp, activation: a.pending } } : a.state, events: a.events };
+    }
+    let next = r.state;
+    // The Soviet impulse over, a German impulse begins (12.41 Defender Adjacent counts per impulse).
+    if (!next.botImpulse && next.attackedThisImpulse) {
+      const { attackedThisImpulse: _, ...rest } = next;
+      next = rest;
+    }
+    return { state: next, events: [...events, ...r.events] };
   }
 
   function activate(state: GameState, { army, units, commandValue, auxiliary, nkvd = false }: ActivationRequest): StepResult {
@@ -476,7 +537,7 @@ export function createEngine(data: EngineData): Engine {
     return { state: botImpulse ? { ...r.state, botImpulse } : r.state, events: r.events };
   }
 
-  const pendingAttack = (state: GameState) => msg("reject.attackPending", { hex: state.botImpulse?.activation.attack?.target ?? "" });
+  const pendingAttack = (state: GameState) => msg("reject.attackPending", { hex: state.combat?.target ?? state.botImpulse?.activation?.attack?.target ?? "" });
 
   // Steps 1-2 of a Soviet activation (9.0): objective check (9.1), movement methods (9.2).
   function activateFormation(state: GameState, army: string): StepResult {
@@ -493,10 +554,20 @@ export function createEngine(data: EngineData): Engine {
   /** Commands that move the game on: refused while a Soviet attack waits for its combat (Q37). */
   const ON = new Set<Command["type"]>(["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation"]);
 
+  /** A combat command: refused with its reason, or played. */
+  const combatStep = (state: GameState, type: Command["type"], r: StepResult | Message): StepResult => ("key" in r ? reject(state, type, r) : r);
+
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
     if (lock) return reject(state, command.type, lock);
     if (state.botImpulse && ON.has(command.type)) return reject(state, command.type, pendingAttack(state));
+    // While a combat is open, the player's moves and step losses of its units go through it (Q45).
+    if (actor === "player" && state.combat && (command.type === "MoveUnits" || command.type === "RemoveStep")) {
+      const base = command.type === "MoveUnits" ? whyNotMove(state, [...new Set(command.units)], command.to, actor) : null;
+      if (base) return reject(state, command.type, base);
+      const r = command.type === "MoveUnits" ? combat.playerMove(state, [...new Set(command.units)], command.to) : combat.playerRemoveStep(state, command.unit);
+      if (r) return combatStep(state, command.type, r);
+    }
     switch (command.type) {
       case "SetUpTurn1":
         return state.setUp ? reject(state, command.type, msg("reject.alreadySetUp")) : setUpTurn1();
@@ -538,7 +609,27 @@ export function createEngine(data: EngineData): Engine {
         return setImprovedPosition(state, command.hex, command.placed);
       case "ActivateFormation":
         return activateFormation(state, command.army);
+      case "CombatTarget":
+        return combatStep(state, command.type, combat.chooseTarget(state, command.hex));
+      case "CombatTactics":
+        return combatStep(state, command.type, combat.playTactics(state, command.tactics, command.replacement));
+      case "CombatChitsDrawn":
+        return combatStep(state, command.type, combat.chitsDrawn(state));
+      case "CombatHits":
+        return combatStep(state, command.type, combat.enterHits(state, command.german, command.soviet));
+      case "CombatLosses":
+        return combatStep(state, command.type, combat.chooseLosses(state, command.retreat));
+      case "CombatHitsApplied":
+        return combatStep(state, command.type, combat.hitsApplied(state));
     }
+  }
+
+  function whyNotDrop(state: GameState, ids: string[], to: Location): Message | null {
+    const unique = [...new Set(ids)];
+    const base = whyNotMove(state, unique, to);
+    if (base || !state.combat) return base;
+    const r = combat.playerMove(state, unique, to);
+    return r && "key" in r ? r : null;
   }
 
   return {
@@ -557,6 +648,8 @@ export function createEngine(data: EngineData): Engine {
     activate,
     sovietCards,
     rules,
+    combat: { view: combat.view, preview: combat.preview, retreatHexes: combat.retreatHexes, whyNotRemoveStep: combat.whyNotRemoveStep },
+    whyNotDrop,
     unit: (id) => byId.get(id),
   };
 }

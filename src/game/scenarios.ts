@@ -13,6 +13,23 @@ const SCENARIOS: Record<string, (engine: Engine) => Scenario> = {
     state: { ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true, objectives: { voronezh: { at: "1009", face: "west" } } },
     note: t("scenario.p17"),
   }),
+  // The Soviet attack on 1802 of the combat sheet (4.5a, tests/engine/combat.test.ts): E01 is the
+  // command card, E17 the auxiliary card (its Assault Coordination applies), E11 the card drawn.
+  combat1802: (engine) => ({
+    state: {
+      ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true,
+      sovietCards: { drawPile: ["e17", "e01", "e11", "e02", "e03"], removed: [], lastDrawn: [], seed: 7 },
+    },
+    note: t("scenario.combat1802"),
+  }),
+  // NKVD Operations (E08, turns 1-2) on the combat sheet: two hits on the German stack in 0205.
+  nkvd: (engine) => ({
+    state: {
+      ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true,
+      sovietCards: { drawPile: ["e08"], removed: [], lastDrawn: [], seed: 7 },
+    },
+    note: t("scenario.nkvd"),
+  }),
 };
 
 /** The scenario named in the page URL, if any. */

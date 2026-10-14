@@ -4,9 +4,13 @@
 // Texts are messages (key + parameters, task 5.4): the UI renders them.
 import type { Message } from "../i18n/message";
 
-/** Off-map boxes of the game state (Q9): reserves, reinforcements by turn, eliminated units. */
-export type Box = "reserve" | "reinforcements" | "eliminated";
-export const BOXES: Box[] = ["reserve", "reinforcements", "eliminated"];
+/**
+ * Off-map boxes of the game state (Q9): reserves, reinforcements by turn, eliminated units, and
+ * units removed from play (12.62: one step at full strength, or eliminated while isolated),
+ * shown with the eliminated units but never back through replacements (Q52).
+ */
+export type Box = "reserve" | "reinforcements" | "eliminated" | "outOfPlay";
+export const BOXES: Box[] = ["reserve", "reinforcements", "eliminated", "outOfPlay"];
 
 /** Where a unit is: a hex id "CCRR" or an off-map box. */
 export type Location = string;
@@ -111,9 +115,14 @@ export interface SovietActivation {
   entered: string[];
   /** The attack declared and waiting for its combat (Q37): target, attacking units and their hexes. */
   attack?: { target: string; units: string[]; at: Record<string, string> };
+  /**
+   * 12.74: German units that ended a retreat in a hex with other German units during this
+   * activation; attacked there again, they take no part and are eliminated if the hex is lost.
+   */
+  retreated?: string[];
 }
 
-/** A Soviet impulse paused on an attack (8.1, Q37): what is left to play once the combat is resolved. */
+/** A Soviet impulse paused on a combat (8.1, Q37): what is left to play once the combat is resolved. */
 export interface BotImpulse {
   /** Card in the Command Card box; null for an activation without a card (tests). */
   card: string | null;
@@ -121,7 +130,8 @@ export interface BotImpulse {
   second: boolean;
   /** Auxiliary card still in its box (first command card only): its tactics (12.31), then the second impulse. */
   auxiliary: string | null;
-  activation: SovietActivation;
+  /** The activation paused on its attack; absent when an event waits for its combat (NKVD Operations). */
+  activation?: SovietActivation;
 }
 
 export interface GameState {
@@ -156,6 +166,10 @@ export interface GameState {
   improvedPositions?: string[];
   /** A Soviet impulse paused on a Soviet attack, until ContinueBotImpulse (Q37). */
   botImpulse?: BotImpulse;
+  /** The combat being resolved on the combat sheet (12.0, D18); the impulse waits for it. */
+  combat?: Combat;
+  /** 12.41 Defender Adjacent: German units already attacked in the current impulse. */
+  attackedThisImpulse?: string[];
   /** Soviet cards outside the discard pile (8.0), from Start on. */
   sovietCards?: SovietCardPiles;
   /** Things the player has to do or keep in mind, set by the bot (events, specials). */
@@ -216,6 +230,22 @@ export type Command =
   | { type: "SetForwardSupport"; hexes: string[] }
   /** Places or removes the Improved Position marker of a hex (14.2): German IPs (14.21), corrections. */
   | { type: "SetImprovedPosition"; hex: string; placed: boolean }
+  /** NKVD Operations: the player's choice among the German stacks tied for the two hits. */
+  | { type: "CombatTarget"; hex: string }
+  /**
+   * Step 3 of a Soviet attack (12.0): the combat tactics the player plays from his hand (ids of
+   * data/combat-tactics.json). Battlefield Replacements: a one-step infantry unit flipped back,
+   * or one hit less.
+   */
+  | { type: "CombatTactics"; tactics: string[]; replacement?: { unit: string } | "hit" }
+  /** Step 4: the player has drawn the combat chits. */
+  | { type: "CombatChitsDrawn" }
+  /** Step 5: hits on the chits kept, each side, as printed (the German sum may be negative, Q44). */
+  | { type: "CombatHits"; german: number; soviet: number }
+  /** Step 6: how the German units take their hits: hexes retreated (0, 1 or 2), the rest as steps. */
+  | { type: "CombatLosses"; retreat: 0 | 1 | 2 }
+  /** Step 6 done on the map: the bot applies its own losses, advances, and cleans up (steps 7-9). */
+  | { type: "CombatHitsApplied" }
   /**
    * Soviet activation of a whole army (dev scenarios; the cards choose their units, 8.13):
    * steps 1 (objective check, 9.1) and 2 (movement methods, 9.2) of 9.0.
@@ -240,6 +270,8 @@ export type GameEvent =
   | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location; path?: string[] }
   | { type: "UnitRestacked"; unit: string; at: Location; to: StackMove }
   | { type: "StepRemoved"; unit: string; from: Face; to: Face }
+  /** Battlefield Replacements: a one-step unit flipped back to its two-step side. */
+  | { type: "StepRestored"; unit: string; from: Face; to: Face }
   | { type: "DispersedSet"; units: string[]; dispersed: boolean }
   | { type: "VictoryPointsSet"; from: number; to: number }
   | { type: "SovietCardDiscarded"; card: string; discarded: boolean }
@@ -372,7 +404,165 @@ export type GameEvent =
   | { type: "ImprovedPositionSet"; hex: string; placed: boolean; rule?: string; steps?: DecisionStep[]; reason?: Message }
   /** The activation is over (9.0, after step 7). */
   | { type: "ActivationEnded"; army: string }
+  /** A combat opens on the combat sheet (12.0): the Soviet attack after its step 1, or NKVD Operations. */
+  | { type: "CombatStarted"; combat: Combat }
+  /** Step 2 of a Soviet attack: the Soviet combat tactics, the card drawn and the Auxiliary card (12.3, 12.31). */
+  | { type: "SovietTacticsApplied"; target: string; tactics: CombatTactic[]; card?: Combat["card"]; auxiliary?: Combat["auxiliary"]; noCard?: Message }
+  /** Reinforce Battle: a Soviet stack moved next to the hex attacked. Followed by its UnitsMoved. */
+  | { type: "ReinforcementMoved"; unit: string; hex: string; steps: DecisionStep[] }
+  | { type: "CombatTargetChosen"; hex: string }
+  /** Step 3: the player's combat tactics. */
+  | { type: "GermanTacticsPlayed"; target: string; tactics: string[]; replacement?: Combat["replacement"] }
+  | { type: "CombatChitsDrawn"; target: string; chits: number }
+  /** Step 5: the hits entered and the totals after the adjustments (12.51). */
+  | { type: "CombatHitsEntered"; target: string; chitHits: { german: number; soviet: number }; hits: CombatHits }
+  | { type: "GermanLossesChosen"; target: string; retreat: 0 | 1 | 2; steps: number }
+  /** One hex of a retreat (12.7): its priority, and the step it costs (priorities 3-4). Followed by its UnitsMoved. */
+  | { type: "RetreatEntered"; units: string[]; from: string; to: string; priority: 1 | 2 | 3 | 4; costsStep: boolean; dispersed: boolean }
+  /** Step 6 done: German step losses and retreat paths. */
+  | { type: "GermanHitsApplied"; target: string; lost: string[]; paths: Record<string, string[]>; extra: number }
+  /** Step 7 (12.54, 12.55, 12.6). */
+  | { type: "SovietLossesApplied"; target: string; report: SovietLossesReport }
+  /** Step 8: one advance check of a Soviet unit (12.83). Followed by its UnitsMoved when it advances. */
+  | { type: "AdvanceChecked"; check: AdvanceCheck }
+  /** Step 9: what became of the Soviet cards used in the combat (12.3, 12.32, 12.37). */
+  | { type: "CombatCleanedUp"; target: string; cards: CardFate[] }
+  /** The combat sheet closes (ContinueBotImpulse). */
+  | { type: "CombatEnded"; target: string }
   | { type: "CommandRejected"; command: Command["type"]; reason: Message };
+
+// ---------------------------------------------------------------- combat (12.0, task 4.5)
+
+/** Where the combat sheet waits for the player; "done" once the bot has finished (steps 7-9). */
+export type CombatStage = "target" | "tactics" | "chits" | "hits" | "losses" | "done";
+
+/** One combat tactic in the combat (12.3) and the chits it adds (12.4). */
+export interface CombatTactic {
+  /** Artillery barrage (12.36), STAVKA's NKVD (12.35), the card drawn, the Auxiliary card (12.31). */
+  source: "barrage" | "stavka" | "card" | "auxiliary";
+  card?: string;
+  /** Tactic id in data/combat-tactics.json, and its printed name. */
+  tactic: string;
+  name: string;
+  /** Combat chit draws it adds (12.4; Assault Coordination without a unit: two). */
+  chits: number;
+  /** It gives its benefit; false: a drawn card's chit only (12.3, Q47). */
+  applies: boolean;
+  /** Why it brings no benefit. */
+  reason?: Message;
+  /** Units it added to the attack (Assault Coordination, Reinforce Battle). */
+  units?: string[];
+  /** Combat Engineers: the IP of the defenders removed instead of +2 strength. */
+  removedIp?: boolean;
+}
+
+/** A change to a side's hit total (12.51, the tactics). */
+export interface HitAdjustment { rule: string; text: Message; value: number }
+
+export interface CombatHits {
+  german: number;
+  soviet: number;
+  germanAdjustments: HitAdjustment[];
+  sovietAdjustments: HitAdjustment[];
+}
+
+/** Step 6: how the German units take their hits (12.52), and what is done on the map. */
+export interface GermanLosses {
+  /** Hexes the defenders retreat (12.7), the rest as step losses; null until the player chooses. */
+  retreat: 0 | 1 | 2 | null;
+  /** Pull Out: two hexes before the combat, no Dispersed marker, ending in German supply. */
+  pullOut?: boolean;
+  /** Step losses taken so far, one unit per step (hits and retreat costs alike). */
+  lost: string[];
+  /** Steps owed for retreating into a hex in Soviet control (12.7 priorities 3-4). */
+  extra: number;
+  /** Retreat path of each defending unit, the combat hex first. */
+  paths: Record<string, string[]>;
+  /** 12.55: hits the German units could absorb at the start of step 6 (a two-hex retreat if possible, and their steps). */
+  absorb: number;
+}
+
+/** Step 7: the Soviet attackers' losses (12.54, 12.55, 12.6). */
+export interface SovietLossesReport {
+  /** Hits after 12.55. */
+  hits: number;
+  /** 12.55: hits taken off because the German units were all eliminated. */
+  reduced?: number;
+  /** First hit: one step, by 12.6; `tied`: units drawn among (Q49). */
+  first?: { unit: string; tied?: string[] };
+  /** The table of 12.54 for the hits left. */
+  table?: { steps: number; hits: number; removed: number; disperse: boolean; eliminate: boolean; parenthetical: boolean };
+  /** Steps removed after the first, one unit per step. */
+  removed: string[];
+  eliminated: string[];
+  dispersed: string[];
+}
+
+/** Step 8: one advance check (12.83). */
+export interface AdvanceCheck {
+  unit: string;
+  /** 1: into the hex attacked; 2: the second hex of a mechanized unit (12.81). */
+  leg: 1 | 2;
+  hex: string | null;
+  /** Route of advance (first line of the table that applies), and Soviet units already there. */
+  route?: Message;
+  occupants?: number;
+  /** "advance": no roll; a number: highest die result that advances; null: no advance. */
+  chance?: "advance" | number | null;
+  roll?: number;
+  advanced: boolean;
+  /** Why it does not advance at all (dispersed, joined, a restriction…). */
+  reason?: Message;
+  /** Candidate hexes of a second hex, and the tiebreakers among them (12.81, Q51). */
+  steps?: DecisionStep[];
+}
+
+/** Step 9: a Soviet card used in the combat. */
+export interface CardFate { card: string; fate: "discarded" | "reused" | "removed" | "keptInDiscard" }
+
+export interface Combat {
+  /** A Soviet attack (12.0); NKVD Operations: two hits as if combat occurred, then the advance. */
+  kind: "sovietAttack" | "nkvdOperations";
+  stage: CombatStage;
+  target: string;
+  /** NKVD Operations: hexes tied for the target, before the player picks one. */
+  choices?: string[];
+  attackers: string[];
+  /** Hex of each attacker at the start of the combat. */
+  from: Record<string, string>;
+  defenders: string[];
+  /** 12.74: units that retreated into the hex earlier in the activation: no part in the defense. */
+  bystanders: string[];
+  /** Attackers added by Assault Coordination or Reinforce Battle: no advance after combat (12.8). */
+  joined: string[];
+  /** Step 1: the reserves placed for this attack (12.2), with the preferences that chose their hex. */
+  reserves: { unit: string; hex: string; steps: DecisionStep[] }[];
+  /** Command Value of the activating card (12.41); 5 under Soviet Intelligence. */
+  commandValue: number;
+  tactics: CombatTactic[];
+  /** Step 2 skipped: why no card was drawn (12.38, 12.3). */
+  noCard?: Message;
+  /** The card drawn for its combat tactics (12.3); from the discard pile when the pile is empty (12.37, Q48). */
+  card?: { id: string; fromDiscard: boolean };
+  /** The Auxiliary card (12.31): applied, or why not. */
+  auxiliary?: { id: string; applied: boolean; reason?: Message };
+  /** Step 3: the player's combat tactics. */
+  germanTactics: string[];
+  replacement?: { unit: string } | "hit";
+  /** German units that joined the defense by Reinforce Battle. */
+  reinforcing: string[];
+  /** 12.4: chits to draw, required minimum and maximum. */
+  chits: { min: number; max: number };
+  /** The strengths of the combat as fought (12.41), kept from step 5 on: the German units may leave the hex. */
+  strengths?: { soviet: number; german: number };
+  /** Step 5: hits on the chits kept, as entered. */
+  chitHits?: { german: number; soviet: number };
+  hits?: CombatHits;
+  losses?: GermanLosses;
+  sovietLosses?: SovietLossesReport;
+  advance?: AdvanceCheck[];
+  cleanUp?: CardFate[];
+}
 
 /** Combat odds or a strength ratio as attack:defense levels (Q39): [3, 1], [1.5, 1], [1, 2]… */
 export type Odds = [number, number];

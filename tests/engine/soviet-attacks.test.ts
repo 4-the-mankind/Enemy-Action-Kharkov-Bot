@@ -1,81 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_GRID } from "../../src/core/geometry";
 import type { HexData } from "../../src/core/map-hexes";
-import type { SideData } from "../../src/core/map-hexsides";
-import { parseSovietCards } from "../../src/core/soviet-cards";
 import { parseUnits, type Unit } from "../../src/core/units";
-import { createBoard } from "../../src/engine/board";
 import { createEngine } from "../../src/engine/engine";
 import { roundOdds } from "../../src/engine/soviet-attacks";
-import { emptyState, type GameEvent, type GameState, type SovietActivation, type SupplyMarker } from "../../src/engine/types";
+import { emptyState, type GameEvent, type GameState, type SovietActivation } from "../../src/engine/types";
 import { expectMessage, keys } from "../i18n/expect-message";
-import { json, realMap, terrain } from "./real-map";
+import { settleCombat } from "./combat-helpers";
+import { board, json, realMap } from "./real-map";
+import { activation, ger, pad, position, sov, world, type Position, type World } from "./synthetic-world";
 
 // Steps 3-7 of a Soviet activation (task 4.4): attack checks (9.4, 9.41-9.43, Q38-Q40),
 // reserves in attacks (12.2, 12.38), reserves placed (9.5), removals (9.6), IP (9.7),
 // undisperse (12.9), Improved Positions (14.2), and the impulse paused on an attack (Q37).
 //
-// Synthetic 10 × 10 grid, all playable: the Soviet map edge along row 01 (east), the German
-// one along row 10 (west). Columns run south. Around 0505: 0504 (east), 0404 and 0604 (north
-// and south-east), 0405 and 0605 (north and south-west), 0506 (west); 0404 and 0604 are not
-// adjacent to each other. Steps 3-7 are played without the movement of step 2: `resume` of
-// an activation built by hand.
-
-const cards = parseSovietCards(json("data/soviet-cards.json"));
-const pad = (n: number) => String(n).padStart(2, "0");
-
-function unit(id: string, side: Unit["side"], extra: Partial<Unit> = {}): Unit {
-  return {
-    id, side, designation: id, armyOrCorps: side === "soviet" ? "6" : "XL", type: "infantry", combatValue: 3, selector: "10",
-    movementValue: 4, steps: 2, entryHex: null, entryTurn: 1, notUsedInSolo: false, front: side === "soviet" ? "southwest" : null,
-    isReducedReplacement: false, images: { front: null, back: null, reduced: null }, backFace: null, reducedFace: null, ...extra,
-  };
-}
-const sov = (id: string, selector: string, extra: Partial<Unit> = {}) => unit(id, "soviet", { selector, ...extra });
-const ger = (id: string, combatValue = 3, extra: Partial<Unit> = {}) => unit(id, "german", { combatValue, ...extra });
-
-interface World {
-  units: Unit[];
-  hexes?: Record<string, Partial<HexData>>;
-  sides?: Record<string, Partial<SideData>>;
-  /** Fixed Artillery Range of every turn (calendar). */
-  far?: number;
-}
-
-function world({ units, hexes = {}, sides = {}, far = 0 }: World) {
-  const hexData: Record<string, Partial<HexData>> = {};
-  for (let c = 1; c <= 10; c++) {
-    hexData[`${pad(c)}01`] = { mapEdge: "soviet" };
-    hexData[`${pad(c)}10`] = { mapEdge: "german" };
-  }
-  for (const [h, d] of Object.entries(hexes)) hexData[h] = { ...hexData[h], ...d };
-  const board = createBoard({ grid: { ...DEFAULT_GRID, cols: 10, rows: 10 }, hexData: { version: 1, hexes: hexData }, sideData: { version: 1, sides } });
-  return createEngine({ units, board, terrain, cards, calendar: Array.from({ length: 14 }, (_, i) => ({ turn: i + 1, far })) });
-}
-
-interface Position {
-  at: Record<string, string>;
-  turn?: number;
-  supply?: Record<string, SupplyMarker>;
-  dispersed?: string[];
-  extra?: Partial<GameState>;
-}
-
-/** A started game on turn 4 (by default), the Southwest Front objective in play. */
-function position({ at, turn = 4, supply, dispersed = [], extra = {} }: Position): GameState {
-  const s = emptyState();
-  for (const [u, h] of Object.entries(at)) {
-    s.units[u] = dispersed.includes(u) ? { at: h, face: "front", dispersed: true } : { at: h, face: "front" };
-    s.order.push(u);
-  }
-  return { ...s, started: true, turn, objectives: { southwest: { at: "0910", face: "west" } }, ...(supply ? { supply } : {}), ...extra };
-}
-
-/** An activation of the 6th Army (Southwest Front) after its movement, by a card of that Command Value. */
-const activation = (units: string[], extra: Partial<SovietActivation> = {}): SovietActivation => ({
-  army: "6", front: "southwest", units, commandValue: 3, nkvd: false,
-  moved: [], fromReserve: [], attacked: [], checked: [], led: [], passChecks: 0, refused: [], entered: [], ...extra,
-});
+// The synthetic 10 × 10 world of synthetic-world.ts. Steps 3-7 are played without the
+// movement of step 2: `resume` of an activation built by hand.
 
 const of = <T extends GameEvent["type"]>(events: GameEvent[], type: T) => events.filter((e): e is Extract<GameEvent, { type: T }> => e.type === type);
 const checksOf = (events: GameEvent[]) => of(events, "AttackChecked");
@@ -452,24 +391,36 @@ describe("Impulse paused on a Soviet attack (Q37)", () => {
   // Position of the p17 example (3.4): booklet set-up without adjustment, Voronezh objective in Chuguev.
   const start: GameState = { ...setUp, started: true, objectives: { voronezh: { at: "1009", face: "west" } } };
 
-  it("stops on each valid attack; the game waits for ContinueBotImpulse, the player's corrections go on", () => {
+  it("stops on each valid attack; the game waits for its combat sheet, the player's corrections go on", () => {
     const first = engine.activate(start, { army: "3T", commandValue: 3 });
-    expect(first.events.at(-1)).toMatchObject({ type: "SovietAttackDeclared", target: "1003" });
+    expect(first.events.find((e) => e.type === "SovietAttackDeclared")).toMatchObject({ target: "1003" });
+    expect(first.events.at(-1)).toMatchObject({ type: "CombatStarted", combat: { target: "1003", stage: "tactics" } });
     expect(first.state.botImpulse).toMatchObject({ card: null, second: false, auxiliary: null, activation: { army: "3T", attack: { target: "1003" } } });
     for (const type of ["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation"] as const) {
       const r = engine.step(first.state, type === "ActivateFormation" ? { type, army: "3T" } : { type });
       expect(r.events[0]).toMatchObject({ type: "CommandRejected", command: type });
       expectMessage((r.events[0] as Extract<GameEvent, { type: "CommandRejected" }>).reason, "reject.attackPending", { hex: "1003" });
     }
-    // The player resolves the combat by hand: the German unit in 1003 is eliminated.
+    // The combat must be finished first.
+    expectMessage((engine.step(first.state, { type: "ContinueBotImpulse" }).events[0] as Extract<GameEvent, { type: "CommandRejected" }>).reason,
+      "reject.combat.open", { hex: "1003" });
+    // A correction elsewhere goes on (Q37); the units of the combat wait for its sheet.
+    const elsewhere = Object.keys(first.state.units).find((id) => id.includes("-6th_") && /^\d{4}$/.test(first.state.units[id].at))!;
+    const from = first.state.units[elsewhere].at;
+    const free = board.neighbors(from).map((n) => n.hex).find((h) => !Object.values(first.state.units).some((u) => u.at === h))!;
+    expect(engine.step(first.state, { type: "MoveUnits", units: [elsewhere], to: free }).events[0]).toMatchObject({ type: "UnitsMoved" });
     const germans = Object.keys(first.state.units).filter((id) => first.state.units[id].at === "1003");
-    const resolved = engine.step(first.state, { type: "MoveUnits", units: germans, to: "eliminated" });
-    expect(resolved.state.botImpulse).toEqual(first.state.botImpulse);
+    expectMessage((engine.step(first.state, { type: "MoveUnits", units: germans, to: "eliminated" }).events[0] as Extract<GameEvent, { type: "CommandRejected" }>).reason,
+      "reject.combat.unitInCombat", { hex: "1003" });
+    const resolved = settleCombat(engine, first.state);
+    expect(resolved.state.combat?.stage).toBe("done");
     const second = engine.step(resolved.state, { type: "ContinueBotImpulse" });
-    expect(second.events.at(-1)).toMatchObject({ type: "SovietAttackDeclared", target: "0604" });
-    const end = engine.step(second.state, { type: "ContinueBotImpulse" });
+    expect(second.events[0]).toEqual({ type: "CombatEnded", target: "1003" });
+    expect(second.events.find((e) => e.type === "SovietAttackDeclared")).toMatchObject({ target: "0604" });
+    const end = engine.step(settleCombat(engine, second.state).state, { type: "ContinueBotImpulse" });
     expect(end.events.at(-1)).toEqual({ type: "ActivationEnded", army: "3T" });
     expect(end.state.botImpulse).toBeUndefined();
+    expect(end.state.combat).toBeUndefined();
     expect(engine.step(end.state, { type: "ContinueBotImpulse" }).events[0]).toMatchObject({ type: "CommandRejected", reason: { key: "reject.noBotImpulse" } });
   });
 });

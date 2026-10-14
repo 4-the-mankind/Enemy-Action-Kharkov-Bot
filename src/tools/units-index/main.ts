@@ -1,5 +1,7 @@
 // Wiring only: load data/units.json, render the verification grid (2.3). No logic beyond filtering/sorting.
 import { parseUnits, type Side, type Unit, type UnitType } from "../../core/units";
+import { t } from "../../i18n/i18n";
+import { dynamicKey } from "../../i18n/message";
 import { FRONT_COLOR } from "../../ui/map-symbols";
 import { CORPS_NAMES, DIVISION_NAMES } from "./names";
 
@@ -129,7 +131,8 @@ function card(u: Unit, f: FaceView): HTMLElement {
   desig.textContent = u.designation;
   const corps = document.createElement("span");
   corps.className = "army";
-  corps.textContent = `${u.armyOrCorps} · ${FACE_LABEL[f.face]}`;
+  // German units: the army of their corps too (Q57).
+  corps.textContent = [u.armyOrCorps, ...(u.germanArmy ? [t(dynamicKey(`names.germanArmy.${u.germanArmy}`))] : []), FACE_LABEL[f.face]].join(" · ");
   head.append(desig, corps);
   data.appendChild(head);
 

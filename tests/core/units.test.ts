@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseUnits } from "../../src/core/units";
 
@@ -7,6 +8,7 @@ function sampleUnit(overrides: Record<string, unknown> = {}) {
     side: "german",
     designation: "1 LAH IISS",
     armyOrCorps: "IISS",
+    germanArmy: "4Pz",
     type: "mechanized",
     combatValue: 5,
     selector: "01",
@@ -36,6 +38,7 @@ describe("reading units.json", () => {
           id: "sov_100-40th_infantry",
           side: "soviet",
           armyOrCorps: "40",
+          germanArmy: undefined,
           type: "infantry",
           front: "voronezh",
         }),
@@ -64,6 +67,16 @@ describe("reading units.json", () => {
   it("requires the solo-exclusion flag", () => {
     expect(parseUnits({ units: [sampleUnit({ notUsedInSolo: true })] }).units[0].notUsedInSolo).toBe(true);
     expect(() => parseUnits({ units: [sampleUnit({ notUsedInSolo: undefined })] })).toThrow("notUsedInSolo");
+  });
+
+  it("gives German units the army of their corps, Soviet units none (Q57)", () => {
+    expect(() => parseUnits({ units: [sampleUnit({ germanArmy: undefined })] })).toThrow("germanArmy");
+    expect(() => parseUnits({ units: [sampleUnit({ germanArmy: "6th" })] })).toThrow("germanArmy");
+    expect(() => parseUnits({ units: [sampleUnit({ side: "soviet", front: "voronezh" })] })).toThrow("germanArmy");
+    // data/units.json: III, XL → 1st Panzer Army; XLVIII, LVII, IISS → 4th Panzer Army; Raus → Army Detachment Kempf.
+    const units = parseUnits(JSON.parse(readFileSync("data/units.json", "utf8"))).units.filter((u) => u.side === "german");
+    const armies = Object.fromEntries(units.map((u) => [u.armyOrCorps, u.germanArmy]));
+    expect(armies).toEqual({ III: "1Pz", XL: "1Pz", XLVIII: "4Pz", LVII: "4Pz", IISS: "4Pz", Raus: "Kempf" });
   });
 
   it("rejects duplicate ids", () => {
