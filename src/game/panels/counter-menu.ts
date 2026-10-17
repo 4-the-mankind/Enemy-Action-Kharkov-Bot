@@ -4,6 +4,9 @@
 // 13.4, corrections; task 4.3b). Outside combat it is a manual correction; it also records
 // the reductions of a set-up adjustment (2.4). In a combat (4.5a), a unit's step losses follow
 // the rules (12.6, 12.61): the menu says why one is refused. Commands go through the engine.
+// German attack (task 5.1b, Q66): with German counters selected, a right-click on a Soviet hex
+// (on a counter or beside) puts "Attack … with n units" first, in bold; greyed with the
+// engine's reason when the attack may not be made (12.1).
 import { isHex, type SupplyMarker } from "../../engine/types";
 
 const SUPPLY: (SupplyMarker | "supplied")[] = ["supplied", "outOfSupply", "isolated"];
@@ -11,11 +14,17 @@ import type { GameSession } from "../state/session";
 import { t, type MessageKey } from "../../i18n/i18n";
 
 export interface CounterMenu {
-  open(unitId: string, at: { clientX: number; clientY: number }): void;
+  /** The menu of a counter (unitId), of the hex right-clicked beside the counters (unitId null), or both. */
+  open(unitId: string | null, at: { clientX: number; clientY: number }, hex?: string | null): void;
   close(): void;
 }
 
-export function createCounterMenu(session: GameSession): CounterMenu {
+export interface CounterMenuDeps {
+  /** The German counters selected on the map: the attackers of an attack declared from the menu. */
+  attackers(): string[];
+}
+
+export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): CounterMenu {
   const menu = document.createElement("div");
   menu.className = "counter-menu";
   menu.setAttribute("role", "menu");
@@ -30,19 +39,55 @@ export function createCounterMenu(session: GameSession): CounterMenu {
   const outside = (e: PointerEvent) => { if (!menu.contains(e.target as Node)) close(); };
   const escape = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
 
-  function open(id: string, at: { clientX: number; clientY: number }) {
-    const state = session.state, engine = session.engine, u = engine.unit(id), s = state.units[id];
+  /** "Attack 1704 with 2 units", first and in bold, when German counters are selected and the hex is Soviet (Q66). */
+  function attackItem(hex: string | null, lock: boolean): string {
+    const state = session.state, engine = session.engine;
+    if (!hex || !isHex(hex)) return "";
+    const soviet = state.order.some((u) => state.units[u]?.at === hex && engine.unit(u)?.side === "soviet");
+    const attackers = deps.attackers();
+    if (!soviet || !attackers.length) return "";
+    const why = engine.combat.whyNotAttack(state, attackers, hex);
+    menu.dataset.hex = hex;
+    return `<button type="button" role="menuitem" class="menu-attack" data-action="attack"${why || lock ? " disabled" : ""}>` +
+      `${t("menu.attack", { hex, count: attackers.length })}</button>` + (why ? `<p class="menu-lock">${t(why)}</p>` : "") +
+      `<div class="menu-rule" role="separator"></div>`;
+  }
+
+  function place(at: { clientX: number; clientY: number }) {
+    menu.hidden = false;
+    const r = menu.getBoundingClientRect();
+    menu.style.left = `${Math.min(at.clientX, innerWidth - r.width - 4)}px`;
+    menu.style.top = `${Math.min(at.clientY, innerHeight - r.height - 4)}px`;
+    addEventListener("pointerdown", outside, true);
+    addEventListener("keydown", escape, true);
+    menu.querySelector<HTMLButtonElement>("button:not([disabled])")?.focus();
+  }
+
+  function open(id: string | null, at: { clientX: number; clientY: number }, hex: string | null = null) {
+    const state = session.state, engine = session.engine;
+    const lock = engine.locked(state);
+    delete menu.dataset.hex;
+    delete menu.dataset.unit;
+    if (!id) {
+      // Beside the counters of a Soviet hex: the attack alone.
+      const attack = attackItem(hex, !!lock);
+      if (!attack) return;
+      menu.innerHTML = `<div class="menu-head">${hex}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") + attack;
+      place(at);
+      return;
+    }
+    const u = engine.unit(id), s = state.units[id];
     if (!u || !s || s.at === "eliminated" || s.at === "outOfPlay") return;
     const last = !engine.nextFace(id, s.face);
     const onMap = isHex(s.at);
     // Before Start every correction is locked: the menu says why instead of acting.
-    const lock = engine.locked(state);
     // A unit of the combat in progress: its steps go only as the rules allow (Q45).
     const combat = lock ? null : engine.combat.whyNotRemoveStep(state, id);
     const ip = onMap && !!state.improvedPositions?.includes(s.at);
     const item = (action: string, label: MessageKey, enabled: boolean, title?: MessageKey) =>
       `<button type="button" role="menuitem" data-action="${action}"${enabled && !lock ? "" : " disabled"}${title ? ` title="${t(title)}"` : ""}>${t(label)}</button>`;
     menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") +
+      attackItem(hex ?? (onMap ? s.at : null), !!lock) +
       (combat ? `<p class="menu-lock">${t(combat)}</p>` : "") +
       item("step", "menu.removeStep", !last && !combat, last ? "menu.lastStep" : undefined) +
       item("eliminate", "menu.eliminate", last && !combat, last ? undefined : "menu.onlyLastStep") +
@@ -56,17 +101,16 @@ export function createCounterMenu(session: GameSession): CounterMenu {
           `${t(`menu.${status}`)}<span class="check" aria-hidden="true">${current ? "✓" : ""}</span></button>`;
       }).join("") + `</div>`;
     menu.dataset.unit = id;
-    menu.hidden = false;
-    const r = menu.getBoundingClientRect();
-    menu.style.left = `${Math.min(at.clientX, innerWidth - r.width - 4)}px`;
-    menu.style.top = `${Math.min(at.clientY, innerHeight - r.height - 4)}px`;
-    addEventListener("pointerdown", outside, true);
-    addEventListener("keydown", escape, true);
-    menu.querySelector<HTMLButtonElement>("button:not([disabled])")?.focus();
+    place(at);
   }
 
   menu.addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-action], button[data-supply]");
+    if (b?.dataset.action === "attack" && menu.dataset.hex) {
+      close();
+      session.dispatch({ type: "DeclareAttack", target: menu.dataset.hex, attackers: deps.attackers() });
+      return;
+    }
     const id = menu.dataset.unit;
     if (!b || !id) return;
     close();

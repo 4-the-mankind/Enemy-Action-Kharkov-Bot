@@ -1,5 +1,6 @@
-// Counters selected by the player, to move a stack or part of it together (D17).
-// View state only: never part of the game state. Limited to one hex at a time.
+// Counters selected by the player, to move a stack or part of it together (D17), or to attack
+// from one hex or more (task 5.1b: Ctrl+click a counter, Shift+click a whole stack, on any hex).
+// View state only: never part of the game state.
 
 export class Selection {
   private ids = new Set<string>();

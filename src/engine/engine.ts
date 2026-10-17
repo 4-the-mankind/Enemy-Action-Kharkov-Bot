@@ -87,7 +87,7 @@ export interface Engine {
    * The combat sheet (12.0, task 4.5): what it shows, where defenders may retreat, why a step
    * may not be lost, why units may not attack a hex (German attack, task 5.1).
    */
-  readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep" | "whyNotAttack">;
+  readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep" | "whyNotAttack" | "advanceHexes">;
   /** Where German units may end a move of the player (Q59, task 5.1): to light the hexes during a drag. */
   readonly germanMoves: Pick<GermanMoves, "checked" | "reach">;
   /**
@@ -129,6 +129,7 @@ export function createEngine(data: EngineData): Engine {
     setDispersed: (state, ids, dispersed) => setDispersed(state, ids, dispersed),
     setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
     reinforceDestination,
+    reinforceInto: sovietMovement.reinforceInto,
   });
   const sovietActivations = createSovietActivation({
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives, sovietMovement, attacks,
@@ -212,8 +213,18 @@ export function createEngine(data: EngineData): Engine {
     if (r && "reason" in r) return reject(state, "MoveUnits", r.reason);
     if (r) return r.combat;
     const moved = moveUnits(state, ids, to, "player");
-    if (!free) return moved;
+    if (!free) return { state: germanMoved(moved.state, ids.filter((id) => state.units[id].at !== to), to), events: moved.events };
     return { state: moved.state, events: moved.events.map((e) => (e.type === "UnitsMoved" ? { ...e, free: true } : e)) };
+  }
+
+  /**
+   * German units moved by the player in his impulse (checked moves, Q59): active (Q62, the
+   * Soviet Reinforce Battle in defense), and not to reinforce an attack (Reinforce Battle).
+   */
+  function germanMoved(state: GameState, ids: string[], to: Location): GameState {
+    if (!ids.length || state.botImpulse || !isHex(to) || !ids.every((id) => byId.get(id)?.side === "german")) return state;
+    const imp = state.germanImpulse ?? { moved: [], attackers: [], retreated: [] };
+    return { ...state, germanImpulse: { ...imp, moved: [...new Set([...imp.moved, ...ids])] } };
   }
 
   /**
@@ -400,7 +411,8 @@ export function createEngine(data: EngineData): Engine {
   function runBotImpulse(state: GameState): StepResult {
     if (!state.started) return reject(state, "RunBotImpulse", msg("reject.pressStart"));
     if (!sovietCards) return reject(state, "RunBotImpulse", msg("reject.cardsNotLoaded"));
-    const { attackedThisImpulse: _, ...fresh } = state;
+    // The German impulse is over: what the bot kept of it goes (12.41, 12.74, Q62).
+    const { attackedThisImpulse: _, germanImpulse: __, ...fresh } = state;
     const r = sovietCards.runImpulse(fresh);
     return "key" in r ? reject(state, "RunBotImpulse", r) : r;
   }
@@ -421,6 +433,8 @@ export function createEngine(data: EngineData): Engine {
       ...end.state, units, forwardSupport: [], turn: state.turn + 1,
       reminders: (state.reminders ?? []).filter((r) => r.until === "done"),
     };
+    delete next.attackedThisImpulse;
+    delete next.germanImpulse;
     // I: units of the calendar space for the new turn enter their Reserve Units box.
     const toReserve = Object.keys(units).filter((id) => units[id].at === "reinforcements" && byId.get(id)?.entryTurn === next.turn);
     if (toReserve.length) next = moveUnits(next, toReserve, "reserve", "bot").state;
@@ -657,13 +671,17 @@ export function createEngine(data: EngineData): Engine {
       case "CombatTactics":
         return combatStep(state, command.type, combat.playTactics(state, command.tactics, command.replacement));
       case "CombatChitsDrawn":
-        return combatStep(state, command.type, combat.chitsDrawn(state));
+        return combatStep(state, command.type, combat.chitsDrawn(state, command.chits));
       case "CombatHits":
-        return combatStep(state, command.type, combat.enterHits(state, command.german, command.soviet));
+        return combatStep(state, command.type, combat.enterHits(state, command.german, command.soviet, command.commandValue));
       case "CombatLosses":
-        return combatStep(state, command.type, combat.chooseLosses(state, command.retreat));
+        return combatStep(state, command.type, combat.chooseLosses(state, command.retreat, command.disperse));
       case "CombatHitsApplied":
         return combatStep(state, command.type, combat.hitsApplied(state));
+      case "NameActivation":
+        return combatStep(state, command.type, combat.nameActivation(state, command.activation));
+      case "FinishCombat":
+        return combatStep(state, command.type, combat.finishGermanAttack(state));
     }
   }
 
@@ -688,7 +706,10 @@ export function createEngine(data: EngineData): Engine {
     activate,
     sovietCards,
     rules,
-    combat: { view: combat.view, preview: combat.preview, retreatHexes: combat.retreatHexes, whyNotRemoveStep: combat.whyNotRemoveStep, whyNotAttack: combat.whyNotAttack },
+    combat: {
+      view: combat.view, preview: combat.preview, retreatHexes: combat.retreatHexes, whyNotRemoveStep: combat.whyNotRemoveStep,
+      whyNotAttack: combat.whyNotAttack, advanceHexes: combat.advanceHexes,
+    },
     germanMoves: { checked: germanMoves.checked, reach: germanMoves.reach },
     whyNotDrop,
     unit: (id) => byId.get(id),

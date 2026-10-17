@@ -12,7 +12,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 export type Speed = "slow" | "normal" | "fast";
 /** Time per hex walked, in ms. */
-const STEP_MS: Record<Speed, number> = { slow: 560, normal: 300, fast: 130 };
+export const STEP_MS: Record<Speed, number> = { slow: 560, normal: 300, fast: 130 };
 /** Pause on a unit that does not move, and between two units, in steps. */
 const HOLD_STEPS = 1.4, GAP_STEPS = 0.8;
 const SPEED_KEY = "ea-kharkov.game.speed";

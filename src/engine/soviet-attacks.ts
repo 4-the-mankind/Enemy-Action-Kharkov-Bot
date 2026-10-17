@@ -315,12 +315,16 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
         || (movement.proximateToUnit(state, id, defender) && !!reinforceDestination(state, act.front, act.units, id, target))));
   }
 
+  /** Fixed Artillery (the aid): the defender's hex within the FAR beyond the artillery line, not in the barrage zone on GT 1-2. */
+  const fixedArtilleryApplies = (state: GameState, target: string) =>
+    !(state.turn <= 2 && inBarrageZone(target)) && hexesBeyondLine(target) <= far(state.turn);
+
   /** 12.31: the tactic gives this attack a benefit other than a chit draw. */
   function tacticApplies(state: GameState, act: SovietActivation, t: CardTactic, target: string, inAttack: string[]): boolean {
     const barrage = state.turn <= 2 && inBarrageZone(target);
     switch (t.tactic) {
       case "soviet-airpower-artillery": return t.name !== "Artillery" || !barrage;
-      case "soviet-fixed-artillery": return !barrage && hexesBeyondLine(target) <= far(state.turn);
+      case "soviet-fixed-artillery": return fixedArtilleryApplies(state, target);
       case "soviet-partisans": return terrainOf(target) === "woods" || isTownOrCity(target);
       case "soviet-reinforce-battle": return reinforcements(state, act, target, inAttack).length > 0;
       case "soviet-nkvd": return !act.nkvd;
@@ -537,7 +541,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
   // The combat sequence (combat.ts) uses the same strengths, flanks and tactics.
   return {
     checks, sorted, combat, auxiliaryApplies, auxiliaryTactics, tacticApplies, reinforcements, assaultUnits,
-    sovietStrength, inBarrageZone, supported, flanked, hexesOf, canAttack, unitsIn,
+    sovietStrength, inBarrageZone, fixedArtilleryApplies, supported, flanked, hexesOf, canAttack, unitsIn,
     /** The same halvings for German attackers (12.41, task 5.1). */
     attackStrength: sovietStrength,
   };

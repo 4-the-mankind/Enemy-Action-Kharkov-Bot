@@ -1398,5 +1398,23 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     return { hex: options[0].hex, path: options[0].path, steps };
   }
 
-  return { activate, moveFormation, enteredHexes, reinforceDestination };
+  /**
+   * Reinforce Battle in a Soviet defense (task 4.5b): the path of a Soviet unit into the hex it
+   * helps defend, in one movement and within 9.23, or null (the aid: "moves into the defending
+   * units' hex. Obey stacking limits").
+   */
+  function reinforceInto(state: GameState, id: string, target: string): { path: string[]; steps: DecisionStep[] } | null {
+    const front = known(id).front;
+    if (!front) return null;
+    const ctx: Ctx = {
+      state, book: "9.21", army: known(id).armyOrCorps, front, inactive: front === "voronezh" ? "southwest" : "voronezh",
+      active: new Set(), objective: state.objectives[front] ?? null, ground: rules.ground(state),
+      supportDistance: supportDistances(state), done: new Set(), refused: new Set(),
+    };
+    const steps: DecisionStep[] = [];
+    const options = restrict(ctx, id, destinations(ctx, id).filter((o) => o.hex === target && !o.leavers), steps);
+    return options.length ? { path: options[0].path, steps } : null;
+  }
+
+  return { activate, moveFormation, enteredHexes, reinforceDestination, reinforceInto };
 }

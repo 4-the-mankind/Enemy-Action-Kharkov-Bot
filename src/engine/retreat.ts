@@ -3,13 +3,17 @@
 // 12.71, avoiding elimination (12.72), together (12.73), a second hex two hexes away from the
 // combat hex, through friendly units in excess of the stacking limit (12.75). An unbridged
 // Dniepr hexside only if no other hex has the same priority. German units: the player chooses
-// among the hexes left (task 4.5a, Q45: no other drop accepted). Soviet units (task 4.5b) add
-// the preferences a-f.
+// among the hexes left (task 4.5a, Q45: no other drop accepted). Soviet units (task 4.5b): the
+// first hex may be over the stacking limits when a hit is left for a second hex (12.75), then
+// the preferences a-f choose (Q61: b) any forward arrow, primary or secondary; c) the hexes next
+// to the one the primary arrow points to; arrows marked V or S only for their front).
 import type { Unit } from "../core/units";
+import { msg } from "../i18n/message";
 import type { Board } from "./board";
 import type { Movement } from "./movement";
 import type { PendingRules } from "./pending";
-import { isHex, type GameState } from "./types";
+import { narrowHexes } from "./soviet-attacks";
+import { isHex, type DecisionStep, type GameState } from "./types";
 
 export interface RetreatData {
   board: Board;
@@ -156,5 +160,71 @@ export function createRetreat({ board, movement, unit, rules }: RetreatData) {
     units.length > 0 && units.every((u) => isHex(state.units[u]?.at ?? ""))
     && routes(state, { units, from: combat, combat, left: hexes, owed: 0, endInSupply }).length > 0;
 
-  return { legal, canRetreat };
+  // ---------------------------------------------------------------- Soviet retreats (task 4.5b)
+
+  /**
+   * The hexes one leg of a Soviet retreat may enter (12.7, 12.71, 12.72): the first hex of the
+   * retreat, or (`second`) the second one, two hexes from the combat hex. `overstack`: a hit is
+   * left after the first hex, so it may be over the stacking limits if a second hex is open
+   * from it (12.75); such a hex is flagged and its retreat goes on.
+   */
+  function sovietLeg(state: GameState, leg: { units: string[]; from: string; combat: string; second: boolean; overstack: boolean; owed?: number }): (RetreatHex & { overstacked: boolean })[] {
+    const { units, from, combat, second } = leg;
+    const ends = candidates(state, units, from, combat, true, second, false);
+    const all: Route[] = ends.map((h) => [h]);
+    if (!second && leg.overstack) {
+      const over = candidates(state, units, from, combat, false, false, false).filter((h) => !ends.some((e) => e.hex === h.hex));
+      for (const h of over) for (const g of candidates(state, units, h.hex, combat, true, true, false)) all.push([h, g]);
+    }
+    if (!all.length) return [];
+    const pick = (rs: Route[]) => {
+      const top = best(dedupe(rs.map((r) => r[0])));
+      return rs.filter((r) => top.some((h) => h.hex === r[0].hex));
+    };
+    const steps = units.map((u) => movement.faceValues(state, u).steps);
+    const eliminates = (r: Route) => !survivable(steps, (leg.owed ?? 0) + r.filter((h) => h.costsStep).length);
+    let chosen = pick(all);
+    // 12.72: a lesser route if the priorities would eliminate a unit and it would not.
+    if (chosen.every(eliminates)) {
+      const spared = all.filter((r) => !eliminates(r));
+      if (spared.length) chosen = pick(spared);
+    }
+    const out = new Map<string, RetreatHex & { overstacked: boolean }>();
+    for (const r of chosen) if (!out.has(r[0].hex)) out.set(r[0].hex, { ...r[0], overstacked: r.length === 2 });
+    return [...out.values()];
+  }
+
+  /** Hexes the printed arrows of `from` point to, for units of these fronts (2.1: V or S arrows for that front only). */
+  function arrowTargets(from: string, fronts: Set<string>): { primary: string[]; any: string[] } {
+    const primary: string[] = [], any: string[] = [];
+    for (const n of board.neighbors(from)) {
+      const a = board.side(from, n.hex)?.arrow;
+      if (!a || a.from !== from || a.to !== n.hex || (a.front !== "both" && !fronts.has(a.front))) continue;
+      any.push(n.hex);
+      if (a.type === "primary") primary.push(n.hex);
+    }
+    return { primary, any };
+  }
+
+  /**
+   * 12.7 "More than one choice" for Soviet units: a) a Soviet VP hex; b) not in the direction of
+   * a forward arrow; c) not adjacent to the forward direction; d) woods; e) easternmost; f) the
+   * lowest numbered hex. Each preference applied is traced.
+   */
+  function sovietChoice(state: GameState, units: string[], from: string, hexes: string[], steps: DecisionStep[]): string {
+    const fronts = new Set(units.map((u) => known(u).front ?? ""));
+    const arrows = arrowTargets(from, fronts);
+    const beside = new Set(arrows.primary.flatMap((p) => board.neighbors(p).map((n) => n.hex)));
+    const sovietVp = (h: string) => board.hex(h).vp !== null && movement.townOwner(state, h) !== "german";
+    return narrowHexes(hexes, [
+      { rule: "12.7 a", text: msg("retreat.pref.sovietVp"), test: sovietVp },
+      { rule: "12.7 b", text: msg("retreat.pref.notArrow"), test: (h) => !arrows.any.includes(h) },
+      { rule: "12.7 c", text: msg("retreat.pref.notBeside"), test: (h) => !beside.has(h) },
+      { rule: "12.7 d", text: msg("retreat.pref.woods"), test: (h) => board.hex(h).terrain === "woods" },
+      { rule: "12.7 e", text: msg("retreat.pref.easternmost"), score: (h) => board.compass(h).west },
+      { rule: "12.7 f", text: msg("retreat.pref.lowestHex"), score: (h) => Number(h) },
+    ], steps)[0];
+  }
+
+  return { legal, canRetreat, sovietLeg, sovietChoice };
 }

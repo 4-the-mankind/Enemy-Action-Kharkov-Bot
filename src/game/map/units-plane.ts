@@ -32,18 +32,10 @@ const SUPPLY_IMAGE = {
 
 export class UnitsPlane {
   private readonly root: SVGGElement;
-  /** Units chosen for a German attack (5.1): ringed in Prussian blue. */
-  private attackers: ReadonlySet<string> = new Set();
 
   constructor(private readonly view: MapView, private readonly data: MapData, private readonly engine: Engine,
     private readonly selection: Selection) {
     this.root = view.plane("units");
-  }
-
-  /** Rings the attackers chosen (view state only), without redrawing the counters. */
-  markAttackers(ids: ReadonlySet<string>) {
-    this.attackers = ids;
-    this.root.querySelectorAll<SVGGElement>(".counter").forEach((g) => g.classList.toggle("attacker", ids.has(g.dataset.unit!)));
   }
 
   render(state: GameState, fly?: { clientX: number; clientY: number; units: string[] }) {
@@ -56,7 +48,7 @@ export class UnitsPlane {
       level.set(hex.id, k + 1);
       const x = hex.x - COUNTER / 2 - k * STACK_STEP, y = hex.y - COUNTER / 2 - k * STACK_STEP;
       const marker = state.supply?.[id];
-      parts.push(`<g class="counter ${u.side}${this.selection.has(id) ? " selected" : ""}${this.attackers.has(id) ? " attacker" : ""}" data-unit="${id}">` +
+      parts.push(`<g class="counter ${u.side}${this.selection.has(id) ? " selected" : ""}" data-unit="${id}">` +
         `<image href="${faceImage(u, s.face)}" x="${x}" y="${y}" width="${COUNTER}" height="${COUNTER}"><title>${u.designation}</title></image>` +
         (s.dispersed ? `<image class="marker" href="/assets/counters/others/${DISPERSED_IMAGE[u.side]}" x="${x + COUNTER - DISPERSED * 0.8}" ` +
           `y="${y - DISPERSED * 0.2}" width="${DISPERSED}" height="${DISPERSED}"><title>${t("map.dispersed")}</title></image>` : "") +

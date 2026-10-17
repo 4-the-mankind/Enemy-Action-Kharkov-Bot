@@ -136,15 +136,40 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       return line(esc(t("log.attack.cancelled", { hex: e.target })));
     case "SovietTacticsApplied": {
       const used = e.tactics.filter((x) => x.applies).map((x) => x.card ? `${x.name} (${x.card.toUpperCase()})` : x.name);
+      // Step 3 of a German attack: the card drawn for the Soviet defense (12.3).
+      if (e.defense) {
+        if (!e.card) return line(esc(t(e.noCard ?? msg("combat.noCard.noCards"))));
+        return line(used.length ? t("log.defense.tactics", { hex: e.target, tactics: used }) : t("log.defense.noEffect", { hex: e.target, card: card(e.card.id) }));
+      }
       return line(used.length ? t("log.attack.tactics", { hex: e.target, tactics: used })
         : esc(t("log.attack.noTactics", { hex: e.target, why: e.noCard ?? "" })));
     }
+    case "ActivationNamed": {
+      const a = e.activation, corps = a.corps ? msg(dynamicKey(`names.corps.${a.corps}`)) : null;
+      if (!("hex" in a)) return line(esc(t("log.activation.corps", { corps: corps! })));
+      return line(esc(corps ? t("log.activation.kampfgruppeCorps", { corps, hex: a.hex, range: a.range })
+        : t("log.activation.kampfgruppe", { hex: a.hex, range: a.range })));
+    }
+    case "SovietHitTaken": {
+      const h = e.hit, base = { n: h.n, hex: e.target };
+      if (h.priority === "12.75") return line(t("log.defense.hit.second", base));
+      // The step itself follows (StepRemoved, or the unit eliminated).
+      if (h.priority === "A") return line(t("log.defense.hit.step", base));
+      if (h.priority === "B") return line(t("log.defense.hit.retreat", base));
+      const hold = { ...base, chance: h.hold?.chance ?? 0, roll: h.hold?.roll ?? 0 };
+      return line(t(h.result === "step" ? "log.defense.hit.holds" : "log.defense.hit.gives", hold));
+    }
+    case "GermanAdvanced":
+      return line(esc(t("log.attack.germanAdvanced", { units: e.units.map(name), from: e.from, to: e.to })));
     case "ReinforcementMoved":
-      return line(esc(t("log.attack.reinforce", { unit: name(e.unit), hex: e.hex })));
+      return line(esc(t(e.defense ? "log.defense.reinforce" : "log.attack.reinforce", { unit: name(e.unit), hex: e.hex })));
     case "CombatTargetChosen":
       return line(t("log.attack.target", { hex: e.hex }));
-    case "GermanTacticsPlayed":
-      return line(e.tactics.length ? esc(t("log.attack.german", { tactics: e.tactics.map((x) => msg(dynamicKey(`names.tactic.${x}`))) })) : t("log.attack.germanNone"));
+    case "GermanTacticsPlayed": {
+      const tactics = e.tactics.map((x) => msg(dynamicKey(`names.tactic.${x}`)));
+      if (e.joined?.length) return line(esc(t("log.attack.germanJoined", { tactics, units: e.joined.map(name) })));
+      return line(e.tactics.length ? esc(t("log.attack.german", { tactics })) : t("log.attack.germanNone"));
+    }
     case "StepRestored":
       return line(esc(t("log.attack.restored", { unit: name(e.unit) })));
     case "CombatChitsDrawn":
@@ -152,11 +177,11 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     case "CombatHitsEntered":
       return line(t("log.attack.hits", { german: e.hits.german, soviet: e.hits.soviet, chitsGerman: e.chitHits.german, chitsSoviet: e.chitHits.soviet }));
     case "GermanLossesChosen":
-      return line(t("log.attack.losses", { steps: e.steps, hexes: e.retreat }));
+      return line(e.disperse ? t("log.attack.lossesDispersed", { count: e.steps }) : t("log.attack.losses", { steps: e.steps, hexes: e.retreat }));
     case "RetreatEntered":
       return line(esc(t(e.costsStep ? "log.attack.retreatStep" : "log.attack.retreat", { units: e.units.map(name), from: e.from, to: e.to, priority: e.priority })));
     case "GermanHitsApplied":
-      return line(t("log.attack.applied"));
+      return line(t(e.attack ? "log.attack.appliedGerman" : "log.attack.applied"));
     case "SovietLossesApplied": {
       const r = e.report, hit = [...(r.first ? [r.first.unit] : []), ...r.removed];
       return line(esc(hit.length || r.dispersed.length ? t("log.attack.sovietLosses", { hex: e.target, units: [...hit, ...r.dispersed.map((d) => msg("log.dispersedUnit", { unit: name(d) }))].map((u) => (typeof u === "string" ? name(u) : u)) })

@@ -49,7 +49,8 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
       if (selectable) {
         li.setAttribute("role", "checkbox");
         li.setAttribute("aria-checked", String(selected));
-        holdToDrag(li, HOLD_MS, (at) => drag.begin(selection.has(id) ? selection.list() : [id], at), () => selection.toggle(id));
+        // A drag carries the selected counters of this hex only (the selection may span hexes, task 5.1b).
+        holdToDrag(li, HOLD_MS, (at) => drag.begin(selection.has(id) ? selection.list().filter((x) => ids.includes(x)) : [id], at), () => selection.toggle(id));
       }
       li.querySelectorAll<HTMLButtonElement>("[data-restack]").forEach((b) => {
         // Not a press on the row: no selection toggle, no drag.
@@ -70,7 +71,9 @@ export function stackRenderer(session: GameSession, selection: Selection, drag: 
     const side = engine.unit(ids[0])!.side;
     box.insertAdjacentHTML("beforeend", supplyNote(engine, state, side, hexId, ids.some((id) => state.supply?.[id])));
     if (pinned) box.insertAdjacentHTML("beforeend", `<p class="insp-hint">${lock ? t(lock) : t("stack.hint")}</p>`);
-    box.querySelector("[data-all]")?.addEventListener("click", () => selection.set(all ? [] : ids));
+    // The whole stack in or out of the selection, which may hold counters of other hexes.
+    box.querySelector("[data-all]")?.addEventListener("click", () =>
+      selection.set(all ? selection.list().filter((x) => !ids.includes(x)) : [...new Set([...selection.list(), ...ids])]));
     return box;
   };
 }

@@ -1,16 +1,20 @@
 // Combat tab of the rail (D18, task 4.5a): the combat sheet of the combat in progress, its
 // steps 1-9 of 12.0 numbered (done: one line, a click shows the detail; in progress: open,
-// with its button; to come: greyed), in the attacker's color. A German attack (task 5.1)
-// follows the German combat sequence; only its step 1 is played yet (TODO 4.5b). Everything it shows comes from
-// the game state and the engine (engine.combat.view): the page computes nothing (D12). Each
-// button sends one command, so Undo (the sheet's own button, or Ctrl+Z) takes back one step.
-import { GERMAN_DEFENSE_TACTICS, type GermanDefenseTactic } from "../../engine/combat";
+// with its button; to come: greyed), in the attacker's color. A German attack (tasks 5.1, 4.5b)
+// follows the German combat sequence: your tactics, the Soviet card (and, when its Reinforce
+// Battle needs it, what your card activated, Q62), the chits declared, the hits, the Soviet
+// hits (12.53), your losses, your advance; "Cancel attack" until the hits are entered. Everything
+// it shows comes from the game state and the engine (engine.combat.view): the page computes
+// nothing (D12). Each button sends one command, so Undo (the sheet's own button, or Ctrl+Z)
+// takes back one step.
+import { GERMAN_ATTACK_TACTICS, GERMAN_DEFENSE_TACTICS, type GermanAttackTactic, type GermanDefenseTactic } from "../../engine/combat";
 import { armyName } from "../../engine/names";
 import { hexName } from "../../engine/objectives";
-import type { AdvanceCheck, Combat, DecisionStep, GameState, HitAdjustment } from "../../engine/types";
+import type { AdvanceCheck, Combat, CombatTactic, DecisionStep, GameState, HitAdjustment, SovietHit } from "../../engine/types";
 import { msg, t, type Message, type MessageKey } from "../../i18n/i18n";
 import { dynamicKey } from "../../i18n/message";
 import { faceImage } from "../data/game-data";
+import type { CombatPlane } from "../map/combat-plane";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
 
@@ -26,15 +30,31 @@ const STEPS: Record<Combat["kind"], StepId[]> = {
 };
 /** The step the sheet waits on, by stage (index in STEPS). */
 const CURRENT: Record<Combat["kind"], Record<Combat["stage"], number>> = {
-  sovietAttack: { target: 2, tactics: 2, chits: 3, hits: 4, losses: 5, done: 8 },
-  nkvdOperations: { target: 0, tactics: 1, chits: 1, hits: 1, losses: 1, done: 3 },
-  germanAttack: { target: 1, tactics: 1, chits: 3, hits: 4, losses: 6, done: 8 },
+  sovietAttack: { target: 2, tactics: 2, activation: 2, chits: 3, hits: 4, losses: 5, advance: 7, done: 8 },
+  nkvdOperations: { target: 0, tactics: 1, activation: 1, chits: 1, hits: 1, losses: 1, advance: 3, done: 3 },
+  germanAttack: { target: 1, tactics: 1, activation: 2, chits: 3, hits: 4, losses: 6, advance: 7, done: 8 },
 };
 
-export function mountCombatPanel(root: HTMLElement, session: GameSession) {
+/** The German corps (6.0) and their activation markers (assets/counters/others/), for Q62. */
+const CORPS = [["III", "ger3rdpzcorpsactivated"], ["XL", "ger40thactivated"], ["XLVIII", "ger48thactivated"], ["LVII", "ger57thactivated"],
+  ["IISS", "ger2ndssactivated"], ["Raus", "gerrausactivated"]] as const;
+const marker = (file: string) => `/assets/counters/others/marker-${file}.png`;
+
+export interface CombatPanel {
+  render(state: GameState): void;
+  /** A map click while the sheet asks for the hex of a Kampfgruppe marker (Q62): true if it took it. */
+  mapClick(hex: string): boolean;
+}
+
+export function mountCombatPanel(root: HTMLElement, session: GameSession, plane: CombatPlane): CombatPanel {
   const engine = session.engine;
   /** What the player is choosing before sending it: reset when the combat moves on. */
-  let local = { key: "", tactics: new Set<GermanDefenseTactic>(), replacement: "hit" as string, german: 0, soviet: 0, open: new Set<number>() };
+  const fresh = (key: string, open: Set<number>) => ({
+    key, tactics: new Set<GermanDefenseTactic>(), attackTactics: new Set<GermanAttackTactic>(), replacement: "hit" as string,
+    german: 0, soviet: 0, chits: 0, commandValue: null as number | null,
+    formation: null as string | null, kgHex: null as string | null, kgRange: 3 as 2 | 3, kgCorps: null as string | null, open,
+  });
+  let local = fresh("", new Set());
   let reason: Message | null = null;
 
   const unit = (id: string, state: GameState) => {
@@ -121,13 +141,19 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
       return `<div class="ledger"><div><h4>${t("combatSheet.hits.yours")}</h4>${ledger(c.hits.germanAdjustments, c.chitHits?.german ?? 0, c.hits.german)}</div>` +
         `<div><h4>${t("combatSheet.hits.theirs")}</h4>${ledger(c.hits.sovietAdjustments, c.chitHits?.soviet ?? 0, c.hits.soviet)}</div></div>`;
     }
-    const p = engine.combat.preview(state, local.german, local.soviet)!;
+    const ga = c.kind === "germanAttack";
+    const p = engine.combat.preview(state, local.german, local.soviet, local.commandValue ?? undefined)!;
     const stepper = (key: "german" | "soviet", label: MessageKey, sub: MessageKey, min: number) =>
       `<div class="hit-row"><div><b>${t(label)}</b><small>${t(sub)}</small></div>` +
       `<div class="stepper" role="group" aria-label="${t(label)}"><button type="button" data-dec="${key}" aria-label="${t("combatSheet.hits.less")}"${local[key] <= min ? " disabled" : ""}>−</button>` +
       `<output aria-live="polite">${local[key]}</output><button type="button" data-inc="${key}" aria-label="${t("combatSheet.hits.more")}">+</button></div></div>`;
-    return `<p>${esc(t("combatSheet.hits.hint"))}</p><div class="hits">` +
-      stepper("german", "combatSheet.hits.german", "combatSheet.hits.germanSub", -9) + stepper("soviet", "combatSheet.hits.soviet", "combatSheet.hits.sovietSub", -9) + `</div>` +
+    // Soviet Intelligence in defense: the command value printed on the German card (1 or 2: one Soviet hit less).
+    const cv = ga && engine.combat.view(state)!.needsCommandValue
+      ? `<div class="hit-row cv"><div><b>${t("combatSheet.attack.commandValue")}</b><small>${t("combatSheet.attack.commandValueSub")}</small></div>` +
+        `<span class="seg" role="group" aria-label="${t("combatSheet.attack.commandValue")}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-cv="${n}" aria-pressed="${local.commandValue === n}">${n}</button>`).join("")}</span></div>` : "";
+    return `<p>${esc(t(ga ? "combatSheet.attack.hitsHint" : "combatSheet.hits.hint"))}</p><div class="hits">` +
+      stepper("german", "combatSheet.hits.german", ga ? "combatSheet.attack.germanSub" : "combatSheet.hits.germanSub", -9) +
+      stepper("soviet", "combatSheet.hits.soviet", ga ? "combatSheet.attack.sovietSub" : "combatSheet.hits.sovietSub", -9) + cv + `</div>` +
       `<div class="ledger"><div><h4>${t("combatSheet.hits.yours")}</h4>${ledger(p.germanAdjustments, local.german, p.german)}</div>` +
       `<div><h4>${t("combatSheet.hits.theirs")}</h4>${ledger(p.sovietAdjustments, local.soviet, p.soviet)}</div></div>` +
       `<p class="note">${t("combatSheet.hits.floor")}</p>`;
@@ -216,6 +242,155 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
       `<button type="button" class="btn" data-target="${h}">${esc(t("combatSheet.target.pick", { hex: h }))}</button>`).join("")}</div>`;
   }
 
+  // ---------------------------------------------------------------- German attack (task 4.5b)
+
+  function attackTactics(c: Combat, state: GameState, current: boolean): string {
+    const cancelled = c.tactics.find((x) => x.cancelled)?.cancelled ?? [];
+    const names_ = (ids: string[]) => ids.map((x) => t(`names.tactic.${x as GermanAttackTactic}`)).join(t("list.comma"));
+    if (!current) {
+      return `<p>${c.germanTactics.length ? esc(names_(c.germanTactics)) : t("combatSheet.sum.none")}</p>` +
+        (cancelled.length ? `<p class="note">${esc(t("combatSheet.attack.cancelled", { tactics: names_(cancelled) }))}</p>` : "") +
+        (c.joined.length ? `<p class="note">${esc(t("combatSheet.tactics.joined", { units: names(c.joined) }))}</p>` : "");
+    }
+    const v = engine.combat.view(state)!;
+    const locks = v.attackTactics!;
+    const sorted = [...GERMAN_ATTACK_TACTICS].sort((a, b) => Number(!!locks[a]) - Number(!!locks[b]));
+    const items = sorted.map((id) => {
+      const lock = locks[id];
+      return `<li class="${lock ? "wide" : ""}"><label class="${lock ? "off" : ""}"><input type="checkbox" data-attack-tactic="${id}"${local.attackTactics.has(id) ? " checked" : ""}${lock ? " disabled" : ""}>` +
+        `<span class="box"></span><span class="t-name">${t(`names.tactic.${id}`)}${lock ? `<small>${tx(lock)}</small>` : ""}</span></label></li>`;
+    }).join("");
+    const notes: string[] = [];
+    if (local.attackTactics.has("german-assault-coordination") && v.assault.length) notes.push(t("combatSheet.attack.assault", { units: names(v.assault) }));
+    if (local.attackTactics.has("german-reinforce-battle") || c.reinforcing.length)
+      notes.push(c.reinforcing.length ? t("combatSheet.yourTactics.reinforcing", { units: names(c.reinforcing) }) : t("combatSheet.attack.reinforceHint", { hex: c.target }));
+    notes.push(t("combatSheet.attack.weakHint"));
+    return `<p>${t("combatSheet.attack.hint")}</p><ul class="tactics">${items}</ul>${notes.map((n) => `<p class="note">${esc(n)}</p>`).join("")}`;
+  }
+
+  /** What a Soviet tactic does for the defense, for the line of the card. */
+  function defenseEffect(c: Combat, x: CombatTactic): string[] {
+    if (!x.applies) return [t("combatSheet.tactics.noBenefit", { why: x.reason ?? msg("combatSheet.sum.none") })];
+    const terrain = engine.combat.view(session.state)?.terrain ?? "clear";
+    switch (x.tactic) {
+      case "soviet-airpower-artillery": return [t("combatSheet.defense.effect.chits", { name: x.name })];
+      case "soviet-fixed-artillery": return [t("combatSheet.defense.effect.chits", { name: "Artillery" })];
+      case "soviet-nkvd": return [t("combatSheet.defense.effect.nkvd")];
+      case "soviet-partisans":
+        return [t(terrain === "city" ? "combatSheet.defense.effect.partisansCity" : terrain === "town" || terrain === "woods" ? "combatSheet.defense.effect.partisansCover" : "combatSheet.defense.effect.partisansOpen")];
+      case "soviet-rifle-brigade": return [t("combatSheet.defense.effect.rifle")];
+      case "soviet-tank-brigade": return [t("combatSheet.defense.effect.tank")];
+      case "soviet-intelligence": {
+        const out = [t("combatSheet.defense.effect.intelligence")];
+        if (x.cancelled?.length) out.push(t("combatSheet.attack.cancelled", { tactics: x.cancelled.map((y) => t(`names.tactic.${y as GermanAttackTactic}`)).join(t("list.comma")) }));
+        return out;
+      }
+      case "soviet-battlefield-replacements":
+        return [x.restored ? t("combatSheet.defense.effect.restored", { unit: name(x.restored) }) : t("combatSheet.defense.effect.replacementsHit")];
+      case "soviet-combat-engineer": return [t("combatSheet.defense.effect.ip", { hex: c.target })];
+      case "soviet-reinforce-battle": return [t("combatSheet.defense.effect.reinforce", { units: names(x.units ?? []), from: x.from ?? "", hex: c.target })];
+      default: return [];
+    }
+  }
+
+  function sovietCard(c: Combat, state: GameState, current: boolean): string {
+    if (c.noCard) return `<p class="note">${tx(c.noCard)}</p>`;
+    if (!c.card) return "";
+    const img = `<img class="card" src="${cardImage(c.card.id)}" alt="${c.card.id.toUpperCase()}" data-card="${c.card.id}" tabindex="0">`;
+    const label = t(c.card.fromDiscard ? "combatSheet.defense.cardFromDiscard" : "combatSheet.defense.card", { card: c.card.id.toUpperCase() });
+    if (c.stage === "activation" && current) return `<ul class="lines"><li>${img}<div class="what"><b>${esc(label)}</b></div></li></ul>${activationQuestion(c, state)}`;
+    const lines = c.tactics.map((x) => `<li>${img}<div class="what"><b>${esc(x.name)}</b>${defenseEffect(c, x).map((n) => `<small>${esc(n)}</small>`).join("")}` +
+      `${x.steps ? decisions(x.steps) : ""}</div><span class="tag${x.applies ? "" : " no"}">${t(x.applies ? "combatSheet.defense.applies" : "combatSheet.defense.noEffect")}</span></li>`).join("");
+    return `<p>${esc(label)}</p>` + (lines ? `<ul class="lines">${lines}</ul>` : `<p class="note">${esc(t("combatSheet.defense.noTactic", { card: c.card.id.toUpperCase() }))}</p>`);
+  }
+
+  /** Q62: what the German card activated, asked for the Soviet Reinforce Battle. */
+  function activationQuestion(c: Combat, state: GameState): string {
+    const attackers = new Set(c.attackers.map((a) => engine.unit(a)?.armyOrCorps));
+    const corps = CORPS.map(([id, m]) => `<li><input type="radio" name="formation" id="f-${id}" value="${id}"${local.formation === id ? " checked" : ""}>` +
+      `<label for="f-${id}"><img src="${marker(m)}" alt="">${t(`names.corps.${id}`)}${attackers.has(id) ? `<small>${t("combatSheet.activation.attackers")}</small>` : ""}</label></li>`).join("");
+    const kg = local.formation === "KG";
+    const kgItem = `<li class="kg"><input type="radio" name="formation" id="f-KG" value="KG"${kg ? " checked" : ""}>` +
+      `<label for="f-KG"><img src="${marker(local.kgRange === 3 ? "germkampfgruppe3hex" : "germkampfgruppe2hex")}" alt="">` +
+      `<span>${esc(kg ? (local.kgHex ? t("combatSheet.activation.kgAt", { hex: local.kgHex }) : t("combatSheet.activation.kgPick")) : t("combatSheet.activation.kg"))}</span></label></li>`;
+    // A Kampfgruppe card may name a corps (6.2, Q64 c): its units alone are active.
+    const range = kg ? `<div class="kg-range">${t("combatSheet.activation.range")} <span class="seg" role="group">` +
+      [2, 3].map((r) => `<button type="button" data-range="${r}" aria-pressed="${local.kgRange === r}">${t("combatSheet.activation.hexes", { count: r })}</button>`).join("") + `</span>` +
+      `<label for="kg-corps">${t("combatSheet.activation.units")}</label> <select id="kg-corps" data-kg-corps>` +
+      `<option value=""${local.kgCorps ? "" : " selected"}>${t("combatSheet.activation.anyUnits")}</option>` +
+      CORPS.map(([id]) => `<option value="${id}"${local.kgCorps === id ? " selected" : ""}>${t(`names.corps.${id}`)}</option>`).join("") + `</select></div>` : "";
+    void state;
+    return `<div class="ask"><p><b>${t("combatSheet.activation.question")}</b> ${t("combatSheet.activation.why")}</p>` +
+      `<ul class="formations">${corps}${kgItem}</ul>${range}</div>`;
+  }
+
+  function attackChits(c: Combat, state: GameState, current: boolean): string {
+    if (!current) return `<p>${esc(t("combatSheet.sum.chits", { count: c.drawn ?? 0 }))}</p>`;
+    const v = engine.combat.view(state, { chits: local.chits })!;
+    const top = Math.max(v.chits.min, v.chits.max);
+    const holds = v.situations.filter((s) => s.applies), others = v.situations.filter((s) => !s.applies);
+    const stepper = top > v.chits.min
+      ? `<div class="stepper" role="group" aria-label="${t("combatSheet.attack.chitsDrawn")}"><button type="button" data-chits="-1" aria-label="${t("combatSheet.attack.chitLess")}"${local.chits <= v.chits.min ? " disabled" : ""}>−</button>` +
+        `<output aria-live="polite">${local.chits}</output><button type="button" data-chits="1" aria-label="${t("combatSheet.attack.chitMore")}"${local.chits >= top ? " disabled" : ""}>+</button></div>` : "";
+    return `<div class="draw"><span class="big">${local.chits}</span><div><b>${t("combatSheet.attack.chitsDrawn")}</b>` +
+      `<small>${esc(top > v.chits.min ? t("combatSheet.attack.chitsNote", { min: v.chits.min, max: top }) : t("combatSheet.attack.chitsExact", { min: v.chits.min }))}</small></div>${stepper}</div>` +
+      sumList(v.chits.rows, v.chits.max, "combatSheet.attack.maximum") +
+      `<h4>${t("combatSheet.chits.keep")}</h4><ul class="situ yes">${holds.map((s) => `<li>${tx(s.text)}</li>`).join("")}</ul>` +
+      `<details class="more"><summary>${esc(t("combatSheet.chits.others", { count: others.length }))}</summary>` +
+      `<ul class="situ no">${others.map((s) => `<li>${tx(s.text)}</li>`).join("")}</ul></details>`;
+  }
+
+  function hitLine(h: SovietHit, state: GameState): string {
+    const head = h.priority === "A" ? t("combatSheet.defense.hit.step") : h.priority === "B" ? t("combatSheet.defense.hit.retreat")
+      : h.priority === "12.75" ? t("combatSheet.defense.hit.second") : t("combatSheet.defense.hit.hold", { chance: h.hold?.chance ?? 0 });
+    const factors = h.hold ? `<small>${esc(h.hold.factors.map((f) => `${t(f.text)} ${f.value < 0 ? f.value : `+${f.value}`}`).join(t("list.semicolon")))}</small>` : "";
+    const lost = h.result === "step" && h.unit ? `<small>${esc(h.tied ? t("combatSheet.defense.lostTied", { unit: name(h.unit), units: names(h.tied) }) : t("combatSheet.defense.lost", { unit: name(h.unit) }))}</small>` : "";
+    const retreats = (h.retreats ?? []).map((r) => `<small>${esc(t("combatSheet.defense.retreat", { units: names(r.units), from: r.from, to: r.to, priority: r.priority }))}</small>` +
+      (r.lost ? `<small>${esc(t("combatSheet.defense.retreatStep", { unit: name(r.lost) }))}</small>` : "") +
+      (r.overstacked ? `<small>${esc(t("combatSheet.defense.overstacked"))}</small>` : "") + decisions(r.steps.filter((x) => x.dropped.length))).join("");
+    const tag = h.hold ? `<span class="tag${h.result === "step" ? "" : " no"}">${d10(h.hold.roll, h.result === "step")} ${t(h.result === "step" ? "combatSheet.defense.holds" : "combatSheet.defense.gives")}</span>` : "<span></span>";
+    void state;
+    return `<li><span class="hit-n">${h.n}</span><div class="what"><b>${esc(head)}</b>${factors}${lost}${retreats}</div>${tag}</li>`;
+  }
+
+  function sovietDefense(c: Combat, state: GameState): string {
+    const r = c.sovietDefense;
+    if (!r) return "";
+    if (!r.hits) return `<p>${t("combatSheet.defense.noHit")}</p>`;
+    const head = r.maxRetreat
+      ? t("combatSheet.defense.head", { count: r.hits, hexes: msg(r.maxRetreat === 2 ? "combatSheet.losses.retreatTwo" : "combatSheet.losses.retreatOne") })
+      : t("combatSheet.defense.headNoRetreat", { count: r.hits });
+    const out = [`<p>${esc(head)}</p>`,
+      `<ul class="lines hits-list">${r.taken.map((h) => hitLine(h, state)).join("")}</ul>`];
+    if (r.eliminated.length) out.push(`<p class="note">${esc(t("combatSheet.soviet.eliminated", { units: names(r.eliminated) }))}</p>`);
+    if (r.unused) out.push(`<p class="note">${esc(t("combatSheet.defense.unused", { count: r.unused }))}</p>`);
+    if (r.bystanders.length) out.push(`<p class="note">${esc(t("combatSheet.defense.bystanders", { units: names(r.bystanders) }))}</p>`);
+    return out.join("");
+  }
+
+  function attackLosses(c: Combat, state: GameState, current: boolean): string {
+    const L = c.losses;
+    if (!L || !c.hits) return "";
+    if (!current) return `<p>${esc(t(L.disperse ? "combatSheet.attack.sumDispersed" : "combatSheet.attack.sumSteps", { count: L.lost.length }))}</p>`;
+    const v = engine.combat.view(state)!;
+    const label = (o: (typeof v.lossOptions)[number]) => o.eliminated ? t("combatSheet.attack.allEliminated")
+      : o.disperse ? t("combatSheet.attack.stepsDisperse", { count: o.steps }) : t("combatSheet.losses.steps", { count: o.steps });
+    const options = v.lossOptions.length > 1 ? `<p>${t("combatSheet.attack.choose")}</p><ul class="choices">${v.lossOptions.map((o) =>
+      `<li><label><input type="radio" name="attackLoss" value="${o.disperse ? "disperse" : "steps"}"${L.disperse !== undefined && !!L.disperse === !!o.disperse ? " checked" : ""}><span class="dot"></span><span>${esc(label(o))}</span></label></li>`).join("")}</ul>` : "";
+    const need = L.lost.length + v.owed;
+    const tally = L.disperse === undefined ? "" : `<ul class="tally"><li class="${v.owed ? "" : "ok"}"><span class="mark"></span>${esc(t("combatSheet.losses.tallySteps", { done: L.lost.length, need }))}</li></ul>`;
+    return `<p><b>${esc(t("combatSheet.losses.head", { count: c.hits.german }))}</b></p>${options}` +
+      (L.disperse !== undefined ? `<p class="note">${t("combatSheet.attack.how")}</p>` : "") + tally;
+  }
+
+  function yourAdvance(c: Combat, state: GameState, current: boolean): string {
+    const moved = Object.entries(c.advanced ?? {}).map(([u, p]) => `<p class="note">${esc(name(u))}: ${p.join(" › ")}</p>`).join("");
+    if (!current) return moved || `<p>${t("combatSheet.sum.noAdvance")}</p>`;
+    const v = engine.combat.view(state)!;
+    if (v.noAdvance && !moved) return `<p>${tx(v.noAdvance)}</p>`;
+    return `<p>${esc(t("combatSheet.attack.advanceHint", { hex: c.target }))}</p>${moved}`;
+  }
+
   // ---------------------------------------------------------------- summaries (done steps)
 
   function summary(id: StepId, c: Combat): string {
@@ -226,23 +401,31 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
         return used.length ? esc(used.join(t("list.comma"))) : t("combatSheet.sum.none");
       }
       case "yourTactics": return c.germanTactics.length ? esc(c.germanTactics.map((x) => t(`names.tactic.${x as GermanDefenseTactic}`)).join(t("list.comma"))) : t("combatSheet.sum.none");
-      case "chits": return esc(t("combatSheet.sum.chits", { count: Math.max(c.chits.min, c.chits.max) }));
+      case "chits": return esc(t("combatSheet.sum.chits", { count: c.drawn ?? Math.max(c.chits.min, c.chits.max) }));
       case "hits": return c.hits ? esc(t("combatSheet.sum.hits", { german: c.hits.german, soviet: c.hits.soviet })) : "";
       case "yourLosses": {
         const L = c.losses;
         if (!L) return "";
+        if (c.kind === "germanAttack") return esc(t(L.disperse ? "combatSheet.attack.sumDispersed" : "combatSheet.attack.sumSteps", { count: L.lost.length }));
         if (L.pullOut) return t("combatSheet.sum.pullOut");
         if (c.defenders.every((d) => !/^\d{4}$/.test(session.state.units[d]?.at ?? ""))) return t("combatSheet.sum.eliminated");
         return esc(t("combatSheet.sum.losses", { steps: L.lost.length, hexes: Math.max(0, ...Object.values(L.paths).map((p) => p.length - 1)) }));
       }
-      case "sovietLosses": case "sovietLoss": return c.sovietLosses ? esc(t("combatSheet.sum.sovietHits", { count: c.sovietLosses.hits })) : "";
+      case "sovietLosses": case "sovietLoss":
+        if (c.sovietDefense) return esc(t("combatSheet.sum.sovietHits", { count: c.sovietDefense.hits }));
+        return c.sovietLosses ? esc(t("combatSheet.sum.sovietHits", { count: c.sovietLosses.hits })) : "";
       case "advance": {
         const n = new Set((c.advance ?? []).filter((a) => a.advanced).map((a) => a.unit)).size;
         return n ? esc(t("combatSheet.sum.advanced", { count: n })) : t("combatSheet.sum.noAdvance");
       }
       case "target": return c.target;
       case "declare": return esc(t("combatSheet.germanAttack.declared", { count: c.attackers.length }));
-      case "cleanUp": case "sovietCard": case "yourAdvance": return "";
+      case "sovietCard": return c.card ? c.card.id.toUpperCase() : c.weak ? t("combatSheet.defense.weak") : t("combatSheet.sum.none");
+      case "yourAdvance": {
+        const n = Object.keys(c.advanced ?? {}).length;
+        return n ? esc(t("combatSheet.sum.advanced", { count: n })) : t("combatSheet.sum.noAdvance");
+      }
+      case "cleanUp": return "";
     }
   }
 
@@ -250,29 +433,27 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
     switch (id) {
       case "reserves": return reserves(c, state);
       case "tactics": return tactics(c);
-      case "yourTactics":
-        // TODO 4.5b: the German combat tactics of an attack (12.3).
-        if (c.kind === "germanAttack") return current ? `<p class="note">${esc(t("combatSheet.germanAttack.later"))}</p>` : "";
-        return yourTactics(c, state, current);
-      case "chits": return chits(c, state, current);
+      case "yourTactics": return c.kind === "germanAttack" ? attackTactics(c, state, current) : yourTactics(c, state, current);
+      case "chits": return c.kind === "germanAttack" ? attackChits(c, state, current) : chits(c, state, current);
       case "hits": return hits(c, state, current);
-      case "yourLosses": return yourLosses(c, state, current);
-      case "sovietLosses": case "sovietLoss": return sovietLosses(c, state);
+      case "yourLosses": return c.kind === "germanAttack" ? attackLosses(c, state, current) : yourLosses(c, state, current);
+      case "sovietLosses": case "sovietLoss": return c.kind === "germanAttack" ? sovietDefense(c, state) : sovietLosses(c, state);
       case "advance": return advance(c, state);
       case "cleanUp": return cleanUp(c);
       case "target": return target(c, current);
       case "declare": return `<ul class="lines">${c.attackers.map((a) => `<li>${unit(a, state)}<div class="what">${esc(t("combatSheet.germanAttack.attacker", { unit: name(a), hex: c.from[a] }))}</div></li>`).join("")}</ul>`;
-      case "sovietCard": case "yourAdvance": return "";
+      case "sovietCard": return sovietCard(c, state, current);
+      case "yourAdvance": return yourAdvance(c, state, current);
     }
   }
 
   // ---------------------------------------------------------------- the footer button
 
   function action(c: Combat, state: GameState): { label: string; ready: boolean; hint?: string } | null {
+    if (c.kind === "germanAttack") return attackAction(c, state);
     switch (c.stage) {
-      case "target": return null;
+      case "target": case "activation": case "advance": return null;
       case "tactics":
-        if (c.kind === "germanAttack") return { label: t("combatSheet.germanAttack.cancel"), ready: true };
         return { label: local.tactics.size ? t("combatSheet.yourTactics.play", { count: local.tactics.size }) : t("combatSheet.yourTactics.none"), ready: true };
       case "chits": return { label: t("combatSheet.chits.done"), ready: true };
       case "hits": return { label: t("combatSheet.hits.resolve"), ready: true };
@@ -286,6 +467,22 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
     }
   }
 
+  /** The footer button of a German attack, by stage. */
+  function attackAction(c: Combat, state: GameState): { label: string; ready: boolean } | null {
+    switch (c.stage) {
+      case "tactics": return { label: local.attackTactics.size ? t("combatSheet.yourTactics.play", { count: local.attackTactics.size }) : t("combatSheet.yourTactics.none"), ready: true };
+      case "activation": return { label: t("combatSheet.activation.done"), ready: !!local.formation && (local.formation !== "KG" || !!local.kgHex) };
+      case "chits": return { label: t("combatSheet.chits.done"), ready: true };
+      case "hits": return { label: t("combatSheet.hits.resolve"), ready: !engine.combat.view(state)!.needsCommandValue || local.commandValue !== null };
+      case "losses": {
+        const L = c.losses!, v = engine.combat.view(state)!;
+        return { label: t("combatSheet.losses.applied"), ready: L.disperse !== undefined && v.owed === 0 };
+      }
+      case "advance": return { label: t("combatSheet.attack.finish"), ready: true };
+      default: return null;
+    }
+  }
+
   function send(command: Parameters<GameSession["dispatch"]>[0]) {
     const refused = session.dispatch(command).find((e) => e.type === "CommandRejected");
     reason = refused ? refused.reason : null;
@@ -296,7 +493,7 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
 
   function render(state: GameState) {
     const c = state.combat;
-    if (!c) { root.innerHTML = `<p class="hint">${t("page.combatNone")}</p>`; reason = null; return; }
+    if (!c) { root.innerHTML = `<p class="hint">${t("page.combatNone")}</p>`; reason = null; plane.previewKampfgruppe(null, 3); return; }
     const key = `${c.kind}:${c.target}:${c.stage}`;
     const ids = STEPS[c.kind], cur = CURRENT[c.kind][c.stage];
     if (key !== local.key) {
@@ -304,9 +501,22 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
       const open = sameCombat ? local.open : new Set<number>();
       // Once the bot has played its steps, its losses and advance show at once.
       if (c.stage === "done") ids.forEach((id, i) => { if (id === "sovietLosses" || id === "sovietLoss" || id === "advance") open.add(i); });
-      local = { key, tactics: new Set(c.germanTactics as GermanDefenseTactic[]), replacement: "hit", german: 0, soviet: 0, open };
+      local = fresh(key, open);
+      local.tactics = new Set(c.germanTactics as GermanDefenseTactic[]);
+      local.attackTactics = new Set(c.germanTactics as GermanAttackTactic[]);
+      // Step 4 of a German attack: the required chits, to start with (12.4).
+      if (c.kind === "germanAttack" && c.stage === "chits") local.chits = c.chits.min;
+      const a = state.germanImpulse?.activation;
+      if (a && "hex" in a) { local.formation = "KG"; local.kgHex = a.hex; local.kgRange = a.range; local.kgCorps = a.corps ?? null; }
+      else if (a) local.formation = a.corps;
+      else if (c.stage === "activation") {
+        // The attackers' corps, to start with: the usual activation (6.0).
+        const corps = [...new Set(c.attackers.map((x) => engine.unit(x)?.armyOrCorps))];
+        if (corps.length === 1 && corps[0]) local.formation = corps[0];
+      }
       reason = null;
     }
+    plane.previewKampfgruppe(c.stage === "activation" && local.formation === "KG" ? local.kgHex : null, local.kgRange);
     const steps = ids.map((id, i) => {
       const n = i + 1, state_ = i < cur ? "done" : i === cur ? "current" : "todo";
       const open = state_ === "current" || (state_ === "done" && local.open.has(i));
@@ -339,6 +549,7 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
       <footer class="b-foot"><div class="foot-row">` +
         `<button type="button" class="undo" data-undo aria-keyshortcuts="Control+Z" title="${esc(t("page.undoHint"))}"${session.canUndo() ? "" : " disabled"}>${t("page.undo")}</button>` +
         (a ? `<button type="button" class="act" data-act${a.ready ? "" : " disabled"}>${esc(a.label)}</button>` : "") + `</div>` +
+        (german && ["tactics", "activation", "chits", "hits"].includes(c.stage) ? `<button type="button" class="cancel-attack" data-cancel-attack>${t("combatSheet.germanAttack.cancel")}</button>` : "") +
         `<p class="combat-reason" role="status">${reason ? tx(reason) : ""}</p></footer>
     </div>`;
   }
@@ -371,12 +582,24 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
       return;
     }
     if (el.closest("[data-undo]")) { reason = null; session.undo(); return; }
+    if (el.closest("[data-cancel-attack]")) { send({ type: "CancelAttack" }); return; }
+    const chit = el.closest<HTMLButtonElement>("[data-chits]");
+    if (chit) {
+      local.chits += Number(chit.dataset.chits);
+      render(session.state);
+      root.querySelector<HTMLButtonElement>(`[data-chits="${chit.dataset.chits}"]`)?.focus();
+      return;
+    }
+    const cv = el.closest<HTMLButtonElement>("[data-cv]");
+    if (cv) { local.commandValue = Number(cv.dataset.cv); render(session.state); root.querySelector<HTMLButtonElement>(`[data-cv="${cv.dataset.cv}"]`)?.focus(); return; }
+    const range = el.closest<HTMLButtonElement>("[data-range]");
+    if (range) { local.kgRange = Number(range.dataset.range) as 2 | 3; render(session.state); root.querySelector<HTMLButtonElement>(`[data-range="${range.dataset.range}"]`)?.focus(); return; }
     const target = el.closest<HTMLButtonElement>("[data-target]");
     if (target) { send({ type: "CombatTarget", hex: target.dataset.target! }); return; }
     if (!el.closest("[data-act]")) return;
+    if (c.kind === "germanAttack") { attackAct(c); return; }
     switch (c.stage) {
       case "tactics": {
-        if (c.kind === "germanAttack") { send({ type: "CancelAttack" }); break; }
         const tactics = [...local.tactics];
         const replacement = local.tactics.has("german-battlefield-replacements") ? (local.replacement === "hit" ? "hit" as const : { unit: local.replacement }) : undefined;
         send(replacement ? { type: "CombatTactics", tactics, replacement } : { type: "CombatTactics", tactics });
@@ -389,8 +612,50 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
     }
   });
 
+  function attackAct(c: Combat) {
+    switch (c.stage) {
+      case "tactics": send({ type: "CombatTactics", tactics: [...local.attackTactics] }); break;
+      case "activation":
+        if (local.formation === "KG" && local.kgHex) {
+          send({ type: "NameActivation", activation: { hex: local.kgHex, range: local.kgRange, ...(local.kgCorps ? { corps: local.kgCorps } : {}) } });
+        }
+        else if (local.formation && local.formation !== "KG") send({ type: "NameActivation", activation: { corps: local.formation } });
+        break;
+      case "chits": send({ type: "CombatChitsDrawn", chits: local.chits }); break;
+      case "hits": send(local.commandValue === null ? { type: "CombatHits", german: local.german, soviet: local.soviet }
+        : { type: "CombatHits", german: local.german, soviet: local.soviet, commandValue: local.commandValue }); break;
+      case "losses": send({ type: "CombatHitsApplied" }); break;
+      case "advance": send({ type: "FinishCombat" }); break;
+      default: break;
+    }
+  }
+
   root.addEventListener("change", (e) => {
     const i = e.target as HTMLInputElement;
+    if (i.dataset.attackTactic) {
+      const id = i.dataset.attackTactic as GermanAttackTactic;
+      if (i.checked) local.attackTactics.add(id); else local.attackTactics.delete(id);
+      render(session.state);
+      root.querySelector<HTMLInputElement>(`[data-attack-tactic="${id}"]`)?.focus();
+      return;
+    }
+    if (i.dataset.kgCorps !== undefined) {
+      local.kgCorps = i.value || null;
+      render(session.state);
+      root.querySelector<HTMLSelectElement>("#kg-corps")?.focus();
+      return;
+    }
+    if (i.name === "formation") {
+      local.formation = i.value;
+      render(session.state);
+      root.querySelector<HTMLInputElement>(`#f-${i.value}`)?.focus();
+      return;
+    }
+    if (i.name === "attackLoss") {
+      send({ type: "CombatLosses", retreat: 0, disperse: i.value === "disperse" });
+      root.querySelector<HTMLInputElement>(`[name="attackLoss"][value="${i.value}"]`)?.focus();
+      return;
+    }
     if (i.dataset.tactic) {
       const id = i.dataset.tactic as GermanDefenseTactic;
       if (i.checked) local.tactics.add(id); else local.tactics.delete(id);
@@ -404,7 +669,16 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession) {
     }
   });
 
+  /** Q62: a click on the map gives the hex of the Kampfgruppe marker while the sheet asks for it. */
+  function mapClick(hex: string): boolean {
+    const c = session.state.combat;
+    if (!c || c.stage !== "activation" || local.formation !== "KG") return false;
+    local.kgHex = hex;
+    render(session.state);
+    return true;
+  }
+
   session.subscribe((state) => render(state));
   render(session.state);
-  return { render };
+  return { render, mapClick };
 }

@@ -30,8 +30,8 @@ export interface MapViewEvents {
   click?: (target: PointerTarget, info: ClickInfo) => void;
   /** A counter held HOLD_MS without moving: the drag controller takes over the pointer. */
   lift?: (unit: string, at: { clientX: number; clientY: number }) => void;
-  /** Right-click on a counter without panning: its context menu (L). */
-  menu?: (unit: string, at: { clientX: number; clientY: number }) => void;
+  /** Right-click without panning, on a counter or beside: the context menu (L) of the counter, and of the hex (task 5.1b). */
+  menu?: (unit: string | null, at: { clientX: number; clientY: number }, hex: string | null) => void;
 }
 
 export class MapView {
@@ -206,7 +206,10 @@ export class MapView {
         const t = this.targetAt(e.clientX, e.clientY);
         if (t) this.events.click?.(t, { unit: drag.unit, toggle: e.ctrlKey || e.metaKey, shift: e.shiftKey });
       }
-      if (drag && !drag.moved && e.button === 2 && drag.unit) this.events.menu?.(drag.unit, e);
+      if (drag && !drag.moved && e.button === 2) {
+        const t = this.targetAt(e.clientX, e.clientY);
+        if (drag.unit || t) this.events.menu?.(drag.unit, e, t?.hex.id ?? null);
+      }
       drag = null;
       vp.classList.remove("panning");
     });

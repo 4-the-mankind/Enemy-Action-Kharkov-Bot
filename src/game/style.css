@@ -564,6 +564,9 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .counter-menu .menu-sep { margin-top: 4px; padding: 6px 12px 2px; font-size: 0.8rem; color: var(--slip-dim); border-top: 1px solid rgb(38 46 41 / 0.15); }
 .counter-menu [role="menuitemradio"] { display: flex; justify-content: space-between; gap: 12px; }
 .counter-menu [aria-checked="true"][disabled] { opacity: 1; }
+/* The German attack declared from the menu (task 5.1b, Q66): first, in bold, ruled off from the counter's entries. */
+.counter-menu .menu-attack { font-weight: 600; }
+.counter-menu .menu-rule { margin: 4px 0; border-top: 1px solid rgb(38 46 41 / 0.15); }
 .stack .tag { font-size: 0.75rem; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; opacity: 0.8; }
 
 /* ---------- Bot tab: deck, activation, orders, "Why this move" ---------- */
@@ -1005,98 +1008,63 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .combat-reason { margin: 8px 0 0; font-size: 0.84rem; color: var(--stab-red); }
 .combat-reason:empty { display: none; }
 
-/* ---------- the combat on the map: pastel arrows, the hex attacked, retreats ---------- */
-/* Drawn on the map like pastel: the strokes scale with it (grid units, not the non-scaling
-   strokes of the other marks), roughened and grained by the #pastel filter. */
+/* A German attack (task 4.5b): the question of the Soviet card (Q62), the chits declared, the
+   hits of 12.53 numbered like the hits they are, and Cancel attack under the footer. */
+.combat-sheet .ask { margin: 8px 0; padding: 8px 10px; background: rgb(31 79 154 / 0.07); border-left: 3px solid var(--prussian); }
+.combat-sheet .ask p { margin: 0 0 6px; }
+.combat-sheet .formations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 4px 0 6px; padding: 0; list-style: none; }
+.combat-sheet .formations li.kg { grid-column: 1 / -1; }
+.combat-sheet .formations label {
+  display: grid; justify-items: center; gap: 3px; height: 100%; padding: 6px 4px 5px;
+  font-size: 0.8rem; line-height: 1.2; text-align: center;
+  border: 1.5px solid rgb(38 46 41 / 0.25); border-radius: 3px; cursor: pointer;
+}
+.combat-sheet .formations li.kg label { grid-template-columns: 38px 1fr; justify-items: start; align-items: center; text-align: left; }
+.combat-sheet .formations label:hover { background: rgb(38 46 41 / 0.06); }
+.combat-sheet .formations input { position: absolute; opacity: 0; pointer-events: none; }
+.combat-sheet .formations input:checked + label { border-color: var(--prussian); background: rgb(31 79 154 / 0.1); box-shadow: inset 0 0 0 1px var(--prussian); }
+.combat-sheet .formations input:focus-visible + label { outline: 2px solid var(--prussian); outline-offset: 2px; }
+.combat-sheet .formations img { width: 38px; height: 38px; border-radius: 3px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.4); }
+.combat-sheet .formations small { font-size: 0.72rem; color: var(--slip-dim); }
+.combat-sheet .seg { display: inline-flex; border: 1.5px solid var(--slip-ink); border-radius: 3px; overflow: hidden; }
+.combat-sheet .seg button { padding: 2px 9px; font: inherit; font-variant-numeric: tabular-nums; color: var(--slip-ink); background: none; border: 0; cursor: pointer; }
+.combat-sheet .seg button + button { border-left: 1px solid rgb(38 46 41 / 0.25); }
+.combat-sheet .seg button[aria-pressed="true"] { color: var(--slip); background: var(--slip-ink); }
+.combat-sheet .kg-range { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 0.82rem; }
+.combat-sheet .kg-range label { margin-left: 6px; }
+.combat-sheet select { padding: 2px 6px; font: inherit; color: var(--slip-ink); background: var(--slip); border: 1.5px solid var(--slip-ink); border-radius: 3px; }
+.combat-sheet select:focus-visible { outline: 2px solid var(--hem); outline-offset: 2px; }
+.combat-sheet .draw { grid-template-columns: auto minmax(0, 1fr) auto; }
+.combat-sheet .hit-row.cv { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.combat-sheet .hits-list .hit-n {
+  display: grid; place-items: center; width: 22px; height: 22px; margin-top: 1px;
+  font-size: 0.78rem; font-weight: 600; font-variant-numeric: tabular-nums; color: #fff; background: var(--stab-red); border-radius: 50%;
+}
+.combat-sheet .cancel-attack {
+  display: block; margin: 8px auto 0; padding: 2px 6px;
+  font: inherit; font-size: 0.84rem; color: var(--slip-dim);
+  background: none; border: 0; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.combat-sheet .cancel-attack:hover { color: var(--slip-ink); }
+.combat-marks .kg-hex { fill: rgb(31 79 154 / 0.07); stroke: var(--prussian); stroke-width: 7; stroke-dasharray: 10 12; }
+.combat-marks .kg-hex.center { fill: rgb(31 79 154 / 0.22); }
+
+/* ---------- the combat on the map: the hex attacked, the bot's arrows, the drops allowed ---------- */
+/* The hex of a Soviet attack drawn like pastel: the strokes scale with the map (grid units, not
+   the non-scaling strokes of the other marks), roughened and grained by the #pastel filter. */
 .combat-marks *, .combat-arrows * { vector-effect: none; }
 .combat-marks .target { fill: rgb(192 39 45 / 0.10); stroke: var(--stab-red); stroke-width: 13; stroke-linejoin: round; filter: url(#pastel); }
 .combat-marks .choice { fill: rgb(192 39 45 / 0.06); stroke: var(--stab-red); stroke-width: 11; stroke-dasharray: 30 20; filter: url(#pastel); }
 .combat-marks .retreat-hex { fill: rgb(31 79 154 / 0.18); stroke: var(--prussian); stroke-width: 9; stroke-dasharray: 26 16; stroke-linejoin: round; }
-.combat-marks .path { fill: none; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; filter: url(#pastel); }
-.combat-marks .path.german { stroke: var(--prussian); stroke-dasharray: 36 26; }
-.combat-marks .path.soviet { stroke: var(--stab-red); }
-.combat-arrows .soviet { --pastel: var(--stab-red); }
+.combat-arrows .soviet { --arrow: var(--stab-red); }
 .combat-arrows .faded { opacity: 0.45; }
-.combat-arrows .arrow { filter: url(#pastel); opacity: 0.94; }
-.combat-arrows .arrow line { stroke: var(--pastel); stroke-width: 28; stroke-linecap: round; }
-.combat-arrows .arrow polygon { fill: var(--pastel); stroke: var(--pastel); stroke-width: 10; stroke-linejoin: round; }
+/* Solid, slightly transparent, with a white edge that reads on every color of the map (Q71). */
+.combat-arrows .arrow { fill: var(--arrow); fill-opacity: 0.8; stroke: #fff; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 
 body.in-combat .bot-options { display: none; }
 
 /* Units removed from play (12.62) with the eliminated ones. */
 .tray-counter.out-of-play { filter: grayscale(1) contrast(0.8); opacity: 0.55; }
-
-/* ---------- F: German impulse bar (task 5.1) ---------- */
-/* A paper slip clipped to the foot of the map, opposite the inspector: what the player does
-   on the map in his impulse, and Attack a hex. In attack mode it becomes the attack order,
-   hemmed in Prussian blue like the combat sheet it opens; the attackers are ringed in blue on
-   the map, the arrows of the attack pointed at show pale. */
-.german-bar {
-  position: absolute; right: 14px; bottom: 14px; z-index: 5;
-  width: min(410px, calc(100% - 28px));
-  display: flex; align-items: center; gap: 12px;
-  padding: 8px 10px 8px 14px;
-  color: var(--slip-ink); background: var(--slip);
-  border-left: 4px solid var(--feldgrau);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
-}
-.german-bar[hidden] { display: none; }
-.german-bar .gb-line { flex: 1; margin: 0; font-size: 0.86rem; line-height: 1.3; color: var(--slip-dim); }
-.german-bar svg .a-hex { fill: currentColor; fill-opacity: 0.3; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
-.german-bar svg .a-shaft { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
-.german-bar svg .a-head { fill: currentColor; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: round; }
-.gb-attack {
-  flex: none; display: inline-flex; align-items: center; gap: 7px;
-  padding: 7px 12px 7px 10px;
-  font: inherit; font-weight: 600; white-space: nowrap;
-  color: var(--slip); background: var(--prussian);
-  border: 0; border-radius: 3px; cursor: pointer;
-}
-.gb-attack:hover { background: #17407f; }
-.gb-attack:focus-visible { outline: 2px solid var(--prussian); outline-offset: 2px; }
-.gb-attack svg { width: 18px; height: 18px; }
-.gb-attack kbd { opacity: 0.7; }
-
-.german-bar.attack { display: block; padding: 0; border-left-color: var(--prussian); }
-.german-bar .hem { height: 6px; background: var(--prussian); box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.22); }
-.gb-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 0 14px; }
-.gb-head h2 { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 1.02rem; font-weight: 600; color: var(--prussian); }
-.gb-head h2 svg { width: 18px; height: 18px; }
-.gb-cancel {
-  flex: none; padding: 3px 9px;
-  font: inherit; font-size: 0.85rem;
-  color: var(--slip-ink); background: transparent;
-  border: 1.5px solid rgb(38 46 41 / 0.45); border-radius: 3px; cursor: pointer;
-}
-.gb-cancel:hover { background: rgb(38 46 41 / 0.08); }
-.gb-cancel kbd { opacity: 0.55; }
-.gb-cancel:focus-visible { outline: 2px solid var(--prussian); outline-offset: 2px; }
-.gb-step { margin: 2px 14px 0; font-size: 0.88rem; line-height: 1.3; }
-.gb-attackers { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 14px 0; padding: 0; list-style: none; }
-.gb-attackers li { display: flex; align-items: center; gap: 5px; }
-.gb-hex { margin-right: 1px; font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--slip-dim); }
-.gb-unit { position: relative; padding: 0; background: none; border: 0; border-radius: 3px; cursor: pointer; }
-.gb-unit img { display: block; width: 40px; height: 40px; border-radius: 2px; box-shadow: 0 0 0 2px var(--prussian), 0 2px 4px rgb(0 0 0 / 0.35); }
-/* Clicking a counter takes it out: a cross shows what the click does. */
-.gb-unit::after {
-  content: ""; position: absolute; inset: 0; opacity: 0;
-  background: linear-gradient(45deg, transparent 45%, var(--stab-red) 45% 55%, transparent 55%),
-              linear-gradient(-45deg, transparent 45%, var(--stab-red) 45% 55%, transparent 55%);
-}
-.gb-unit:hover::after, .gb-unit:focus-visible::after { opacity: 0.85; }
-.gb-unit:focus-visible { outline: 2px solid var(--prussian); outline-offset: 3px; }
-.gb-reason { min-height: 1.3em; margin: 6px 14px 10px; font-size: 0.84rem; line-height: 1.3; color: var(--slip-dim); }
-.gb-reason.refused { font-weight: 500; color: var(--stab-red); }
-/* A narrow map: the slip spans the foot of the map and the inspector rests on it (--gb-h:
-   the slip's height, kept by german-bar.ts). */
-.map-area { container: map / inline-size; }
-@container map (max-width: 780px) {
-  .german-bar { left: 14px; width: auto; }
-  .inspector { bottom: calc(22px + var(--gb-h, 0px)); max-height: calc(100% - 36px - var(--gb-h, 0px)); }
-}
-
-/* Attackers chosen on the map: a Prussian blue ring. */
-.map-svg .counter.attacker .sel-ring { stroke: var(--prussian); stroke-width: 4; filter: drop-shadow(0 0 1.5px rgb(255 255 255 / 0.95)); }
 
 /* Where German units carried may end their move (Q59): a blue wash; hatched where only
    strategic movement gets (10.6). Hidden while Alt places them freely. */
@@ -1107,12 +1075,8 @@ body.in-combat .bot-options { display: none; }
 .reach.off { display: none; }
 .drop-label small { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
 
-/* A German attack on the map and on its sheet: Prussian blue. */
+/* A German attack: its sheet hemmed in Prussian blue. On the map no arrows (Q68, task 5.1b):
+   the hex attacked keeps the outline of a pinned hex, thin and staff red, until the combat ends. */
 .combat-sheet.german { --hem: var(--prussian); }
 .combat-sheet.german .current .n { box-shadow: 0 0 0 3px rgb(31 79 154 / 0.22); }
-.combat-marks .target.german { fill: rgb(31 79 154 / 0.10); stroke: var(--prussian); }
-.combat-arrows .german { --pastel: var(--prussian); }
-/* The attack pointed at, not declared yet: the arrows planned in dashes, clean of the pastel. */
-.combat-arrows.ghost .arrow { filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.95)); opacity: 1; }
-.combat-arrows.ghost .arrow line { stroke-width: 13; stroke-dasharray: 26 16; stroke-linecap: butt; }
-.combat-arrows.ghost .arrow polygon { fill: rgb(31 79 154 / 0.45); stroke-width: 7; }
+.combat-marks .target.german { fill: none; stroke: var(--stab-red); stroke-width: 3; vector-effect: non-scaling-stroke; filter: none; }

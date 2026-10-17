@@ -105,6 +105,8 @@ describe("Soviet attack on 1802, turn 1 (the attack found in 4.4, the combat she
     expect(r.events[0]).toMatchObject({ type: "CommandRejected" });
     s = run(engine, s, [{ type: "MoveUnits", units: [G], to: hexes[0] }, { type: "RemoveStep", unit: G }]).state;
     expect(s.units[G]).toEqual({ at: hexes[0], face: "back" });
+    // The ways to take the hits stay as they were when the step began: the choice stays shown.
+    expect(engine.combat.view(s)!.lossOptions).toEqual(engine.combat.view(toHits.state)!.lossOptions);
     const done = play(engine, s, { type: "CombatHitsApplied" });
     const end = done.state.combat!;
     expect(end.stage).toBe("done");

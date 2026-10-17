@@ -4,6 +4,10 @@
 // tiebreakers of 9.24 (Q51). Q50: "closer to objective" looks at the unit's Army Objective
 // marker while in play (9.1, it takes priority for its army), else its front's; without one
 // that line is passed over. "Across river": minor river, Donets or Dniepr.
+// German Advance After Combat (task 4.5b): the player drags the attackers, the engine checks
+// 12.8 (into the vacated hex, stacking), 12.81 (a second hex for mechanized units, or the one
+// infantry unit of Panzer Battalion; off the path of retreat, never from one Soviet-controlled
+// hex to another, nor next to a garrison), 12.82 (unbridged Donets or Dniepr) and 10.5.
 import type { Unit } from "../core/units";
 import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
@@ -33,6 +37,20 @@ export interface AdvanceOption {
 
 /** Chance as a comparable number: an automatic advance first. */
 const weight = (c: AdvanceOption["chance"]) => (c === "advance" ? 11 : c ?? 0);
+
+/** What a German attacker's advance depends on (12.8, 12.81). */
+export interface GermanAdvanceContext {
+  /** The hex attacked, vacated by the defenders. */
+  target: string;
+  /** The unit's advance so far, its hex first; absent before it advances. */
+  path?: string[];
+  /** The defenders retreated two hexes or were eliminated (12.81). */
+  twoHexes: boolean;
+  /** First hexes of the Soviet retreat (the path of retreat; none when eliminated). */
+  retreatNext: string[];
+  /** Panzer Battalion: "free" while its infantry unit is not chosen, else the unit; absent if not played. */
+  panzer?: string;
+}
 
 export type Advances = ReturnType<typeof createAdvance>;
 
@@ -237,5 +255,60 @@ export function createAdvance({ board, movement, unit, rules }: AdvanceData) {
     return { state: seeded, checks, path };
   }
 
-  return { advanceUnit, objectiveOf };
+  // ---------------------------------------------------------------- German advance (task 4.5b)
+
+  /** Why the German unit may not advance into `to` now (12.8, 12.81, 12.82), 10.5 aside, or null. */
+  function germanStep(state: GameState, id: string, to: string, ctx: GermanAdvanceContext): Message | null {
+    const at = state.units[id].at;
+    if (!ctx.path) return to === ctx.target ? null : msg("advance.german.firstHex", { hex: ctx.target });
+    if (ctx.path.length > 2) return msg("advance.german.done", { unit: known(id).designation });
+    if (!ctx.twoHexes) return msg("advance.german.oneHex");
+    const u = known(id);
+    if (u.type !== "mechanized" && !(ctx.panzer === "free" && u.type === "infantry") && ctx.panzer !== id) return msg("advance.german.notMech", { unit: u.designation });
+    // 12.82: across an unbridged Donets or Dniepr hexside, the unit stops there.
+    if (unbridged(ctx.path[0], ctx.target)) return msg("advance.german.river", { unit: u.designation });
+    if (!board.areAdjacent(at, to) || to === at) return msg("advance.german.secondHex", { hex: ctx.target });
+    if (unitsIn(state, to, "soviet").length) return msg("advance.german.enemy", { hex: to });
+    if (ctx.retreatNext.includes(to)) return null;
+    // Off the path of retreat (always, the defenders eliminated).
+    const control = movement.zoc(state, "soviet");
+    if (control.has(at) && control.has(to)) return msg("advance.german.zoc", { hex: to });
+    if (board.neighbors(at).some((n) => rules.garrisonAt(state, n.hex))) return msg("advance.german.garrison");
+    if (unbridged(at, to)) return msg("advance.german.riverOff", { hex: to });
+    return null;
+  }
+
+  /** The hexes the German unit could advance into next, 10.5 aside. */
+  function germanCandidates(state: GameState, id: string, ctx: GermanAdvanceContext): string[] {
+    const hexes = ctx.path ? board.neighbors(state.units[id].at).map((n) => n.hex) : [ctx.target];
+    return hexes.filter((h) => !germanStep(state, id, h, ctx) && movement.canEndIn(without(state, id), h, [id]));
+  }
+
+  /**
+   * Why these German units may not advance into `to` (12.8, 12.81, 12.82, stacking, 10.5:
+   * never where supply cannot be traced, unless the unit cannot trace it and no hex open to its
+   * advance can), or null.
+   */
+  function whyNotGermanAdvance(state: GameState, ids: string[], to: string, ctx: (id: string) => GermanAdvanceContext): Message | null {
+    for (const id of ids) {
+      const why = germanStep(state, id, to, ctx(id));
+      if (why) return why;
+    }
+    const after = ids.reduce((s, id) => withUnitAt(s, id, to), state);
+    if (!movement.canEndIn(ids.reduce(without, state), to, ids)) return msg("advance.german.stacking", { hex: to });
+    if (!rules.supplyTracesTo(after, "german", to)) {
+      for (const id of ids) {
+        const stuck = !rules.canTraceSupply(state, id)
+          && !germanCandidates(state, id, ctx(id)).some((h) => rules.supplyTracesTo(withUnitAt(state, id, h), "german", h));
+        if (!stuck) return msg("advance.german.supply", { unit: known(id).designation, hex: to });
+      }
+    }
+    return null;
+  }
+
+  /** The hexes the German unit may advance into now, for the map. */
+  const germanAdvanceHexes = (state: GameState, id: string, ctx: GermanAdvanceContext) =>
+    germanCandidates(state, id, ctx).filter((h) => !whyNotGermanAdvance(state, [id], h, () => ctx));
+
+  return { advanceUnit, objectiveOf, whyNotGermanAdvance, germanAdvanceHexes };
 }

@@ -22,6 +22,15 @@ const SCENARIOS: Record<string, (engine: Engine) => Scenario> = {
     },
     note: t("scenario.combat1802"),
   }),
+  // A German attack (task 4.5b): the booklet set-up, E10 (Reinforce Battle) on top of the Soviet
+  // draw pile for the card drawn in defense. Attack 1704 from 1604 and 1804.
+  attack1704: (engine) => ({
+    state: {
+      ...engine.step(emptyState(), { type: "SetUpTurn1" }).state, started: true,
+      sovietCards: { drawPile: ["e10", "e01", "e02", "e03", "e05", "e06"], removed: [], lastDrawn: [], seed: 7 },
+    },
+    note: t("scenario.attack1704"),
+  }),
   // NKVD Operations (E08, turns 1-2) on the combat sheet: two hits on the German stack in 0205.
   nkvd: (engine) => ({
     state: {
