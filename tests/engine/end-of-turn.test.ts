@@ -195,7 +195,7 @@ describe("Ground condition (18.33, 18.34)", () => {
     expect(of(r.events, "GroundMarkersPlaced")[0]).toEqual({ type: "GroundMarkersPlaced", turns: [7, 8, 9, 10], aside: 1 });
     const g = r.state.ground!;
     expect([...Object.values(g.turns), ...g.aside].sort()).toEqual([...GROUND_MARKERS].sort());
-    expect(of(r.events, "GroundRevealed")[0]).toEqual({ type: "GroundRevealed", turn: 7, ground: g.turns[7] });
+    expect(of(r.events, "GroundRevealed")[0]).toEqual({ type: "GroundRevealed", turn: 7, ground: g.turns[7], tags: [g.turns[7]] });
     expect(endOf(6).state.ground).toEqual(g);
   });
 

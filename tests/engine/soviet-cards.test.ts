@@ -137,7 +137,7 @@ describe("Soviet impulse (8.1)", () => {
 
   it("STAVKA leaves the game when played on turn 7 or later (8.2, Q27)", () => {
     const { state, events } = impulse(withPile(["e22"], 7));
-    expect(of(events, "SovietCardRemoved")).toEqual([{ type: "SovietCardRemoved", card: "e22" }]);
+    expect(of(events, "SovietCardRemoved")).toEqual([{ type: "SovietCardRemoved", card: "e22", tags: ["stavkaRemoved"] }]);
     expect(state.sovietCards!.removed).toEqual(["e22"]);
     expect(state.sovietDiscard).toEqual([]);
   });

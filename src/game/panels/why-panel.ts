@@ -2,12 +2,14 @@
 // apply and why, then each preference, restriction and tiebreaker with the hexes it kept and
 // set aside, as the engine traced them. Shown for the move being played, a clicked order, or
 // a clicked log line, right under the order or the log line it explains (place). Hovering a
-// step outlines the hexes it set aside on the map (dark, dashed).
+// step outlines the hexes it set aside on the map (dark, dashed). A step or a skipped method
+// due to a state tag carries its mark (task 4.6b, Q88).
 import type { Engine } from "../../engine/engine";
 import { faceImage } from "../data/game-data";
 import { walks, type Decision } from "../playback/activation";
 import type { MovePlayer } from "../playback/move-player";
 import type { GameSession } from "../state/session";
+import { tagMark } from "./tag-chip";
 import { t } from "../../i18n/i18n";
 
 /** "Method 11" for "9.21 method 11" (9.21, 9.22, 9.26); other rules as they are ("9.27"). */
@@ -56,10 +58,10 @@ export function mountWhyPanel(root: HTMLElement, session: GameSession, player: M
       : `<p class="why-method">${t("why.noMethod")}</p>`;
     const skipped = d.skipped.length
       ? `<details class="why-skipped"${d.method ? "" : " open"}><summary>${t("why.skipped", { count: d.skipped.length })}</summary><ul>` +
-        d.skipped.map((k) => `<li><b>${methodLabel(k.method)}</b> ${t(k.reason)}</li>`).join("") + "</ul></details>"
+        d.skipped.map((k) => `<li><b>${methodLabel(k.method)}</b> ${t(k.reason)}${k.tag ? " " + tagMark(k.tag) : ""}</li>`).join("") + "</ul></details>"
       : "";
     const steps = d.steps.length
-      ? `<ol class="why-steps">` + d.steps.map((st, i) => `<li data-step="${i}" tabindex="0"><span class="rule">${st.rule}</span> ${t(st.text)}` +
+      ? `<ol class="why-steps">` + d.steps.map((st, i) => `<li data-step="${i}" tabindex="0"><span class="rule">${st.rule}</span> ${t(st.text)}${st.tag ? " " + tagMark(st.tag) : ""}` +
         `<div class="hexes">${hexes(st.kept, "kept")}${st.dropped.length ? " " + hexes(st.dropped, "dropped") : ""}</div></li>`).join("") + "</ol>"
       : "";
     // Replay only while the counter still stands where this move put it.

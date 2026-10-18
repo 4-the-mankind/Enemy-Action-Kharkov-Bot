@@ -26,6 +26,7 @@ import { mountCombatPanel } from "./panels/combat-panel";
 import { mountGameEnd } from "./panels/game-end";
 import { mountReminders } from "./panels/reminders";
 import { mountStartNotice } from "./panels/start-notice";
+import { mountTurnBar } from "./panels/turn-bar";
 import { mountWhyPanel } from "./panels/why-panel";
 import { BotMovePlayer, readBotMoves } from "./playback/bot-moves";
 import { MovePlayer } from "./playback/move-player";
@@ -121,9 +122,7 @@ async function init() {
   mountCardZoom();
   // A log line's "Why this move" opens right under it, in the Log tab.
   mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); }, scenario?.note);
-  const undo = $<HTMLButtonElement>("undo");
-  undo.addEventListener("click", () => session.undo());
-  session.subscribe(() => { undo.disabled = !session.canUndo(); });
+  mountTurnBar($("turnBar"), $("tagsBar"), session, player, game.calendar);
 
   // The Combat tab (D18): enabled only during a combat, opened when one begins, closed after it.
   let hadCombat = false;

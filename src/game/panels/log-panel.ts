@@ -1,4 +1,5 @@
-// Log tab of the rail (D): the events of each step, newest first, in the player's words.
+// Log tab of the rail (D): the events of each step, newest first, in the player's words, each
+// with the marks of the state tags that weighed on it (task 4.6b, Q88).
 import type { Engine } from "../../engine/engine";
 import { adjustmentName, armyName, frontName, sideName } from "../../engine/names";
 import { isHex, type GameEvent, type Location } from "../../engine/types";
@@ -7,6 +8,7 @@ import { dynamicKey, type Message } from "../../i18n/message";
 import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
+import { tagMarks } from "./tag-chip";
 import { objectiveChange, objectiveName } from "./objective-text";
 import { hexName } from "../../engine/objectives";
 
@@ -232,6 +234,8 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       };
       return line(t(e.result ? "log.victory.ends" : "log.victory.goesOn", levels));
     }
+    case "VictorySkipped":
+      return line(t("log.victory.skipped", { turn: e.turn }));
     case "GameEnded":
       return line(t("log.victory.result", { result: resultName(e.result) }));
     case "GermanEventPlayed":
@@ -298,14 +302,17 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
     for (const [i, e] of events.entries()) {
       const line = describe(e, session.engine);
       if (!line) continue;
+      // The state tags that weighed on it (task 4.6b, Q88).
+      const marks = tagMarks(e.tags), fold = line.html.indexOf("<details");
+      const html = fold < 0 ? line.html + marks : line.html.slice(0, fold) + marks + line.html.slice(fold);
       const cls = (line.refused ? "fresh refused" : "fresh") + (grouped && i > 0 ? " sub" : "");
       let li: HTMLLIElement;
       if (grouped && anchor) {
         li = document.createElement("li");
-        li.innerHTML = line.html;
+        li.innerHTML = html;
         li.className = cls;
         anchor.after(li);
-      } else li = add(line.html, cls);
+      } else li = add(html, cls);
       if (grouped) anchor = li;
       if (e.type === "DecisionTraced") {
         decisions.set(li, e);

@@ -7,7 +7,7 @@ import type { Unit } from "../core/units";
 import type { Board } from "./board";
 import type { Movement } from "./movement";
 import type { PendingRules } from "./pending";
-import { isHex, type GameEvent, type GameResult, type GameState, type VictoryLevel } from "./types";
+import { isHex, type GameEvent, type GameResult, type GameState, type Outlook, type VictoryLevel } from "./types";
 
 /** A calendar space as the engine reads it: FAR (12.3) and the Victory Levels (18.35). */
 export interface CalendarSpace {
@@ -104,5 +104,17 @@ export function createVictory({ board, movement, unit, rules }: VictoryData) {
     return { type: "VictoryChecked", ...base, victory, defeat, result };
   }
 
-  return { afterMove, supplyPhase, check, edgeHexes };
+  /**
+   * The turn bar's outcome label (task 4.6b, Q85): what the check at the end of the current
+   * game-turn would give with the VPs and Kharkov as they are. No check before GT 4 (no Victory
+   * Levels) nor at the end of a heavy mud turn (18.34).
+   */
+  function outlook(state: GameState, space: CalendarSpace | undefined): Outlook {
+    if (rules.ground(state) === "heavyMud") return { check: false, why: "heavyMud" };
+    const c = check(state, space);
+    if (!c) return { check: false, why: "beforeTurn4" };
+    return { check: true, outcome: c.result?.outcome ?? "goesOn", level: c.result?.level, victory: c.victory, defeat: c.defeat };
+  }
+
+  return { afterMove, supplyPhase, check, outlook, edgeHexes };
 }

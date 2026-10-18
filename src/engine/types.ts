@@ -107,6 +107,26 @@ export interface GameResult {
   kharkov: "german" | "soviet";
 }
 
+/**
+ * State tags (§3bis H, task 4.6b): the conditions the bot reads, shown under the turn bar and
+ * cited on the log lines and the "Why this move" steps they weighed on (Q86, Q88).
+ */
+export type TagId = "frozen" | "lightMud" | "heavyMud" | "support" | "forwardSupport" | "operationalLimit" | "okwExpedites" | "stavkaRemoved" | "desperation";
+
+/** A state tag as the turn bar shows it: what it is now, its effect, its rule, how long it lasts. */
+export interface StateTag { id: TagId; name: Message; effect: Message; rule: string; until: Message }
+
+/**
+ * What the victory check of the current game-turn would give if the VPs stay as they are
+ * (18.35, Q85): no check this turn (before GT 4, heavy mud), or its outcome with the levels.
+ */
+export type Outlook =
+  | { check: false; why: "beforeTurn4" | "heavyMud" }
+  | {
+    check: true; outcome: "goesOn" | GameResult["outcome"]; level?: VictoryLevel;
+    victory: { below: number; level: VictoryLevel }; defeat: { above?: number; atLeast?: number; level: VictoryLevel };
+  };
+
 /** German events the player tells the app about (Q77): they act on what only the app holds. */
 export type GermanEventId = "stavkaConfused" | "okwExpedites" | "airInterdiction";
 
@@ -349,9 +369,17 @@ export interface DecisionStep {
   /** Destination hexes it kept, and the ones it set aside. */
   kept: string[];
   dropped: string[];
+  /** The state tag behind it (task 4.6b, Q88): set by tags.ts. */
+  tag?: TagId;
 }
 
-export type GameEvent =
+/** A method that did not apply, and why; `tag`: the state tag behind the reason (Q88). */
+export interface SkippedMethod { method: string; reason: Message; tag?: TagId }
+
+/** Every event may name the state tags that weighed on it (task 4.6b, Q88): set by tags.ts. */
+export type GameEvent = GameEventBody & { tags?: TagId[] };
+
+type GameEventBody =
   | { type: "SetUpApplied"; placed: string[]; reserve: string[]; reinforcements: string[] }
   | { type: "SetUpCleared" }
   /** `path`: hexes crossed, start and end included, when the engine knows them (bot moves). */
@@ -444,6 +472,8 @@ export type GameEvent =
     victory: { below: number; level: VictoryLevel }; defeat: { above?: number; atLeast?: number; level: VictoryLevel };
     result: GameResult | null;
   }
+  /** 18.34: no victory check at the end of a heavy mud game-turn. */
+  | { type: "VictorySkipped"; turn: number }
   | { type: "GameEnded"; result: GameResult }
   /** A German event the player played (Q77): the Soviet cards it discarded, or the marker it removed. */
   | { type: "GermanEventPlayed"; event: GermanEventId; cards?: string[]; hex?: string; units?: string[] }
@@ -456,7 +486,7 @@ export type GameEvent =
     /** 9.22 Soviet Desperation (fewer than 19 VP): method 11 processed right after method 5. */
     desperation?: boolean;
     /** Methods skipped for every unit, and why. */
-    skipped: { method: string; reason: Message }[];
+    skipped: SkippedMethod[];
     /** Spearhead units skipping methods 4-9 (9.21). */
     spearheads: string[];
     /** Out of supply or isolated units, moved last by 9.27. */
@@ -480,7 +510,7 @@ export type GameEvent =
     path: string[];
     steps: DecisionStep[];
     /** Earlier methods that did not apply to this unit, and why. */
-    skipped: { method: string; reason: Message }[];
+    skipped: SkippedMethod[];
   }
   /** A Soviet unit placed from the reserve box (12.2 in an attack, 9.5 in step 4), or not (hex null). Followed by its UnitsMoved. */
   | { type: "ReservePlaced"; unit: string; hex: string | null; rule: "12.2" | "9.5"; steps: DecisionStep[]; reason?: Message }

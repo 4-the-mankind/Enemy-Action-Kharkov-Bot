@@ -1,16 +1,14 @@
-// Bot tab of the rail (§3bis D): the Soviet cards on the deck, "Run bot impulse" and "Next
-// turn", how the bot read the cards of its last impulse (8.1), the activations being played
-// (each formation, its units in the order the bot moved them, the current one lit), playback
-// controls under the impulse buttons (speed, replay, skip, clear trails), and the "Why this
-// move" slip below. Plus the Soviet state kept so far.
-// Task 4.6: the ground condition of the turn beside the turn line (18.33), "End the game" on the
-// last turn, and the German events only the app can play (Q77) under the impulse buttons.
+// Bot tab of the rail (§3bis D): the Soviet cards on the deck, how the bot read the cards of
+// its last impulse (8.1), the activations being played (each formation, its units in the order
+// the bot moved them, the current one lit), playback controls (speed, replay, skip, clear
+// trails), and the "Why this move" slip below. Plus the Soviet state kept so far.
+// Task 4.6b: the turn line, "Run bot impulse", "Next turn" and the VPs moved to the turn bar,
+// the ground condition and the German events to the tags bar (turn-bar.ts).
 import type { CardCommand } from "../../core/soviet-cards";
 import { adjustmentName, armyName, frontName } from "../../engine/names";
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
-import { isHex, SOVIET_CARDS, type GameEvent, type GameState, type GermanEventId, type Ground } from "../../engine/types";
-import { LAST_TURN } from "../../engine/victory";
-import { faceImage, groundImage } from "../data/game-data";
+import { isHex, SOVIET_CARDS, type GameEvent, type GameState } from "../../engine/types";
+import { faceImage } from "../data/game-data";
 import { readActivation, walks, type Activation, type Decision } from "../playback/activation";
 import type { MovePlayer, Speed } from "../playback/move-player";
 import type { GameSession } from "../state/session";
@@ -102,80 +100,28 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     shownCard = command ?? null;
   };
 
-  // ---- Controls: the bot's impulse, the next turn.
-  parts.activate.innerHTML = `<p class="turn-line"></p>
-    <div class="impulse-row">
-      <button type="button" class="btn ink" data-action="impulse">${t("bot.runImpulse")}</button>
-      <button type="button" class="btn switch" data-action="next-turn">${t("bot.nextTurn")}</button>
-    </div>
-    <details class="german-events"><summary>${t("bot.events.title")}</summary><div class="event-list"></div></details>
-    <p class="activate-reason" role="status"></p>
+  // ---- Controls: the combat waited for, the playback, the dev activation.
+  parts.activate.innerHTML = `<p class="activate-reason" role="status"></p>
     <p class="combat-wait" role="status" hidden></p>
     <div class="playback" hidden></div>` +
     (dev ? `<details class="dev-activate"><summary>${t("bot.devActivate")}</summary>
       <div class="activate-row"><select class="army-select" aria-label="${t("bot.devArmy")}"></select><button type="button" class="btn switch" data-action="activate">${t("bot.activate")}</button></div></details>` : "");
-  const turnLine = parts.activate.querySelector<HTMLElement>(".turn-line")!;
-  const runButton = parts.activate.querySelector<HTMLButtonElement>("[data-action=impulse]")!;
-  const nextButton = parts.activate.querySelector<HTMLButtonElement>("[data-action=next-turn]")!;
   const reason = parts.activate.querySelector<HTMLElement>(".activate-reason")!;
   const select = parts.activate.querySelector<HTMLSelectElement>(".army-select");
   const playback = parts.activate.querySelector<HTMLElement>(".playback")!;
   const wait = parts.activate.querySelector<HTMLElement>(".combat-wait")!;
-  const eventList = parts.activate.querySelector<HTMLElement>(".event-list")!;
   const send = (command: Parameters<GameSession["dispatch"]>[0]) => {
     const refused = session.dispatch(command).find((e) => e.type === "CommandRejected");
     reason.textContent = refused ? t(refused.reason) : "";
   };
   parts.activate.addEventListener("click", (e) => {
     const action = (e.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
-    if (action === "impulse") send({ type: "RunBotImpulse" });
-    else if (action === "next-turn") send({ type: "NextTurn" });
-    else if (action === "activate" && select) send({ type: "ActivateFormation", army: select.value });
-    const event = (e.target as Element).closest<HTMLElement>("[data-event]");
-    if (event) send({ type: "GermanEvent", event: event.dataset.event as GermanEventId, ...(event.dataset.hex ? { hex: event.dataset.hex } : {}) });
+    if (action === "activate" && select) send({ type: "ActivateFormation", army: select.value });
   });
 
-  /** Q77: the German events that act on what only the app holds; Air Interdiction names its marker. */
-  const EVENTS: { id: GermanEventId; turns?: string }[] = [{ id: "stavkaConfused", turns: "5-6" }, { id: "okwExpedites", turns: "4" }, { id: "airInterdiction" }];
-  const renderEvents = (state: GameState) => {
-    eventList.innerHTML = EVENTS.map(({ id, turns }) => {
-      const badge = turns ? `<span class="gt">${turns}</span>` : "";
-      const head = `<div class="event-name">${badge}<b>${t(`bot.events.${id}.name`)}</b><span>${t(`bot.events.${id}.text`)}</span></div>`;
-      const markers = id === "airInterdiction" ? state.forwardSupport ?? [] : [];
-      const buttons = (markers.length ? markers : [null]).map((hex) => {
-        const why = engine.whyNotGermanEvent(state, id, hex ?? undefined);
-        const label = hex ? t("bot.events.removeAt", { hex }) : t("bot.events.play");
-        return `<button type="button" class="btn switch" data-event="${id}"${hex ? ` data-hex="${hex}"` : ""}${why ? ` disabled title="${t(why)}"` : ""}>${label}</button>`;
-      }).join("");
-      return `<div class="event">${head}<div class="event-actions">${buttons}</div></div>`;
-    }).join("");
-  };
-
-  /** 18.33: the ground condition of the turn, with its marker, from Game-turn 7. */
-  const groundChip = (state: GameState) => {
-    if (state.turn < 7) return "";
-    const g: Ground = engine.rules.ground(state);
-    return ` <span class="ground-chip ${g}"><img src="${groundImage(g)}" alt="">${t(`ground.${g}`)}</span>`;
-  };
-
   const renderControls = (state: GameState) => {
-    const lock = engine.locked(state);
-    const pile = state.sovietCards?.drawPile.length ?? 0;
-    const impulses = state.sovietImpulses ?? 0;
-    turnLine.innerHTML = (!state.started ? t("bot.turnLine.beforeStart")
-      : state.result ? t("bot.turnLine.over", { turn: state.turn })
-      : impulses ? t("bot.turnLine.started", { turn: state.turn, impulse: impulses }) : t("bot.turnLine.noImpulse", { turn: state.turn })) + (state.started ? groundChip(state) : "");
-    // A Soviet impulse paused on a combat (4.5a): it goes on from the Combat tab.
-    const paused = !!state.botImpulse;
     wait.hidden = !state.combat;
     wait.textContent = state.combat ? t("bot.waitCombat", { hex: state.combat.target }) : "";
-    runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing || paused;
-    runButton.title = lock ? t(lock) : t(!pile && state.started ? "bot.runTitle.pileEmpty" : "bot.runTitle.endsImpulse");
-    nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing || paused;
-    // The last turn ends the game (18.35).
-    nextButton.textContent = t(state.turn >= LAST_TURN ? "bot.endGame" : "bot.nextTurn");
-    nextButton.title = pile ? t("bot.nextTitle.waitPile", { count: pile }) : t(state.turn >= LAST_TURN ? "bot.nextTitle.endGame" : "bot.nextTitle.ready");
-    renderEvents(state);
     if (select) {
       const armies = new Map<string, string>();
       for (const [id, s] of Object.entries(state.units)) {
@@ -311,7 +257,6 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
     const removed = s.sovietCards?.removed ?? [];
     const roll = s.adjustment?.roll;
     parts.status.innerHTML = (adj ? `<div><dt>${t("bot.status.adjustment")}</dt><dd>${roll ? t("bot.status.adjustmentRolled", { adjustment: adjustmentName(adj.id), roll }) : t(adjustmentName(adj.id))}</dd></div>` : "") +
-      `<div><dt>${t("bot.status.vp")}</dt><dd>${s.vp}</dd></div>` +
       `<div><dt>${t("bot.status.discard")}</dt><dd>${s.sovietDiscard.length ? s.sovietDiscard.map((c) => c.toUpperCase()).join(t("list.comma")) : t("bot.status.none")}</dd></div>` +
       (removed.length ? `<div><dt>${t("bot.status.removed")}</dt><dd>${removed.map((c) => c.toUpperCase()).join(t("list.comma"))}</dd></div>` : "");
   };

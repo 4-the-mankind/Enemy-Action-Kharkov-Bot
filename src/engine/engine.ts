@@ -23,10 +23,12 @@ import { createSovietActivation, type SovietActivations } from "./soviet-activat
 import { createSovietAttacks } from "./soviet-attacks";
 import { createSovietCards, type SovietCards } from "./soviet-cards";
 import { createSovietMovement, type SovietMovement } from "./soviet-movement";
-import { createVictory, LAST_TURN, type CalendarSpace } from "./victory";
+import { createTags, tagEvents } from "./tags";
+import { createVictory, KHARKOV, LAST_TURN, type CalendarSpace } from "./victory";
 import {
   emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameResult,
-  type GameState, type Location, type ObjectiveFace, type ObjectiveFront, type Reminder, type StackMove, type StepResult, type SupplyMarker,
+  type GameState, type Location, type ObjectiveFace, type ObjectiveFront, type Outlook, type Reminder, type StackMove, type StateTag, type StepResult,
+  type SupplyMarker,
 } from "./types";
 
 /** 8.2: STAVKA, removed from play at the start of a heavy mud Game-turn 7 (18.34). */
@@ -107,6 +109,12 @@ export interface Engine {
    * movement rules of German units unless `free` (Alt + drag, Q59), or null.
    */
   whyNotDrop(state: GameState, units: string[], to: Location, free?: boolean): Message | null;
+  /** The state tags of the moment (§3bis H, task 4.6b): the conditions the bot reads. */
+  tags(state: GameState): StateTag[];
+  /** What the victory check of this game-turn would give if the VPs stay as they are (18.35, Q85). */
+  outlook(state: GameState): Outlook;
+  /** Owner of Kharkov (18.35). */
+  kharkov(state: GameState): "german" | "soviet";
 }
 
 export function createEngine(data: EngineData): Engine {
@@ -121,6 +129,7 @@ export function createEngine(data: EngineData): Engine {
   const victory = createVictory({ board: data.board, movement, unit: (id) => byId.get(id), rules });
   const replacements = createReplacements({ movement, unit: (id) => byId.get(id), rules, units, move: (state, ids, to) => moveUnits(state, ids, to, "bot") });
   const space = (turn: number) => data.calendar?.find((t) => t.turn === turn);
+  const stateTags = createTags(rules);
   const sovietMovement = createSovietMovement({
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives,
     move: (state, id, to, path) => moveUnits(state, [id], to, "bot", path),
@@ -507,7 +516,7 @@ export function createEngine(data: EngineData): Engine {
       const checked = victory.check(state, space(state.turn));
       if (checked) events.push(checked);
       if (checked?.result) return endGame(state, checked.result, events);
-    }
+    } else events.push({ type: "VictorySkipped", turn: state.turn });
     if (state.turn >= LAST_TURN) return reject(state, "NextTurn", msg("reject.lastTurn", { turn: LAST_TURN }));
     // V: Dispersed and Forward Support markers off the map; [GT 4+] village garrisons checked
     // (15.3); [GT 7] objective markers out of play (9.12); ground condition markers (18.33).
@@ -796,7 +805,13 @@ export function createEngine(data: EngineData): Engine {
   /** A combat command: refused with its reason, or played. */
   const combatStep = (state: GameState, type: Command["type"], r: StepResult | Message): StepResult => ("key" in r ? reject(state, type, r) : r);
 
+  /** A step, its events marked with the state tags that weighed on them (task 4.6b, Q88). */
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
+    const r = play(state, command, actor);
+    return { ...r, events: tagEvents(r.events) };
+  }
+
+  function play(state: GameState, command: Command, actor: Actor = "player"): StepResult {
     if (state.result && !AFTER_END.has(command.type)) return reject(state, command.type, msg("reject.gameOver"));
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
     if (lock) return reject(state, command.type, lock);
@@ -910,6 +925,9 @@ export function createEngine(data: EngineData): Engine {
     whyNotGermanEvent: (state, event, hex) => locked(state) ?? germanEvents.whyNot(state, event, hex),
     whyNotDrop,
     unit: (id) => byId.get(id),
+    tags: stateTags.tags,
+    outlook: (state) => victory.outlook(state, space(state.turn)),
+    kharkov: (state) => (movement.townOwner(state, KHARKOV) === "soviet" ? "soviet" : "german"),
   };
 }
 

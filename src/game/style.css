@@ -42,7 +42,94 @@ kbd {
 
 /* ---------- Map ---------- */
 
-.map-area { position: relative; min-width: 0; min-height: 0; }
+/* The middle column: turn bar (A), tags bar (H), then the map. */
+.center { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100vh; }
+.map-area { position: relative; flex: 1; min-width: 0; min-height: 0; }
+
+/* ---------- Turn bar (A) and tags bar (H), task 4.6b ---------- */
+
+.turn-bar {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px;
+  padding: 7px 14px; background: var(--feldgrau-deep); border-bottom: 1px solid var(--feldgrau);
+}
+.tb-turn { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; }
+.tb-turn b { font-weight: 600; font-size: 1.02rem; }
+.tb-turn small, .tb-phase { color: var(--paper-dim); font-size: 0.85rem; }
+.tb-turn small::after { content: "·"; margin-left: 8px; }
+.tb-vp { display: flex; align-items: center; gap: 6px; }
+.vp-chip { padding: 1px 8px; font-size: 0.9rem; border: 1px solid var(--paper-dim); border-radius: 10px; font-variant-numeric: tabular-nums; }
+.vp-chip b { font-weight: 600; }
+/* The outcome if the VPs stay so (18.35, Q85): green victory, red defeat, amber draw, grey no check. */
+.outlook { padding: 1px 8px; font-size: 0.8rem; font-weight: 600; border-radius: 3px; white-space: nowrap; cursor: help; }
+.outlook.victory { color: #10240f; background: #7fbf6a; }
+.outlook.defeat { color: #fff; background: var(--stab-red); }
+.outlook.draw { color: #2b1d00; background: #e0b048; }
+.outlook.goesOn, .outlook.none { color: var(--paper-dim); background: rgb(232 228 211 / 0.1); font-weight: 500; }
+.outlook.final { outline: 1px solid currentColor; outline-offset: 1px; }
+.tb-kharkov { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: help; }
+.tb-kharkov img { width: 22px; height: 22px; border-radius: 2px; }
+.tb-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.tb-actions .btn { white-space: nowrap; padding: 4px 11px; }
+.tb-actions .btn kbd { margin-left: 2px; }
+.tb-actions .btn.ink { font-weight: 600; color: var(--slip-ink); background: var(--paper); border-color: var(--paper); }
+.tb-actions .btn.ink:hover:not([disabled]) { background: #fff; }
+.tb-reason { position: absolute; z-index: 11; right: 14px; top: 100%; margin: 4px 0 0; padding: 4px 10px; font-size: 0.85rem; color: #fff; background: #8e1d22; border-radius: 3px; box-shadow: 0 3px 8px rgb(0 0 0 / 0.4); }
+.tb-reason:empty { display: none; }
+
+.tags-bar {
+  position: relative; z-index: 10; display: flex; align-items: center; gap: 8px; min-height: 36px;
+  padding: 4px 14px; background: var(--feldgrau-dark); border-bottom: 1px solid var(--feldgrau);
+}
+.tags { display: flex; flex-wrap: wrap; gap: 4px 6px; flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 3px; font-size: 0.85rem;
+  background: rgb(232 228 211 / 0.08); border: 1px solid var(--feldgrau-light); border-radius: 3px; cursor: help;
+}
+.tag-chip img, .tag-chip .tag-glyph { width: 22px; height: 22px; border-radius: 2px; flex: none; }
+.tag-chip img.card { width: auto; }
+.tag-chip .tag-until { color: var(--paper-dim); font-size: 0.75rem; }
+.tag-chip.lightMud, .tag-chip.heavyMud, .tag-chip.desperation { border-color: var(--paper-dim); font-weight: 600; }
+.tags-none { color: var(--paper-dim); font-size: 0.85rem; }
+.tag-glyph .zone { fill: rgb(192 39 45 / 0.25); }
+.tag-glyph .edge { fill: none; stroke: var(--stab-red); stroke-width: 2; }
+.tag-glyph.support .zone { fill: rgb(232 228 211 / 0.2); }
+.tag-glyph.support .edge { stroke: var(--paper); }
+.add-event { position: relative; flex: none; }
+.add-event > .btn { padding: 3px 10px; font-size: 0.85rem; white-space: nowrap; }
+.event-pop {
+  position: absolute; z-index: 30; right: 0; top: calc(100% + 6px); width: min(360px, calc(100vw - 32px));
+  padding: 10px 14px; font-size: 0.88rem; background: var(--feldgrau-deep); border: 1px solid var(--feldgrau-light);
+  border-radius: 4px; box-shadow: 0 6px 18px rgb(0 0 0 / 0.5);
+}
+.event-pop[hidden] { display: none; }
+.event-pop h2 { margin: 0; font-size: 0.95rem; }
+
+/* The explanation slip of an element with a "help" cursor, opened by a click (Q89, info-pop.ts). */
+.info-pop {
+  position: fixed; z-index: 45; width: max-content; max-width: min(340px, calc(100vw - 16px)); padding: 9px 12px;
+  font-size: 0.86rem; line-height: 1.4; color: var(--slip-ink); background: var(--slip); border-radius: 4px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.45);
+}
+.info-pop[hidden] { display: none; }
+.info-pop header { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.info-pop header img, .info-pop header .tag-glyph { width: 26px; height: 26px; border-radius: 2px; flex: none; }
+.info-pop header img.card { width: auto; height: 34px; }
+.info-pop header b { font-weight: 600; }
+.info-pop header b::first-letter { text-transform: uppercase; }
+.info-pop p { margin: 0; }
+.info-pop .info-foot { margin-top: 6px; font-size: 0.78rem; color: var(--slip-dim); }
+.info-pop .tag-glyph.support .zone { fill: rgb(38 46 41 / 0.15); }
+.info-pop .tag-glyph.support .edge { stroke: var(--slip-ink); }
+[data-info][aria-expanded="true"] { outline: 2px solid var(--paper); outline-offset: 1px; }
+
+/* A tag cited by a log line or a "Why this move" step (Q88). */
+.tag-marks { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 6px; vertical-align: middle; }
+.tag-mark {
+  display: inline-flex; align-items: center; gap: 3px; padding: 0 5px 0 1px; font-size: 0.72rem; line-height: 1.5;
+  white-space: nowrap; border: 1px solid currentColor; border-radius: 3px; opacity: 0.85; cursor: help; vertical-align: middle;
+}
+.tag-mark img, .tag-mark .tag-glyph { width: 14px; height: 14px; border-radius: 1px; }
+.tag-mark img.card { width: auto; }
 
 .viewport {
   position: absolute;
@@ -551,6 +638,7 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
   .dossier.right:not(.folded) .folder-tabs { position: fixed; z-index: 21; right: min(var(--rail-w), calc(100vw - var(--tabs-w) - 16px)); }
   .units-body { width: var(--units-w); }
   .inspector { width: auto; right: 14px; }
+  .tb-actions .keys { display: none; }
 }
 
 .recap-actions { flex-wrap: wrap; }
@@ -660,12 +748,6 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .reminder .btn:hover { background: rgb(38 46 41 / 0.1); }
 
 .activate { padding-top: 14px; border-top: 1px solid var(--feldgrau); }
-.turn-line { margin: 0 0 8px; font-size: 0.9rem; color: var(--paper-dim); }
-.turn-line b { color: var(--paper); font-weight: 600; }
-.impulse-row { display: flex; gap: 8px; }
-.impulse-row .btn { white-space: nowrap; }
-.activate .btn.ink { flex: 1; font-weight: 600; color: var(--slip-ink); background: var(--paper); border-color: var(--paper); }
-.activate .btn.ink:hover:not([disabled]) { background: #fff; }
 .activate-row { display: flex; gap: 8px; margin-top: 8px; }
 .army-select {
   flex: 1; min-width: 0; padding: 5px 6px; font: inherit; color: var(--paper);
@@ -1114,19 +1196,11 @@ body.in-combat .bot-options { display: none; }
 .stop.now .station { background: var(--stab-red); }
 .stop.now .stop-label b { color: var(--paper); }
 
-/* The ground of the turn beside the turn line of the Bot tab. */
-.ground-chip { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; color: var(--paper); white-space: nowrap; }
-.ground-chip img { width: 18px; height: 18px; border-radius: 2px; }
-.ground-chip.lightMud, .ground-chip.heavyMud { font-weight: 600; }
-
 /* A ground reminder shows its marker, square, not a card. */
 .reminder.ground img { height: 38px; cursor: default; }
 .reminder.heavyMud { border-left-color: var(--slip-ink); }
 
-/* German events only the app can play (Q77). */
-.german-events { margin-top: 12px; font-size: 0.88rem; }
-.german-events summary { cursor: pointer; color: var(--paper-dim); }
-.german-events summary:hover { color: var(--paper); }
+/* German events only the app can play (Q77), under "Add event" in the tags bar (Q87). */
 .event-list { display: grid; gap: 8px; margin-top: 8px; }
 .event { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--feldgrau); }
 .event-name b { font-weight: 600; color: var(--paper); }

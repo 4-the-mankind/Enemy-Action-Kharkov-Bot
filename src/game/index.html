@@ -29,6 +29,9 @@
       </nav>
     </aside>
 
+    <div class="center">
+    <header id="turnBar" class="turn-bar" data-i18n-aria-label="page.turnBar"></header>
+    <section id="tagsBar" class="tags-bar" data-i18n-aria-label="page.tagsBar"></section>
     <main class="map-area">
       <div id="viewport" class="viewport" tabindex="0" data-i18n-aria-label="page.viewport"></div>
       <aside id="inspector" class="inspector" aria-live="polite"></aside>
@@ -53,6 +56,7 @@
         </button>
       </div>
     </main>
+    </div>
 
     <aside id="railDossier" class="dossier right" data-i18n-aria-label="page.rail">
       <nav class="folder-tabs" role="tablist" data-i18n-aria-label="page.railTabs">
@@ -80,10 +84,7 @@
         </section>
 
         <section data-tabpanel="log" class="rail-section log-section" data-i18n-aria-label="page.tab.log">
-          <div class="log-tools">
-            <button type="button" id="undo" class="switch" aria-keyshortcuts="Control+Z" disabled><span data-i18n="page.undo"></span> <kbd>Ctrl</kbd> + <kbd>Z</kbd></button>
-          </div>
-          <p class="hint" data-i18n="page.undoHint"></p>
+          <p class="hint" data-i18n="page.logHint"></p>
           <ol id="log" class="log"></ol>
         </section>
 

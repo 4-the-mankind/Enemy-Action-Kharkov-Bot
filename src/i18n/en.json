@@ -730,12 +730,6 @@
     "devActivate": "Activate an army (dev scenario)",
     "devArmy": "Soviet army",
     "activate": "Activate",
-    "turnLine": {
-      "started": "<b>Game-turn {{turn}}</b>, after Soviet impulse {{impulse}}",
-      "noImpulse": "<b>Game-turn {{turn}}</b>, no Soviet impulse yet",
-      "beforeStart": "<b>Game-turn 1</b>, before Start",
-      "over": "<b>Game-turn {{turn}}</b>, the game is over."
-    },
     "runTitle": {
       "pileEmpty": "The Soviet draw pile is empty.",
       "endsImpulse": "Ends your German impulse: the bot plays its Soviet impulse."
@@ -789,7 +783,6 @@
     "status": {
       "adjustment": "Set-up adjustment",
       "adjustmentRolled": "{{adjustment}} (rolled {{roll}})",
-      "vp": "Soviet VP",
       "discard": "Soviet discard",
       "none": "None",
       "removed": "Out of the game"
@@ -1023,7 +1016,8 @@
       "ends": "Victory check, game-turn {{turn}}: {{vp}} VP, Kharkov {{kharkov}}-owned. German victory below {{below}} with Kharkov German, defeat {{defeat}} (18.35).",
       "above": "above {{vp}}",
       "atLeast": "at {{vp}} or more",
-      "result": "<b>The game is over: {{result}}.</b>"
+      "result": "<b>The game is over: {{result}}.</b>",
+      "skipped": "No victory check at the end of game-turn {{turn}}: heavy mud (18.34)."
     },
     "event": {
       "stavkaConfused": "STAVKA Confused: {{cards}} discarded from the Soviet draw pile.",
@@ -1304,13 +1298,16 @@
     "activation": "Activation",
     "whyThisMove": "Why this move",
     "undo": "Undo",
-    "undoHint": "Undo takes back the last action and removes it from the log. Arrow keys move the map.",
+    "undoHint": "Takes back the last action and removes it from the log.",
     "overlaysHint": "Lay a sheet on the map to check what the bot reads from it.",
     "printedMap": "Printed map",
     "unitsSwitch": "Units",
     "fitMap": "Fit map",
     "combatNone": "No combat in progress: the tab opens by itself when one begins.",
-    "gameEnd": "End of the game"
+    "gameEnd": "End of the game",
+    "logHint": "Undo, in the turn bar, takes back the last action and removes it from the log. Arrow keys move the map.",
+    "turnBar": "Turn bar",
+    "tagsBar": "State tags"
   },
   "legend": {
     "title": "Bot moves legend",
@@ -1867,5 +1864,112 @@
     "undo": "Undo the last turn",
     "fold": "Look at the map",
     "show": "Show"
+  },
+  "turnBar": {
+    "turn": "Game-turn {{turn}} / {{last}}",
+    "beforeStart": "before Start",
+    "over": "the game is over",
+    "noImpulse": "no Soviet impulse yet",
+    "afterImpulse": "after Soviet impulse {{impulse}}",
+    "vp": "VP <b>{{vp}}</b>",
+    "vpTitle": "Soviet victory points (17.1).",
+    "kharkov": "Kharkov: {{side}}",
+    "kharkovTitle": "Owner of Kharkov (14.1): a German victory needs it German-owned (18.35).",
+    "level": {
+      "strategic": "strategic",
+      "operational": "operational",
+      "tactical": "tactical"
+    },
+    "outlook": {
+      "goesOn": "Game goes on",
+      "beforeTurn4": "No check before GT 4",
+      "beforeTurn4Title": "Victory is checked at the end of each game-turn from game-turn 4 on (18.35).",
+      "heavyMud": "No check: heavy mud",
+      "heavyMudTitle": "No victory check at the end of a heavy mud game-turn (18.34).",
+      "if": "If the VPs stay so, the victory check at the end of game-turn {{turn}} gives this (18.35).",
+      "ifLast": "If the VPs stay so, the end of game-turn {{turn}} ends the game with this (18.35).",
+      "levels": "German {{victoryLevel}} victory below {{below}} VP with Kharkov German-owned; German {{defeatLevel}} defeat {{defeat}} VP.",
+      "over": "The game is over (17.2, 18.35)."
+    }
+  },
+  "tag": {
+    "title": "Conditions the bot reads",
+    "none": "No condition in effect",
+    "beforeStart": "Conditions show once the game starts",
+    "addEvent": "Add event",
+    "event": "German event",
+    "until": {
+      "turn": "Game-turn {{turn}}",
+      "turn7": "Until game-turn 7",
+      "supplyPhase": "Until the Supply Phase",
+      "vpAtLeast": "While {{vp}} VP or more",
+      "vpAtMost": "While {{vp}} VP or fewer",
+      "vpBelow": "While below {{vp}} VP",
+      "turnStart": "Until game-turn {{turn}} starts",
+      "game": "Rest of the game"
+    },
+    "frozen": {
+      "name": "Frozen",
+      "short": "frozen",
+      "effect": "No effect: the game-turn is played as normal.",
+      "hint": "Frozen ground: no effect (18.34)."
+    },
+    "lightMud": {
+      "name": "Light mud",
+      "short": "light mud",
+      "effect": "Light Mud river costs; no German strategic movement; six combat chits at most; a Soviet card to return to the draw pile is discarded instead.",
+      "hint": "Light mud (18.34): Light Mud river costs, no German strategic movement, six combat chits at most, returned Soviet cards discarded."
+    },
+    "heavyMud": {
+      "name": "Heavy mud",
+      "short": "heavy mud",
+      "effect": "No cards played, no activations: two infantry replacement steps each side instead; no victory check at the end of the turn.",
+      "hint": "Heavy mud (18.34): no cards, no activations, replacement steps instead, no victory check."
+    },
+    "support": {
+      "name": {
+        "west": "Support: west line",
+        "east": "Support: east line"
+      },
+      "short": "support",
+      "effect": "Soviet units east of the line are in support. Unsupported Soviet attacks and defenses get no combat tactics; unsupported units get no replacements or IP.",
+      "hint": "Soviet support (13.51-13.52): no combat tactics, replacements or IP outside support."
+    },
+    "forwardSupport": {
+      "name": "Forward Support {{count}}/{{max}}",
+      "short": "Forward Support",
+      "effect": "Hexes within five hexes of the markers in {{hexes}} are in Soviet support; the markers leave the map at the end of the turn.",
+      "hint": "Forward Support markers (13.53): every hex within five hexes is in Soviet support."
+    },
+    "operationalLimit": {
+      "name": {
+        "near": "Operational limit: near",
+        "far": "Operational limit: far"
+      },
+      "short": "operational limit",
+      "effect": "Units of the fronts without objective marker ({{fronts}}) are held back beyond the line in their movement methods and placements.",
+      "effectNone": "No front is subject yet: both front objective markers are on the map.",
+      "hint": "Soviet operational limit (9.8): units of a front without objective marker are held back beyond the line."
+    },
+    "desperation": {
+      "name": "Soviet desperation",
+      "short": "desperation",
+      "effect": "Below 19 VP, the fronts without objective marker ({{fronts}}) process movement method 11 right after method 5.",
+      "hint": "Soviet desperation (9.22): below 19 VP, method 11 comes right after method 5."
+    },
+    "okwExpedites": {
+      "name": "OKW Expedites",
+      "short": "OKW Expedites",
+      "effect": "Your units due on game-turn 6 enter their reserve box on game-turn 5.",
+      "hint": "OKW Expedites: your game-turn 6 units come on game-turn 5."
+    },
+    "stavkaRemoved": {
+      "name": "STAVKA out of play",
+      "short": "STAVKA out",
+      "effect": "The STAVKA card (E22) has left play (8.2): the bot no longer draws it.",
+      "effectMud": "The STAVKA card (E22) left play at the start of heavy mud game-turn 7 (18.34): the bot no longer draws it.",
+      "hint": "STAVKA (E22) out of play: the bot no longer draws it."
+    },
+    "slipRule": "Rule {{rule}}"
   }
 }
