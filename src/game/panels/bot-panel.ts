@@ -59,7 +59,7 @@ function readImpulse(events: GameEvent[], depth: number, before?: Reading): Read
   return { depth, drawn, blocks };
 }
 
-export function mountBotPanel(parts: Parts, session: GameSession, player: MovePlayer, why: ReturnType<typeof mountWhyPanel>, dev = false) {
+export function mountBotPanel(parts: Parts, session: GameSession, player: MovePlayer, why: ReturnType<typeof mountWhyPanel>) {
   const engine = session.engine;
   const cards = engine.sovietCards;
   /** The activation on show, and the undo depth that takes it back. */
@@ -104,7 +104,8 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   parts.activate.innerHTML = `<p class="activate-reason" role="status"></p>
     <p class="combat-wait" role="status" hidden></p>
     <div class="playback" hidden></div>` +
-    (dev ? `<details class="dev-activate"><summary>${t("bot.devActivate")}</summary>
+    // In dev, shown for the booklet positions (setDev).
+    (import.meta.env.DEV ? `<details class="dev-activate" hidden><summary>${t("bot.devActivate")}</summary>
       <div class="activate-row"><select class="army-select" aria-label="${t("bot.devArmy")}"></select><button type="button" class="btn switch" data-action="activate">${t("bot.activate")}</button></div></details>` : "");
   const reason = parts.activate.querySelector<HTMLElement>(".activate-reason")!;
   const select = parts.activate.querySelector<HTMLSelectElement>(".army-select");
@@ -292,5 +293,10 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   render(session.state);
   return {
     onStep,
+    /** The dev activation (a booklet position loaded, dev only). */
+    setDev(on: boolean) {
+      const dev = parts.activate.querySelector<HTMLElement>(".dev-activate");
+      if (dev) dev.hidden = !on;
+    },
   };
 }

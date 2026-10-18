@@ -48,7 +48,7 @@ export function mountInfoPop() {
     if (!(e.target as Element).closest(".info-pop")) close();
   }, true);
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !pop.hidden) { close(); return; }
+    if (e.key === "Escape" && !pop.hidden) { e.preventDefault(); close(); return; }
     const el = (e.target as Element).closest?.<HTMLElement>("[data-info]");
     if (el && (e.key === "Enter" || e.key === " ")) { e.stopPropagation(); e.preventDefault(); open(el); }
   }, true);

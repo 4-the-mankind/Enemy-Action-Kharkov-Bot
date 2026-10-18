@@ -65,7 +65,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
   };
   addButton.addEventListener("click", () => openPop(pop.hidden !== false));
   document.addEventListener("pointerdown", (e) => { if (!pop.hidden && !(e.target as Element).closest(".add-event")) openPop(false); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.hidden) openPop(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.hidden) { e.preventDefault(); openPop(false); } });
   pop.addEventListener("click", (e) => {
     const event = (e.target as Element).closest<HTMLElement>("[data-event]");
     if (!event) return;

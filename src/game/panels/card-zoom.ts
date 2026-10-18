@@ -42,6 +42,6 @@ export function mountCardZoom(root: HTMLElement = document.body) {
     zoom.hidden = true;
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && pinned) { pinned = null; zoom.classList.remove("pinned"); zoom.hidden = true; }
+    if (e.key === "Escape" && pinned) { e.preventDefault(); pinned = null; zoom.classList.remove("pinned"); zoom.hidden = true; }
   });
 }

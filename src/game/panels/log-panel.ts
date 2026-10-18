@@ -270,7 +270,7 @@ function garrisonTrace(e: Extract<GameEvent, { type: "GarrisonsPlaced" }>): stri
  * An undo removes the lines of the step it takes back; refused commands stay (they changed nothing).
  * A click on a bot decision line shows its "Why this move" slip.
  */
-export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision, line: HTMLLIElement) => void, intro?: string) {
+export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision, line: HTMLLIElement) => void) {
   const decisions = new WeakMap<HTMLLIElement, Decision>();
   root.addEventListener("click", (e) => {
     const li = (e.target as Element).closest("li");
@@ -291,9 +291,8 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
   };
   /** Lines of each step that changed the state, in the order of the undo history. */
   const steps: HTMLLIElement[][] = [];
-  add(intro ?? t("log.newGame"));
-  session.subscribe((_, events, undo) => {
-    if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
+  /** The lines of one step, newest first; refused commands' lines are not part of the step (Undo leaves them). */
+  const write = (events: GameEvent[], fresh = true): HTMLLIElement[] => {
     const lines: HTMLLIElement[] = [];
     // A set-up adjustment is one step: its own actions are listed under it, in play order.
     // So is a Soviet impulse, and the start of a turn.
@@ -305,7 +304,7 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
       // The state tags that weighed on it (task 4.6b, Q88).
       const marks = tagMarks(e.tags), fold = line.html.indexOf("<details");
       const html = fold < 0 ? line.html + marks : line.html.slice(0, fold) + marks + line.html.slice(fold);
-      const cls = (line.refused ? "fresh refused" : "fresh") + (grouped && i > 0 ? " sub" : "");
+      const cls = [line.refused && "refused", fresh && "fresh", grouped && i > 0 && "sub"].filter(Boolean).join(" ");
       let li: HTMLLIElement;
       if (grouped && anchor) {
         li = document.createElement("li");
@@ -322,6 +321,30 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
       }
       if (!line.refused) lines.push(li);
     }
-    if (lines.length) steps.push(lines);
+    return lines;
+  };
+  add(t("log.newGame"));
+  session.subscribe((_, events, undo) => {
+    if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
+    const lines = write(events);
+    // One entry per state change, even one without a line, so that Undo takes back the right lines.
+    if (session.depth > steps.length) steps.push(lines);
   });
+
+  // A loaded game (task 5.2): the log written again from the steps replayed, then the load's own lines.
+  let loaded: { intro: string; notes: string[] } | null = null;
+  session.onRestore(() => {
+    root.replaceChildren();
+    steps.length = 0;
+    add(loaded?.intro ?? t("log.newGame"));
+    for (const events of session.steps()) steps.push(write(events, false));
+    for (const note of loaded?.notes ?? []) add(note, "fresh");
+    loaded = null;
+  });
+  return {
+    /** A line outside the undo history (a game saved). */
+    note(html: string) { add(html, "fresh"); },
+    /** The first line and the closing lines of the log written for the next loaded game. */
+    onLoad(intro: string, notes: string[]) { loaded = { intro, notes }; },
+  };
 }

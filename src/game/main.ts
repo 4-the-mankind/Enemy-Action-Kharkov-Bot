@@ -25,12 +25,14 @@ import { mountCardZoom } from "./panels/card-zoom";
 import { mountCombatPanel } from "./panels/combat-panel";
 import { mountGameEnd } from "./panels/game-end";
 import { mountReminders } from "./panels/reminders";
+import { mountLoadScreen } from "./panels/load-screen";
+import { mountMainMenu } from "./panels/main-menu";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountTurnBar } from "./panels/turn-bar";
 import { mountWhyPanel } from "./panels/why-panel";
 import { BotMovePlayer, readBotMoves } from "./playback/bot-moves";
 import { MovePlayer } from "./playback/move-player";
-import { scenarioFromUrl } from "./scenarios";
+import { bookletInUrl, downloadSave, fetchBooklet, loadSave, newGame } from "./saves";
 import { GameSession } from "./state/session";
 import { Selection } from "./state/selection";
 import { applyI18n, t } from "../i18n/i18n";
@@ -113,15 +115,14 @@ async function init() {
   });
   player.onPlaying((playing) => supply.setHeld(playing));
   const why = mountWhyPanel($("why"), session, player);
-  const scenario = scenarioFromUrl(session.engine);
-  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
+  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why);
   mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
   mountGameEnd($("gameEnd"), session, game.calendar);
   const combatPanel = mountCombatPanel($("combat"), session, combatPlane);
   mountCardZoom();
   // A log line's "Why this move" opens right under it, in the Log tab.
-  mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); }, scenario?.note);
+  const log = mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); });
   mountTurnBar($("turnBar"), $("tagsBar"), session, player, game.calendar);
 
   // The Combat tab (D18): enabled only during a combat, opened when one begins, closed after it.
@@ -204,7 +205,6 @@ async function init() {
     },
     menu: (unit, at, hex) => menu.open(unit, at, hex),
   };
-  if (scenario) session.load(scenario.state);
   units.render(session.state);
   document.body.classList.toggle("game-locked", !!session.engine.locked(session.state));
 
@@ -224,9 +224,21 @@ async function init() {
   unitsButtons.forEach((b) => b.addEventListener("click", () => setUnitsShown(!unitsShown())));
   document.addEventListener("keydown", (e) => {
     if (e.target instanceof Element && e.target.matches("input, select, textarea")) return;
+    // Escape (Q101): one thing at a time. A pop-up closed first (it marks the key as taken; a
+    // drag and the counter menu stop it before it gets here), then the pinned hex and the
+    // selection; with nothing left, the main menu. In the menu, back to the game.
+    if (e.key === "Escape") {
+      // Nothing while a save is replayed (the loading screen).
+      if (e.defaultPrevented || document.body.classList.contains("loading-save")) return;
+      if (mainMenu.isOpen()) mainMenu.escape();
+      else if (selection.list().length || insp.pinnedHex()) { selection.clear(); insp.release(); }
+      else mainMenu.open();
+      return;
+    }
+    // No game shortcut behind the main menu.
+    if (document.body.classList.contains("menu-open")) return;
     if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) { e.preventDefault(); session.undo(); return; }
-    if (e.key === "Escape") { selection.clear(); insp.release(); }
-    else if (e.key === "0") view.resetView();
+    if (e.key === "0") view.resetView();
     else if (e.key in PAN_KEYS && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const [dx, dy] = PAN_KEYS[e.key], step = e.shiftKey ? 240 : 80;
       e.preventDefault();
@@ -238,7 +250,24 @@ async function init() {
     else if ((e.key === "g" || e.key === "G") && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSupply("german");
   });
 
+  // Main menu (task 5.2, Q99): the game stays in this page behind it. Only a reload or closing
+  // the page loses it: asked first when it changed since it was last saved (Q94).
+  window.addEventListener("beforeunload", (e) => { if (session.dirty) e.preventDefault(); });
+  const screen = mountLoadScreen($("loadScreen"));
+  const mainMenu = mountMainMenu($("mainMenu"), session, {
+    newGame: () => { bot.setDev(false); newGame(session, log); },
+    load: async (save) => { bot.setDev(!!save.booklet && import.meta.env.DEV); await loadSave(session, save, screen, log); },
+    save: () => downloadSave(session, log),
+    booklet: fetchBooklet,
+  });
+  document.querySelector("[data-action=menu]")!.addEventListener("click", () => mainMenu.open());
+  // A new or loaded game: nothing of the previous one stays selected, pinned or walking.
+  session.onRestore(() => { selection.clear(); insp.release(); botMoves.stop(); player.clear(); });
+
   view.fit();
+  // A booklet position named in the URL (dev): opened at once.
+  const booklet = bookletInUrl();
+  if (booklet) await mainMenu.openBooklet(booklet);
   if (warnings.length) status(t("map.layersEmpty", { warnings: warnings.join(" ") }), true);
 }
 

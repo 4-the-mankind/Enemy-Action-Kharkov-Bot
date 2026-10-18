@@ -1,0 +1,1261 @@
+{
+ "format": 1,
+ "app": {
+  "version": "0.1.0",
+  "commit": "9eaad9b",
+  "modified": true
+ },
+ "savedAt": "2026-10-18T21:03:31.134Z",
+ "start": {
+  "version": 1,
+  "turn": 1,
+  "setUp": true,
+  "units": {
+   "germ_1-lah-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_1-tot-IISS_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_106-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_11-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_110-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_111-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_114-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_126-23p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_128-23p-LVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_15-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_164-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_167-Raus_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_199-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_2-lah-IISS_arm": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_201-23p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_217-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_25-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_255-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_27-19P-IIICorps_arm": {
+    "at": "1802",
+    "face": "front"
+   },
+   "germ_298-LVII_inf": {
+    "at": "1003",
+    "face": "front"
+   },
+   "germ_3-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_3-tot-IISS_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_332-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_335-IIICorps_inf": {
+    "at": "1903",
+    "face": "front"
+   },
+   "germ_387-IIICorps_inf": {
+    "at": "1604",
+    "face": "front"
+   },
+   "germ_39-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_4-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_40-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_417-168-Raus_infantry": {
+    "at": "0205",
+    "face": "front"
+   },
+   "germ_429-168-Raus_inf": {
+    "at": "0205",
+    "face": "front"
+   },
+   "germ_442-168-Raus_inf": {
+    "at": "0206",
+    "face": "front"
+   },
+   "germ_5-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_543-387-IIICorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_585-320-Raus_inf": {
+    "at": "1203",
+    "face": "front"
+   },
+   "germ_586-320-Raus_inf": {
+    "at": "1402",
+    "face": "front"
+   },
+   "germ_587-320-Raus_infantry": {
+    "at": "1503",
+    "face": "front"
+   },
+   "germ_6-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_6-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_63-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_679-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_680-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_681-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_684-335-IIICorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_7-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_73-19P-IIICorps_arm": {
+    "at": "1804",
+    "face": "front"
+   },
+   "germ_74-19P-IIICorps_arm": {
+    "at": "1904",
+    "face": "front"
+   },
+   "germ_81-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_88-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_ah-lah-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_df-dr-IISS_mech": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_dl-dr-IISS_mech": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_Fus-Grd-XLVIII_armor": {
+    "at": "0604",
+    "face": "front"
+   },
+   "germ_Gre-Grd-XLVIII_armor": {
+    "at": "0803",
+    "face": "front"
+   },
+   "germ_lg-dr-IISS_armor": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_pangd-XLVIII_mech": {
+    "at": "0404",
+    "face": "front"
+   },
+   "germ_SS RegimentGerm-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_SSReg. Westland-XLCorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_SSReg.Nordland-XLCorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_tot-tot-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_10-Popov_mech": {
+    "at": "1701",
+    "face": "front"
+   },
+   "sov_100-40th_infantry": {
+    "at": "0105",
+    "face": "front"
+   },
+   "sov_106-6th_infantry": {
+    "at": "1302",
+    "face": "front"
+   },
+   "sov_111-3rdT_infantry": {
+    "at": "1002",
+    "face": "front"
+   },
+   "sov_11C-3rdT_cav": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_152-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_160-3rdT_infantry": {
+    "at": "0703",
+    "face": "front"
+   },
+   "sov_161-69th_infantry": {
+    "at": "0104",
+    "face": "front"
+   },
+   "sov_172-6th_infantry": {
+    "at": "1202",
+    "face": "front"
+   },
+   "sov_173-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_18-Popov_armor": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_180-69th_infantry": {
+    "at": "0403",
+    "face": "front"
+   },
+   "sov_184-3rdT_infantry": {
+    "at": "0702",
+    "face": "front"
+   },
+   "sov_195-1stGuards_infantry": {
+    "at": "1702",
+    "face": "front"
+   },
+   "sov_19G-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_1GC-3rdT_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_2-1stGuards_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_20G-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_219-69th_infantry": {
+    "at": "0204",
+    "face": "front"
+   },
+   "sov_25-Popov_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_253-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_259-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_25G-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_263-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_267-6th_infantry": {
+    "at": "1302",
+    "face": "front"
+   },
+   "sov_270-69th_infantry": {
+    "at": "0304",
+    "face": "front"
+   },
+   "sov_2GC-Popov_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_3-Popov_armor": {
+    "at": "1502",
+    "face": "front"
+   },
+   "sov_303-69th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_305-40th_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_309-40th_infantry": {
+    "at": "0105",
+    "face": "front"
+   },
+   "sov_340-40th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_350-6th_infantry": {
+    "at": "1103",
+    "face": "front"
+   },
+   "sov_35G-Popov_infantry": {
+    "at": "1704",
+    "face": "front"
+   },
+   "sov_37-69th_infantry": {
+    "at": "0204",
+    "face": "front"
+   },
+   "sov_38G-1stGuards_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_41G-Popov_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_44G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_48G-3rdT_infantry": {
+    "at": "0603",
+    "face": "front"
+   },
+   "sov_50G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_50G-Popov_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_52-1stGuards_infantry": {
+    "at": "1801",
+    "face": "front"
+   },
+   "sov_57G-Popov_infantry": {
+    "at": "1603",
+    "face": "front"
+   },
+   "sov_58G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_5G-40th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_6-6th_infantry": {
+    "at": "1202",
+    "face": "front"
+   },
+   "sov_62G-3rdT_infantry": {
+    "at": "0903",
+    "face": "front"
+   },
+   "sov_6GC-3rdT_armor": {
+    "at": "1001",
+    "face": "front"
+   },
+   "sov_78G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A-2G-40th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A12-3rdT_mech": {
+    "at": "0902",
+    "face": "front"
+   },
+   "sov_A15-3rdT_armor": {
+    "at": "0602",
+    "face": "front"
+   },
+   "sov_A1G-6th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A3G-69th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A4G-Popov_armor": {
+    "at": "1601",
+    "face": "front"
+   },
+   "sov_B12-3rdT_armor": {
+    "at": "0902",
+    "face": "front"
+   },
+   "sov_B15-3rdT_mech": {
+    "at": "0602",
+    "face": "front"
+   },
+   "sov_B1G-6th_armcav": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B2G-69th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B3G-69th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B4G-Popov_mech": {
+    "at": "1601",
+    "face": "front"
+   }
+  },
+  "order": [
+   "germ_1-lah-IISS_mech",
+   "germ_1-tot-IISS_armor",
+   "germ_106-15-LVII_inf",
+   "germ_11-6p-XLVIII_armor",
+   "germ_110-11p-XLVIII_armor",
+   "germ_111-11p-XLVIII_armor",
+   "germ_114-6p-XLVIII_armor",
+   "germ_126-23p-LVII_armor",
+   "germ_128-23p-LVIII_armor",
+   "germ_15-11p-XLVIII_armor",
+   "germ_164-57-Raus_infantry",
+   "germ_167-Raus_inf",
+   "germ_199-57-Raus_infantry",
+   "germ_2-lah-IISS_arm",
+   "germ_201-23p-LVII_armor",
+   "germ_217-57-Raus_infantry",
+   "germ_25-7P-XLCorps_arm",
+   "germ_255-Raus_infantry",
+   "germ_27-19P-IIICorps_arm",
+   "germ_298-LVII_inf",
+   "germ_3-3P-IIICorps_arm",
+   "germ_3-tot-IISS_armor",
+   "germ_332-Raus_infantry",
+   "germ_335-IIICorps_inf",
+   "germ_387-IIICorps_inf",
+   "germ_39-17p-LVII_armor",
+   "germ_4-6p-XLVIII_armor",
+   "germ_40-17p-LVII_armor",
+   "germ_417-168-Raus_infantry",
+   "germ_429-168-Raus_inf",
+   "germ_442-168-Raus_inf",
+   "germ_5-3P-IIICorps_arm",
+   "germ_543-387-IIICorps_inf",
+   "germ_585-320-Raus_inf",
+   "germ_586-320-Raus_inf",
+   "germ_587-320-Raus_infantry",
+   "germ_6-3P-IIICorps_arm",
+   "germ_6-7P-XLCorps_arm",
+   "germ_63-17p-LVII_armor",
+   "germ_679-333-XLCorps_inf",
+   "germ_680-333-XLCorps_inf",
+   "germ_681-333-XLCorps_inf",
+   "germ_684-335-IIICorps_inf",
+   "germ_7-7P-XLCorps_arm",
+   "germ_73-19P-IIICorps_arm",
+   "germ_74-19P-IIICorps_arm",
+   "germ_81-15-LVII_inf",
+   "germ_88-15-LVII_inf",
+   "germ_ah-lah-IISS_mech",
+   "germ_df-dr-IISS_mech",
+   "germ_dl-dr-IISS_mech",
+   "germ_Fus-Grd-XLVIII_armor",
+   "germ_Gre-Grd-XLVIII_armor",
+   "germ_lg-dr-IISS_armor",
+   "germ_pangd-XLVIII_mech",
+   "germ_SS RegimentGerm-XLCorps_inf",
+   "germ_SSReg. Westland-XLCorps_arm",
+   "germ_SSReg.Nordland-XLCorps_arm",
+   "germ_tot-tot-IISS_mech",
+   "sov_10-Popov_mech",
+   "sov_100-40th_infantry",
+   "sov_106-6th_infantry",
+   "sov_111-3rdT_infantry",
+   "sov_11C-3rdT_cav",
+   "sov_152-6th_infantry",
+   "sov_160-3rdT_infantry",
+   "sov_161-69th_infantry",
+   "sov_172-6th_infantry",
+   "sov_173-6th_infantry",
+   "sov_18-Popov_armor",
+   "sov_180-69th_infantry",
+   "sov_184-3rdT_infantry",
+   "sov_195-1stGuards_infantry",
+   "sov_19G-3rdT_infantry",
+   "sov_1GC-3rdT_armor",
+   "sov_2-1stGuards_mech",
+   "sov_20G-6th_infantry",
+   "sov_219-69th_infantry",
+   "sov_25-Popov_armor",
+   "sov_253-3rdT_infantry",
+   "sov_259-1stGuards_infantry",
+   "sov_25G-3rdT_infantry",
+   "sov_263-6th_infantry",
+   "sov_267-6th_infantry",
+   "sov_270-69th_infantry",
+   "sov_2GC-Popov_armor",
+   "sov_3-Popov_armor",
+   "sov_303-69th_infantry",
+   "sov_305-40th_infantry",
+   "sov_309-40th_infantry",
+   "sov_340-40th_infantry",
+   "sov_350-6th_infantry",
+   "sov_35G-Popov_infantry",
+   "sov_37-69th_infantry",
+   "sov_38G-1stGuards_infantry",
+   "sov_41G-Popov_infantry",
+   "sov_44G-1stGuards_infantry",
+   "sov_48G-3rdT_infantry",
+   "sov_50G-1stGuards_infantry",
+   "sov_50G-Popov_infantry",
+   "sov_52-1stGuards_infantry",
+   "sov_57G-Popov_infantry",
+   "sov_58G-1stGuards_infantry",
+   "sov_5G-40th_mech",
+   "sov_6-6th_infantry",
+   "sov_62G-3rdT_infantry",
+   "sov_6GC-3rdT_armor",
+   "sov_78G-1stGuards_infantry",
+   "sov_A-2G-40th_armor",
+   "sov_A12-3rdT_mech",
+   "sov_A15-3rdT_armor",
+   "sov_A1G-6th_armor",
+   "sov_A3G-69th_mech",
+   "sov_A4G-Popov_armor",
+   "sov_B12-3rdT_armor",
+   "sov_B15-3rdT_mech",
+   "sov_B1G-6th_armcav",
+   "sov_B2G-69th_mech",
+   "sov_B3G-69th_armor",
+   "sov_B4G-Popov_mech"
+  ],
+  "vp": 2,
+  "sovietTowns": [
+   "0302",
+   "1103"
+  ],
+  "sovietDiscard": [],
+  "objectives": {},
+  "started": true,
+  "sovietCards": {
+   "drawPile": [
+    "e08"
+   ],
+   "removed": [],
+   "lastDrawn": [],
+   "seed": 7
+  }
+ },
+ "commands": [],
+ "state": {
+  "version": 1,
+  "turn": 1,
+  "setUp": true,
+  "units": {
+   "germ_1-lah-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_1-tot-IISS_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_106-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_11-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_110-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_111-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_114-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_126-23p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_128-23p-LVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_15-11p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_164-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_167-Raus_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_199-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_2-lah-IISS_arm": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_201-23p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_217-57-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_25-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_255-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_27-19P-IIICorps_arm": {
+    "at": "1802",
+    "face": "front"
+   },
+   "germ_298-LVII_inf": {
+    "at": "1003",
+    "face": "front"
+   },
+   "germ_3-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_3-tot-IISS_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_332-Raus_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_335-IIICorps_inf": {
+    "at": "1903",
+    "face": "front"
+   },
+   "germ_387-IIICorps_inf": {
+    "at": "1604",
+    "face": "front"
+   },
+   "germ_39-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_4-6p-XLVIII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_40-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_417-168-Raus_infantry": {
+    "at": "0205",
+    "face": "front"
+   },
+   "germ_429-168-Raus_inf": {
+    "at": "0205",
+    "face": "front"
+   },
+   "germ_442-168-Raus_inf": {
+    "at": "0206",
+    "face": "front"
+   },
+   "germ_5-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_543-387-IIICorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_585-320-Raus_inf": {
+    "at": "1203",
+    "face": "front"
+   },
+   "germ_586-320-Raus_inf": {
+    "at": "1402",
+    "face": "front"
+   },
+   "germ_587-320-Raus_infantry": {
+    "at": "1503",
+    "face": "front"
+   },
+   "germ_6-3P-IIICorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_6-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_63-17p-LVII_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_679-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_680-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_681-333-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_684-335-IIICorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_7-7P-XLCorps_arm": {
+    "at": "2001",
+    "face": "front"
+   },
+   "germ_73-19P-IIICorps_arm": {
+    "at": "1804",
+    "face": "front"
+   },
+   "germ_74-19P-IIICorps_arm": {
+    "at": "1904",
+    "face": "front"
+   },
+   "germ_81-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_88-15-LVII_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_ah-lah-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_df-dr-IISS_mech": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_dl-dr-IISS_mech": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_Fus-Grd-XLVIII_armor": {
+    "at": "0604",
+    "face": "front"
+   },
+   "germ_Gre-Grd-XLVIII_armor": {
+    "at": "0803",
+    "face": "front"
+   },
+   "germ_lg-dr-IISS_armor": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "germ_pangd-XLVIII_mech": {
+    "at": "0404",
+    "face": "front"
+   },
+   "germ_SS RegimentGerm-XLCorps_inf": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_SSReg. Westland-XLCorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_SSReg.Nordland-XLCorps_arm": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "germ_tot-tot-IISS_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_10-Popov_mech": {
+    "at": "1701",
+    "face": "front"
+   },
+   "sov_100-40th_infantry": {
+    "at": "0105",
+    "face": "front"
+   },
+   "sov_106-6th_infantry": {
+    "at": "1302",
+    "face": "front"
+   },
+   "sov_111-3rdT_infantry": {
+    "at": "1002",
+    "face": "front"
+   },
+   "sov_11C-3rdT_cav": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_152-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_160-3rdT_infantry": {
+    "at": "0703",
+    "face": "front"
+   },
+   "sov_161-69th_infantry": {
+    "at": "0104",
+    "face": "front"
+   },
+   "sov_172-6th_infantry": {
+    "at": "1202",
+    "face": "front"
+   },
+   "sov_173-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_18-Popov_armor": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_180-69th_infantry": {
+    "at": "0403",
+    "face": "front"
+   },
+   "sov_184-3rdT_infantry": {
+    "at": "0702",
+    "face": "front"
+   },
+   "sov_195-1stGuards_infantry": {
+    "at": "1702",
+    "face": "front"
+   },
+   "sov_19G-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_1GC-3rdT_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_2-1stGuards_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_20G-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_219-69th_infantry": {
+    "at": "0204",
+    "face": "front"
+   },
+   "sov_25-Popov_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_253-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_259-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_25G-3rdT_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_263-6th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_267-6th_infantry": {
+    "at": "1302",
+    "face": "front"
+   },
+   "sov_270-69th_infantry": {
+    "at": "0304",
+    "face": "front"
+   },
+   "sov_2GC-Popov_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_3-Popov_armor": {
+    "at": "1502",
+    "face": "front"
+   },
+   "sov_303-69th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_305-40th_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_309-40th_infantry": {
+    "at": "0105",
+    "face": "front"
+   },
+   "sov_340-40th_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_350-6th_infantry": {
+    "at": "1103",
+    "face": "front"
+   },
+   "sov_35G-Popov_infantry": {
+    "at": "1704",
+    "face": "front"
+   },
+   "sov_37-69th_infantry": {
+    "at": "0204",
+    "face": "front"
+   },
+   "sov_38G-1stGuards_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_41G-Popov_infantry": {
+    "at": "reserve",
+    "face": "front"
+   },
+   "sov_44G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_48G-3rdT_infantry": {
+    "at": "0603",
+    "face": "front"
+   },
+   "sov_50G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_50G-Popov_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_52-1stGuards_infantry": {
+    "at": "1801",
+    "face": "front"
+   },
+   "sov_57G-Popov_infantry": {
+    "at": "1603",
+    "face": "front"
+   },
+   "sov_58G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_5G-40th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_6-6th_infantry": {
+    "at": "1202",
+    "face": "front"
+   },
+   "sov_62G-3rdT_infantry": {
+    "at": "0903",
+    "face": "front"
+   },
+   "sov_6GC-3rdT_armor": {
+    "at": "1001",
+    "face": "front"
+   },
+   "sov_78G-1stGuards_infantry": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A-2G-40th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A12-3rdT_mech": {
+    "at": "0902",
+    "face": "front"
+   },
+   "sov_A15-3rdT_armor": {
+    "at": "0602",
+    "face": "front"
+   },
+   "sov_A1G-6th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A3G-69th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_A4G-Popov_armor": {
+    "at": "1601",
+    "face": "front"
+   },
+   "sov_B12-3rdT_armor": {
+    "at": "0902",
+    "face": "front"
+   },
+   "sov_B15-3rdT_mech": {
+    "at": "0602",
+    "face": "front"
+   },
+   "sov_B1G-6th_armcav": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B2G-69th_mech": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B3G-69th_armor": {
+    "at": "reinforcements",
+    "face": "front"
+   },
+   "sov_B4G-Popov_mech": {
+    "at": "1601",
+    "face": "front"
+   }
+  },
+  "order": [
+   "germ_1-lah-IISS_mech",
+   "germ_1-tot-IISS_armor",
+   "germ_106-15-LVII_inf",
+   "germ_11-6p-XLVIII_armor",
+   "germ_110-11p-XLVIII_armor",
+   "germ_111-11p-XLVIII_armor",
+   "germ_114-6p-XLVIII_armor",
+   "germ_126-23p-LVII_armor",
+   "germ_128-23p-LVIII_armor",
+   "germ_15-11p-XLVIII_armor",
+   "germ_164-57-Raus_infantry",
+   "germ_167-Raus_inf",
+   "germ_199-57-Raus_infantry",
+   "germ_2-lah-IISS_arm",
+   "germ_201-23p-LVII_armor",
+   "germ_217-57-Raus_infantry",
+   "germ_25-7P-XLCorps_arm",
+   "germ_255-Raus_infantry",
+   "germ_27-19P-IIICorps_arm",
+   "germ_298-LVII_inf",
+   "germ_3-3P-IIICorps_arm",
+   "germ_3-tot-IISS_armor",
+   "germ_332-Raus_infantry",
+   "germ_335-IIICorps_inf",
+   "germ_387-IIICorps_inf",
+   "germ_39-17p-LVII_armor",
+   "germ_4-6p-XLVIII_armor",
+   "germ_40-17p-LVII_armor",
+   "germ_417-168-Raus_infantry",
+   "germ_429-168-Raus_inf",
+   "germ_442-168-Raus_inf",
+   "germ_5-3P-IIICorps_arm",
+   "germ_543-387-IIICorps_inf",
+   "germ_585-320-Raus_inf",
+   "germ_586-320-Raus_inf",
+   "germ_587-320-Raus_infantry",
+   "germ_6-3P-IIICorps_arm",
+   "germ_6-7P-XLCorps_arm",
+   "germ_63-17p-LVII_armor",
+   "germ_679-333-XLCorps_inf",
+   "germ_680-333-XLCorps_inf",
+   "germ_681-333-XLCorps_inf",
+   "germ_684-335-IIICorps_inf",
+   "germ_7-7P-XLCorps_arm",
+   "germ_73-19P-IIICorps_arm",
+   "germ_74-19P-IIICorps_arm",
+   "germ_81-15-LVII_inf",
+   "germ_88-15-LVII_inf",
+   "germ_ah-lah-IISS_mech",
+   "germ_df-dr-IISS_mech",
+   "germ_dl-dr-IISS_mech",
+   "germ_Fus-Grd-XLVIII_armor",
+   "germ_Gre-Grd-XLVIII_armor",
+   "germ_lg-dr-IISS_armor",
+   "germ_pangd-XLVIII_mech",
+   "germ_SS RegimentGerm-XLCorps_inf",
+   "germ_SSReg. Westland-XLCorps_arm",
+   "germ_SSReg.Nordland-XLCorps_arm",
+   "germ_tot-tot-IISS_mech",
+   "sov_10-Popov_mech",
+   "sov_100-40th_infantry",
+   "sov_106-6th_infantry",
+   "sov_111-3rdT_infantry",
+   "sov_11C-3rdT_cav",
+   "sov_152-6th_infantry",
+   "sov_160-3rdT_infantry",
+   "sov_161-69th_infantry",
+   "sov_172-6th_infantry",
+   "sov_173-6th_infantry",
+   "sov_18-Popov_armor",
+   "sov_180-69th_infantry",
+   "sov_184-3rdT_infantry",
+   "sov_195-1stGuards_infantry",
+   "sov_19G-3rdT_infantry",
+   "sov_1GC-3rdT_armor",
+   "sov_2-1stGuards_mech",
+   "sov_20G-6th_infantry",
+   "sov_219-69th_infantry",
+   "sov_25-Popov_armor",
+   "sov_253-3rdT_infantry",
+   "sov_259-1stGuards_infantry",
+   "sov_25G-3rdT_infantry",
+   "sov_263-6th_infantry",
+   "sov_267-6th_infantry",
+   "sov_270-69th_infantry",
+   "sov_2GC-Popov_armor",
+   "sov_3-Popov_armor",
+   "sov_303-69th_infantry",
+   "sov_305-40th_infantry",
+   "sov_309-40th_infantry",
+   "sov_340-40th_infantry",
+   "sov_350-6th_infantry",
+   "sov_35G-Popov_infantry",
+   "sov_37-69th_infantry",
+   "sov_38G-1stGuards_infantry",
+   "sov_41G-Popov_infantry",
+   "sov_44G-1stGuards_infantry",
+   "sov_48G-3rdT_infantry",
+   "sov_50G-1stGuards_infantry",
+   "sov_50G-Popov_infantry",
+   "sov_52-1stGuards_infantry",
+   "sov_57G-Popov_infantry",
+   "sov_58G-1stGuards_infantry",
+   "sov_5G-40th_mech",
+   "sov_6-6th_infantry",
+   "sov_62G-3rdT_infantry",
+   "sov_6GC-3rdT_armor",
+   "sov_78G-1stGuards_infantry",
+   "sov_A-2G-40th_armor",
+   "sov_A12-3rdT_mech",
+   "sov_A15-3rdT_armor",
+   "sov_A1G-6th_armor",
+   "sov_A3G-69th_mech",
+   "sov_A4G-Popov_armor",
+   "sov_B12-3rdT_armor",
+   "sov_B15-3rdT_mech",
+   "sov_B1G-6th_armcav",
+   "sov_B2G-69th_mech",
+   "sov_B3G-69th_armor",
+   "sov_B4G-Popov_mech"
+  ],
+  "vp": 2,
+  "sovietTowns": [
+   "0302",
+   "1103"
+  ],
+  "sovietDiscard": [],
+  "objectives": {},
+  "started": true,
+  "sovietCards": {
+   "drawPile": [
+    "e08"
+   ],
+   "removed": [],
+   "lastDrawn": [],
+   "seed": 7
+  }
+ },
+ "booklet": "nkvd"
+}

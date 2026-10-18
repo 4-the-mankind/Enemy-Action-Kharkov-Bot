@@ -1261,15 +1261,6 @@
       "description": "VP value; ring = front target; diamond = logistics hex; color = front"
     }
   },
-  "scenario": {
-    "p17": "<b>Booklet example p17 loaded:</b> turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev scenario).",
-    "combat1802": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E17, E01, E11, E02, E03. Run bot impulse: the 1st Guards Army attacks 1802, the combat sheet opens.",
-    "nkvd": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E08. Run bot impulse: NKVD Operations puts two hits on the German stack in 0205.",
-    "attack1704": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E10, E01, E02, E03, E05, E06. Attack 1704 from 1604 and 1804: E10 (Reinforce Battle) is drawn for the Soviet defense.",
-    "turn4end": "End of game-turn 4 (task 4.6): press Next turn for the garrisons of the turn 5 Supply Phase. 387 (1604) and 73/19P (1804) of III Corps are reduced: right-click them for a replacement step, the infantry first (16.1).",
-    "turn6end": "End of game-turn 6 (task 4.6): press Next turn to set the ground condition markers on the calendar (Units panel) and reveal the ground of turn 7.",
-    "turn14end": "End of game-turn 14 (task 4.6): 17 Soviet VPs; press End the game."
-  },
   "page": {
     "title": "Situation map",
     "units": "Units",
@@ -1293,7 +1284,6 @@
       "overlays": "Overlays",
       "combat": "Combat"
     },
-    "home": "Home",
     "sovietCardsRead": "Soviet cards read",
     "activation": "Activation",
     "whyThisMove": "Why this move",
@@ -1307,7 +1297,8 @@
     "gameEnd": "End of the game",
     "logHint": "Undo, in the turn bar, takes back the last action and removes it from the log. Arrow keys move the map.",
     "turnBar": "Turn bar",
-    "tagsBar": "State tags"
+    "tagsBar": "State tags",
+    "menu": "Menu"
   },
   "legend": {
     "title": "Bot moves legend",
@@ -1319,8 +1310,14 @@
     "title": "EA Kharkov Bot",
     "intro": "Soviet bot for Enemy Action: Kharkov, German Solo.",
     "game": "Game",
-    "map": "Situation map",
-    "mapText": "The game map, with overlays showing what the bot reads from it",
+    "continue": "Continue",
+    "continueText": "Back to the game in progress",
+    "start": "Start",
+    "startText": "A new campaign game, from the set-up of turn 1",
+    "loadSave": "Load save",
+    "loadSaveText": "Open a save file and go on with its game",
+    "saveGame": "Save game",
+    "saveGameText": "Download the save file of the game in progress",
     "tools": "Tools",
     "calibration": "Map calibration",
     "calibrationText": "Hex grid, background image, saved to data/map-grid.json",
@@ -1329,7 +1326,16 @@
     "unitsIndex": "Units index",
     "unitsIndexText": "Every known unit counter with its decoded data, for checking against data/units.json (2.3)",
     "sovietCards": "Soviet cards",
-    "sovietCardsText": "Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)"
+    "sovietCardsText": "Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)",
+    "booklet": "Booklet positions (dev)",
+    "cancel": "Cancel",
+    "saved": "Game saved: {{file}}. Load save opens it again.",
+    "confirm": {
+      "start": "The game in progress has changed since it was last saved. Start a new game anyway?",
+      "startButton": "Start a new game",
+      "load": "The game in progress has changed since it was last saved. Load the save anyway?",
+      "loadButton": "Load the save"
+    }
   },
   "advance": {
     "route": {
@@ -1971,5 +1977,58 @@
       "hint": "STAVKA (E22) out of play: the bot no longer draws it."
     },
     "slipRule": "Rule {{rule}}"
+  },
+  "booklet": {
+    "p17": {
+      "name": "Example p17",
+      "note": "Turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev only)."
+    },
+    "combat1802": {
+      "name": "Soviet attack on 1802",
+      "note": "Booklet set-up without adjustment, turn 1, Soviet draw pile E17, E01, E11, E02, E03. Run bot impulse: the 1st Guards Army attacks 1802, the combat sheet opens."
+    },
+    "attack1704": {
+      "name": "German attack on 1704",
+      "note": "Booklet set-up without adjustment, turn 1, Soviet draw pile E10, E01, E02, E03, E05, E06. Attack 1704 from 1604 and 1804: E10 (Reinforce Battle) is drawn for the Soviet defense."
+    },
+    "nkvd": {
+      "name": "NKVD Operations",
+      "note": "Booklet set-up without adjustment, turn 1, Soviet draw pile E08. Run bot impulse: NKVD Operations puts two hits on the German stack in 0205."
+    },
+    "turn4end": {
+      "name": "End of game-turn 4",
+      "note": "Press Next turn for the garrisons of the turn 5 Supply Phase. 387 (1604) and 73/19P (1804) of III Corps are reduced: right-click them for a replacement step, the infantry first (16.1)."
+    },
+    "turn6end": {
+      "name": "End of game-turn 6",
+      "note": "Press Next turn to set the ground condition markers on the calendar (Units panel) and reveal the ground of turn 7."
+    },
+    "turn14end": {
+      "name": "End of game-turn 14",
+      "note": "17 Soviet VPs. Press End the game."
+    }
+  },
+  "save": {
+    "loading": {
+      "title": "Loading the save",
+      "count_one": "Game-turn {{turn}}: {{done}} / {{count}} action replayed",
+      "count_other": "Game-turn {{turn}}: {{done}} / {{count}} actions replayed"
+    },
+    "log": {
+      "booklet": "<b>{{name}}</b> loaded. {{note}}",
+      "loaded_one": "Save loaded: game-turn {{turn}}, {{count}} action replayed (saved {{date}} UTC with version {{app}}).",
+      "loaded_other": "Save loaded: game-turn {{turn}}, {{count}} actions replayed (saved {{date}} UTC with version {{app}}).",
+      "differs": "<b>Save of {{date}} UTC loaded as it was saved, without its history:</b> this version of the app ({{current}}) does not replay it the same way as the version that made it ({{app}}). The log and Undo start here.",
+      "refused": "Action {{n}} of the save ({{command}}) is now refused: {{reason}}",
+      "saved": "Game saved: {{file}}."
+    },
+    "error": {
+      "notJson": "The file is not a save file (not JSON).",
+      "notASave": "The file is not a save file of this app.",
+      "newer": "The save comes from a newer version of the app ({{version}}).",
+      "booklet": "No booklet position \"{{id}}\" in data/saves.",
+      "read": "{{file}} could not be read.",
+      "file": "{{file}}: {{reason}}"
+    }
   }
 }

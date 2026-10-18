@@ -352,8 +352,40 @@ body.game-locked .inspector.pinned .stack li:hover { background: transparent; }
 
 h1 { margin: 0; font-size: 1.45rem; font-weight: 600; letter-spacing: -0.01em; }
 h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
-.home { color: var(--paper-dim); font-size: 0.85rem; text-decoration: none; }
+.home { padding: 0; color: var(--paper-dim); font: inherit; font-size: 0.85rem; text-decoration: none; background: none; border: 0; cursor: pointer; }
 .home:hover { color: var(--paper); text-decoration: underline; }
+
+/* Main menu (task 5.2, Q99): the home screen laid over the whole game page, the game kept behind it. */
+.main-menu {
+  position: fixed; inset: 0; z-index: 100; overflow-y: auto;
+  display: grid; place-items: start center; padding: 48px 16px;
+  background: var(--feldgrau-dark);
+}
+body:not(.menu-open) .main-menu { display: none; }
+.main-menu main { width: min(560px, 100%); }
+.main-menu h1 { margin: 0 0 4px; font-size: 2rem; font-weight: 600; }
+.main-menu .intro { margin: 0 0 28px; color: var(--paper-dim); }
+.main-menu h2 { margin: 0 0 10px; font-size: 1.1rem; font-weight: 600; }
+.main-menu h2.next { margin-top: 32px; }
+.main-menu ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--feldgrau); }
+.main-menu li { border-bottom: 1px solid var(--feldgrau); }
+.main-menu li[hidden], .main-menu [data-dev][hidden] { display: none; }
+.main-menu a, .main-menu .entry {
+  display: block; width: 100%; padding: 12px 4px; color: var(--paper); text-decoration: none; text-align: left;
+  font: inherit; background: none; border: 0; cursor: pointer;
+}
+.main-menu a:hover, .main-menu .entry:hover { background: var(--feldgrau-deep); }
+.main-menu a span, .main-menu .entry span { display: block; color: var(--paper-dim); font-size: 0.9rem; }
+.main-menu a span.name, .main-menu .entry span.name { color: var(--paper); font-size: 1rem; }
+.main-menu .entry[disabled] { cursor: default; opacity: 0.45; }
+.main-menu .entry[disabled]:hover { background: none; }
+.main-menu .entry[data-menu=continue] span.name { font-weight: 600; }
+.menu-message, .menu-confirm { margin: 10px 0 0; padding: 8px 10px; background: var(--feldgrau-deep); border-left: 4px solid var(--feldgrau-light); }
+.menu-message.error, .menu-confirm { border-left-color: var(--stab-red); }
+.menu-message[hidden], .menu-confirm[hidden] { display: none; }
+.menu-confirm p { margin: 0 0 8px; }
+.menu-confirm-actions { display: flex; gap: 8px; }
+.menu-confirm .btn.ink { font-weight: 600; color: var(--feldgrau-dark); background: var(--paper); border-color: var(--paper); }
 .hint { margin: 2px 18px 12px 0; font-size: 0.85rem; color: var(--paper-dim); }
 
 .btn { font: inherit; color: inherit; background: transparent; border: 1px solid var(--paper-dim); border-radius: 3px; padding: 5px 12px; cursor: pointer; }
@@ -395,6 +427,11 @@ h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
 .start-notice p { margin: 0; font-size: 0.9rem; color: var(--slip-dim); }
 .start-notice .btn { display: block; pointer-events: auto; margin: 12px auto 0; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
 .start-notice .btn:hover { background: var(--feldgrau); }
+
+/* Loading screen (task 5.2): the same slip while a save is replayed; the start notice steps aside. */
+.load-screen progress { display: block; width: 100%; height: 8px; margin-top: 10px; accent-color: var(--stab-red); }
+.load-screen .load-count { font-variant-numeric: tabular-nums; }
+.loading-save #startNotice { display: none; }
 
 .counter-menu .menu-lock { margin: 0; padding: 6px 12px; font-size: 0.82rem; color: var(--stab-red); }
 
