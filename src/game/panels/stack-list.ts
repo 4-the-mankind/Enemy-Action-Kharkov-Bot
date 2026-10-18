@@ -15,11 +15,27 @@ import { t } from "../../i18n/i18n";
 
 const MARKER_TAG = { outOfSupply: ["stack.oos", "stack.oosTitle"], isolated: ["stack.isolated", "stack.isolatedTitle"] } as const;
 
+/**
+ * A garrisoned hex (15) holds no unit: the marker instead of the stack, and on a pinned hex
+ * "Remove garrison" for a German unit activated next to it that neither moves nor attacks (Q74).
+ */
+function garrisonBox(session: GameSession, hexId: string, pinned: boolean): HTMLElement {
+  const why = session.engine.whyNotGarrison(session.state, hexId, false);
+  const box = document.createElement("div");
+  box.className = "stack garrison-box";
+  box.innerHTML = `<ul><li><img src="/assets/counters/others/marker-sovietownershipbck_sovietgarrison.png" alt="">` +
+    `<span class="stack-name">${t("stack.garrison")}<small>${t("stack.garrisonNote")}</small></span></li></ul>` +
+    (pinned ? `<button type="button" class="linkbtn" data-remove-garrison${why ? ` disabled title="${t(why)}"` : ""}>${t("stack.removeGarrison")}</button>` +
+      `<p class="insp-hint">${t("stack.garrisonHint")}</p>` : "");
+  box.querySelector("[data-remove-garrison]")?.addEventListener("click", () => session.dispatch({ type: "SetGarrison", hex: hexId, placed: false }));
+  return box;
+}
+
 export function stackRenderer(session: GameSession, selection: Selection, drag: DragController, menu: CounterMenu): StackRenderer {
   return (hexId, pinned) => {
     const state = session.state, engine = session.engine;
     const ids = state.order.filter((id) => state.units[id].at === hexId).reverse();
-    if (!ids.length) return null;
+    if (!ids.length) return state.garrisons?.includes(hexId) ? garrisonBox(session, hexId, pinned) : null;
 
     // Before Start (locked) the stack is read only: no selection, no drag, no restack.
     const lock = engine.locked(state), selectable = pinned && !lock;

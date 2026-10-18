@@ -3,11 +3,12 @@ import type { Engine } from "../../engine/engine";
 import { adjustmentName, armyName, frontName, sideName } from "../../engine/names";
 import { isHex, type GameEvent, type Location } from "../../engine/types";
 import { msg, t, type Param } from "../../i18n/i18n";
-import { dynamicKey } from "../../i18n/message";
+import { dynamicKey, type Message } from "../../i18n/message";
 import type { Decision } from "../playback/activation";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
 import { objectiveChange, objectiveName } from "./objective-text";
+import { hexName } from "../../engine/objectives";
 
 const where = (at: Location): Param => (isHex(at) ? at : msg(`log.where.${at as "reserve" | "reinforcements" | "eliminated" | "outOfPlay"}`));
 
@@ -171,7 +172,8 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
       return line(e.tactics.length ? esc(t("log.attack.german", { tactics })) : t("log.attack.germanNone"));
     }
     case "StepRestored":
-      return line(esc(t("log.attack.restored", { unit: name(e.unit) })));
+      // A replacement step: its ReplacementAssigned line says it all.
+      return e.replacement ? null : line(esc(t("log.attack.restored", { unit: name(e.unit) })));
     case "CombatChitsDrawn":
       return line(t("log.attack.chits", { count: e.chits }));
     case "CombatHitsEntered":
@@ -197,7 +199,67 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
     }
     case "CombatEnded":
       return line(t("log.attack.ended", { hex: e.target }));
+    // Task 4.6: VPs, garrisons, replacements, ground, victory, German events.
+    case "VictoryPointsChanged":
+      return line(esc(t(`log.vpChange.${e.why}`, { hex: hexName(e.hex), from: e.from, to: e.to })));
+    case "GarrisonsPlaced":
+      return line(garrisonTrace(e));
+    case "GarrisonSet":
+      return line(esc(t(e.placed ? "log.garrison.placed" : "log.garrison.removed", { hex: hexName(e.hex), reason: e.reason, rule: e.rule })));
+    case "GarrisonsChecked":
+      return e.removed.length
+        ? line(esc(t("log.garrison.checkedRemoved", { removed: { list: e.removed.map((r) => msg("log.garrison.hexWhy", { hex: r.hex, reason: r.reason })), separator: "semicolon" } })))
+        : e.kept.length ? line(t("log.garrison.checkedKept", { count: e.kept.length })) : null;
+    case "ReplacementAssigned": {
+      const by = e.side === "german" ? msg("log.replacement.byYou") : e.army ? msg("log.replacement.byArmy", { army: armyName(e.army) })
+        : msg("log.replacement.byFront", { front: frontName(e.front!) });
+      const params = { unit: name(e.unit), by, priority: e.priority, rule: e.rule };
+      const text = t(isHex(e.from) ? "log.replacement.flipped" : "log.replacement.rebuilt", params)
+        + (e.tied && e.tied.length > 1 ? t("log.replacement.tied", { units: e.tied.map(name) }) : "")
+        + (e.refused?.length ? t("log.replacement.refused", { units: { list: e.refused.map((r) => msg("log.replacement.unitWhy", { unit: name(r.unit), reason: r.reason })), separator: "semicolon" } }) : "");
+      return line(esc(text));
+    }
+    case "GroundMarkersPlaced":
+      return line(t("log.ground.placed", { first: e.turns[0], last: e.turns[e.turns.length - 1], aside: e.aside }));
+    case "GroundRevealed":
+      return line(t("log.ground.revealed", { turn: e.turn, ground: msg(`ground.${e.ground}`) }));
+    case "HeavyMudTurn":
+      return line(t(e.stavkaRemoved ? "log.ground.heavyMudStavka" : "log.ground.heavyMud", { turn: e.turn }));
+    case "VictoryChecked": {
+      const levels = {
+        turn: e.turn, vp: e.vp, kharkov: sideName(e.kharkov), below: e.victory.below,
+        defeat: e.defeat.atLeast !== undefined ? msg("log.victory.atLeast", { vp: e.defeat.atLeast }) : msg("log.victory.above", { vp: e.defeat.above! }),
+      };
+      return line(t(e.result ? "log.victory.ends" : "log.victory.goesOn", levels));
+    }
+    case "GameEnded":
+      return line(t("log.victory.result", { result: resultName(e.result) }));
+    case "GermanEventPlayed":
+      if (e.event === "stavkaConfused") return line(t("log.event.stavkaConfused", { cards: (e.cards ?? []).map(card) }));
+      if (e.event === "okwExpedites") return line(esc(t("log.event.okwExpedites", { count: e.units?.length ?? 0 })));
+      return line(t("log.event.airInterdiction", { hex: e.hex ?? "" }));
   }
+}
+
+/** "German operational victory", "German tactical defeat", "Draw" (17.3, 18.35). */
+export const resultName = (r: { outcome: "victory" | "defeat" | "draw"; level?: string }): Message =>
+  r.outcome === "draw" ? msg("result.draw") : msg(dynamicKey(`result.${r.outcome}.${r.level}`));
+
+/**
+ * The garrison placement process (15.1, 15.11): one line for what was placed, each hex checked
+ * listed under it, in the order of the process, with the requirement that failed (example p44).
+ */
+function garrisonTrace(e: Extract<GameEvent, { type: "GarrisonsPlaced" }>): string {
+  // Placed and still there at the end of the step; those removed again by a later placement apart.
+  const removed = e.checks.flatMap((c) => c.removes ?? []);
+  const placed = e.checks.filter((c) => c.placed && !removed.includes(c.hex)).map((c) => c.hex);
+  const head = e.front
+    ? t(placed.length ? "log.garrison.frontPlaced" : "log.garrison.frontNone", { front: frontName(e.front), hexes: placed })
+    : t(placed.length ? "log.garrison.phasePlaced" : "log.garrison.phaseNone", { hexes: placed });
+  const rows = e.checks.map((c) => `<li class="${c.placed ? "yes" : "no"}"><b>${c.hex}</b> ${esc(t(c.placed ? "log.garrison.yes" : "log.garrison.no", { reason: c.reason }))}` +
+    (c.removes?.length ? esc(t("log.garrison.removes", { hexes: c.removes })) : "") + `</li>`).join("");
+  return esc(head) + (removed.length ? esc(t("log.garrison.removedBy", { hexes: removed })) : "")
+    + (rows ? `<details class="garrison-trace"><summary>${t("log.garrison.details", { count: e.checks.length })}</summary><ol>${rows}</ol></details>` : "");
 }
 
 /**

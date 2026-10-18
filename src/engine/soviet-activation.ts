@@ -163,7 +163,7 @@ export function createSovietActivation(data: SovietActivationData) {
         continue;
       }
       events.push({ type: "ReservePlaced", unit: id, hex, rule: "9.5", steps });
-      // TODO 4.6: the garrison marker of the hex is removed (9.5).
+      // 9.5: the garrison marker of the hex is removed by the move (the engine's MoveUnits).
       const m = move(state, [id], hex);
       state = m.state;
       events.push(...m.events);

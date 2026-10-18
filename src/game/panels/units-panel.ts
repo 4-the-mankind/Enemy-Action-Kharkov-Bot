@@ -4,10 +4,13 @@
 // press-and-hold; the boxes are drop targets for counters dragged from the map.
 // Once set up, the recap holds the set-up adjustment table (p48-50, 2.5): a d10 result
 // table to roll on or choose from; the bot then plays the recorded adjustment.
+// Task 4.6: the ground condition markers lie on their calendar stations (18.33), face down until
+// the end of the turn before; the one just revealed turns over.
 import type { Unit } from "../../core/units";
 import { ADJUSTMENTS } from "../../engine/setup-adjustments";
 import type { GameState } from "../../engine/types";
-import { counterUrl, faceImage, type CalendarTurn } from "../data/game-data";
+import { counterUrl, faceImage, groundImage, type CalendarTurn } from "../data/game-data";
+import { MUD_TURNS } from "../../engine/ground";
 import { holdToDrag, type DragController } from "../drag";
 import { HOLD_MS } from "../map/map-view";
 import type { GameSession } from "../state/session";
@@ -27,6 +30,19 @@ export function mountUnitsPanel(setupRoot: HTMLElement, groupsRoot: HTMLElement,
   const shown = (u: Unit) => filter === "all" || u.side === filter;
   /** Die face shown while rolling, then the result until the bot has played the adjustment. */
   let rolling: { face: number; landed: boolean } | null = null;
+  /** Ground markers already face up: one revealed since the last render turns over. */
+  let revealed: number[] | null = null;
+
+  /** 18.33: the marker on a calendar station, face up once its turn is reached; game-turn 14 is frozen, without a marker. */
+  function groundMarker(state: GameState, turn: number, flip: boolean): string {
+    if (turn === MUD_TURNS.last + 1)
+      return `<img class="ground-marker fixed" src="${groundImage("frozen")}" alt="${t("units.groundFixed", { turn })}" title="${t("units.groundFixed", { turn })}">`;
+    const g = state.ground?.turns[turn];
+    if (!g) return "";
+    const up = turn <= state.turn;
+    const title = up ? t("units.groundShown", { turn, ground: msg(`ground.${g}`) }) : t("units.groundHidden", { turn });
+    return `<img class="ground-marker${up ? "" : " down"}${flip ? " flip" : ""}" src="${groundImage(up ? g : null)}" alt="${title}" title="${title}">`;
+  }
 
   function counter(u: Unit, src: string, state: GameState | null): HTMLElement {
     const img = document.createElement("img");
@@ -122,12 +138,15 @@ export function mountUnitsPanel(setupRoot: HTMLElement, groupsRoot: HTMLElement,
     const line = document.createElement("div");
     line.className = "metro";
     const arriving = at("reinforcements");
+    const up = Object.keys(state.ground?.turns ?? {}).map(Number).filter((n) => n <= state.turn);
+    const fresh = revealed && !reducedMotion() ? up.filter((n) => !revealed!.includes(n)) : [];
+    revealed = up;
     for (const { turn, dates } of calendar.filter((t) => t.turn > 1)) {
       const units = arriving.filter((u) => u.entryTurn === turn);
       const stop = document.createElement("div");
-      stop.className = "stop" + (units.length ? "" : " none");
+      stop.className = "stop" + (units.length ? "" : " none") + (turn === state.turn && state.started ? " now" : "");
       stop.innerHTML = `<i class="station" aria-hidden="true"></i><div class="stop-label"><b>${t("units.turn", { turn })}</b><span>${dates}</span>` +
-        (units.length ? `<span class="count">${units.length}</span>` : "") + `</div>`;
+        groundMarker(state, turn, fresh.includes(turn)) + (units.length ? `<span class="count">${units.length}</span>` : "") + `</div>`;
       if (units.length) stop.append(well("reinforcements", "", units, state));
       line.append(stop);
     }

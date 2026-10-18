@@ -7,6 +7,8 @@
 // German attack (task 5.1b, Q66): with German counters selected, a right-click on a Soviet hex
 // (on a counter or beside) puts "Attack … with n units" first, in bold; greyed with the
 // engine's reason when the attack may not be made (12.1).
+// Task 4.6: "Replacement step" on a German unit (16.1, Q76), greyed with the engine's reason;
+// on a hex without units, "Remove garrison" (15.3, Q74) or "Place garrison" (a correction).
 import { isHex, type SupplyMarker } from "../../engine/types";
 
 const SUPPLY: (SupplyMarker | "supplied")[] = ["supplied", "outOfSupply", "isolated"];
@@ -63,16 +65,30 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
     menu.querySelector<HTMLButtonElement>("button:not([disabled])")?.focus();
   }
 
+  /** A hex without units (task 4.6): its garrison marker removed, or one placed (village and VP hexes). */
+  function garrisonItem(hex: string | null): string {
+    const state = session.state, engine = session.engine;
+    if (!hex || !isHex(hex) || state.order.some((u) => state.units[u]?.at === hex)) return "";
+    const placed = !state.garrisons?.includes(hex);
+    const why = engine.whyNotGarrison(state, hex, placed);
+    // Placing one by hand is offered only where a garrison may go.
+    if (placed && why && why.key !== "reject.pressStart" && why.key !== "reject.gameOver") return "";
+    menu.dataset.garrison = hex;
+    return `<button type="button" role="menuitem" data-action="${placed ? "place-garrison" : "remove-garrison"}"${why ? " disabled" : ""}>` +
+      `${t(placed ? "menu.placeGarrison" : "menu.removeGarrison")}</button>` + (why && !placed ? `<p class="menu-lock">${t(why)}</p>` : "");
+  }
+
   function open(id: string | null, at: { clientX: number; clientY: number }, hex: string | null = null) {
     const state = session.state, engine = session.engine;
     const lock = engine.locked(state);
     delete menu.dataset.hex;
     delete menu.dataset.unit;
+    delete menu.dataset.garrison;
     if (!id) {
-      // Beside the counters of a Soviet hex: the attack alone.
-      const attack = attackItem(hex, !!lock);
-      if (!attack) return;
-      menu.innerHTML = `<div class="menu-head">${hex}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") + attack;
+      // Beside the counters of a Soviet hex: the attack alone; on a hex without units, its garrison.
+      const items = attackItem(hex, !!lock) + garrisonItem(hex);
+      if (!items) return;
+      menu.innerHTML = `<div class="menu-head">${hex}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") + items;
       place(at);
       return;
     }
@@ -84,6 +100,9 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
     // A unit of the combat in progress: its steps go only as the rules allow (Q45).
     const combat = lock ? null : engine.combat.whyNotRemoveStep(state, id);
     const ip = onMap && !!state.improvedPositions?.includes(s.at);
+    // 16.1 (Q76): a German unit with a step to regain; the reason when the engine refuses it.
+    const replace = u.side === "german" && onMap && !lock ? engine.whyNotReplace(state, id) : null;
+    const lostStep = u.side === "german" && onMap && s.face !== "front" && !engine.nextFace(id, s.face);
     const item = (action: string, label: MessageKey, enabled: boolean, title?: MessageKey) =>
       `<button type="button" role="menuitem" data-action="${action}"${enabled && !lock ? "" : " disabled"}${title ? ` title="${t(title)}"` : ""}>${t(label)}</button>`;
     menu.innerHTML = `<div class="menu-head">${u.designation}</div>` + (lock ? `<p class="menu-lock">${t(lock)}</p>` : "") +
@@ -91,6 +110,7 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
       (combat ? `<p class="menu-lock">${t(combat)}</p>` : "") +
       item("step", "menu.removeStep", !last && !combat, last ? "menu.lastStep" : undefined) +
       item("eliminate", "menu.eliminate", last && !combat, last ? undefined : "menu.onlyLastStep") +
+      (lostStep ? item("replace", "menu.replacementStep", !replace) + (replace ? `<p class="menu-lock">${t(replace)}</p>` : "") : "") +
       item("disperse", s.dispersed ? "menu.removeDispersed" : "menu.placeDispersed", onMap, onMap ? undefined : "menu.onlyOnMap") +
       item("ip", ip ? "menu.removeIp" : "menu.placeIp", onMap, onMap ? undefined : "menu.onlyOnMap") +
       `<div class="menu-group" role="group" aria-label="${t("menu.supplyMarker")}"><div class="menu-sep">${t("menu.supplyMarker")}</div>` +
@@ -111,12 +131,19 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
       session.dispatch({ type: "DeclareAttack", target: menu.dataset.hex, attackers: deps.attackers() });
       return;
     }
+    const garrison = menu.dataset.garrison;
+    if (garrison && (b?.dataset.action === "remove-garrison" || b?.dataset.action === "place-garrison")) {
+      close();
+      session.dispatch({ type: "SetGarrison", hex: garrison, placed: b.dataset.action === "place-garrison" });
+      return;
+    }
     const id = menu.dataset.unit;
     if (!b || !id) return;
     close();
     if (b.dataset.supply) session.dispatch({ type: "SetSupplyStatus", units: [id], status: b.dataset.supply as SupplyMarker | "supplied" });
     if (b.dataset.action === "step") session.dispatch({ type: "RemoveStep", unit: id });
     else if (b.dataset.action === "eliminate") session.dispatch({ type: "MoveUnits", units: [id], to: "eliminated" });
+    else if (b.dataset.action === "replace") session.dispatch({ type: "AssignReplacement", unit: id });
     else if (b.dataset.action === "disperse") session.dispatch({ type: "SetDispersed", units: [id], dispersed: !session.state.units[id].dispersed });
     else if (b.dataset.action === "ip") {
       const at = session.state.units[id].at;

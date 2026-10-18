@@ -24,9 +24,8 @@
 // The army marker a unit reaches moves on at once (the engine's MoveUnits), a front's third
 // objective goes at the end of the activation (9.12), after step 7 (soviet-activation.ts).
 //
-// 9.21 methods 1-8, 10-12; 9.22 methods 1-8, 10, 11; 9.26; 9.27. TODO 4.6: method 9 of 9.21
-// and 9.22. Supply, support and the operational limit come from supply.ts; garrisons and the
-// ground from the PendingRules (pending.ts), provisional until task 4.6.
+// 9.21 methods 1-12; 9.22 methods 1-11; 9.26; 9.27. Supply, support and the operational limit
+// come from supply.ts; garrisons and the ground from the game state (PendingRules, pending.ts).
 import type { Front, Unit } from "../core/units";
 import { msg, semicolonList, type Message } from "../i18n/message";
 import type { Board } from "./board";
@@ -484,8 +483,6 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     return u.type === "mechanized" ? msg("move.skip.armoredSpearheadUnitGT35") : null;
   }
 
-  const notYet = (task: string) => () => msg("move.skip.notCoded", { task });
-
   /** Soviet units of the active front on the map that cannot trace supply right now (13.1). */
   const cutOff = (ctx: Ctx) => Object.keys(ctx.state.units).filter((s) =>
     isHex(ctx.state.units[s].at) && sideOf(s) === "soviet" && known(s).front === ctx.front && !rules.canTraceSupply(ctx.state, s));
@@ -592,6 +589,34 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
   function armorOnly(state: GameState, hex: string, except?: string): boolean {
     const here = unitsIn(state, hex).filter((u) => u !== except);
     return board.hex(hex).vp !== null && here.length > 0 && here.every((u) => sideOf(u) === "soviet" && known(u).type === "mechanized");
+  }
+
+  /**
+   * 9.21 and 9.22 method 9 (Relieve Garrison): a garrisoned hex targeted for the active front,
+   * to which a German unit is proximate or German supply can be traced, and Soviet supply too.
+   * 9.21: not a hex adjacent to a Soviet unit unless a VP hex; prefer one adjacent to a German
+   * unit. 9.22: prefer a) adjacent to a German unit, b) a German unit proximate; a unit starting
+   * in a village targeted for the active front, a German unit proximate, does not move by this
+   * or any subsequent method.
+   */
+  function relieveGarrison(ctx: Ctx, id: string): Found {
+    const state = ctx.state, start = hexOf(state, id), base = without(state, id), book = ctx.book;
+    if (book === "9.22" && board.hex(start).village && targetedFor(start, ctx.front)
+      && germansOnMap(state).some(([g]) => germanProximate(ctx, g, start)))
+      return stays(start, msg("move.trace.holdsVillage", { hex: start }), false);
+    const options = destinations(ctx, id).filter((o) => rules.garrisonAt(state, o.hex) && targetedFor(o.hex, ctx.front)
+      && (book === "9.22" || board.hex(o.hex).vp !== null || adjacentHexesWith(base, o.hex, "soviet").length === 0)
+      && rules.supplyTracesTo(state, "soviet", o.hex) && threatened(ctx, o.hex, true));
+    const adjacent = (o: Option) => adjacentToGerman(state, o.hex);
+    return {
+      kind: "options", options, none: msg("move.none.noGarrisonToRelieve"),
+      prefs: book === "9.21"
+        ? [prefer("9.21 method 9", msg("move.pref.garrisonAdjacentGermanUnit"), adjacent)]
+        : [
+          prefer("9.22 method 9 a", msg("move.pref.garrisonAdjacentGermanUnit"), adjacent),
+          prefer("9.22 method 9 b", msg("move.pref.garrisonGermanUnitProximate"), (o) => germansOnMap(state).some(([g]) => germanProximate(ctx, g, o.hex))),
+        ],
+    };
   }
 
   /**
@@ -798,8 +823,8 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     },
     { n: 8, title: msg("move.method.adjacentGermanUnit"), order: "desc", skip: () => null, skipUnit: spearheadSkip, find: adjacentToGermanUnit },
     {
-      n: 9, title: msg("move.method.relieveGarrison"), order: "desc", skipUnit: spearheadSkip,
-      skip: (ctx) => (ctx.state.turn < 4 ? msg("move.skip.gameTurn4Later") : notYet("4.6")()),
+      n: 9, title: msg("move.method.relieveGarrison"), order: "desc", skipUnit: spearheadSkip, find: relieveGarrison,
+      skip: (ctx) => (ctx.state.turn < 4 ? msg("move.skip.gameTurn4Later") : null),
     },
     {
       n: 10, title: msg("move.method.followMovementArrows"), order: "asc", skip: () => null,
@@ -976,7 +1001,7 @@ export function createSovietMovement({ board, movement, unit, rules, objectives,
     },
     { n: 7, title: msg("move.method.causeSurround"), order: "desc", opLimit: true, skip: () => null, find: causeSurround },
     { n: 8, title: msg("move.method.adjacentGermanUnit"), order: "desc", opLimit: true, skip: () => null, find: adjacentToGermanUnit },
-    { n: 9, title: msg("move.method.relieveGarrison"), order: "desc", opLimit: true, skip: notYet("4.6") },
+    { n: 9, title: msg("move.method.relieveGarrison"), order: "desc", opLimit: true, skip: () => null, find: relieveGarrison },
     {
       n: 10, title: msg("move.method.followMovementArrows"), order: "asc", opLimit: true, skip: () => null,
       find(ctx, id) {

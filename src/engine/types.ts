@@ -45,11 +45,16 @@ export interface SovietCardPiles {
   seed: number;
 }
 
+/** Ground condition of a game-turn (18.33-18.34). */
+export type Ground = "frozen" | "lightMud" | "heavyMud";
+
 /** A reminder shown to the player until done, or until the end of the turn. */
 export interface Reminder {
   id: string;
-  /** Card that set it, e.g. "e18". */
+  /** Card that set it, e.g. "e18"; empty when the ground condition set it (`ground`). */
   card: string;
+  /** Ground condition of the turn that set it (18.34: card preparation, heavy mud replacements). */
+  ground?: Ground;
   title: Message;
   text: Message;
   turn: number;
@@ -82,6 +87,28 @@ export type SupportLine = "west" | "east";
 
 /** 13.53: up to two Soviet Forward Support markers on the map. */
 export const MAX_FORWARD_SUPPORT = 2;
+
+/**
+ * Ground condition markers (18.33): the marker on the calendar space of each game-turn 7-13
+ * (face down until the end of the turn before, Q75), and the markers set aside unseen.
+ */
+export interface GroundMarkers { turns: Record<string, Ground>; aside: Ground[] }
+
+/** Victory level (17.3, 18.35). */
+export type VictoryLevel = "strategic" | "operational" | "tactical";
+
+/** End of the game (17.2, 18.35): a German victory or defeat of a level, or a draw (GT 14). */
+export interface GameResult {
+  outcome: "victory" | "defeat" | "draw";
+  level?: VictoryLevel;
+  turn: number;
+  vp: number;
+  /** Owner of Kharkov (18.35) when the game ended. */
+  kharkov: "german" | "soviet";
+}
+
+/** German events the player tells the app about (Q77): they act on what only the app holds. */
+export type GermanEventId = "stavkaConfused" | "okwExpedites" | "airInterdiction";
 
 /**
  * A Soviet activation under way (9.0 steps 3-7), kept in the state while the bot waits for
@@ -185,6 +212,18 @@ export interface GameState {
   supportLine?: SupportLine;
   /** Hexes with an Improved Position marker (14.2); the IP belongs to the units in the hex. */
   improvedPositions?: string[];
+  /** Hexes with a Soviet garrison marker (15): village and VP hexes. */
+  garrisons?: string[];
+  /** Map-edge VP hexes whose VPs the Soviets hold (17.1, Q80). */
+  edgeVp?: string[];
+  /** Ground condition markers (18.33), from the End of Turn Phase of Game-turn 6. */
+  ground?: GroundMarkers;
+  /** [GT 4] OKW Expedites played: German units due on turn 6 enter their reserve box on turn 5 (Q77). */
+  okwExpedites?: boolean;
+  /** 18.34 heavy mud: the German infantry replacement steps assigned this turn (two at most). */
+  heavyMudSteps?: number;
+  /** The game is over (17.2, 18.35): no command moves it on. */
+  result?: GameResult;
   /** A Soviet impulse paused on a Soviet attack, until ContinueBotImpulse (Q37). */
   botImpulse?: BotImpulse;
   /** The combat being resolved on the combat sheet (12.0, D18); the impulse waits for it. */
@@ -247,7 +286,7 @@ export type Command =
   /**
    * Supply Phase (4.0 III), steps 2-4: supply status of German units [GT 2+] and Soviet units
    * [GT 4+] (13.1-13.2), surrender (13.23), [GT 8+] Soviet support line (13.51).
-   * [GT 7] step 5: front objective removal (9.12). TODO 4.6: step 1 (garrisons, 15.1).
+   * [GT 4+] step 1: garrisons (15.1). [GT 7] step 5: front objective removal (9.12).
    */
   | { type: "SupplyPhase" }
   /** Sets or removes (supplied) the supply marker of units: Air Resupply (13.4), corrections. */
@@ -256,6 +295,15 @@ export type Command =
   | { type: "SetForwardSupport"; hexes: string[] }
   /** Places or removes the Improved Position marker of a hex (14.2): German IPs (14.21), corrections. */
   | { type: "SetImprovedPosition"; hex: string; placed: boolean }
+  /** Places or removes a Soviet garrison marker (15): a German unit activated next to it (15.3, Q74), corrections. */
+  | { type: "SetGarrison"; hex: string; placed: boolean }
+  /**
+   * A German replacement step (16.1, Q76): a one-step unit on the map flipped to its two-step
+   * side, or an eliminated unit moved to the Reserve Units box on its one-step side.
+   */
+  | { type: "AssignReplacement"; unit: string }
+  /** A German event acting on what only the app holds (Q77); Air Interdiction names the marker's hex. */
+  | { type: "GermanEvent"; event: GermanEventId; hex?: string }
   /** German combat sequence, step 1 (12.0, 12.1): the Soviet hex attacked and the German units attacking it. */
   | { type: "DeclareAttack"; target: string; attackers: string[] }
   /** Takes back the German attack declared, before its hits are entered (§3bis I). */
@@ -311,8 +359,8 @@ export type GameEvent =
   | { type: "UnitsMoved"; units: string[]; from: Location[]; to: Location; path?: string[]; free?: boolean }
   | { type: "UnitRestacked"; unit: string; at: Location; to: StackMove }
   | { type: "StepRemoved"; unit: string; from: Face; to: Face }
-  /** Battlefield Replacements: a one-step unit flipped back to its two-step side. */
-  | { type: "StepRestored"; unit: string; from: Face; to: Face }
+  /** A one-step unit flipped back to its two-step side: Battlefield Replacements, or a replacement step (16.1, `replacement`). */
+  | { type: "StepRestored"; unit: string; from: Face; to: Face; replacement?: boolean }
   | { type: "DispersedSet"; units: string[]; dispersed: boolean }
   | { type: "VictoryPointsSet"; from: number; to: number }
   | { type: "SovietCardDiscarded"; card: string; discarded: boolean }
@@ -355,11 +403,50 @@ export type GameEvent =
     germanSurrender: { hex: string; units: string[] }[];
     sovietSurrender: { hex: string; unit: string }[];
     supportLine?: SupportLine;
+    /** 18.34: a heavy mud turn, markers only taken off the units able to trace supply. */
+    heavyMud?: boolean;
   }
   | { type: "SupplyStatusSet"; units: string[]; status: SupplyMarker | "supplied" }
   | { type: "ForwardSupportSet"; hexes: string[] }
   /** A unit ended its move in an enemy town or city (14.1). */
   | { type: "TownCaptured"; hex: string; owner: "german" | "soviet" }
+  /**
+   * Soviet VPs gained or lost (17.1): a town or city changed hands, or a map-edge VP hex was
+   * taken (occupied, supply traceable) or lost (left, or no supply in the Supply Phase, Q80).
+   */
+  | { type: "VictoryPointsChanged"; from: number; to: number; hex: string; why: "town" | "edgeTaken" | "edgeLeft" | "edgeNoSupply" }
+  /**
+   * Garrison placement (15.1): the Supply Phase step 1, or a Garrison Front event (`front`).
+   * Each hex checked, in the order of the process, with what became of it.
+   */
+  | { type: "GarrisonsPlaced"; rule: "15.1" | "15.11"; front?: "voronezh" | "southwest"; checks: GarrisonCheck[] }
+  /** A garrison marker placed or removed outside the placement process: why, and by which rule. */
+  | { type: "GarrisonSet"; hex: string; placed: boolean; rule: string; reason: Message }
+  /** 15.3 End of Turn Phase: village garrisons checked for removal. */
+  | { type: "GarrisonsChecked"; removed: { hex: string; reason: Message }[]; kept: string[] }
+  /**
+   * A replacement step (16.1): the unit, where it came from, the priority that chose it and the
+   * units it was chosen among (Soviet: lowest selector); units of the formation left out, and why.
+   */
+  | {
+    type: "ReplacementAssigned"; side: "german" | "soviet"; unit: string; from: Location; priority: 1 | 2 | 3 | 4;
+    rule: "16.1" | "18.34"; army?: string; front?: "voronezh" | "southwest"; tied?: string[]; refused?: { unit: string; reason: Message }[];
+  }
+  /** 18.33: ground condition markers placed face down on the calendar (game-turns), the rest set aside. */
+  | { type: "GroundMarkersPlaced"; turns: number[]; aside: number }
+  /** 18.33: the ground condition marker of a game-turn revealed (at the end of the turn before). */
+  | { type: "GroundRevealed"; turn: number; ground: Ground }
+  /** 18.34 heavy mud: no cards, no activations; replacement steps instead (IV). */
+  | { type: "HeavyMudTurn"; turn: number; stavkaRemoved: boolean }
+  /** 18.35: the Victory Levels of the game-turn compared with the Soviet VPs at its end. */
+  | {
+    type: "VictoryChecked"; turn: number; vp: number; kharkov: "german" | "soviet";
+    victory: { below: number; level: VictoryLevel }; defeat: { above?: number; atLeast?: number; level: VictoryLevel };
+    result: GameResult | null;
+  }
+  | { type: "GameEnded"; result: GameResult }
+  /** A German event the player played (Q77): the Soviet cards it discarded, or the marker it removed. */
+  | { type: "GermanEventPlayed"; event: GermanEventId; cards?: string[]; hex?: string; units?: string[] }
   | {
     type: "FormationActivated"; army: string; front: "voronezh" | "southwest";
     /** Active units on the map, in reserve, and those that move (on the map, not dispersed). */
@@ -704,6 +791,13 @@ export interface Combat {
   /** German Reinforce Battle in attack: the hex the stack came from. */
   reinforceFrom?: string;
 }
+
+/**
+ * One hex of the garrison placement process (15.1): a Soviet VP hex (step 1) or a village (step 2).
+ * `placed`: a marker goes there; otherwise `reason` says which requirement failed. `removes`:
+ * earlier garrisons that no longer meet the requirements once this one is placed.
+ */
+export interface GarrisonCheck { hex: string; step: 1 | 2; placed: boolean; reason: Message; removes?: string[] }
 
 /** Combat odds or a strength ratio as attack:defense levels (Q39): [3, 1], [1.5, 1], [1, 2]… */
 export type Odds = [number, number];

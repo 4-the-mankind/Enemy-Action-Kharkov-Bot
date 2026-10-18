@@ -23,6 +23,7 @@ import { mountUnitsPanel } from "./panels/units-panel";
 import { mountBotPanel } from "./panels/bot-panel";
 import { mountCardZoom } from "./panels/card-zoom";
 import { mountCombatPanel } from "./panels/combat-panel";
+import { mountGameEnd } from "./panels/game-end";
 import { mountReminders } from "./panels/reminders";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountWhyPanel } from "./panels/why-panel";
@@ -115,6 +116,7 @@ async function init() {
   const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, !!scenario);
   mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
+  mountGameEnd($("gameEnd"), session, game.calendar);
   const combatPanel = mountCombatPanel($("combat"), session, combatPlane);
   mountCardZoom();
   // A log line's "Why this move" opens right under it, in the Log tab.

@@ -1080,3 +1080,106 @@ body.in-combat .bot-options { display: none; }
 .combat-sheet.german { --hem: var(--prussian); }
 .combat-sheet.german .current .n { box-shadow: 0 0 0 3px rgb(31 79 154 / 0.22); }
 .combat-marks .target.german { fill: none; stroke: var(--stab-red); stroke-width: 3; vector-effect: non-scaling-stroke; filter: none; }
+
+/* ---- Task 4.6: garrisons, ground condition, German events, end of the game. */
+
+/* Soviet garrison markers (15): the counter itself, landing on its hex (units-plane.ts). */
+.map-svg .garrison { transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.45)); }
+.garrison-box ul { margin-top: 0; }
+.garrison-box li { cursor: default; }
+.garrison-box .linkbtn { margin-top: 6px; font-size: 0.85rem; }
+.garrison-box .linkbtn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* Garrison placement trace in the log (15.1, example p44). */
+.garrison-trace { margin-top: 4px; font-size: 0.82rem; }
+.garrison-trace summary { cursor: pointer; color: var(--paper-dim); }
+.garrison-trace ol { margin: 4px 0 0; padding-left: 0; list-style: none; columns: 1; }
+.garrison-trace li { padding: 1px 0 1px 8px; border-left: 2px solid var(--feldgrau); }
+.garrison-trace li.yes { border-left-color: var(--stab-red); color: var(--paper); }
+.garrison-trace li b { font-variant-numeric: tabular-nums; }
+
+/* Ground condition: the marker on its calendar station (18.33), face down until revealed. */
+.ground-marker {
+  align-self: center; width: 22px; height: 22px; border-radius: 2px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+.ground-marker.down { opacity: 0.75; }
+.ground-marker.fixed { opacity: 0.45; filter: grayscale(0.6); }
+.ground-marker.flip { animation: ground-flip 700ms cubic-bezier(.3, .7, .2, 1) 200ms backwards; }
+@keyframes ground-flip {
+  from { transform: perspective(200px) rotateY(180deg) scale(1.3); filter: brightness(0.4); }
+  55% { filter: brightness(1); }
+  to { transform: perspective(200px) rotateY(0) scale(1); }
+}
+.stop.now .station { background: var(--stab-red); }
+.stop.now .stop-label b { color: var(--paper); }
+
+/* The ground of the turn beside the turn line of the Bot tab. */
+.ground-chip { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; color: var(--paper); white-space: nowrap; }
+.ground-chip img { width: 18px; height: 18px; border-radius: 2px; }
+.ground-chip.lightMud, .ground-chip.heavyMud { font-weight: 600; }
+
+/* A ground reminder shows its marker, square, not a card. */
+.reminder.ground img { height: 38px; cursor: default; }
+.reminder.heavyMud { border-left-color: var(--slip-ink); }
+
+/* German events only the app can play (Q77). */
+.german-events { margin-top: 12px; font-size: 0.88rem; }
+.german-events summary { cursor: pointer; color: var(--paper-dim); }
+.german-events summary:hover { color: var(--paper); }
+.event-list { display: grid; gap: 8px; margin-top: 8px; }
+.event { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--feldgrau); }
+.event-name b { font-weight: 600; color: var(--paper); }
+.event-name span { display: block; color: var(--paper-dim); font-size: 0.82rem; line-height: 1.3; }
+.event-name .gt { display: inline-block; margin-right: 6px; padding: 0 5px; font-size: 0.75rem; font-weight: 600; color: var(--feldgrau-dark); background: var(--paper-dim); border-radius: 2px; }
+.event-actions { display: flex; flex-direction: column; gap: 4px; }
+.event-actions .btn { padding: 3px 10px; font-size: 0.82rem; }
+
+/*
+ * End of the game (17.2, 18.35): a slip laid on the middle of the map (Q84, like the start
+ * notice), a heavy rule of the outcome's colour, the level in large type. Folded, one line
+ * remains at the top of the map.
+ */
+.game-end {
+  --outcome: var(--slip-ink);
+  position: absolute; top: 50%; left: 50%; z-index: 7; transform: translate(-50%, -50%);
+  width: min(440px, calc(100% - 32px)); padding: 16px 22px 18px;
+  color: var(--slip-ink); background: var(--slip);
+  border-top: 7px solid var(--outcome); box-shadow: 0 14px 40px rgb(0 0 0 / 0.55);
+}
+.game-end[hidden] { display: none; }
+.game-end.victory { --outcome: var(--feldgrau); }
+.game-end.defeat { --outcome: var(--stab-red); }
+.game-end.arriving { animation: end-arrive 560ms cubic-bezier(.2, .8, .2, 1); }
+@keyframes end-arrive {
+  from { transform: translate(-50%, calc(-50% - 24px)); opacity: 0; }
+  to { transform: translate(-50%, -50%); opacity: 1; }
+}
+.end-when { margin: 0; font-size: 0.85rem; color: var(--slip-dim); }
+.end-title {
+  margin: 2px 0 8px; font-size: 2.1rem; font-weight: 600; line-height: 1.02; letter-spacing: -0.01em;
+  color: var(--outcome); text-wrap: balance;
+}
+.game-end.victory .end-title { color: var(--slip-ink); }
+.end-text { margin: 0; font-size: 0.98rem; line-height: 1.45; max-width: 38em; }
+.end-facts { display: grid; grid-template-columns: auto auto 1fr; margin: 14px 0 0; border-top: 1.5px solid var(--slip-ink); }
+.end-facts div { padding: 6px 14px 0 0; }
+.end-facts div + div { padding-left: 14px; border-left: 1px solid rgb(38 46 41 / 0.25); }
+.end-facts dt { font-size: 0.78rem; color: var(--slip-dim); }
+.end-facts dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.end-actions { display: flex; gap: 8px; margin-top: 16px; }
+.end-actions .btn { border-color: var(--slip-ink); }
+.end-actions .btn.ink { font-weight: 600; color: var(--slip); background: var(--slip-ink); }
+.end-actions .btn.ink:hover { background: var(--feldgrau); }
+.end-actions .btn:not(.ink):hover { background: rgb(38 46 41 / 0.08); }
+.game-end.folded { top: 18px; transform: translateX(-50%); width: auto; max-width: calc(100% - 32px); padding: 7px 14px; border-top-width: 4px; }
+.end-line { display: flex; align-items: baseline; gap: 14px; margin: 0; white-space: nowrap; }
+.end-line .linkbtn { font-size: 0.85rem; }
+@media (max-width: 520px) {
+  .end-title { font-size: 1.65rem; }
+  .end-facts { grid-template-columns: 1fr 1fr; }
+  .end-facts div:nth-child(3) { grid-column: 1 / -1; padding-left: 0; border-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ground-marker.flip, .game-end.arriving { animation: none; }
+}

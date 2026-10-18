@@ -17,10 +17,8 @@ const scan = (id: string) => `/assets/cards/EAKh-sovECcards-E-${id.slice(1)}.png
 const FRONT = { voronezh: "Voronezh Front", southwest: "Southwest Front" } as const;
 const TIE = { voronezh: "a supplied unit closest to the west map edge", southwest: "a supplied unit closest to the 3300 hexrow", stavka: "a supplied unit closest to hex 1923" };
 
-/** Task that will code the line, when the bot passes it over for now. */
-const PENDING: Record<string, string> = {
-  replacement: "4.6", "soviet-garrison-front": "4.6",
-};
+/** Task that will code the line, when the bot passes it over for now (none left since task 4.6). */
+const PENDING: Record<string, string> = {};
 
 function reading(l: CardCommand, events: Map<string, string>): { what: string; rule: string; waits?: string; note?: string } {
   switch (l.kind) {

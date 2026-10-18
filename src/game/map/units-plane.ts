@@ -24,6 +24,9 @@ const objectiveImage = (front: ObjectiveFront, face: ObjectiveFace) =>
 /** Army Objective markers (9.13), West side only. */
 const ARMY_OBJECTIVE_IMAGE = { "40": "marker-sov40tharmy-objW.png", "1G": "marker-sov1stGrdsarmy-objW.png" };
 const DISPERSED_IMAGE = { german: "marker-germandispersed.png", soviet: "marker-sovietdispersed-sml.png" };
+/** Soviet garrison marker (15): the back of a Soviet ownership marker, alone in its hex. */
+const GARRISON = 118;
+const GARRISON_IMAGE = "/assets/counters/others/marker-sovietownershipbck_sovietgarrison.png";
 /** Supply markers (13.2), on a counter's top left corner. */
 const SUPPLY_IMAGE = {
   german: { outOfSupply: "marker-germanoos.png", isolated: "marker-germanisolated.png" },
@@ -32,6 +35,8 @@ const SUPPLY_IMAGE = {
 
 export class UnitsPlane {
   private readonly root: SVGGElement;
+  /** Garrisons drawn last time: new ones land, removed ones fade out (task 4.6). */
+  private garrisons: string[] | null = null;
 
   constructor(private readonly view: MapView, private readonly data: MapData, private readonly engine: Engine,
     private readonly selection: Selection) {
@@ -88,8 +93,38 @@ export class UnitsPlane {
       parts.push(`<image class="objective" href="/assets/counters/others/marker-sovietfwrdsupp.png" x="${hex.x - OBJECTIVE / 2 + 40}" ` +
         `y="${hex.y - OBJECTIVE / 2 - 40}" width="${OBJECTIVE}" height="${OBJECTIVE}"><title>${t("map.forwardSupport")}</title></image>`);
     }
+    // Soviet garrisons (15): the marker centered on its hex, which holds no unit.
+    const garrisons = state.garrisons ?? [];
+    for (const at of garrisons) {
+      const hex = this.data.hexById.get(at);
+      if (!hex) continue;
+      parts.push(`<image class="garrison" data-garrison="${at}" href="${GARRISON_IMAGE}" x="${hex.x - GARRISON / 2}" y="${hex.y - GARRISON / 2}" ` +
+        `width="${GARRISON}" height="${GARRISON}"><title>${t("map.garrison")}</title></image>`);
+    }
     this.root.innerHTML = parts.join("");
-    if (fly && !matchMedia("(prefers-reduced-motion: reduce)").matches) this.flyIn(fly);
+    const motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (fly && motion) this.flyIn(fly);
+    if (this.garrisons && motion) this.animateGarrisons(this.garrisons, garrisons);
+    this.garrisons = garrisons;
+  }
+
+  /** A garrison placed lands on its hex; one removed lingers a moment and fades. */
+  private animateGarrisons(before: string[], after: string[]) {
+    for (const at of after.filter((h) => !before.includes(h)))
+      this.root.querySelector(`[data-garrison="${at}"]`)?.animate(
+        [{ transform: "scale(1.35)", opacity: 0 }, { transform: "none", opacity: 1 }],
+        { duration: 320, easing: "cubic-bezier(.2,.7,.2,1)" });
+    for (const at of before.filter((h) => !after.includes(h))) {
+      const hex = this.data.hexById.get(at);
+      if (!hex) continue;
+      const ghost = document.createElementNS(SVG_NS, "image");
+      ghost.setAttribute("class", "garrison leaving");
+      ghost.setAttribute("href", GARRISON_IMAGE);
+      for (const [k, v] of [["x", hex.x - GARRISON / 2], ["y", hex.y - GARRISON / 2], ["width", GARRISON], ["height", GARRISON]] as const) ghost.setAttribute(k, String(v));
+      this.root.append(ghost);
+      ghost.animate([{ opacity: 1 }, { opacity: 0, transform: "scale(0.85)" }], { duration: 420, easing: "ease-in", fill: "forwards" })
+        .finished.then(() => ghost.remove(), () => ghost.remove());
+    }
   }
 
   /** Set-up cascade: counters fly from the button that placed them to their hex. */

@@ -31,8 +31,12 @@ export interface SupplyRules {
   supplyStatus(state: GameState, id: string): SupplyStatus;
   /** 13.1: the unit can trace supply right now (false off the map). */
   canTraceSupply(state: GameState, id: string): boolean;
-  /** 13.1: that side's supply can be traced from the hex, a friendly unit imagined in it. */
-  supplyTracesTo(state: GameState, side: Side, hex: string): boolean;
+  /**
+   * 13.1: that side's supply can be traced from the hex, a friendly unit imagined in it.
+   * `garrisonZoc` (15.21): the other garrisons not adjacent to German units exert a Soviet ZOC
+   * on the German trace (garrison placement, End of Turn Phase, Garrison Front event).
+   */
+  supplyTracesTo(state: GameState, side: Side, hex: string, opts?: { garrisonZoc?: boolean }): boolean;
   /** 13.3: Soviet reserve supply can be traced from the hex (never through a German ZOC). */
   reserveSupplyTracesTo(state: GameState, hex: string): boolean;
   /** Hexes of a supply path from the hex to a supply head (both included), or null (4.3b). */
@@ -45,14 +49,17 @@ export interface SupplyRules {
   inSovietSupport(state: GameState, hex: string): boolean;
   /** 9.8: the line in use, or null when the entire map is within the limit (GT 1-5). */
   operationalLimit(state: GameState): OperationalLimit | null;
-  /** 9.8: the hex is beyond the limit for units of that front (subject only without a front objective). */
-  beyondOperationalLimit(state: GameState, front: Front, hex: string): boolean;
+  /**
+   * 9.8: the hex is beyond the limit for units of that front (subject only without a front
+   * objective); `front` null: beyond the line in use, whatever the objectives (15.1, Q78).
+   */
+  beyondOperationalLimit(state: GameState, front: Front | null, hex: string): boolean;
 }
 
 export interface SupplyData {
   board: Board;
   unit(id: string): Unit | undefined;
-  /** Task 4.6 (15): Soviet garrisons block German supply paths (13.1). */
+  /** 15.2: Soviet garrisons block German supply paths (13.1). */
   garrisonAt(state: GameState, hex: string): boolean;
 }
 
@@ -71,8 +78,11 @@ interface SupplyMap {
   zocClosed: Set<string>;
 }
 
-/** Relaxed searches that tell why a hex is not supplied (whyNoSupply). */
-interface Relax { reserve?: boolean; noLimit?: boolean; noZoc?: boolean }
+/**
+ * Relaxed searches that tell why a hex is not supplied (whyNoSupply); `garrisonZoc`: the
+ * provisional garrison ZOCs of 15.21, but not that of the garrison in `except` (the hex traced from).
+ */
+interface Relax { reserve?: boolean; noLimit?: boolean; noZoc?: boolean; garrisonZoc?: boolean; except?: string }
 
 /** 13.1: a path is at most seven hexes long (two if it crosses an unbridged Dniepr hexside). */
 const PATH = 7;
@@ -90,8 +100,9 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
    * enterable; the hex traced from need not be (it may be in an enemy ZOC, and an enemy
    * unit in it is replaced by an imagined friendly one).
    */
-  function supplyMap(state: GameState, side: Side, { reserve = false, noLimit = false, noZoc = false }: Relax = {}): SupplyMap {
-    const key = `${side}${reserve ? ":reserve" : ""}${noLimit ? ":noLimit" : ""}${noZoc ? ":noZoc" : ""}`;
+  function supplyMap(state: GameState, side: Side, { reserve = false, noLimit = false, noZoc = false, garrisonZoc = false, except }: Relax = {}): SupplyMap {
+    const gz = garrisonZoc && side === "german";
+    const key = `${side}${reserve ? ":reserve" : ""}${noLimit ? ":noLimit" : ""}${noZoc ? ":noZoc" : ""}${gz ? `:gz${except ?? ""}` : ""}`;
     let byKey = cache.get(state);
     const cached = byKey?.get(key);
     if (cached) return cached;
@@ -109,6 +120,12 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
       if (u.side === foe && supplyStatus(state, id) !== "isolated") for (const n of board.neighbors(s.at)) zoc.add(n.hex);
     }
     const has = (hex: string, s: Side) => occupied.get(hex)?.has(s) ?? false;
+    // 15.21: a garrison not adjacent to a German unit exerts a ZOC on the German trace; the
+    // garrison of the hex traced from does not (15.3 "other garrisons"), nor blocks it.
+    const garrisoned = (hex: string) => hex !== (gz ? except : undefined) && garrisonAt(state, hex);
+    if (gz)
+      for (const g of board.hexes)
+        if (garrisoned(g) && !board.neighbors(g).some((n) => has(n.hex, "german"))) for (const n of board.neighbors(g)) zoc.add(n.hex);
     const enemyTown = (hex: string) => {
       const t = board.hex(hex).terrain;
       if (t !== "town" && t !== "city") return false;
@@ -118,7 +135,7 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     // only if a friendly unit is in the hex (13.3: reserve supply, never into a German ZOC).
     const zocClosed = new Set([...zoc].filter((h) => reserve || !has(h, side)));
     const enterable = (hex: string) =>
-      !has(hex, foe) && !enemyTown(hex) && !(side === "german" && garrisonAt(state, hex))
+      !has(hex, foe) && !enemyTown(hex) && !(side === "german" && garrisoned(hex))
       && (noZoc || !zocClosed.has(hex));
     const crossing = (a: string, b: string) => {
       const s = board.side(a, b);
@@ -193,8 +210,10 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     return { ...state, units };
   }
 
-  const supplyTracesTo = (state: GameState, side: Side, hex: string) =>
-    supplyMap(hypothetical(state, side, hex), side).supplied.has(hex);
+  // The garrison of the hex traced from is left out (15.3 "other garrisons"); a hex without one
+  // shares the map of the state (cached), so the garrison placement process traces quickly.
+  const supplyTracesTo = (state: GameState, side: Side, hex: string, opts: { garrisonZoc?: boolean } = {}) =>
+    supplyMap(hypothetical(state, side, hex), side, opts.garrisonZoc ? { garrisonZoc: true, except: garrisonAt(state, hex) ? hex : undefined } : {}).supplied.has(hex);
 
   /** Path from the hex to a supply head in that map, or null. */
   function pathIn(map: SupplyMap, hex: string): string[] | null {
@@ -264,7 +283,7 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     beyondOperationalLimit(state, front, hex) {
       const limit = operationalLimit(state);
       // 9.8: units of a front are subject to the limit only once its objective marker is removed.
-      if (!limit || state.objectives[front]) return false;
+      if (!limit || (front && state.objectives[front])) return false;
       return board.lineSide(limit === "far" ? "lineFar" : "lineWest", hex) === "west";
     },
   };

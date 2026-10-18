@@ -8,24 +8,29 @@ import { msg, type Message } from "../i18n/message";
 import type { Board } from "./board";
 import { createAdvance } from "./advance";
 import { createCombat, type Combats } from "./combat";
+import { createGarrisons } from "./garrisons";
+import { createGermanEvents } from "./german-events";
 import { createGermanMoves, type GermanMoves } from "./german-moves";
+import { groundEndOfTurn } from "./ground";
 import { adjustmentName } from "./names";
 import { createMovement, type Movement } from "./movement";
 import { createObjectives } from "./objectives";
 import type { RecordedAdjustment } from "./setup-adjustments";
 import { provisionalRules, type PendingRules } from "./pending";
+import { createReplacements } from "./replacements";
 import { createRetreat } from "./retreat";
 import { createSovietActivation, type SovietActivations } from "./soviet-activation";
 import { createSovietAttacks } from "./soviet-attacks";
 import { createSovietCards, type SovietCards } from "./soviet-cards";
 import { createSovietMovement, type SovietMovement } from "./soviet-movement";
+import { createVictory, LAST_TURN, type CalendarSpace } from "./victory";
 import {
-  emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameState,
-  type Location, type ObjectiveFace, type ObjectiveFront, type StackMove, type StepResult, type SupplyMarker,
+  emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameResult,
+  type GameState, type Location, type ObjectiveFace, type ObjectiveFront, type Reminder, type StackMove, type StepResult, type SupplyMarker,
 } from "./types";
 
-/** Last game-turn of the campaign (calendar, 18.35). */
-const LAST_TURN = 14;
+/** 8.2: STAVKA, removed from play at the start of a heavy mud Game-turn 7 (18.34). */
+const STAVKA = "e22";
 
 export interface EngineData {
   units: Unit[];
@@ -39,8 +44,8 @@ export interface EngineData {
   cards?: SovietCard[];
   /** Supply (supply.ts) and the rules of tasks not coded yet (garrisons, ground…): pending.ts. */
   rules?: PendingRules;
-  /** Calendar spaces (data/calendar.json): the Fixed Artillery Range of each game-turn (12.3). */
-  calendar?: { turn: number; far: number }[];
+  /** Calendar spaces (data/calendar.json): the Fixed Artillery Range (12.3) and Victory Levels (18.35) of each game-turn. */
+  calendar?: CalendarSpace[];
 }
 
 /** A whole Soviet activation without a card (tests, booklet examples): what a card would bring. */
@@ -90,6 +95,12 @@ export interface Engine {
   readonly combat: Pick<Combats, "view" | "preview" | "retreatHexes" | "whyNotRemoveStep" | "whyNotAttack" | "advanceHexes">;
   /** Where German units may end a move of the player (Q59, task 5.1): to light the hexes during a drag. */
   readonly germanMoves: Pick<GermanMoves, "checked" | "reach">;
+  /** Why the player may not give this German unit a replacement step (16, Q76), or null. */
+  whyNotReplace(state: GameState, unitId: string): Message | null;
+  /** Why a garrison marker may not be placed (or removed) there by hand (15, Q74), or null. */
+  whyNotGarrison(state: GameState, hex: string, placed: boolean): Message | null;
+  /** Why the player may not play this German event now (Q77), or null; Air Interdiction names the marker's hex. */
+  whyNotGermanEvent(state: GameState, event: Extract<Command, { type: "GermanEvent" }>["event"], hex?: string): Message | null;
   /**
    * Why the player may not drop these units there (a drag on the map or the Units panel): the
    * rules of the boxes, those of the combat open (retreats, reinforcement, Q45), then the
@@ -106,15 +117,20 @@ export function createEngine(data: EngineData): Engine {
   const movement = createMovement({ board: data.board, terrain: data.terrain, unit: (id) => byId.get(id), rules });
   const germanMoves = createGermanMoves({ movement, unit: (id) => byId.get(id), rules });
   const objectives = createObjectives({ board: data.board, movement, unit: (id) => byId.get(id), rules });
+  const garrisons = createGarrisons({ board: data.board, movement, unit: (id) => byId.get(id), rules });
+  const victory = createVictory({ board: data.board, movement, unit: (id) => byId.get(id), rules });
+  const replacements = createReplacements({ movement, unit: (id) => byId.get(id), rules, units, move: (state, ids, to) => moveUnits(state, ids, to, "bot") });
+  const space = (turn: number) => data.calendar?.find((t) => t.turn === turn);
   const sovietMovement = createSovietMovement({
     board: data.board, movement, unit: (id) => byId.get(id), rules, objectives,
     move: (state, id, to, path) => moveUnits(state, [id], to, "bot", path),
   });
   const cardsById = new Map((data.cards ?? []).map((c) => [c.id, c]));
+  const germanEvents = createGermanEvents({ card: (id) => cardsById.get(id), units, rules });
   const reinforceDestination = sovietMovement.reinforceDestination;
   const attacks = createSovietAttacks({
     board: data.board, movement, unit: (id) => byId.get(id), rules, card: (id) => cardsById.get(id),
-    far: (turn) => data.calendar?.find((t) => t.turn === turn)?.far ?? 0,
+    far: (turn) => space(turn)?.far ?? 0,
     move: (state, ids, to) => moveUnits(state, ids, to, "bot"),
     setImprovedPosition: (state, hex, placed) => setImprovedPosition(state, hex, placed),
     reinforceDestination,
@@ -140,7 +156,7 @@ export function createEngine(data: EngineData): Engine {
   });
   const sovietCards = data.cards
     ? createSovietCards({
-      cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, activations: sovietActivations,
+      cards: data.cards, board: data.board, movement, unit: (id) => byId.get(id), rules, activations: sovietActivations, garrisons, replacements,
       step: (s, c) => step(s, c, "bot"), startNkvd: (s, hexes) => combat.startNkvd(s, hexes),
     })
     : null;
@@ -160,7 +176,9 @@ export function createEngine(data: EngineData): Engine {
   }
 
   // Until Start, the set-up belongs to the booklet and the bot (p48): the player only watches.
+  // Once the game is over (17.2), nothing moves any more.
   function locked(state: GameState, actor: Actor = "player"): Message | null {
+    if (state.result) return msg("reject.gameOver");
     if (actor === "bot" || state.started) return null;
     return msg(state.setUp ? "reject.pressStart" : "reject.setUpFirst");
   }
@@ -203,17 +221,56 @@ export function createEngine(data: EngineData): Engine {
     if (base) return { reason: base };
     const r = state.combat ? combat.playerMove(state, ids, to) : null;
     if (r) return "key" in r ? { reason: r } : { combat: r };
+    // 16.1 (Q76): an eliminated German unit dragged to the Reserve Units box is a replacement step.
+    if (replacing(state, ids, to, free)) {
+      if (state.combat) return { reason: msg("reject.combat.open", { hex: state.combat.target }) };
+      let s = state;
+      for (const id of ids) {
+        const step = replacements.german(s, id);
+        if ("key" in step) return { reason: step };
+        s = step.state;
+      }
+      return null;
+    }
+    // 10.1, 15.22: no German unit into a garrisoned hex (a retreat goes through the combat above),
+    // unless the garrison goes when the unit's activation begins next to it (15.3, Q74).
+    if (isHex(to) && rules.garrisonAt(state, to) && ids.some((id) => byId.get(id)?.side === "german")) {
+      const removed = !free && ids.every((id) => activationRemoves(state, id, to));
+      if (!removed) return { reason: msg("reject.move.garrison", { hex: to }) };
+    }
     const why = free ? null : germanMoves.whyNot(state, ids, to);
     return why ? { reason: why } : null;
   }
+
+  /** The German units are eliminated and dragged to the reserve box, the move checked: replacement steps (Q76). */
+  const replacing = (state: GameState, ids: string[], to: Location, free: boolean) =>
+    !free && to === "reserve" && ids.every((id) => byId.get(id)?.side === "german" && state.units[id]?.at === "eliminated");
+
+  /** 15.3 (Q74): the unit's activation removes the garrison of that hex (supplied, undispersed, next to it). */
+  const activationRemoves = (state: GameState, id: string, hex: string) =>
+    byId.get(id)?.side === "german" && isHex(state.units[id]?.at ?? "") && !state.units[id].dispersed
+    && rules.supplyStatus(state, id) === "supplied" && data.board.neighbors(state.units[id].at).some((n) => n.hex === hex);
 
   function playerMove(state: GameState, units: string[], to: Location, free: boolean): StepResult {
     const ids = [...new Set(units)];
     const r = whyNotPlayerMove(state, ids, to, free);
     if (r && "reason" in r) return reject(state, "MoveUnits", r.reason);
     if (r) return r.combat;
-    const moved = moveUnits(state, ids, to, "player");
-    if (!free) return { state: germanMoved(moved.state, ids.filter((id) => state.units[id].at !== to), to), events: moved.events };
+    if (replacing(state, ids, to, free)) {
+      let s = state;
+      const events: GameEvent[] = [];
+      for (const id of ids) {
+        const step = replacements.german(s, id) as StepResult;
+        s = step.state;
+        events.push(...step.events);
+      }
+      return { state: s, events };
+    }
+    // 15.3, 10.1 (Q74): a German unit starting its checked move next to a garrison removes it.
+    const leaving = ids.filter((id) => state.units[id].at !== to);
+    const start = free ? { state, events: [] } : garrisons.activationRemovals(state, leaving);
+    const moved = moveUnits(start.state, ids, to, "player");
+    if (!free) return { state: germanMoved(moved.state, leaving, to), events: [...start.events, ...moved.events] };
     return { state: moved.state, events: moved.events.map((e) => (e.type === "UnitsMoved" ? { ...e, free: true } : e)) };
   }
 
@@ -275,17 +332,37 @@ export function createEngine(data: EngineData): Engine {
       next.improvedPositions = next.improvedPositions!.filter((h) => !vacated.includes(h));
       for (const hex of vacated) events.push({ type: "ImprovedPositionSet", hex, placed: false, rule: "14.24", reason: msg("ip.why.vacated") });
     }
-    // 14.1: a town or city changes hands the moment an enemy unit enters it.
+    // 14.1: a town or city changes hands the moment an enemy unit enters it; the Soviets gain
+    // or lose its VPs (17.1).
     const sides = new Set(ordered.map((id) => byId.get(id)!.side));
     const owner = isHex(to) ? movement.townOwner(next, to) : null;
     if (owner && sides.size === 1 && !sides.has(owner)) {
       const side = [...sides][0];
       next.sovietTowns = side === "soviet" ? [...next.sovietTowns, to] : next.sovietTowns.filter((h) => h !== to);
       events.push({ type: "TownCaptured", hex: to, owner: side });
+      const vp = data.board.hex(to).vp;
+      if (vp) {
+        const after = Math.max(0, next.vp + (side === "soviet" ? vp : -vp));
+        events.push({ type: "VictoryPointsChanged", from: next.vp, to: after, hex: to, why: "town" });
+        next.vp = after;
+      }
     }
-    if (!isHex(to)) return { state: next, events };
+    // 15.3, 9.5: a unit ending its move, advance or retreat in a garrisoned hex, or a reserve
+    // placed there, removes the garrison (a German unit only gets there by retreat, 12.71).
+    if (isHex(to) && rules.garrisonAt(next, to)) {
+      next.garrisons = (next.garrisons ?? []).filter((h) => h !== to);
+      const first = byId.get(ordered[0])!;
+      events.push({
+        type: "GarrisonSet", hex: to, placed: false, rule: first.side === "soviet" ? "15.3" : "12.71",
+        reason: msg(first.side === "soviet" ? "garrison.removed.sovietUnit" : "garrison.removed.germanRetreat", { unit: first.designation }),
+      });
+    }
+    // 17.1: map-edge VP hexes taken or left (Q80).
+    const edge = victory.afterMove(next, [...from, to]);
+    events.push(...edge.events);
+    if (!isHex(to)) return { state: edge.state, events };
     // 9.13: an Army Objective marker moves on when a Soviet unit enters its hex.
-    const reached = objectives.entered(next, ordered, path?.slice(1) ?? [to]);
+    const reached = objectives.entered(edge.state, ordered, path?.slice(1) ?? [to]);
     return { state: reached.state, events: [...events, ...reached.events] };
   }
 
@@ -418,33 +495,88 @@ export function createEngine(data: EngineData): Engine {
   }
 
   // End of turn (4.0 V) and start of the next: Reserve Phase (I), Soviet draw pile (II),
-  // Supply Phase (III). TODO 4.6: victory check (17.2) and garrison removal (15.3).
+  // Supply Phase (III); in a heavy mud turn, its replacement steps instead of impulses (18.34).
   function nextTurn(state: GameState): StepResult {
     if (!state.started) return reject(state, "NextTurn", msg("reject.pressStart"));
     if (!sovietCards || !state.sovietCards) return reject(state, "NextTurn", msg("reject.cardsNotLoaded"));
     const left = state.sovietCards.drawPile.length;
     if (left) return reject(state, "NextTurn", msg("reject.cardsLeft", { count: left }));
+    const events: GameEvent[] = [];
+    // V: victory check (17.2, 18.35), not at the end of a heavy mud turn (18.34).
+    if (rules.ground(state) !== "heavyMud") {
+      const checked = victory.check(state, space(state.turn));
+      if (checked) events.push(checked);
+      if (checked?.result) return endGame(state, checked.result, events);
+    }
     if (state.turn >= LAST_TURN) return reject(state, "NextTurn", msg("reject.lastTurn", { turn: LAST_TURN }));
-    // V: Dispersed and Forward Support markers off the map; [GT 7] objective markers out of play (9.12).
+    // V: Dispersed and Forward Support markers off the map; [GT 4+] village garrisons checked
+    // (15.3); [GT 7] objective markers out of play (9.12); ground condition markers (18.33).
     const units = { ...state.units };
     for (const [id, u] of Object.entries(units)) if (u.dispersed) { const { dispersed: _, ...rest } = u; units[id] = rest; }
-    const end = state.turn === 7 ? objectives.endOfTurn7(state) : { state, events: [] };
-    let next: GameState = {
-      ...end.state, units, forwardSupport: [], turn: state.turn + 1,
-      reminders: (state.reminders ?? []).filter((r) => r.until === "done"),
-    };
+    let next: GameState = { ...state, units, forwardSupport: [] };
+    if (state.turn >= 4) {
+      const g = garrisons.endOfTurn(next);
+      next = g.state;
+      events.push(...g.events);
+    }
+    if (state.turn === 7) {
+      const end = objectives.endOfTurn7(next);
+      next = end.state;
+      events.push(...end.events);
+    }
+    const ground = groundEndOfTurn(next);
+    next = { ...ground.state, turn: state.turn + 1, reminders: (state.reminders ?? []).filter((r) => r.until === "done") };
+    events.push(...ground.events);
     delete next.attackedThisImpulse;
     delete next.germanImpulse;
-    // I: units of the calendar space for the new turn enter their Reserve Units box.
-    const toReserve = Object.keys(units).filter((id) => units[id].at === "reinforcements" && byId.get(id)?.entryTurn === next.turn);
+    delete next.heavyMudSteps;
+    // I: units of the calendar space for the new turn enter their Reserve Units box; on turn 5,
+    // after OKW Expedites, the German units due on turn 6 too (Q77).
+    const due = (id: string) => {
+      const u = byId.get(id);
+      return u?.entryTurn === next.turn || (next.turn === 5 && !!state.okwExpedites && u?.side === "german" && u.entryTurn === 6);
+    };
+    const toReserve = Object.keys(units).filter((id) => units[id].at === "reinforcements" && due(id));
     if (toReserve.length) next = moveUnits(next, toReserve, "reserve", "bot").state;
-    // II: the Soviet draw pile.
-    const pile = sovietCards.preparePile(next);
-    next = pile.state;
-    const events: GameEvent[] = [{ type: "TurnStarted", turn: next.turn, cardsAdded: pile.added, toReserve, pile: next.sovietCards!.drawPile.length }, ...end.events];
-    // III: supply.
+    const heavy = rules.ground(next) === "heavyMud";
+    // II: the Soviet draw pile; in heavy mud, none (18.34), and STAVKA leaves play on turn 7.
+    let added: string[] = [];
+    let stavkaRemoved = false;
+    if (!heavy) {
+      const pile = sovietCards.preparePile(next);
+      next = pile.state;
+      added = pile.added;
+    } else if (next.turn === 7 && !next.sovietCards!.removed.includes(STAVKA)) {
+      next = { ...next, sovietDiscard: next.sovietDiscard.filter((c) => c !== STAVKA), sovietCards: { ...next.sovietCards!, removed: [...next.sovietCards!.removed, STAVKA] } };
+      stavkaRemoved = true;
+    }
+    events.unshift({ type: "TurnStarted", turn: next.turn, cardsAdded: added, toReserve, pile: next.sovietCards!.drawPile.length });
+    if (stavkaRemoved) events.push({ type: "SovietCardRemoved", card: STAVKA });
+    // III: supply (in heavy mud, markers off the units able to trace supply only).
     const supply = supplyPhase(next);
-    return { state: supply.state, events: [...events, ...supply.events] };
+    next = supply.state;
+    events.push(...supply.events);
+    // IV in heavy mud: two infantry replacement steps each side (18.34), the Soviet ones by the bot.
+    const turnGround = rules.ground(next);
+    if (heavy) {
+      const r = replacements.heavyMud(next);
+      next = r.state;
+      events.push({ type: "HeavyMudTurn", turn: next.turn, stavkaRemoved }, ...r.events);
+    }
+    if (turnGround !== "frozen") {
+      const reminder: Reminder = {
+        id: `ground-${next.turn}`, card: "", ground: turnGround, turn: next.turn, until: "endOfTurn",
+        title: msg(heavy ? "reminder.heavyMud.title" : "reminder.lightMud.title"), text: msg(heavy ? "reminder.heavyMud.text" : "reminder.lightMud.text"),
+      };
+      next = { ...next, reminders: [...(next.reminders ?? []), reminder] };
+      events.push({ type: "ReminderAdded", reminder });
+    }
+    return { state: next, events };
+  }
+
+  /** 17.2: the game is over; nothing moves it on any more (Undo stays). */
+  function endGame(state: GameState, result: GameResult, events: GameEvent[]): StepResult {
+    return { state: { ...state, result }, events: [...events, { type: "GameEnded", result }] };
   }
 
   function dismissReminder(state: GameState, id: string): StepResult {
@@ -459,6 +591,32 @@ export function createEngine(data: EngineData): Engine {
     if (!state.started) return reject(state, "SupplyPhase", msg("reject.pressStart"));
     // 13.0: all units supplied on GT 1; Soviet units throughout GT 2-3.
     if (state.turn < 2) return reject(state, "SupplyPhase", msg("reject.noSupplyPhaseGt1"));
+    if (rules.ground(state) === "heavyMud") return heavyMudSupply(state);
+    // Step 1 [GT 4+]: garrisons (15.1); they block German supply in step 2 (15.2).
+    const placement = state.turn >= 4 ? garrisons.place(state) : { state, events: [] };
+    const statuses = supplyStatuses(placement.state);
+    // 17.1: map-edge VP hexes whose Soviet units trace no supply are lost; those that do are taken (Q80).
+    const edge = victory.supplyPhase(statuses.state);
+    return { state: edge.state, events: [...placement.events, ...statuses.events, ...edge.events] };
+  }
+
+  /** 18.34 heavy mud: no Supply Phase, except that units able to trace supply lose their OOS or Isolated marker. */
+  function heavyMudSupply(state: GameState): StepResult {
+    const changes: Extract<GameEvent, { type: "SupplyPhaseDone" }>["changes"] = [];
+    const supply = { ...state.supply };
+    for (const [id, marker] of Object.entries(state.supply ?? {})) {
+      if (!rules.canTraceSupply(state, id)) continue;
+      delete supply[id];
+      changes.push({ unit: id, from: marker, to: "supplied" });
+    }
+    return {
+      state: { ...state, supply },
+      events: [{ type: "SupplyPhaseDone", turn: state.turn, changes, germanSurrender: [], sovietSurrender: [], heavyMud: true }],
+    };
+  }
+
+  // Supply Phase steps 2-5 (13.1-13.2, 13.23, 13.51, 9.12).
+  function supplyStatuses(state: GameState): StepResult {
     const sides = state.turn >= 4 ? ["german", "soviet"] : ["german"];
     const traced = new Map<string, boolean>();
     for (const [id, s] of Object.entries(state.units)) {
@@ -601,15 +759,45 @@ export function createEngine(data: EngineData): Engine {
   /** Commands the player may only send once the game has started. */
   const PLAY = new Set<Command["type"]>([
     "MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
-    "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition", "DeclareAttack", "CancelAttack",
+    "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition", "DeclareAttack", "CancelAttack", "SetGarrison", "AssignReplacement",
+    "GermanEvent",
   ]);
   /** Commands that move the game on: refused while a Soviet attack waits for its combat (Q37). */
-  const ON = new Set<Command["type"]>(["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation"]);
+  const ON = new Set<Command["type"]>(["RunBotImpulse", "NextTurn", "SupplyPhase", "ActivateFormation", "AssignReplacement", "GermanEvent"]);
+  /** Commands still accepted once the game is over (17.2): a new set-up, the reminders. */
+  const AFTER_END = new Set<Command["type"]>(["SetUpTurn1", "ClearSetUp", "DismissReminder"]);
+
+  /** Why a garrison marker may not be placed or removed there by hand (15, Q74), or null. */
+  function whyNotGarrison(state: GameState, hex: string, placed: boolean): Message | null {
+    if (!data.board.isPlayable(hex)) return msg("reject.notPlayable", { hex });
+    const here = rules.garrisonAt(state, hex);
+    if (!placed) return here ? null : msg("reject.garrison.none", { hex });
+    return here ? msg("reject.garrison.already", { hex }) : garrisons.whyNotPlace(state, hex);
+  }
+
+  function setGarrison(state: GameState, hex: string, placed: boolean): StepResult {
+    const why = whyNotGarrison(state, hex, placed);
+    if (why) return reject(state, "SetGarrison", why);
+    const list = state.garrisons ?? [];
+    return {
+      state: { ...state, garrisons: placed ? [...list, hex] : list.filter((h) => h !== hex) },
+      events: [{ type: "GarrisonSet", hex, placed, rule: "15", reason: msg(placed ? "garrison.placed.byPlayer" : "garrison.removed.byPlayer") }],
+    };
+  }
+
+  /** German combat sequence, step 1 (12.1); the attackers' activation removes the garrisons next to them (15.3, Q74). */
+  function declareAttack(state: GameState, attackers: string[], target: string): StepResult {
+    const r = combat.startGermanAttack(state, attackers, target);
+    if ("key" in r) return reject(state, "DeclareAttack", r);
+    const g = garrisons.activationRemovals(r.state, attackers);
+    return { state: g.state, events: [...r.events, ...g.events] };
+  }
 
   /** A combat command: refused with its reason, or played. */
   const combatStep = (state: GameState, type: Command["type"], r: StepResult | Message): StepResult => ("key" in r ? reject(state, type, r) : r);
 
   function step(state: GameState, command: Command, actor: Actor = "player"): StepResult {
+    if (state.result && !AFTER_END.has(command.type)) return reject(state, command.type, msg("reject.gameOver"));
     const lock = PLAY.has(command.type) ? locked(state, actor) : null;
     if (lock) return reject(state, command.type, lock);
     if (state.botImpulse && ON.has(command.type)) return reject(state, command.type, pendingAttack(state));
@@ -663,7 +851,13 @@ export function createEngine(data: EngineData): Engine {
       case "ActivateFormation":
         return activateFormation(state, command.army);
       case "DeclareAttack":
-        return combatStep(state, command.type, combat.startGermanAttack(state, command.attackers, command.target));
+        return declareAttack(state, command.attackers, command.target);
+      case "SetGarrison":
+        return setGarrison(state, command.hex, command.placed);
+      case "AssignReplacement":
+        return combatStep(state, command.type, replacements.german(state, command.unit));
+      case "GermanEvent":
+        return combatStep(state, command.type, germanEvents.play(state, command.event, command.hex));
       case "CancelAttack":
         return combatStep(state, command.type, combat.cancelAttack(state));
       case "CombatTarget":
@@ -711,6 +905,9 @@ export function createEngine(data: EngineData): Engine {
       whyNotAttack: combat.whyNotAttack, advanceHexes: combat.advanceHexes,
     },
     germanMoves: { checked: germanMoves.checked, reach: germanMoves.reach },
+    whyNotReplace: (state, id) => locked(state) ?? replacements.whyNotGerman(state, id),
+    whyNotGarrison: (state, hex, placed) => locked(state) ?? whyNotGarrison(state, hex, placed),
+    whyNotGermanEvent: (state, event, hex) => locked(state) ?? germanEvents.whyNot(state, event, hex),
     whyNotDrop,
     unit: (id) => byId.get(id),
   };

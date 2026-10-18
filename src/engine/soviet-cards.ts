@@ -8,10 +8,12 @@ import { onTurn, type CardCommand, type SovietCard } from "../core/soviet-cards"
 import type { Front, Unit } from "../core/units";
 import { msg, sentences, semicolonList, type Message } from "../i18n/message";
 import type { Board } from "./board";
+import type { Garrisons } from "./garrisons";
 import type { Movement } from "./movement";
 import { armyName, frontName } from "./names";
 import type { PendingRules } from "./pending";
 import { drawIndex, shuffle } from "./random";
+import type { Replacements } from "./replacements";
 import type { ActivationRun, SovietActivations } from "./soviet-activation";
 import {
   isHex, MAX_FORWARD_SUPPORT, type Command, type GameEvent, type GameState, type Reminder, type SovietActivation,
@@ -26,6 +28,10 @@ export interface SovietCardsData {
   rules: PendingRules;
   /** Whole activations (9.0): movement, attacks, reserves, removals, IP. */
   activations: SovietActivations;
+  /** Garrison placement (15.1): the Garrison Front event (15.11). */
+  garrisons: Garrisons;
+  /** Replacement steps (16): the "Assign 1 RP" command (8.12). */
+  replacements: Replacements;
   /** Runs an engine command as the bot (moves, markers). */
   step(state: GameState, command: Command): StepResult;
   /** NKVD Operations on the combat sheet (combat.ts): the German stacks tied for the two hits. */
@@ -56,7 +62,7 @@ const ENGINEERS_HEXES = 3;
 
 export type SovietCards = ReturnType<typeof createSovietCards>;
 
-export function createSovietCards({ cards, board, movement, unit, rules, activations, step, startNkvd }: SovietCardsData) {
+export function createSovietCards({ cards, board, movement, unit, rules, activations, garrisons, replacements, step, startNkvd }: SovietCardsData) {
   const byId = new Map(cards.map((c) => [c.id, c]));
   const card = (id: string) => {
     const c = byId.get(id);
@@ -262,6 +268,8 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
     if (role !== "auxiliary") return msg("cards.delay.auxOnly");
     const pile = piles(state).drawPile;
     if (pile.length < 4) return msg("cards.fewerThanFour", { count: pile.length });
+    // 18.34 light mud: a card to be returned to the draw pile is discarded instead.
+    if (rules.ground(state) === "lightMud") return { state, events: [], detail: msg("cards.delay.lightMud") };
     const s = shuffle([...pile, id], piles(state).seed);
     return {
       // Back in the pile: no longer face up beside the command card.
@@ -438,9 +446,10 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
         return { state: r.state, events: [r.event], detail: msg("cards.hitler.done") };
       }
       case "soviet-garrison-front": {
-        // TODO 4.6: place the garrison markers (15.1) once garrisons are in the game state.
-        const hexes = rules.garrisonPlacements(state, line.front!);
-        return msg(hexes.length ? "cards.garrison.notCoded" : "cards.garrison.none");
+        // 15.11: does not apply if no garrison marker can be newly placed.
+        const r = garrisons.place(state, line.front!);
+        if (!r.placed.length) return msg("cards.garrison.none");
+        return { state: r.state, events: r.events, detail: msg("cards.garrison.placed", { hexes: r.placed }) };
       }
       case "soviet-engineers": return engineers(state);
     }
@@ -453,9 +462,11 @@ export function createSovietCards({ cards, board, movement, unit, rules, activat
       case "activateMostUnits": return activateMostUnits(state, l.front, imp);
       case "activateEndangered": return activateEndangered(state, l.front, imp);
       case "replacement": {
-        // TODO 4.6: assign the replacement step (16.1) to this unit.
-        const u = rules.replacementFor(state, l.army);
-        return u ? msg("cards.replacement.notCoded") : msg("cards.replacement.none", { army: armyName(l.army) });
+        // 8.12: a step to the army's unit chosen by 16.1; not performed if none is eligible.
+        const r = replacements.sovietCommand(state, l.army);
+        if (!r) return msg("cards.replacement.none", { army: armyName(l.army) });
+        const given = r.events.find((e) => e.type === "ReplacementAssigned")!;
+        return { ...r, detail: msg("cards.replacement.done", { unit: name(given.type === "ReplacementAssigned" ? given.unit : "") }) };
       }
       default: return event(state, id, l, role);
     }

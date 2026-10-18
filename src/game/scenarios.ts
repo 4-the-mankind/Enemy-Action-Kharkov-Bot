@@ -1,6 +1,7 @@
 // Dev scenarios: positions loaded from the URL (?scenario=…) to check the bot against the
 // booklet's examples on the map. Not part of the player's interface.
 import type { Engine } from "../engine/engine";
+import { groundEndOfTurn } from "../engine/ground";
 import { emptyState, type GameState } from "../engine/types";
 import { t } from "../i18n/i18n";
 
@@ -39,7 +40,24 @@ const SCENARIOS: Record<string, (engine: Engine) => Scenario> = {
     },
     note: t("scenario.nkvd"),
   }),
+  // Task 4.6: the booklet set-up at the end of a game-turn, the Soviet draw pile empty; "Next
+  // turn" plays the End of Turn Phase and the next Supply Phase. Turn 4: garrisons (15.1) and a
+  // reduced infantry and a reduced armor unit of III Corps for replacement steps (16.1); turn 6: ground condition markers
+  // (18.33); turn 14: the end of the game (18.35).
+  turn4end: (engine) => endOfTurn(engine, 4, 14, { "germ_387-IIICorps_inf": "back", "germ_73-19P-IIICorps_arm": "back" }, "scenario.turn4end"),
+  turn6end: (engine) => endOfTurn(engine, 6, 18, {}, "scenario.turn6end"),
+  turn14end: (engine) => endOfTurn(engine, 14, 17, {}, "scenario.turn14end"),
 };
+
+function endOfTurn(engine: Engine, turn: number, vp: number, faces: Record<string, "back">, note: "scenario.turn4end" | "scenario.turn6end" | "scenario.turn14end"): Scenario {
+  const s = engine.step(emptyState(), { type: "SetUpTurn1" }).state;
+  const units = { ...s.units };
+  for (const [id, face] of Object.entries(faces)) if (units[id]) units[id] = { ...units[id], face };
+  let state: GameState = { ...s, units, started: true, turn, vp, sovietCards: { drawPile: [], removed: [], lastDrawn: [], seed: 7 } };
+  // From game-turn 7, the ground markers drawn as if the game had passed the ends of turns 6 and 10 (18.33).
+  for (const end of [6, 10]) if (turn > end) state = { ...groundEndOfTurn({ ...state, turn: end }).state, turn };
+  return { state, note: t(note) };
+}
 
 /** The scenario named in the page URL, if any. */
 export function scenarioFromUrl(engine: Engine): Scenario | null {

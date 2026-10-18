@@ -201,7 +201,8 @@
       "isolated": "{{unit}} is isolated: one hex at most, and not out of an enemy ZOC (13.22).",
       "isolatedMech": "{{unit}} is isolated: a mechanized unit cannot move (13.22).",
       "outOfSupplyMech": "{{unit}} is out of supply: two hexes at most (13.21).",
-      "noPath": "{{unit}} cannot reach {{hex}}: enemy units, their zones of control or a river bar every path (10.1, 11.1)."
+      "noPath": "{{unit}} cannot reach {{hex}}: enemy units, their zones of control or a river bar every path (10.1, 11.1).",
+      "garrison": "{{hex}} has a Soviet garrison: German units do not enter it (10.1, 15.22)."
     },
     "attack": {
       "sovietImpulse": "The Soviet impulse is not over: finish its combat first.",
@@ -216,6 +217,32 @@
       "noneToCancel": "No German attack to cancel.",
       "alreadyAttacked": "{{units}} already defended against an attack in this impulse: a unit is attacked once (12.1).",
       "tooLate": "The hits are entered: the attack can no longer be cancelled. Undo the steps instead."
+    },
+    "gameOver": "The game is over. Undo to take back the last turn.",
+    "garrison": {
+      "already": "{{hex}} already has a garrison marker.",
+      "none": "{{hex}} has no garrison marker.",
+      "notVillageOrVp": "Garrison markers go in village and VP hexes only; {{hex}} is neither (15).",
+      "occupied": "{{hex}} is occupied: a garrison marker goes in a hex without units."
+    },
+    "event": {
+      "heavyMud": "Heavy mud: no card is played this turn (18.34).",
+      "turns": "This event applies on game-turn {{turns}} only.",
+      "pileEmpty": "The Soviet draw pile is empty.",
+      "alreadyPlayed": "OKW Expedites has already been played.",
+      "noForwardSupport": "No Soviet Forward Support marker is on the map.",
+      "noMarkerThere": "No Forward Support marker in {{hex}}."
+    },
+    "replacement": {
+      "gameTurn3": "German replacements start on game-turn 3 (16).",
+      "germanOnly": "Only German units take your replacement steps; the bot assigns the Soviet ones.",
+      "heavyMudInfantry": "Heavy mud: your two replacement steps go to infantry units (18.34).",
+      "heavyMudDone_one": "Heavy mud: your {{count}} replacement step is already assigned (18.34).",
+      "heavyMudDone_other": "Heavy mud: your {{count}} replacement steps are already assigned (18.34).",
+      "noLostStep": "{{unit}} has no step to regain: only one-step units on the map and eliminated units take replacements (16.1).",
+      "notEligible": "{{unit}} can't receive a replacement step: {{reason}}.",
+      "priority": "{{unit}} must wait: {{first}} comes first in the {{corps}} (priority {{priority}} of 16.1).",
+      "priorityInfantry": "{{unit}} must wait: {{first}} comes first among your infantry (priority {{priority}} of 16.1)."
     }
   },
   "movement": {
@@ -339,7 +366,8 @@
     },
     "delay": {
       "auxOnly": "Command Delay applies only to the auxiliary card",
-      "done": "back into the draw pile, shuffled"
+      "done": "back into the draw pile, shuffled",
+      "lightMud": "light mud: the card is discarded instead of going back into the draw pile (18.34)"
     },
     "forwardSupport": {
       "both": "both Forward Support markers are in play",
@@ -379,8 +407,8 @@
       "done": "you discard German cards worth at least 6 command value"
     },
     "garrison": {
-      "notCoded": "garrison placement is not coded yet (task 4.6)",
-      "none": "no garrison marker can be newly placed (garrisons come with task 4.6)"
+      "none": "no garrison marker can be newly placed",
+      "placed": "garrison markers placed in {{hexes}}"
     },
     "engineers": {
       "fewer": "fewer than three hexes qualify ({{count}})",
@@ -390,8 +418,8 @@
       "both": "German IPs removed in {{removed}}; Soviet IPs placed in {{placed}}"
     },
     "replacement": {
-      "notCoded": "replacements are not coded yet (task 4.6)",
-      "none": "no unit of the {{army}} is eligible for replacement (replacements come with task 4.6)"
+      "none": "no unit of the {{army}} is eligible for replacement",
+      "done": "one step to {{unit}}"
     }
   },
   "attack": {
@@ -534,7 +562,8 @@
       "endsOverStacked": "ends over-stacked: {{units}}, active and still to move, are to leave the hex",
       "frozen927": "{{why}}: does not move",
       "surrounded": "surrounded",
-      "isolatedAdjacent": "isolated and adjacent to a German unit"
+      "isolatedAdjacent": "isolated and adjacent to a German unit",
+      "holdsVillage": "starts in the village {{hex}}, targeted for the front, a German unit proximate"
     },
     "pref": {
       "hexWithinCurrentSovietOperationalLimit": "a hex within the current Soviet operational limit",
@@ -593,7 +622,9 @@
       "closestHex": "the closest hex",
       "hexClosePossibleHexSovietSupply": "a hex as close as possible to a hex in Soviet supply",
       "furthestCompass": "the hex furthest {{direction}}, the objective's compass direction",
-      "alreadyCausingSurround": "already causing surround of {{units}}: moves adjacent to it"
+      "alreadyCausingSurround": "already causing surround of {{units}}: moves adjacent to it",
+      "garrisonAdjacentGermanUnit": "a garrisoned hex adjacent to a German unit",
+      "garrisonGermanUnitProximate": "a garrisoned hex to which a German unit is proximate"
     },
     "skip": {
       "activeFrontSObjectiveMarkerNot": "the active front's objective marker is not in play",
@@ -615,7 +646,6 @@
       "everyDestinationBreaks923Restriction": "every destination breaks a 9.23 restriction",
       "everyDestinationBeyondOperationalLimit": "every destination is beyond the operational limit",
       "noReachableHexSovietSupplyNor": "no reachable hex in Soviet supply nor away from German units",
-      "notCoded": "not coded yet (task {{task}})",
       "alreadyProximate": "already proximate to {{hex}}",
       "followsMethodsOf": "able to trace supply: follows the movement methods of {{book}}"
     },
@@ -637,7 +667,8 @@
       "noReachableHexGermanVPHex": "no reachable hex from which a German VP hex is proximate",
       "noHexNextToGerman": "no reachable unoccupied hex next to a German unit and not next to a Soviet unit adjacent to it",
       "noHexNextToGermanNotExposed": "no reachable unoccupied hex next to a German unit and not next to a Soviet unit adjacent to it, without being nearly surrounded",
-      "noDestination": "no destination"
+      "noDestination": "no destination",
+      "noGarrisonToRelieve": "no reachable garrisoned hex of the front that German units threaten"
     },
     "method": {
       "takeVPHex": "Take VP Hex",
@@ -702,7 +733,8 @@
     "turnLine": {
       "started": "<b>Game-turn {{turn}}</b>, after Soviet impulse {{impulse}}",
       "noImpulse": "<b>Game-turn {{turn}}</b>, no Soviet impulse yet",
-      "beforeStart": "<b>Game-turn 1</b>, before Start"
+      "beforeStart": "<b>Game-turn 1</b>, before Start",
+      "over": "<b>Game-turn {{turn}}</b>, the game is over."
     },
     "runTitle": {
       "pileEmpty": "The Soviet draw pile is empty.",
@@ -710,7 +742,8 @@
     },
     "nextTitle": {
       "waitPile": "Once the Soviet draw pile is empty ({{count}} left) and your cards are played.",
-      "ready": "End this turn and start the next."
+      "ready": "End this turn and start the next.",
+      "endGame": "Game-turn 14 is the last: its End of Turn Phase decides the game (18.35)."
     },
     "armyOption": "{{army}} ({{front}})",
     "reading": {
@@ -761,7 +794,25 @@
       "none": "None",
       "removed": "Out of the game"
     },
-    "waitCombat": "The Soviet impulse waits for the combat on {{hex}}: see the Combat tab."
+    "waitCombat": "The Soviet impulse waits for the combat on {{hex}}: see the Combat tab.",
+    "endGame": "End the game",
+    "events": {
+      "title": "Play a German event",
+      "play": "Play",
+      "removeAt": "Remove in {{hex}}",
+      "stavkaConfused": {
+        "name": "STAVKA Confused",
+        "text": "Soviet cards discarded from the top of the draw pile until their Command Values reach 4."
+      },
+      "okwExpedites": {
+        "name": "OKW Expedites",
+        "text": "Your units due on game-turn 6 enter their reserve box on game-turn 5."
+      },
+      "airInterdiction": {
+        "name": "Air Interdiction",
+        "text": "A Soviet Forward Support marker of your choice leaves the map."
+      }
+    }
   },
   "log": {
     "where": {
@@ -925,6 +976,60 @@
       "corps": "Your card activated {{corps}}.",
       "kampfgruppe": "Your card activated a Kampfgruppe: marker in {{hex}}, {{range}} hexes.",
       "kampfgruppeCorps": "Your card activated a Kampfgruppe of {{corps}}: marker in {{hex}}, {{range}} hexes."
+    },
+    "vpChange": {
+      "town": "Soviet VPs {{from}} → <b>{{to}}</b>: {{hex}} changed hands (17.1).",
+      "edgeTaken": "Soviet VPs {{from}} → <b>{{to}}</b>: a Soviet unit holds the map-edge VP hex {{hex}}, in Soviet supply (17.1).",
+      "edgeLeft": "Soviet VPs {{from}} → <b>{{to}}</b>: no Soviet unit left in the map-edge VP hex {{hex}} (17.1).",
+      "edgeNoSupply": "Soviet VPs {{from}} → <b>{{to}}</b>: the Soviet units in the map-edge VP hex {{hex}} trace no supply (17.1)."
+    },
+    "garrison": {
+      "phasePlaced_one": "Garrison placed in {{hexes}} (15.1).",
+      "phasePlaced_other": "Garrisons placed in {{hexes}} (15.1).",
+      "phaseNone": "No garrison placed (15.1).",
+      "frontPlaced": "Garrison Front, {{front}}: garrisons placed in {{hexes}} (15.11).",
+      "frontNone": "Garrison Front, {{front}}: no garrison placed (15.11).",
+      "removedBy": " Removed by a later placement: {{hexes}}, which no longer meet the requirements.",
+      "details_one": "{{count}} hex checked",
+      "details_other": "{{count}} hexes checked, in descending hex number order",
+      "yes": "yes: {{reason}}",
+      "no": "no: {{reason}}",
+      "removes": "; removes the garrison of {{hexes}}",
+      "placed": "Garrison placed in {{hex}}: {{reason}}.",
+      "removed": "Garrison removed from {{hex}}: {{reason}} ({{rule}}).",
+      "checkedRemoved": "End of turn: {{removed}} (15.3).",
+      "hexWhy": "garrison removed from {{hex}}, {{reason}}",
+      "checkedKept_one": "End of turn: the village garrison stays (15.3).",
+      "checkedKept_other": "End of turn: the {{count}} village garrisons stay (15.3)."
+    },
+    "replacement": {
+      "byYou": "your replacement",
+      "byArmy": "{{army}}",
+      "byFront": "heavy mud, {{front}}",
+      "flipped": "Replacement step ({{by}}): {{unit}} flips back to two steps, priority {{priority}} of {{rule}}.",
+      "rebuilt": "Replacement step ({{by}}): {{unit}} leaves the eliminated units for the reserve box, on its one-step side, priority {{priority}} of {{rule}}.",
+      "tied": " Lowest selector shared with {{units}}: the first in the counter list.",
+      "refused": " Not eligible: {{units}}.",
+      "unitWhy": "{{unit}}, {{reason}}"
+    },
+    "ground": {
+      "placed": "Ground condition markers placed face down on game-turns {{first}}-{{last}}, {{aside}} set aside unseen (18.33).",
+      "revealed": "<b>Ground for game-turn {{turn}}: {{ground}}</b> (18.33).",
+      "heavyMud": "Heavy mud on game-turn {{turn}}: no cards, no activations; replacement steps instead (18.34).",
+      "heavyMudStavka": "Heavy mud on game-turn {{turn}}: no cards, no activations; replacement steps instead. STAVKA leaves play (18.34)."
+    },
+    "victory": {
+      "goesOn": "Victory check, game-turn {{turn}}: {{vp}} VP, Kharkov {{kharkov}}-owned. German victory below {{below}} with Kharkov German, defeat {{defeat}}: the game goes on (18.35).",
+      "ends": "Victory check, game-turn {{turn}}: {{vp}} VP, Kharkov {{kharkov}}-owned. German victory below {{below}} with Kharkov German, defeat {{defeat}} (18.35).",
+      "above": "above {{vp}}",
+      "atLeast": "at {{vp}} or more",
+      "result": "<b>The game is over: {{result}}.</b>"
+    },
+    "event": {
+      "stavkaConfused": "STAVKA Confused: {{cards}} discarded from the Soviet draw pile.",
+      "okwExpedites_one": "OKW Expedites: {{count}} German unit due on game-turn 6 enters its reserve box on game-turn 5.",
+      "okwExpedites_other": "OKW Expedites: {{count}} German units due on game-turn 6 enter their reserve box on game-turn 5.",
+      "airInterdiction": "Air Interdiction: Forward Support marker removed from {{hex}}."
     }
   },
   "units": {
@@ -970,7 +1075,10 @@
       "eliminated": "Eliminated"
     },
     "turn": "Turn {{turn}}",
-    "outOfPlay": "{{unit}} ({{army}}), out of play: it cannot come back (12.62)"
+    "outOfPlay": "{{unit}} ({{army}}), out of play: it cannot come back (12.62)",
+    "groundShown": "Ground on game-turn {{turn}}: {{ground}} (18.33)",
+    "groundHidden": "Ground condition marker of game-turn {{turn}}, face down until the end of the turn before (18.33)",
+    "groundFixed": "Game-turn {{turn}}: frozen, no ground condition marker (18.33)"
   },
   "inspector": {
     "terrain": "Terrain",
@@ -1017,7 +1125,11 @@
     "down": "Move {{unit}} down the stack",
     "upTitle": "Up the stack",
     "downTitle": "Down the stack",
-    "hint": "Click to select, hold to drag."
+    "hint": "Click to select, hold to drag.",
+    "garrison": "Soviet garrison",
+    "garrisonNote": "Not a unit: German units stop next to it and do not enter (15.22).",
+    "removeGarrison": "Remove the garrison",
+    "garrisonHint": "It goes by itself when a German unit next to it moves or attacks. Remove it here for a unit activated next to it that does neither (15.3)."
   },
   "supplyNote": {
     "cannot": "<b>Cannot trace supply.</b> {{why}}",
@@ -1045,7 +1157,10 @@
     "placeIp": "Place Improved Position",
     "removeIp": "Remove Improved Position",
     "attack_one": "Attack {{hex}} with {{count}} unit",
-    "attack_other": "Attack {{hex}} with {{count}} units"
+    "attack_other": "Attack {{hex}} with {{count}} units",
+    "placeGarrison": "Place a garrison",
+    "removeGarrison": "Remove the garrison",
+    "replacementStep": "Replacement step"
   },
   "why": {
     "moved": "{{from}} to {{to}}",
@@ -1076,9 +1191,18 @@
   "reminder": {
     "until": {
       "done": "From {{card}}, turn {{turn}}.",
-      "endOfTurn": "From {{card}}, until the end of turn {{turn}}."
+      "endOfTurn": "From {{card}}, until the end of turn {{turn}}.",
+      "ground": "Ground condition of game-turn {{turn}}, for the whole turn (18.34)."
     },
-    "done": "Done"
+    "done": "Done",
+    "heavyMud": {
+      "title": "Heavy mud",
+      "text": "No cards and no activations this turn. Card preparation: step 3 only. Assign your two infantry replacement steps (right-click a reduced infantry unit, or drag an eliminated one to Reserves), then press Next turn."
+    },
+    "lightMud": {
+      "title": "Light mud",
+      "text": "Deal four supplemental cards to your draw pile instead of seven. No strategic movement, river crossings cost more, six combat chits at most."
+    }
   },
   "cardZoom": {
     "alt": "Soviet card {{card}}"
@@ -1106,7 +1230,8 @@
     "layersEmpty": "{{warnings}} Those layers stay empty.",
     "hideUnits": "Hide units",
     "showUnits": "Show units",
-    "improvedPosition": "Improved Position"
+    "improvedPosition": "Improved Position",
+    "garrison": "Soviet garrison"
   },
   "layers": {
     "grid": {
@@ -1146,7 +1271,10 @@
     "p17": "<b>Booklet example p17 loaded:</b> turn 1 set-up without adjustment, Voronezh Front Objective West in 1009. Activate the 3T army from the Bot tab (Activate an army, dev scenario).",
     "combat1802": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E17, E01, E11, E02, E03. Run bot impulse: the 1st Guards Army attacks 1802, the combat sheet opens.",
     "nkvd": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E08. Run bot impulse: NKVD Operations puts two hits on the German stack in 0205.",
-    "attack1704": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E10, E01, E02, E03, E05, E06. Attack 1704 from 1604 and 1804: E10 (Reinforce Battle) is drawn for the Soviet defense."
+    "attack1704": "Dev scenario: booklet set-up without adjustment, turn 1, Soviet draw pile E10, E01, E02, E03, E05, E06. Attack 1704 from 1604 and 1804: E10 (Reinforce Battle) is drawn for the Soviet defense.",
+    "turn4end": "End of game-turn 4 (task 4.6): press Next turn for the garrisons of the turn 5 Supply Phase. 387 (1604) and 73/19P (1804) of III Corps are reduced: right-click them for a replacement step, the infantry first (16.1).",
+    "turn6end": "End of game-turn 6 (task 4.6): press Next turn to set the ground condition markers on the calendar (Units panel) and reveal the ground of turn 7.",
+    "turn14end": "End of game-turn 14 (task 4.6): 17 Soviet VPs; press End the game."
   },
   "page": {
     "title": "Situation map",
@@ -1181,7 +1309,8 @@
     "printedMap": "Printed map",
     "unitsSwitch": "Units",
     "fitMap": "Fit map",
-    "combatNone": "No combat in progress: the tab opens by itself when one begins."
+    "combatNone": "No combat in progress: the tab opens by itself when one begins.",
+    "gameEnd": "End of the game"
   },
   "legend": {
     "title": "Bot moves legend",
@@ -1650,5 +1779,93 @@
       "easternmost": "the easternmost hex",
       "lowestHex": "the lowest numbered hex"
     }
+  },
+  "garrison": {
+    "yes": {
+      "vp": "empty Soviet VP hex in Soviet supply",
+      "village": "{{soviet}}; {{german}}"
+    },
+    "soviet": {
+      "unit": "a Soviet unit is proximate",
+      "support": "in Soviet support"
+    },
+    "german": {
+      "unit": "a German unit would be proximate",
+      "supply": "German supply can be traced to it"
+    },
+    "no": {
+      "germanAdjacent": "adjacent to a German unit",
+      "operationalLimit": "beyond the operational limit",
+      "sovietSupply": "no Soviet supply from the hex",
+      "sovietProximity": "no Soviet unit proximate, and not in Soviet support",
+      "frontProximity": "no unit of the front proximate, and not in Soviet support",
+      "germanThreat": "no German unit would be proximate, and no German supply can be traced to it"
+    },
+    "removed": {
+      "activation": "{{unit}} begins its activation next to it",
+      "sovietUnit": "{{unit}} ends its move in the hex",
+      "germanRetreat": "{{unit}} retreats into the hex",
+      "noSovietSupply": "Soviet supply cannot be traced to it",
+      "noGermanSupply": "German supply cannot be traced to it",
+      "byPlayer": "removed by you"
+    },
+    "placed": {
+      "byPlayer": "placed by you"
+    }
+  },
+  "replacement": {
+    "no": {
+      "notInPlay": "not in play yet",
+      "reserve": "in the Reserve Units box (16.2)",
+      "destroyed": "destroyed (16.2)",
+      "singleStep": "a one-step unit at full strength (16.2)",
+      "twoSteps": "already has two or more steps (16.2)",
+      "sixSteps": "in a stack with six steps (16.2)",
+      "support": "outside Soviet support (16.2)",
+      "supply": "out of supply or unable to trace supply (16.21)",
+      "reserveSupply": "no Soviet reserve supply from its hex (16.21)"
+    }
+  },
+  "ground": {
+    "frozen": "frozen",
+    "lightMud": "light mud",
+    "heavyMud": "heavy mud"
+  },
+  "result": {
+    "draw": "Draw",
+    "victory": {
+      "strategic": "German strategic victory",
+      "operational": "German operational victory",
+      "tactical": "German tactical victory"
+    },
+    "defeat": {
+      "strategic": "German strategic defeat",
+      "operational": "German operational defeat",
+      "tactical": "German tactical defeat"
+    },
+    "text": {
+      "victory": {
+        "strategic": "Star and Gallop never break through. Your counterattacks take back every Soviet gain and destroy two fronts.",
+        "operational": "The historical outcome: after the Soviet breakout, Army Group South regroups, destroys the spearheads and retakes most of the lost ground.",
+        "tactical": "Battered but not broken, your armies give ground, then hold a new front."
+      },
+      "defeat": {
+        "tactical": "The Soviets fall short of their goals but hold key ground: Germany has to leave the Crimea.",
+        "operational": "Kharkov falls and the Soviets keep the initiative in southern Russia: there will be no German offensive in the east in 1943.",
+        "strategic": "Army Group South is shattered and the way west lies open to the Soviet armies."
+      },
+      "draw": "Your VP level would win, but Kharkov is Soviet-owned at the end of game-turn 14 (18.35)."
+    }
+  },
+  "end": {
+    "when": "End of game-turn {{turn}}, {{dates}}",
+    "vp": "Soviet VPs",
+    "kharkov": "Kharkov",
+    "owned": "{{side}}-owned",
+    "levels": "Victory levels",
+    "levelsValue": "German victory below {{below}}, defeat {{defeat}}",
+    "undo": "Undo the last turn",
+    "fold": "Look at the map",
+    "show": "Show"
   }
 }

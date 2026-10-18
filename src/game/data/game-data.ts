@@ -4,9 +4,11 @@ import { parseSovietCards, type SovietCard } from "../../core/soviet-cards";
 import { parseTerrainEffects, type TerrainEffects } from "../../core/terrain-effects";
 import { parseUnits, type Unit } from "../../core/units";
 import { parseSetupAdjustments, type RecordedAdjustment } from "../../engine/setup-adjustments";
+import type { Ground, VictoryLevel } from "../../engine/types";
+import type { CalendarSpace } from "../../engine/victory";
 
-/** A calendar space: its dates, and the Fixed Artillery Range (FAR, 12.3) the engine reads. */
-export interface CalendarTurn { turn: number; dates: string; far: number }
+/** A calendar space: its dates, and what the engine reads (FAR, 12.3; Victory Levels, 18.35). */
+export interface CalendarTurn extends CalendarSpace { dates: string }
 
 export interface GameData {
   units: Unit[];
@@ -28,7 +30,16 @@ function parseCalendar(raw: unknown): CalendarTurn[] {
   return turns.map((t, i) => {
     const r = t as Record<string, unknown>;
     if (!Number.isInteger(r.turn) || typeof r.dates !== "string" || !Number.isInteger(r.far)) throw new Error(`data/calendar.json: invalid turn [${i}].`);
-    return { turn: r.turn as number, dates: r.dates, far: r.far as number };
+    const out: CalendarTurn = { turn: r.turn as number, dates: r.dates, far: r.far as number };
+    // 18.35: German victory below `below`, defeat above `above` (GT 14: at `atLeast` or more).
+    const level = (x: unknown): VictoryLevel => {
+      if (x !== "strategic" && x !== "operational" && x !== "tactical") throw new Error(`data/calendar.json: invalid victory level in turn [${i}].`);
+      return x;
+    };
+    const v = r.victory as Record<string, unknown> | undefined, d = r.defeat as Record<string, unknown> | undefined;
+    if (v) out.victory = { below: v.below as number, level: level(v.level) };
+    if (d) out.defeat = { ...(d.above !== undefined ? { above: d.above as number } : {}), ...(d.atLeast !== undefined ? { atLeast: d.atLeast as number } : {}), level: level(d.level) };
+    return out;
   });
 }
 
@@ -50,3 +61,7 @@ export function faceImage(u: Unit, face: "front" | "back" | "reduced"): string {
   const file = u.images[face] ?? u.images.front ?? u.images.back ?? u.images.reduced;
   return file ? counterUrl(file) : "";
 }
+
+/** Ground condition marker of a game-turn (18.33), face up; `null`: the face-down side. */
+export const groundImage = (g: Ground | null) =>
+  `/assets/counters/others/${g ? { frozen: "marker-frozengrnd.png", lightMud: "marker-ltmudgrnd.png", heavyMud: "marker-hvymudgrnd.png" }[g] : "marker-groundcondition.png"}`;
