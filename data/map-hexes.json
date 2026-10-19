@@ -168,7 +168,8 @@
     },
     "1221": {
       "terrain": "woods",
-      "lineFar": "west"
+      "lineFar": "west",
+      "village": true
     },
     "1222": {
       "mapEdge": "german"
@@ -298,7 +299,8 @@
     },
     "1521": {
       "terrain": "woods",
-      "lineFar": "west"
+      "lineFar": "west",
+      "village": true
     },
     "1523": {
       "mapEdge": "german",
@@ -1436,7 +1438,8 @@
     },
     "0721": {
       "terrain": "woods",
-      "lineFar": "west"
+      "lineFar": "west",
+      "village": true
     },
     "0104": {
       "terrain": "woods",
