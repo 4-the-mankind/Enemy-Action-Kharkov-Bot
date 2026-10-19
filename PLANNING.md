@@ -344,6 +344,13 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
   - **Tests** (choix du dev) : un test vérifie le message, pas la formulation : `expectMessage(m, key, params)` (`tests/i18n/expect-message.ts`) contrôle la clé, les valeurs et que le gabarit de en.json utilise exactement ces paramètres ; 147 assertions converties. `tests/i18n/i18n.test.ts` : rendu, pluriels, erreurs strictes, gabarits bien formés, noms de toutes les armées / ajustements / terrains, aucune clé inutilisée, aucune clé `data-i18n` manquante. 263 tests verts.
 
 - [ ] **5.5** Aide « How to play » (demande du dev, 2026-10-17) — IA (Sonnet 5, moyen), **après 5.1b**. Un petit bouton « ? » ouvre un « How to play » qui **n'explique pas les règles**, mais **comment faire chaque action et où cliquer** : déplacer (glisser, Alt = pose libre), sélectionner (clic, Ctrl+clic, Maj+clic), attaquer (sélection puis clic droit sur la case), feuille de combat étape par étape, corrections au menu L, Undo / Ctrl+Z, analyse du ravitaillement, panneau Units, impulsion du bot. Des « ? » contextuels ouvrent la bonne section ; le premier demandé par le dev : **attaquer avec Reinforce Battle** (sur la feuille, à côté de la tactique : déclarer l'attaque avec la sélection, puis à l'étape 2 glisser la pile de renfort à côté de la case — sur sa propre case si elle y est déjà —, cocher Reinforce Battle, « Play these tactics »). Textes dans `src/i18n/en.json`. Emplacement du bouton principal et forme du panneau à proposer au dev (maquette si utile).
+- [ ] **5.6** Vérificateur de sauvegarde (demande du dev, 2026-10-20) — IA (script : Sonnet 5, moyen ; analyse des décisions du bot : Opus 5.5, élevé). Le dev soumet la sauvegarde d'une partie entière, avec ses notes sur les moments suspects (tour, impulsion) ; un script la rejoue dans le moteur, sans interface, et liste les anomalies :
+  - **rejeu** : état rejoué différent de l'état sauvé (bug certain, à localiser), exception, commande refusée, impulsion ou combat qui ne se termine pas, tour qui ne passe pas ;
+  - **états impossibles**, vérifiés après chaque commande : surempilement (10.4), unité dans une case ennemie, garnison adjacente à un Allemand ou dans une case occupée, marqueurs de ravitaillement incohérents, total de VP différent de la propriété des cases, objectifs et limites opérationnelles mal placés ;
+  - **séquence de jeu** : ordre des phases et des impulsions, garnisons, remplacements, sol et fin de partie au bon tour ;
+  - **saisies du joueur non contrôlées**, signalées sans jugement : poses libres (Alt), unités soviétiques déplacées à la main, résultats de combat saisis ;
+  - **décisions du bot** : choix suspects repérés (unité jamais déplacée, attaque à cote absurde, réserves jamais placées), puis relecture contre le livret des décisions tracées, en commençant par les moments notés par le dev (procédure de la skill `golden-test`).
+  - Limites : ce que l'interface affiche sans l'enregistrer n'est pas visible dans la sauvegarde ; la relecture des décisions se fait par échantillons.
 
 ### Phase 6 — Optionnel
 
@@ -630,3 +637,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-19** — 4.8 : Q107 réglée (objectif sur la carte), Q108 (villages ajoutés par le dev) et Q109 (0815/0915 ignorés) réglées ; p44 fait, conforme au livret ; Q110 posée ; les 7 exemples sont faits, 461 tests verts.
 - **2026-10-19** — Q110 réglée (option 1) : p44 garde toutes les cases VP hors vue soviétiques, sans unité.
 - **2026-10-20** — Skill `golden-test` écrite ; tâche 4.8 faite.
+- **2026-10-20** — Tâche 5.6 ajoutée (demande du dev) : vérificateur de sauvegarde d'une partie entière.
