@@ -12,6 +12,7 @@ import type { StackRenderer } from "./inspector";
 import { supplyNote } from "./supply-note";
 import { sideName } from "../../engine/names";
 import { t } from "../../i18n/i18n";
+import { staticUrl } from "../../ui/static-url";
 
 const MARKER_TAG = { outOfSupply: ["stack.oos", "stack.oosTitle"], isolated: ["stack.isolated", "stack.isolatedTitle"] } as const;
 
@@ -23,7 +24,7 @@ function garrisonBox(session: GameSession, hexId: string, pinned: boolean): HTML
   const why = session.engine.whyNotGarrison(session.state, hexId, false);
   const box = document.createElement("div");
   box.className = "stack garrison-box";
-  box.innerHTML = `<ul><li><img src="/assets/counters/others/marker-sovietownershipbck_sovietgarrison.png" alt="">` +
+  box.innerHTML = `<ul><li><img src="${staticUrl("assets/counters/others/")}marker-sovietownershipbck_sovietgarrison.png" alt="">` +
     `<span class="stack-name">${t("stack.garrison")}<small>${t("stack.garrisonNote")}</small></span></li></ul>` +
     (pinned ? `<button type="button" class="linkbtn" data-remove-garrison${why ? ` disabled title="${t(why)}"` : ""}>${t("stack.removeGarrison")}</button>` +
       `<p class="insp-hint">${t("stack.garrisonHint")}</p>` : "");

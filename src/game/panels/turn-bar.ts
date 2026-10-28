@@ -14,6 +14,7 @@ import { resultName } from "./log-panel";
 import { infoAttrs, mountInfoPop } from "./info-pop";
 import { infoSlip, tagChip } from "./tag-chip";
 import { msg, t } from "../../i18n/i18n";
+import { staticUrl } from "../../ui/static-url";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
@@ -111,7 +112,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
       (space ? `<small>${esc(space.dates)}</small>` : "") + `<span class="tb-phase">${phase}</span>`;
     vp.innerHTML = `<span class="vp-chip" title="${esc(t("turnBar.vpTitle"))}">${t("turnBar.vp", { vp: state.vp })}</span>${outlookLabel(state)}`;
     const owner = engine.kharkov(state);
-    const marker = `<img src="/assets/counters/others/${owner === "soviet" ? "marker-sovietownership26.png" : "marker-germanownership.png"}" alt="">`;
+    const marker = `<img src="${staticUrl("assets/counters/others/")}${owner === "soviet" ? "marker-sovietownership26.png" : "marker-germanownership.png"}" alt="">`;
     const name = t("turnBar.kharkov", { side: sideName(owner) });
     kharkov.innerHTML = `<span class="tb-kharkov ${owner}"${infoAttrs(infoSlip(marker, name, t("turnBar.kharkovTitle")))}>${marker}${esc(name)}</span>`;
 

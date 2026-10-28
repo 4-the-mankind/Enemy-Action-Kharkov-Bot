@@ -6,9 +6,10 @@ import { groundImage } from "../data/game-data";
 import { cardImage } from "./card-zoom";
 import { infoAttrs } from "./info-pop";
 import { t } from "../../i18n/i18n";
+import { staticUrl } from "../../ui/static-url";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-const marker = (file: string) => `/assets/counters/others/${file}`;
+const marker = (file: string) => staticUrl(`assets/counters/others/${file}`);
 
 /** Line glyph for the tags without a marker of their own: the support and operational limit lines. */
 const LINE = (cls: string) => `<svg class="tag-glyph ${cls}" viewBox="0 0 20 20" aria-hidden="true"><path class="zone" d="M11 1h8v18h-8z"/><path class="edge" d="M11 1 9 6l2 4-2 5 2 4"/></svg>`;

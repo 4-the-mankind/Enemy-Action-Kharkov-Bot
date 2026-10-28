@@ -6,6 +6,7 @@ import { parseUnits, type Unit } from "../../core/units";
 import { parseSetupAdjustments, type RecordedAdjustment } from "../../engine/setup-adjustments";
 import type { Ground, VictoryLevel } from "../../engine/types";
 import type { CalendarSpace } from "../../engine/victory";
+import { staticUrl } from "../../ui/static-url";
 
 /** A calendar space: its dates, and what the engine reads (FAR, 12.3; Victory Levels, 18.35). */
 export interface CalendarTurn extends CalendarSpace { dates: string }
@@ -19,8 +20,8 @@ export interface GameData {
 }
 
 async function fetchJson(path: string): Promise<unknown> {
-  const res = await fetch(path, { cache: "no-store" }).catch(() => null);
-  if (!res?.ok) throw new Error(`${path.slice(1)} could not be loaded.`);
+  const res = await fetch(staticUrl(path), { cache: "no-store" }).catch(() => null);
+  if (!res?.ok) throw new Error(`${path} could not be loaded.`);
   return res.json();
 }
 
@@ -45,7 +46,7 @@ function parseCalendar(raw: unknown): CalendarTurn[] {
 
 export async function loadGameData(): Promise<GameData> {
   const [units, calendar, adjustments, terrain, cards] = await Promise.all(
-    ["/data/units.json", "/data/calendar.json", "/data/setup-adjustments.json", "/data/terrain-effects.json", "/data/soviet-cards.json"].map(fetchJson));
+    ["data/units.json", "data/calendar.json", "data/setup-adjustments.json", "data/terrain-effects.json", "data/soviet-cards.json"].map(fetchJson));
   return {
     units: parseUnits(units).units, calendar: parseCalendar(calendar),
     adjustments: parseSetupAdjustments(adjustments).adjustments, terrain: parseTerrainEffects(terrain),
@@ -54,7 +55,7 @@ export async function loadGameData(): Promise<GameData> {
 }
 
 /** URL of a counter image from units.json (file name in assets/counters/units/). */
-export const counterUrl = (file: string) => `/assets/counters/units/${encodeURIComponent(file)}`;
+export const counterUrl = (file: string) => staticUrl(`assets/counters/units/${encodeURIComponent(file)}`);
 
 /** Image of the face a unit shows. Falls back to any printed face. */
 export function faceImage(u: Unit, face: "front" | "back" | "reduced"): string {
@@ -64,4 +65,4 @@ export function faceImage(u: Unit, face: "front" | "back" | "reduced"): string {
 
 /** Ground condition marker of a game-turn (18.33), face up; `null`: the face-down side. */
 export const groundImage = (g: Ground | null) =>
-  `/assets/counters/others/${g ? { frozen: "marker-frozengrnd.png", lightMud: "marker-ltmudgrnd.png", heavyMud: "marker-hvymudgrnd.png" }[g] : "marker-groundcondition.png"}`;
+  staticUrl(`assets/counters/others/${g ? { frozen: "marker-frozengrnd.png", lightMud: "marker-ltmudgrnd.png", heavyMud: "marker-hvymudgrnd.png" }[g] : "marker-groundcondition.png"}`);

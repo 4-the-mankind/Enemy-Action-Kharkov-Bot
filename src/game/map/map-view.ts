@@ -1,6 +1,7 @@
 // The game map viewport: background image, one SVG in grid coordinates split into
 // fixed planes, pan/zoom, and pointer → hex/side resolution (D3).
 import { hexAt, pointerTarget, type Hex, type MapGrid, type Point, type PointerTarget } from "../../core/geometry";
+import { staticUrl } from "../../ui/static-url";
 
 /**
  * Stacking order, bottom to top. Every feature draws into one plane, so adding a
@@ -78,7 +79,7 @@ export class MapView {
   async setBackground(grid: MapGrid) {
     const b = grid.background;
     if (!b.image) { this.bg.hidden = true; return; }
-    const url = "/" + b.image.split("/").map(encodeURIComponent).join("/");
+    const url = staticUrl(b.image.split("/").map(encodeURIComponent).join("/"));
     const img = new Image();
     img.src = url;
     await img.decode();

@@ -1,6 +1,6 @@
 # Enemy Action: Kharkov — German Solo Rules (rulebook transcription)
 
-Source: `Rulebook German Solo.pdf` (Compass Games 2021), converted to Markdown for the project. Text is verbatim; images/diagrams are not transcribed (only short layout notes in *italics*).
+Source: `scans/Rulebook German Solo.pdf` (not committed) (Compass Games 2021), converted to Markdown for the project. Text is verbatim; images/diagrams are not transcribed (only short layout notes in *italics*).
 
 Conventions: `[GT 5+]` = game-turn badge (rule applies on GT 5 and later; `[GT 1-4]` range; `[GT 7]` single turn). ▲/▼ = check units in ascending/descending selector order. `> **[Exemple pN]**` = example/illustration box from page N. `<!-- pN -->` = start of PDF page N.
 

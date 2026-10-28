@@ -4,6 +4,7 @@ import { t } from "../../i18n/i18n";
 import { dynamicKey } from "../../i18n/message";
 import { FRONT_COLOR } from "../../ui/map-symbols";
 import { CORPS_NAMES, DIVISION_NAMES } from "./names";
+import { staticUrl } from "../../ui/static-url";
 
 const corpsName = (token: string) => CORPS_NAMES[token] ?? token;
 
@@ -77,7 +78,7 @@ function groupByDivision(all: Unit[], shown: Unit[]): { divisions: Division[]; i
 }
 
 async function load() {
-  const res = await fetch("/data/units.json");
+  const res = await fetch(staticUrl("data/units.json"));
   if (!res.ok) {
     units = [];
     render();
@@ -117,7 +118,7 @@ function card(u: Unit, f: FaceView): HTMLElement {
 
   const img = document.createElement("img");
   img.className = "counter";
-  img.src = `/assets/counters/units/${f.image}`;
+  img.src = staticUrl(`assets/counters/units/${f.image}`);
   img.alt = `${u.designation} (${FACE_LABEL[f.face]})`;
   el.appendChild(img);
 

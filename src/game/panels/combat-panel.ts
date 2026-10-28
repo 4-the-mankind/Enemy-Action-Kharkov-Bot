@@ -17,6 +17,7 @@ import { faceImage } from "../data/game-data";
 import type { CombatPlane } from "../map/combat-plane";
 import type { GameSession } from "../state/session";
 import { cardImage } from "./card-zoom";
+import { staticUrl } from "../../ui/static-url";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 const tx = (m: Message) => esc(t(m));
@@ -38,7 +39,7 @@ const CURRENT: Record<Combat["kind"], Record<Combat["stage"], number>> = {
 /** The German corps (6.0) and their activation markers (assets/counters/others/), for Q62. */
 const CORPS = [["III", "ger3rdpzcorpsactivated"], ["XL", "ger40thactivated"], ["XLVIII", "ger48thactivated"], ["LVII", "ger57thactivated"],
   ["IISS", "ger2ndssactivated"], ["Raus", "gerrausactivated"]] as const;
-const marker = (file: string) => `/assets/counters/others/marker-${file}.png`;
+const marker = (file: string) => staticUrl(`assets/counters/others/marker-${file}.png`);
 
 export interface CombatPanel {
   render(state: GameState): void;

@@ -7,6 +7,7 @@ import type { mountLoadScreen } from "./panels/load-screen";
 import type { mountLogPanel } from "./panels/log-panel";
 import { appName, makeSave, replay, saveName, type SaveFile } from "./state/save-file";
 import type { GameSession } from "./state/session";
+import { staticUrl } from "../ui/static-url";
 
 type Log = ReturnType<typeof mountLogPanel>;
 
@@ -20,7 +21,7 @@ export function bookletInUrl(): string | null {
 
 /** A booklet position's file (Q92, dev only): data/saves/<id>.json. */
 export async function fetchBooklet(id: string): Promise<{ text: string } | { error: Message }> {
-  const res = await fetch(`/data/saves/${encodeURIComponent(id)}.json`, { cache: "no-store" }).catch(() => null);
+  const res = await fetch(staticUrl(`data/saves/${encodeURIComponent(id)}.json`), { cache: "no-store" }).catch(() => null);
   // The dev server answers a missing file with the page itself: only JSON is a position.
   const found = res?.ok && res.headers.get("content-type")?.includes("json");
   return found ? { text: await res.text() } : { error: msg("save.error.booklet", { id }) };

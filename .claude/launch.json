@@ -1,6 +1,24 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "map", "runtimeExecutable": "bash", "runtimeArgs": ["-c", "source ~/.nvm/nvm.sh && npm run dev"], "port": 5173 }
+    {
+      "name": "map",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && npm run dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "release-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && npx vite preview --port 5173 --strictPort"
+      ],
+      "port": 5173,
+      "url": "http://localhost:5173"
+    }
   ]
 }

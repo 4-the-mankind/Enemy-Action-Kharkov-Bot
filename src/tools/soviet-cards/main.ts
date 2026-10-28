@@ -3,6 +3,7 @@
 import { parseSovietCards, type CardCommand, type SovietCard } from "../../core/soviet-cards";
 import { armyName, frontName } from "../../engine/names";
 import { t } from "../../i18n/i18n";
+import { staticUrl } from "../../ui/static-url";
 
 interface Named { id: string; name: string }
 
@@ -13,7 +14,7 @@ const tabs = document.getElementById("front-tabs") as HTMLElement;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const army = (a: string) => t(a === "voronezh" || a === "southwest" ? frontName(a) : armyName(a));
-const scan = (id: string) => `/assets/cards/EAKh-sovECcards-E-${id.slice(1)}.png`;
+const scan = (id: string) => staticUrl(`assets/cards/EAKh-sovECcards-E-${id.slice(1)}.png`);
 const FRONT = { voronezh: "Voronezh Front", southwest: "Southwest Front" } as const;
 const TIE = { voronezh: "a supplied unit closest to the west map edge", southwest: "a supplied unit closest to the 3300 hexrow", stavka: "a supplied unit closest to hex 1923" };
 
@@ -94,13 +95,13 @@ function render(cards: SovietCard[], events: Map<string, string>, tactics: Map<s
 
 async function init() {
   const get = async (path: string) => {
-    const res = await fetch(path, { cache: "no-store" });
-    if (!res.ok) throw new Error(`${path.slice(1)} could not be loaded.`);
+    const res = await fetch(staticUrl(path), { cache: "no-store" });
+    if (!res.ok) throw new Error(`${path} could not be loaded.`);
     return res.json();
   };
   let cards: SovietCard[], events: Map<string, string>, tactics: Map<string, string>;
   try {
-    const [c, e, t] = await Promise.all(["/data/soviet-cards.json", "/data/events.json", "/data/combat-tactics.json"].map(get));
+    const [c, e, t] = await Promise.all(["data/soviet-cards.json", "data/events.json", "data/combat-tactics.json"].map(get));
     cards = parseSovietCards(c);
     events = new Map((e.events as Named[]).map((x) => [x.id, x.name]));
     tactics = new Map((t.tactics as Named[]).map((x) => [x.id, x.name]));
