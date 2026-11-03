@@ -240,7 +240,7 @@ describe("Soviet losses (12.54, 12.55, 12.6, 12.62)", () => {
     s = play(engine, s, { type: "MoveUnits", units: ["g"], to: "eliminated" }).state;
     const done = play(engine, s, { type: "CombatHitsApplied" }).state.combat!;
     // 5 hits, 2 absorbed by a two-hex retreat and 2 by the steps: 1 unfulfilled.
-    expect(done.sovietLosses).toMatchObject({ hits: 1, reduced: 1 });
+    expect(done.sovietLosses).toMatchObject({ hits: 1, reduced: 1, reduction: { germanHits: 5, retreat: 2, steps: 2 } });
   });
 
   it("12.62: a unit with one step at full strength is removed from play", () => {

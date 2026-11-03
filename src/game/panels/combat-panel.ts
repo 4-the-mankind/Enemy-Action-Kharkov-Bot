@@ -195,9 +195,13 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession, plane:
     const r = c.sovietLosses;
     if (!r) return "";
     if (c.kind === "nkvdOperations") return `<p>${esc(r.first ? t("combatSheet.soviet.nkvd", { unit: name(r.first.unit) }) : t("combatSheet.soviet.nkvdNone"))}</p>`;
-    if (!r.hits) return `<p>${t("combatSheet.soviet.none")}</p>` + (r.reduced ? `<p class="note">${esc(t("combatSheet.soviet.reduced", { count: r.reduced }))}</p>` : "");
-    const out = [];
-    if (r.reduced) out.push(`<p class="note">${esc(t("combatSheet.soviet.reduced", { count: r.reduced }))}</p>`);
+    // A save of an older version has no `reduction`: the short note.
+    const rd = r.reduction;
+    const reduced = !r.reduced ? "" : `<p class="note">${esc(rd
+      ? t("combatSheet.soviet.reduced", { count: r.reduced, hits: r.hits, before: r.hits + r.reduced, german: rd.germanHits, absorb: rd.retreat + rd.steps, retreat: rd.retreat, steps: rd.steps })
+      : t("combatSheet.soviet.reducedShort", { count: r.reduced }))}</p>`;
+    if (!r.hits) return `<p>${t("combatSheet.soviet.none")}</p>` + reduced;
+    const out = [reduced];
     if (r.first) out.push(`<ul class="lines"><li>${unit(r.first.unit, state)}<div class="what">${esc(r.first.tied
       ? t("combatSheet.soviet.firstTied", { unit: name(r.first.unit), units: names(r.first.tied) })
       : t("combatSheet.soviet.first", { unit: name(r.first.unit) }))}</div></li></ul>`);
@@ -208,8 +212,11 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession, plane:
         : msg("combatSheet.soviet.steps", { count: x.removed });
       out.push(`<p>${esc(t("combatSheet.soviet.table", { hits: x.hits, steps: x.steps, result }))}${x.parenthetical ? ` <small>(${t("combatSheet.soviet.parenthetical")})</small>` : ""}</p>`);
     }
-    if (r.removed.length) out.push(`<p class="note">${esc(t("combatSheet.soviet.removed", { units: names(r.removed) }))}</p>`);
-    if (r.eliminated.length) out.push(`<p class="note">${esc(t("combatSheet.soviet.eliminated", { units: names(r.eliminated) }))}</p>`);
+    // The units hit after the first, each with its counter: steps lost, then eliminated.
+    const lines = [...new Set(r.removed)].filter((id) => !r.eliminated.includes(id))
+      .map((id) => [id, t("combatSheet.soviet.stepLost", { unit: name(id), count: r.removed.filter((x) => x === id).length })])
+      .concat(r.eliminated.map((id) => [id, t("combatSheet.soviet.eliminated", { unit: name(id) })]));
+    if (lines.length) out.push(`<ul class="lines">${lines.map(([id, text]) => `<li>${unit(id, state)}<div class="what">${esc(text)}</div></li>`).join("")}</ul>`);
     return out.join("");
   }
 

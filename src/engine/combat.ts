@@ -1176,7 +1176,7 @@ export function createCombat(data: CombatData) {
     const defs = defendersIn(state, c);
     const cap = retreatCap(state, c);
     const canGo = cap >= 2 && retreat.canRetreat(state, defs, c.target, 2) ? 2 : cap >= 1 && retreat.canRetreat(state, defs, c.target, 1) ? 1 : 0;
-    const losses: GermanLosses = { retreat: null, lost: [], extra: 0, paths: {}, absorb: canGo + stepsOf(state, defs) };
+    const losses: GermanLosses = { retreat: null, lost: [], extra: 0, paths: {}, absorb: canGo + stepsOf(state, defs), absorbRetreat: canGo };
     losses.options = optionsFor(state, { ...c, losses });
     return losses;
   }
@@ -1436,9 +1436,10 @@ export function createCombat(data: CombatData) {
   }
 
   /** Step 7 (12.54): the first hit a step, the rest by the table. */
-  function sovietLosses(state: GameState, c: Combat, hits: number, vacatedVp: boolean, reduced: number): { state: GameState; report: SovietLossesReport; events: GameEvent[] } {
+  function sovietLosses(state: GameState, c: Combat, hits: number, vacatedVp: boolean, reduced: number, reduction?: SovietLossesReport["reduction"]): { state: GameState; report: SovietLossesReport; events: GameEvent[] } {
     const report: SovietLossesReport = { hits, removed: [], eliminated: [], dispersed: [] };
     if (reduced) report.reduced = reduced;
+    if (reduction) report.reduction = reduction;
     const events: GameEvent[] = [];
     if (hits <= 0) return { state, report, events };
     const lost = new Map<string, number>();
@@ -1569,7 +1570,8 @@ export function createCombat(data: CombatData) {
       const hits = c.hits?.soviet ?? 0;
       // 12.55: German hits beyond what the units could absorb come off the Soviet hits.
       const reduced = allEliminated && c.hits ? Math.min(hits, Math.max(0, c.hits.german - L.absorb)) : 0;
-      return sovietLosses(state, c, hits - reduced, vacated && board.hex(c.target).vp !== null, reduced);
+      const reduction = reduced && c.hits ? { germanHits: c.hits.german, retreat: L.absorbRetreat ?? 0, steps: L.absorb - (L.absorbRetreat ?? 0) } : undefined;
+      return sovietLosses(state, c, hits - reduced, vacated && board.hex(c.target).vp !== null, reduced, reduction);
     })();
     state = losses.state;
     events.push(...losses.events);

@@ -1622,7 +1622,8 @@
     },
     "soviet": {
       "none": "No hit on the Soviet units.",
-      "reduced": "12.55: {{count}} hits fewer, your units all eliminated.",
+      "reduced": "12.55: your units were all eliminated. They could absorb {{absorb}} of their {{german}} hits (retreat: {{retreat}} hexes, steps: {{steps}}), so the {{count}} hits left unfulfilled come off the Soviet hits: {{before}} − {{count}} = {{hits}}.",
+      "reducedShort": "12.55: {{count}} hits fewer, your units all eliminated.",
       "first": "First hit: {{unit}} loses a step (12.6: most steps, then the higher selector).",
       "firstTied": "First hit: {{unit}} loses a step, drawn among {{units}} (12.6).",
       "table": "{{hits}} hits left on {{steps}} steps (12.54): {{result}}.",
@@ -1633,8 +1634,9 @@
       "eliminate": "all the attackers eliminated",
       "steps_one": "{{count}} more step",
       "steps_other": "{{count}} more steps",
-      "removed": "Steps removed: {{units}}.",
-      "eliminated": "Eliminated: {{units}}.",
+      "stepLost_one": "{{unit}} loses a step.",
+      "stepLost_other": "{{unit}} loses {{count}} steps.",
+      "eliminated": "{{unit}} is eliminated.",
       "nkvd": "One step from the adjacent Soviet units (12.6): {{unit}}.",
       "nkvdNone": "No Soviet unit is left next to the hex."
     },

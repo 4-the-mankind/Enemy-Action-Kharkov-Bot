@@ -716,6 +716,8 @@ export interface GermanLosses {
   paths: Record<string, string[]>;
   /** 12.55: hits the German units could absorb at the start of step 6 (a two-hex retreat if possible, and their steps). */
   absorb: number;
+  /** 12.55: the hexes of retreat counted in `absorb` (the rest are steps). */
+  absorbRetreat?: number;
 }
 
 /** Step 7: the Soviet attackers' losses (12.54, 12.55, 12.6). */
@@ -724,6 +726,8 @@ export interface SovietLossesReport {
   hits: number;
   /** 12.55: hits taken off because the German units were all eliminated. */
   reduced?: number;
+  /** 12.55: how the reduction was reached: the German hits, and what the units could absorb (retreat hexes, steps). */
+  reduction?: { germanHits: number; retreat: number; steps: number };
   /** First hit: one step, by 12.6; `tied`: units drawn among (Q49). */
   first?: { unit: string; tied?: string[] };
   /** The table of 12.54 for the hits left. */
