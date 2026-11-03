@@ -30,10 +30,9 @@ export function supplySummary(state: GameState, events: GameEvent[], sideOf: (id
     if (count("outOfSupply")) parts.push(msg("supplyNotice.change.outOfSupply", { count: count("outOfSupply") }));
     if (count("isolated")) parts.push(msg("supplyNotice.change.isolated", { count: count("isolated") }));
     if (count("supplied")) parts.push(msg("supplyNotice.change.resupplied", { count: count("supplied") }));
-    if (s === "german" && done.germanSurrender.length)
-      parts.push(msg("supplyNotice.change.germanSurrender", { count: done.germanSurrender.length, hexes: done.germanSurrender.map((g) => g.hex) }));
-    if (s === "soviet" && done.sovietSurrender.length)
-      parts.push(msg("supplyNotice.change.sovietSurrender", { count: done.sovietSurrender.length }));
+    // 13.23: a step per stack (the German ones chosen under the lines, Q120).
+    const surrender = s === "german" ? done.germanSurrender.length : done.sovietSurrender.length;
+    if (surrender) parts.push(msg("supplyNotice.change.surrender", { count: surrender }));
     const marked = Object.entries(state.supply ?? {}).filter(([id]) => sideOf(id) === s && isHex(state.units[id]?.at ?? ""));
     const oos = marked.filter(([, m]) => m === "outOfSupply").length, isolated = marked.filter(([, m]) => m === "isolated").length;
     return msg(`supplyNotice.${s}`, {

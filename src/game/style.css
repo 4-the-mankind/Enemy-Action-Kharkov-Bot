@@ -435,10 +435,24 @@ body:not(.menu-open) .main-menu { display: none; }
 .supply-notice li { position: relative; padding: 3px 0 3px 22px; border-top: 1px solid rgb(38 46 41 / 0.12); }
 .supply-notice li:first-child { border-top: 0; }
 .supply-notice li::before { content: "✓"; position: absolute; left: 2px; top: 3px; font-weight: 700; color: var(--feldgrau); }
-.supply-notice li, .supply-notice .btn { animation: supply-step 0.25s ease both; animation-delay: calc(var(--i) * 0.4s); }
+.supply-notice li, .supply-notice > .btn, .supply-notice .surrender { animation: supply-step 0.25s ease both; animation-delay: calc(var(--i) * 0.4s); }
+/* German surrender (13.23, Q120): the stack's units to choose from, then what was removed. */
+.supply-notice .surrender { margin-top: 8px; padding-top: 6px; border-top: 1px solid rgb(38 46 41 / 0.25); font-size: 0.88rem; }
+.supply-notice .surrender[hidden] { display: none; }
+.supply-notice .surrender p { margin: 4px 0 0; color: var(--slip-ink); }
+.supply-notice .surrender .choose { font-weight: 600; color: var(--stab-red); }
+.supply-notice .surrender small { color: var(--slip-dim); }
+.supply-notice .choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.supply-notice .choices .btn { display: inline-block; margin: 0; padding: 4px 12px; font-weight: 500; color: var(--slip-ink); background: transparent; border-color: var(--slip-ink); }
+.supply-notice .choices .btn:hover { background: rgb(38 46 41 / 0.08); }
+.supply-notice .choices .btn.destroy { border-color: var(--stab-red); color: var(--stab-red); }
+.supply-notice > .btn[disabled] { color: var(--slip-dim); background: rgb(38 46 41 / 0.12); border-color: rgb(38 46 41 / 0.3); cursor: not-allowed; }
+.supply-notice > .btn[disabled]:hover { background: rgb(38 46 41 / 0.12); }
+.supply-notice .wait-note { margin-top: 4px; font-size: 0.8rem; text-align: center; }
+.supply-notice .wait-note:empty { display: none; }
 @keyframes supply-step { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .supply-notice li, .supply-notice .btn { animation: none; }
+  .supply-notice li, .supply-notice > .btn, .supply-notice .surrender { animation: none; }
 }
 
 /* "Your turn" banner: a band across the middle of the map, faded in and out (2 s), clicks pass through. */

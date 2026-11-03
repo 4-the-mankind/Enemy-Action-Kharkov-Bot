@@ -110,6 +110,10 @@
     }
   },
   "reject": {
+    "surrender": {
+      "pending": "First choose the step each surrendering German stack loses ({{hexes}}, 13.23).",
+      "notPending": "{{unit}} is not in a German stack waiting to surrender (13.23)."
+    },
     "setUpFirst": "Set up turn 1 first.",
     "pressStart": "Press Start to begin turn 1.",
     "alreadySetUp": "Turn 1 is already set up.",
@@ -879,7 +883,11 @@
       "phase": "<b>Supply Phase, turn {{turn}}.</b> Supply markers: {{changes}}.",
       "phaseNone": "<b>Supply Phase, turn {{turn}}.</b> No supply marker changes.",
       "change": "{{unit}} {{marker}}",
-      "surrender": " <b>Surrender (13.23):</b> remove one step from {{stacks}}.",
+      "surrender": " <b>Surrender (13.23):</b> {{stacks}} lose one step.",
+      "surrendered": {
+        "alone": "<b>Surrender (13.23):</b> {{unit}}, alone in {{hex}}, loses its step.",
+        "chosen": "<b>Surrender (13.23):</b> you chose {{unit}} to lose the step of {{hex}}."
+      },
       "stack": "{{hex}} ({{units}})",
       "lineWest": " Soviet support line: western (13.51).",
       "lineEast": " Soviet support line: eastern (13.51).",
@@ -1202,10 +1210,8 @@
       "outOfSupply": "+{{count}} OOS",
       "isolated": "+{{count}} isolated",
       "resupplied": "{{count}} back in supply",
-      "germanSurrender_one": "{{count}} stack to surrender in {{hexes}}: remove one step of your choice (13.23)",
-      "germanSurrender_other": "{{count}} stacks to surrender in {{hexes}}: remove one step of your choice from each (13.23)",
-      "sovietSurrender_one": "{{count}} step lost to surrender (13.23)",
-      "sovietSurrender_other": "{{count}} steps lost to surrender (13.23)"
+      "surrender_one": "{{count}} stack surrenders, one step lost (13.23)",
+      "surrender_other": "{{count}} stacks surrender, one step lost each (13.23)"
     },
     "supportLine": {
       "west": "Soviet support line: western (13.51).",
@@ -1214,6 +1220,15 @@
     "objectives_one": "Front objectives: {{count}} marker removed (9.12).",
     "objectives_other": "Front objectives: {{count}} markers removed (9.12).",
     "objectivesNone": "Front objectives: none removed (9.12).",
+    "surrender": {
+      "choose": "Surrender in {{hex}} (13.23): choose the unit that loses a step.",
+      "reduce": "{{unit}}: reduce",
+      "destroy": "{{unit}}: destroy",
+      "reduced": "Surrender in {{hex}} (13.23): {{unit}} reduced.",
+      "destroyed": "Surrender in {{hex}} (13.23): {{unit}} destroyed, out of play.",
+      "alone": "alone in its hex",
+      "wait": "Choose the step each surrendering stack loses first."
+    },
     "continue": "Continue to command phase",
     "waiting": "Read the Supply Phase first: click ‘Continue to command phase’ on the map."
   },

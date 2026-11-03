@@ -42,7 +42,7 @@ describe("Supply notice (Q119)", () => {
     expect(s).toMatchObject({ turn: 5, heavyMud: false });
     expect(keys(s.lines)).toEqual(["supplyNotice.garrisonsNone", "supplyNotice.german", "supplyNotice.soviet"]);
     expectMessage(s.lines[1], "supplyNotice.german", {
-      changes: semicolonList([msg("supplyNotice.change.isolated", { count: 1 }), msg("supplyNotice.change.germanSurrender", { count: 1, hexes: ["0502"] })]),
+      changes: semicolonList([msg("supplyNotice.change.isolated", { count: 1 }), msg("supplyNotice.change.surrender", { count: 1 })]),
       now: msg("supplyNotice.now", { oos: 0, isolated: 2 }),
     });
     expectMessage(s.lines[2], "supplyNotice.soviet", {
@@ -56,7 +56,7 @@ describe("Supply notice (Q119)", () => {
     after.units.s2 = { at: "eliminated", face: "front" };
     const s = supplySummary(after, [started, done(5, { sovietSurrender: [{ hex: "0505", unit: "s2" }] })], sideOf)!;
     expectMessage(s.lines[2], "supplyNotice.soviet", {
-      changes: semicolonList([msg("supplyNotice.change.sovietSurrender", { count: 1 })]),
+      changes: semicolonList([msg("supplyNotice.change.surrender", { count: 1 })]),
       now: msg("supplyNotice.now", { oos: 0, isolated: 1 }),
     });
   });

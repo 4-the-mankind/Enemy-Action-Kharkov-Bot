@@ -98,6 +98,9 @@ function describe(e: GameEvent, engine: Engine): { html: string; refused?: boole
         + (german.length ? t("log.supply.surrender", { stacks: { list: german, separator: "semicolon" } }) : "")
         + (e.supportLine ? t(e.supportLine === "west" ? "log.supply.lineWest" : "log.supply.lineEast") : ""));
     }
+    case "GermanSurrendered":
+      // The step itself follows (StepRemoved, or the unit out of play).
+      return line(t(e.auto ? "log.supply.surrendered.alone" : "log.supply.surrendered.chosen", { unit: name(e.unit), hex: e.hex }));
     case "SupplyStatusSet":
       return line(t(`log.supply.set.${e.status}`, { units: e.units.map(name) }));
     case "ForwardSupportSet":

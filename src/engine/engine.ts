@@ -27,7 +27,7 @@ import { createTags, tagEvents } from "./tags";
 import { createVictory, KHARKOV, LAST_TURN, type CalendarSpace } from "./victory";
 import {
   emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameResult,
-  type GameState, type Location, type ObjectiveFace, type ObjectiveFront, type Outlook, type Reminder, type StackMove, type StateTag, type StepResult,
+  type GameState, type GermanSurrender, type Location, type ObjectiveFace, type ObjectiveFront, type Outlook, type Reminder, type StackMove, type StateTag, type StepResult,
   type SupplyMarker,
 } from "./types";
 
@@ -72,6 +72,8 @@ export interface Engine {
   canLift(state: GameState, unitId: string, actor?: Actor): boolean;
   /** Face the unit shows after losing one step, or null if it is on its last step. */
   nextFace(unitId: string, face: Face): Face | null;
+  /** 13.23: why the game waits for the surrendering German stacks to lose their step (Q120), or null. */
+  surrenderPending(state: GameState): Message | null;
   /** Units used in the solo game, in data order. */
   readonly units: Unit[];
   unit(id: string): Unit | undefined;
@@ -539,6 +541,7 @@ export function createEngine(data: EngineData): Engine {
     delete next.attackedThisImpulse;
     delete next.germanImpulse;
     delete next.heavyMudSteps;
+    delete next.germanSurrender;
     // I: units of the calendar space for the new turn enter their Reserve Units box; on turn 5,
     // after OKW Expedites, the German units due on turn 6 too (Q77).
     const due = (id: string) => {
@@ -655,8 +658,18 @@ export function createEngine(data: EngineData): Engine {
     const germanSurrender: { hex: string; units: string[] }[] = [];
     const sovietSurrender: { hex: string; unit: string }[] = [];
     const losses: GameEvent[] = [];
+    const pending: GermanSurrender[] = [];
     for (const [hex, ids] of surrender) {
-      if (byId.get(ids[0])!.side === "german") { germanSurrender.push({ hex, units: ids }); continue; }
+      if (byId.get(ids[0])!.side === "german") {
+        // 13.23: the German stack loses a step of the player's choice; a unit alone loses its own (Q120).
+        germanSurrender.push({ hex, units: ids });
+        if (ids.length > 1) { pending.push({ hex, units: ids }); continue; }
+        const r = surrenderLoss(next, hex, ids[0], true);
+        next = r.state;
+        losses.push(...r.events);
+        pending.push({ hex, units: ids, removed: ids[0], auto: true });
+        continue;
+      }
       // 13.23: a Soviet stack adjacent to a German unit loses a step, from its highest selector.
       const adjacent = data.board.neighbors(hex).some((n) => data.board.areAdjacent(hex, n.hex)
         && Object.entries(state.units).some(([g, gs]) => gs.at === n.hex && byId.get(g)?.side === "german"));
@@ -668,10 +681,35 @@ export function createEngine(data: EngineData): Engine {
       next = r.state;
       losses.push(...r.events);
     }
+    if (pending.length) next.germanSurrender = pending;
+    else delete next.germanSurrender;
     const done: GameEvent = { type: "SupplyPhaseDone", turn: state.turn, changes, germanSurrender, sovietSurrender };
     if (next.supportLine) done.supportLine = next.supportLine;
     const removal = objectives.supplyPhase(next);
     return { state: removal.state, events: [done, ...losses, ...removal.events] };
+  }
+
+  /** 13.23: a surrendering unit loses a step; its last one lost, it is destroyed (out of play, 13.22: it is isolated). */
+  function surrenderLoss(state: GameState, hex: string, unit: string, auto: boolean): StepResult {
+    const destroyed = !nextFace(unit, state.units[unit].face);
+    const r = destroyed ? moveUnits(state, [unit], "eliminated", "bot") : removeStep(state, unit);
+    return { state: r.state, events: [{ type: "GermanSurrendered", hex, unit, destroyed, auto }, ...r.events] };
+  }
+
+  /** The player's choice for a surrendering German stack (13.23, Q120). */
+  function surrenderStep(state: GameState, unit: string): StepResult {
+    const stacks = state.germanSurrender ?? [];
+    const i = stacks.findIndex((g) => !g.removed && g.units.includes(unit));
+    if (i < 0) return reject(state, "SurrenderStep", msg("reject.surrender.notPending", { unit: name(unit) }));
+    const r = surrenderLoss(state, stacks[i].hex, unit, false);
+    const germanSurrender = stacks.map((g, j) => (j === i ? { ...g, removed: unit } : g));
+    return { state: { ...r.state, germanSurrender }, events: r.events };
+  }
+
+  /** The German stacks that still have to choose their surrender step (13.23), or null. */
+  function surrenderPending(state: GameState): Message | null {
+    const hexes = (state.germanSurrender ?? []).filter((g) => !g.removed).map((g) => g.hex);
+    return hexes.length ? msg("reject.surrender.pending", { hexes }) : null;
   }
 
   function setSupplyStatus(state: GameState, ids: string[], status: SupplyMarker | "supplied"): StepResult {
@@ -767,7 +805,7 @@ export function createEngine(data: EngineData): Engine {
 
   /** Commands the player may only send once the game has started. */
   const PLAY = new Set<Command["type"]>([
-    "MoveUnits", "Restack", "RemoveStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
+    "MoveUnits", "Restack", "RemoveStep", "SurrenderStep", "SetDispersed", "SetVictoryPoints", "DiscardSovietCard", "PlaceObjective",
     "SetSupplyStatus", "SetForwardSupport", "SetImprovedPosition", "DeclareAttack", "CancelAttack", "SetGarrison", "AssignReplacement",
     "GermanEvent",
   ]);
@@ -818,6 +856,9 @@ export function createEngine(data: EngineData): Engine {
     if (state.botImpulse && ON.has(command.type)) return reject(state, command.type, pendingAttack(state));
     // A German attack declared: the bot waits for its combat too.
     if (state.combat && ON.has(command.type)) return reject(state, command.type, msg("reject.combat.open", { hex: state.combat.target }));
+    // 13.23: the surrendering German stacks lose their step first (Q120).
+    const surrendering = ON.has(command.type) ? surrenderPending(state) : null;
+    if (surrendering) return reject(state, command.type, surrendering);
     if (actor === "player" && command.type === "MoveUnits") return playerMove(state, command.units, command.to, !!command.free);
     // While a combat is open, the player's step losses of its units go through it (Q45).
     if (actor === "player" && state.combat && command.type === "RemoveStep") {
@@ -835,6 +876,8 @@ export function createEngine(data: EngineData): Engine {
         return restack(state, command.unit, command.to);
       case "RemoveStep":
         return removeStep(state, command.unit);
+      case "SurrenderStep":
+        return surrenderStep(state, command.unit);
       case "SetDispersed":
         return setDispersed(state, command.units, command.dispersed);
       case "SetVictoryPoints":
@@ -908,6 +951,7 @@ export function createEngine(data: EngineData): Engine {
       return !!u && !!s && !locked(state, actor) && (actor === "bot" || !(u.side === "soviet" && s.at === "reserve"));
     },
     nextFace,
+    surrenderPending,
     units,
     movement,
     sovietMovement,

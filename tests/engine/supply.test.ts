@@ -17,6 +17,7 @@ import { expectMessage } from "../i18n/expect-message";
 // hex down: 0505 touches 0404 and 0405, 0507 touches 0406 and 0407.
 
 type Traced = Extract<GameEvent, { type: "DecisionTraced" }>;
+const rejected = (events: GameEvent[]) => events.find((e): e is Extract<GameEvent, { type: "CommandRejected" }> => e.type === "CommandRejected")?.reason;
 const traceOf = (events: GameEvent[], unit: string) =>
   events.find((e): e is Traced => e.type === "DecisionTraced" && e.unit === unit)!;
 
@@ -237,6 +238,46 @@ describe("13.2 Supply Phase and markers", () => {
     expect(r.state.supply).toEqual({ g: "outOfSupply", s: "isolated" });
     // 13.23: an isolated Soviet unit still cut off and adjacent to a German unit loses a step.
     expect(r.events).toContainEqual({ type: "StepRemoved", unit: "s", from: "front", to: "back" });
+  });
+
+  it("13.23 German surrender: a unit alone loses its step by itself, destroyed out of play on its last one (Q120)", () => {
+    const back = { combatValue: 1, selector: "10", movementValue: 4, steps: 1 };
+    const alone = setup({ units: [ger("g", { backFace: back })], at: { g: "0410" }, hexes: sovietEdge, supply: { g: "isolated" } });
+    let r = alone.engine.step(alone.state, { type: "SupplyPhase" });
+    expect(r.events).toContainEqual({ type: "GermanSurrendered", hex: "0410", unit: "g", destroyed: false, auto: true });
+    expect(r.state.units.g.face).toBe("back");
+    expect(r.state.germanSurrender).toEqual([{ hex: "0410", units: ["g"], removed: "g", auto: true }]);
+    expect(alone.engine.surrenderPending(r.state)).toBeNull();
+    r = alone.engine.step(r.state, { type: "SupplyPhase" });
+    expect(r.events).toContainEqual({ type: "GermanSurrendered", hex: "0410", unit: "g", destroyed: true, auto: true });
+    expect(r.state.units.g.at).toBe("outOfPlay");
+  });
+
+  it("13.23 German surrender: a stack waits for the player's choice, and the game with it (Q120)", () => {
+    const back = { combatValue: 1, selector: "10", movementValue: 4, steps: 1 };
+    const { engine, state } = setup({
+      units: [ger("g1", { backFace: back }), ger("g2"), ger("g3")], at: { g1: "0410", g2: "0410", g3: "0408" }, hexes: sovietEdge,
+      supply: { g1: "isolated", g2: "isolated", g3: "outOfSupply" },
+    });
+    let r = engine.step(state, { type: "SupplyPhase" });
+    expect(r.state.germanSurrender).toEqual([{ hex: "0410", units: ["g1", "g2"] }]);
+    expect(r.state.units.g1.face).toBe("front");
+    expectMessage(engine.surrenderPending(r.state), "reject.surrender.pending", { hexes: ["0410"] });
+    expectMessage(rejected(engine.step(r.state, { type: "RunBotImpulse" }).events), "reject.surrender.pending", { hexes: ["0410"] });
+    expectMessage(rejected(engine.step(r.state, { type: "NextTurn" }).events), "reject.surrender.pending", { hexes: ["0410"] });
+    expectMessage(rejected(engine.step(r.state, { type: "SurrenderStep", unit: "g3" }).events), "reject.surrender.notPending", { unit: "g3" });
+
+    r = engine.step(r.state, { type: "SurrenderStep", unit: "g2" });
+    expect(r.events[0]).toEqual({ type: "GermanSurrendered", hex: "0410", unit: "g2", destroyed: true, auto: false });
+    expect(r.state.units.g2.at).toBe("outOfPlay");
+    expect(r.state.germanSurrender).toEqual([{ hex: "0410", units: ["g1", "g2"], removed: "g2" }]);
+    expect(engine.surrenderPending(r.state)).toBeNull();
+    expectMessage(rejected(engine.step(r.state, { type: "SurrenderStep", unit: "g1" }).events), "reject.surrender.notPending", { unit: "g1" });
+  });
+
+  it("13.23 Soviet surrender: the unit's last step lost, it is destroyed out of play (13.22)", () => {
+    const { engine, state } = setup({ units: [ger("g"), sov("s")], at: { g: "0410", s: "0409" }, hexes: sovietEdge, supply: { s: "isolated" } });
+    expect(engine.step(state, { type: "SupplyPhase" }).state.units.s.at).toBe("outOfPlay");
   });
 
   it("removes the markers of units back in supply; none on Game-turn 1", () => {

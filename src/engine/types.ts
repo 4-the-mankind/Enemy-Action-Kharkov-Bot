@@ -230,6 +230,12 @@ export interface GameState {
   forwardSupport?: string[];
   /** [GT 8+] Soviet support line chosen in step 4 of the Supply Phase (13.51). */
   supportLine?: SupportLine;
+  /**
+   * German surrender of this turn's Supply Phase (13.23, Q120): each isolated stack still cut off
+   * loses one step. `removed`: the unit that lost it (by itself when alone in the stack, `auto`);
+   * absent while the player has to choose. The game waits for every choice.
+   */
+  germanSurrender?: GermanSurrender[];
   /** Hexes with an Improved Position marker (14.2); the IP belongs to the units in the hex. */
   improvedPositions?: string[];
   /** Hexes with a Soviet garrison marker (15): village and VP hexes. */
@@ -277,6 +283,8 @@ export type Command =
   | { type: "MoveUnits"; units: string[]; to: Location; free?: boolean }
   /** One step lost: the counter flips (or its "R" counter comes in). The last step is lost with an elimination. */
   | { type: "RemoveStep"; unit: string }
+  /** 13.23: the unit of a surrendering German stack that loses its step (Q120). */
+  | { type: "SurrenderStep"; unit: string }
   | { type: "SetDispersed"; units: string[]; dispersed: boolean }
   | { type: "SetVictoryPoints"; vp: number }
   /** Moves a Soviet card to the discard pile, or back to the deck. */
@@ -435,6 +443,8 @@ type GameEventBody =
     heavyMud?: boolean;
   }
   | { type: "SupplyStatusSet"; units: string[]; status: SupplyMarker | "supplied" }
+  /** 13.23: a step of a surrendering German stack removed; `auto`: the stack had a single unit. Followed by the step loss. */
+  | { type: "GermanSurrendered"; hex: string; unit: string; destroyed: boolean; auto: boolean }
   | { type: "ForwardSupportSet"; hexes: string[] }
   /** A unit ended its move in an enemy town or city (14.1). */
   | { type: "TownCaptured"; hex: string; owner: "german" | "soviet" }
@@ -831,6 +841,9 @@ export interface Combat {
  * `placed`: a marker goes there; otherwise `reason` says which requirement failed. `removes`:
  * earlier garrisons that no longer meet the requirements once this one is placed.
  */
+/** A surrendering German stack (13.23): its isolated units still cut off, and the one that lost the step. */
+export interface GermanSurrender { hex: string; units: string[]; removed?: string; auto?: boolean }
+
 export interface GarrisonCheck { hex: string; step: 1 | 2; placed: boolean; reason: Message; removes?: string[] }
 
 /** Combat odds or a strength ratio as attack:defense levels (Q39): [3, 1], [1.5, 1], [1, 2]… */
