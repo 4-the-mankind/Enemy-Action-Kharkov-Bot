@@ -268,7 +268,9 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
   function onStep(state: GameState, events: GameEvent[], undo: boolean) {
     const activation = undo ? null : readActivation(events);
     const impulse = undo ? null : readImpulse(events, session.depth);
-    readings = readings.filter((r) => r.depth <= session.depth);
+    // A new turn: the bot has not played yet, the last impulse of the turn before goes.
+    const newTurn = !undo && events.some((e) => e.type === "TurnStarted");
+    readings = newTurn ? [] : readings.filter((r) => r.depth <= session.depth);
     if (impulse) readings = [impulse];
     else if (!undo && readings.length && events.some((e) => e.type === "CombatEnded"))
       readings.push(readImpulse(events, session.depth, readings[readings.length - 1])!);
@@ -279,7 +281,7 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       why.place(null);
       why.show(null);
       playCurrent();
-    } else if (current && (session.depth < current.depth || impulse)) {
+    } else if (current && (session.depth < current.depth || impulse || newTurn)) {
       // The activation was undone (or a new position loaded, or an impulse without one): its trails and slip go too.
       current = null;
       player.clear();
