@@ -28,6 +28,7 @@ import { mountReminders } from "./panels/reminders";
 import { mountLoadScreen } from "./panels/load-screen";
 import { mountMainMenu } from "./panels/main-menu";
 import { mountStartNotice } from "./panels/start-notice";
+import { mountSupplyNotice } from "./panels/supply-notice";
 import { mountTurnBar } from "./panels/turn-bar";
 import { mountTurnBanner } from "./panels/turn-banner";
 import { mountWhyPanel } from "./panels/why-panel";
@@ -124,7 +125,8 @@ async function init() {
   mountCardZoom();
   // A log line's "Why this move" opens right under it, in the Log tab.
   const log = mountLogPanel($("log"), session, (d, line) => { why.show(d); why.place(line, true); });
-  mountTurnBar($("turnBar"), $("tagsBar"), session, player, game.calendar);
+  const supplyNotice = mountSupplyNotice($("supplyNotice"), session);
+  mountTurnBar($("turnBar"), $("tagsBar"), session, player, game.calendar, supplyNotice);
 
   // The Combat tab (D18): enabled only during a combat, opened when one begins, closed after it.
   let hadCombat = false;

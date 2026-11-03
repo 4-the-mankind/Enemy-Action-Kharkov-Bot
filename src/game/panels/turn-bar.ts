@@ -1,7 +1,7 @@
 // Turn bar (§3bis A, task 4.6b) over the map: game-turn / 14 and its dates, the Soviet impulse,
 // the VP chip with the outcome label "if the VPs stay so" (18.35, Q85: grey when no check would
 // end the game, the levels in a slip on click, Q89), Kharkov's owner (slip on click), then Undo and Redo (Q117), "Run bot impulse" (ends your
-// German impulse, D14) and "Next turn" / "End the game".
+// German impulse, D14) and "Next turn" / "End the game", both waiting while the supply notice is open (Q119).
 // Under it, the tags bar (§3bis H, Q86): the state tags of the moment, and "Add event", the
 // German events only the app can play (Q77, Q87: moved here from the Bot tab).
 import type { GameState, GermanEventId, Outlook } from "../../engine/types";
@@ -12,6 +12,7 @@ import type { MovePlayer } from "../playback/move-player";
 import type { GameSession } from "../state/session";
 import { resultName } from "./log-panel";
 import { infoAttrs, mountInfoPop } from "./info-pop";
+import type { SupplyNotice } from "./supply-notice";
 import { infoSlip, tagChip } from "./tag-chip";
 import { msg, t } from "../../i18n/i18n";
 import { staticUrl } from "../../ui/static-url";
@@ -21,7 +22,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 /** Q77: the German events that act on what only the app holds; Air Interdiction names its marker. */
 const EVENTS: { id: GermanEventId; turns?: string }[] = [{ id: "stavkaConfused", turns: "5-6" }, { id: "okwExpedites", turns: "4" }, { id: "airInterdiction" }];
 
-export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: GameSession, player: MovePlayer, calendar: CalendarTurn[]) {
+export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: GameSession, player: MovePlayer, calendar: CalendarTurn[], supplyNotice: SupplyNotice) {
   const engine = session.engine;
   mountInfoPop();
   bar.innerHTML = `<div class="tb-turn"></div>
@@ -126,12 +127,13 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
     const pile = state.sovietCards?.drawPile.length ?? 0;
     // A Soviet impulse paused on a combat (4.5a): it goes on from the Combat tab.
     const paused = !!state.botImpulse;
-    runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing || paused;
-    runButton.title = lock ? t(lock) : t(!pile && state.started ? "bot.runTitle.pileEmpty" : "bot.runTitle.endsImpulse");
-    nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing || paused;
+    const reading = supplyNotice.open();
+    runButton.disabled = !!lock || !state.sovietCards || !pile || player.playing || paused || reading;
+    runButton.title = lock ? t(lock) : reading ? t("supplyNotice.waiting") : t(!pile && state.started ? "bot.runTitle.pileEmpty" : "bot.runTitle.endsImpulse");
+    nextButton.disabled = !!lock || !state.sovietCards || pile > 0 || player.playing || paused || reading;
     // The last turn ends the game (18.35).
     nextButton.textContent = t(state.turn >= LAST_TURN ? "bot.endGame" : "bot.nextTurn");
-    nextButton.title = pile ? t("bot.nextTitle.waitPile", { count: pile }) : t(state.turn >= LAST_TURN ? "bot.nextTitle.endGame" : "bot.nextTitle.ready");
+    nextButton.title = reading ? t("supplyNotice.waiting") : pile ? t("bot.nextTitle.waitPile", { count: pile }) : t(state.turn >= LAST_TURN ? "bot.nextTitle.endGame" : "bot.nextTitle.ready");
 
     const tags = state.started ? engine.tags(state) : [];
     tagList.innerHTML = tags.length ? tags.map(tagChip).join("") : `<li class="tags-none">${t(state.started ? "tag.none" : "tag.beforeStart")}</li>`;
@@ -140,5 +142,6 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
 
   session.subscribe((state, _events, undone) => { if (undone) reason.textContent = ""; render(state); });
   player.onPlaying(() => render(session.state));
+  supplyNotice.onChange(() => render(session.state));
   render(session.state);
 }

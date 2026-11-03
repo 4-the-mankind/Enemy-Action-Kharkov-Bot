@@ -428,6 +428,19 @@ body:not(.menu-open) .main-menu { display: none; }
 .start-notice .btn { display: block; pointer-events: auto; margin: 12px auto 0; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
 .start-notice .btn:hover { background: var(--feldgrau); }
 
+/* Supply notice (Q119): the start notice's slip, its steps checked one every 0.4 s, then its button. */
+.supply-notice { width: min(460px, calc(100% - 32px)); }
+.supply-notice > p { margin-bottom: 6px; }
+.supply-notice ul { margin: 8px 0 0; padding: 0; list-style: none; font-size: 0.88rem; line-height: 1.4; }
+.supply-notice li { position: relative; padding: 3px 0 3px 22px; border-top: 1px solid rgb(38 46 41 / 0.12); }
+.supply-notice li:first-child { border-top: 0; }
+.supply-notice li::before { content: "✓"; position: absolute; left: 2px; top: 3px; font-weight: 700; color: var(--feldgrau); }
+.supply-notice li, .supply-notice .btn { animation: supply-step 0.25s ease both; animation-delay: calc(var(--i) * 0.4s); }
+@keyframes supply-step { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .supply-notice li, .supply-notice .btn { animation: none; }
+}
+
 /* "Your turn" banner: a band across the middle of the map, faded in and out (2 s), clicks pass through. */
 .turn-banner {
   position: absolute; top: 50%; left: 0; right: 0; z-index: 7; transform: translateY(-50%);

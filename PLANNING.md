@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-11-03 (5.8 faite, Q115-Q118 réglées).
+Mise à jour : 2026-11-03 (5.8 et 5.9 faites, Q115-Q119 réglées).
 
 ---
 
@@ -364,6 +364,11 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
   - **Redo** (Q117) : Ctrl+Y et Ctrl+Maj+Z, bouton « Redo » à côté d'Undo dans la barre A et au pied de la feuille de combat ; rejoue le pas annulé avec ses events (journal, vues). Effacé par toute commande qui change l'état (pas par une commande refusée) et par un chargement ; pas dans la sauvegarde (Q118).
   - **Tests** `tests/game/session.test.ts` (6) ; test de chargement de `save-file.test.ts` adapté (la limite revient après le rejeu). 467 tests verts. Vérifié dans le navigateur intégré : Undo / Redo de la mise en place, Undo bloqué après Start et après « Run bot impulse », Undo puis Ctrl+Maj+Z sur une étape de la feuille de combat soviétique, aucune erreur console.
 
+- [x] **5.9** Encart de la Supply Phase (demande du dev, 2026-11-03 ; Q119) — IA (Opus 5.5, moyen). **Fait (2026-11-03)**, **à vérifier par le dev** (`/?save=turn4end` → Next turn).
+  - **Encart** (`src/game/panels/supply-notice.ts`) : après « Next turn », la feuille de l'encart de démarrage revient au milieu de la carte, « Turn n · Supply Phase », une ligne par étape de 4.0 III, cochées une à une (0,4 s), puis le bouton « Continue to command phase ». Lignes : [GT 4+] garrisons placées (15.1) ; supply allemand ; supply soviétique (« not checked » avant le GT 4) ; [GT 8+] support line ; [GT 7] objectifs de front retirés (9.12). Par camp : changements du tour (+OOS, +isolated, back in supply, reddition 13.23 — cases à traiter pour les piles allemandes) puis total des marqueurs sur la carte après la phase (Q119 option 2). Heavy mud : mention 18.34, seulement les marqueurs retirés. Pas d'encart au GT 1 ni à la fin de partie. Sans animation si « réduire les animations ».
+  - **Blocage** (Q119, interface seulement) : tant que l'encart est ouvert, « Run bot impulse » et « Next turn » sont grisés, avec la raison en infobulle ; fermé par son bouton, un Undo ou un chargement ; pas dans l'état du jeu ni dans la sauvegarde.
+  - **Résumé** `src/game/state/supply-summary.ts` (`supplySummary`, lu des events de `NextTurn`) ; tests `tests/game/supply-summary.test.ts` (9). 476 tests verts. Vérifié dans le navigateur intégré (`turn4end` → turn 5 : 16 garrisons, 2 OOS de chaque côté ; boutons grisés puis libérés).
+
 ### Phase 6 — Optionnel
 
 - [ ] **6.1** Assistant IA (serveur MCP) qui explique les décisions du bot ou répond aux questions de règles à partir du journal et de `docs/` — IA (Sonnet 5, moyen)
@@ -503,6 +508,7 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
 | Q116 | Pendant un combat soviétique : (1) « Run bot impulse » ne s'annule jamais, l'Undo s'arrête à l'ouverture de la feuille ; (2) l'Undo remonte avant « Run bot impulse » tant que l'impulsion n'est pas finie. Recommandé : 1. | **réglée** (2026-11-03, dev) : option 1. |
 | Q117 | Redo : (a) Ctrl+Y et Ctrl+Maj+Z / Ctrl+Y seul / Ctrl+Maj+Z seul ; (b) bouton dans la barre A et la feuille de combat / raccourci seul. Recommandé : a1, b1. | **réglée** (2026-11-03, dev) : a1, b1. |
 | Q118 | Les pas annulés (Redo) vont-ils dans la sauvegarde ? (1) non ; (2) oui, nouveau format. Recommandé : 1. | **réglée** (2026-11-03, dev) : option 1. |
+| Q119 | Encart de la Supply Phase (tâche 5.9) : (a) bandeau qui disparaît / progression liée aux marqueurs / progression à rythme fixe ; (b) nombres : changements du tour / changements + total après la phase / total seul ; (c) encart réutilisé : encart de démarrage / feuille de fin de partie ; (d) blocage : interface seulement / phase dans l'état du jeu / aucun. Recommandé : a2, b2, c1, d1. | **réglée** (2026-11-03, dev) : progression à rythme fixe avec les nombres, puis encart de démarrage réutilisé avec « Continue to command phase » (b2, c1, d1). |
 | Q58 | NKVD Operations : « as if combat occurred… Do not reduce hits in a city/town hex ». Un IP sur la pile ciblée retire-t-il un coup (et l'IP), comme en combat ? | **réglée** (2026-10-14, dev) : oui, seules town et city ne réduisent pas les coups ; l'IP prend le premier coup et disparaît (12.51), affiché sur la feuille. |
 | Q10 | La cible de front (case VP/village) et la case logistique (V/S) sont-elles indépendantes ?                                                                   | **réglée** : oui, indépendantes. N'importe quelle case peut être case logistique, indépendamment du reste. Les villages (et les town/city) peuvent être cible exclusive d'un front ou des deux ; une même case peut être à la fois cible de front et case logistique.                                                                                     |
 
@@ -660,3 +666,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-20** — Tâche 5.6 ajoutée (demande du dev) : vérificateur de sauvegarde d'une partie entière.
 - **2026-10-28** — Tâche 5.7 (déploiement GitHub Pages) ajoutée et faite : dépôt public, branche `release` déployée par GitHub Actions, chemins de base, copie de `data/` et `assets/`, PDF déplacé dans `scans/` (Q111-Q114).
 - **2026-11-03** — Tâche 5.8 ajoutée et faite (Q115-Q118) : Undo limité au début de l'impulsion allemande en cours, Redo (Ctrl+Y, Ctrl+Maj+Z, boutons) ; 467 tests verts.
+- **2026-11-03** — Tâche 5.9 ajoutée et faite (Q119) : encart de la Supply Phase après « Next turn » (étapes cochées, changements et total des marqueurs par camp, « Continue to command phase ») ; 476 tests verts.
