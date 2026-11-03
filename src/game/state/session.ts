@@ -1,5 +1,7 @@
-// The game session on the UI side (D12): current state, past states for undo, and the
-// events of each step for the views to play. No rule here: everything goes through step.
+// The game session on the UI side (D12): current state, past states for undo, the steps undone
+// for redo, and the events of each step for the views to play. No rule here: everything goes
+// through step. Undo stops at the start of the German impulse under way (Q115): it never takes
+// back Start, a new turn, nor a Soviet impulse once run.
 import type { Engine } from "../../engine/engine";
 import { emptyState, type Command, type GameEvent, type GameState } from "../../engine/types";
 import type { ReplayStep } from "./save-file";
@@ -7,12 +9,17 @@ import type { ReplayStep } from "./save-file";
 /** `undo` is true when the state went back one step (no events then). */
 export type SessionListener = (state: GameState, events: GameEvent[], undo: boolean) => void;
 
+/** Q115: commands that open a German impulse (or play the bot's), never undone. */
+const UNDO_FLOOR = new Set<Command["type"]>(["StartGame", "NextTurn", "RunBotImpulse", "ContinueBotImpulse"]);
+
 export class GameSession {
   private current: GameState = emptyState();
   /** The position the history starts from (D16: a save keeps it with the commands). */
   private first: GameState = this.current;
   /** Each state change: the state before it, the command that made it and its events (D16 keeps the commands). */
   private readonly history: ReplayStep[] = [];
+  /** The steps undone, the last one undone at the end, with the state they reached (Q118: not saved). */
+  private readonly undone: { step: ReplayStep; state: GameState }[] = [];
   /** The state written to the last save file, or loaded: the game has changed since when it is no longer current. */
   private saved: GameState = this.current;
   private readonly listeners: SessionListener[] = [];
@@ -45,6 +52,7 @@ export class GameSession {
     if (state !== this.current) {
       this.history.push({ state: this.current, command, events });
       this.current = state;
+      this.undone.length = 0;
     }
     this.emit(events, false);
     return events;
@@ -57,18 +65,45 @@ export class GameSession {
   restore(start: GameState, steps: ReplayStep[], state: GameState) {
     this.first = start;
     this.history.splice(0, this.history.length, ...steps);
+    this.undone.length = 0;
     this.current = state;
     this.saved = state;
     for (const f of this.restored) f();
     this.emit([], false);
   }
 
-  canUndo(): boolean { return this.history.length > 0; }
+  /**
+   * Number of steps Undo never takes back (Q115-Q116): up to the last Start, Next turn, Run bot
+   * impulse or Continue. The Next turn that ended the game is not one: "Undo the last turn" stays.
+   */
+  get undoFloor(): number {
+    for (let i = this.history.length - 1; i >= 0; i--) {
+      const after = this.history[i + 1]?.state ?? this.current;
+      if (UNDO_FLOOR.has(this.history[i].command.type) && !after.result) return i + 1;
+    }
+    return 0;
+  }
+
+  canUndo(): boolean { return this.history.length > this.undoFloor; }
 
   undo() {
     if (!this.canUndo()) return;
-    this.current = this.history.pop()!.state;
+    const step = this.history.pop()!;
+    this.undone.push({ step, state: this.current });
+    this.current = step.state;
     this.emit([], true);
+  }
+
+  /** Redo is possible until a command changes the state (Q117). */
+  canRedo(): boolean { return this.undone.length > 0; }
+
+  /** Takes the last step undone again, with its events (the log and the views play them again). */
+  redo() {
+    const last = this.undone.pop();
+    if (!last) return;
+    this.history.push(last.step);
+    this.current = last.state;
+    this.emit(last.step.events, false);
   }
 
   subscribe(f: SessionListener) { this.listeners.push(f); }

@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-10-19 (5.2 faite, Q90-Q101 réglées).
+Mise à jour : 2026-11-03 (5.8 faite, Q115-Q118 réglées).
 
 ---
 
@@ -359,6 +359,10 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
   - **PDF du livret** (Q111) : déplacé dans `scans/` (racine, ignoré par git) ; il reste dans l'historique git (Q114).
   - **Réglages GitHub (dev)** : *Settings → Pages → Source : GitHub Actions* ; *Settings → Environments → github-pages → Deployment branches* : autoriser `release`.
   - Vérifié avec `vite preview` (config `release-preview` de `.claude/launch.json`, port 5173) : jeu (mise en place du tour 1, 142 pions), index des unités, cartes soviétiques, aucune requête en erreur ; serveur de dev vérifié ensuite. 461 tests verts.
+- [x] **5.8** Limite de l'Undo et Redo (demande du dev, 2026-11-03 ; Q115-Q118) — IA (Opus 5.5, moyen). **Fait (2026-11-03).**
+  - **Limite** (`GameSession.undoFloor`, `src/game/state/session.ts`) : l'Undo ne remonte jamais avant le dernier `StartGame`, `NextTurn`, `RunBotImpulse` ou `ContinueBotImpulse` (Q115, Q116) ; calculée sur l'historique, elle tient après « Load save ». Exception : le `NextTurn` qui a fini la partie reste annulable (« Undo the last turn »). Mise en place avant Start : Undo illimité. Bouton Undo grisé à la limite, avec une bulle qui l'explique.
+  - **Redo** (Q117) : Ctrl+Y et Ctrl+Maj+Z, bouton « Redo » à côté d'Undo dans la barre A et au pied de la feuille de combat ; rejoue le pas annulé avec ses events (journal, vues). Effacé par toute commande qui change l'état (pas par une commande refusée) et par un chargement ; pas dans la sauvegarde (Q118).
+  - **Tests** `tests/game/session.test.ts` (6) ; test de chargement de `save-file.test.ts` adapté (la limite revient après le rejeu). 467 tests verts. Vérifié dans le navigateur intégré : Undo / Redo de la mise en place, Undo bloqué après Start et après « Run bot impulse », Undo puis Ctrl+Maj+Z sur une étape de la feuille de combat soviétique, aucune erreur console.
 
 ### Phase 6 — Optionnel
 
@@ -495,6 +499,10 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
 | Q112 | Contenu du build de production : (1) page de jeu seule ; (2) page de jeu et outils units-index et soviet-cards. Recommandé : 1. | **réglée** (2026-10-28, dev) : option 2. |
 | Q113 | Où ranger le PDF du livret hors du dépôt : (1) `assets/scans/` (exclu de la copie au build) ; (2) nouveau `scans/` à la racine, ignoré par git. Recommandé : 2. | **réglée** (2026-10-28, dev) : option 2. |
 | Q114 | Le PDF reste-t-il dans l'historique git : (1) oui ; (2) réécriture de l'historique et push forcé. Pas de recommandation (choix sur les droits du livret). | **réglée** (2026-10-28, dev) : option 1. Tâche de déploiement : nouvelle 5.7 (et non 5.3), branche `release` déployée. |
+| Q115 | Où l'Undo s'arrête-t-il ? (1) à la fin d'une impulsion soviétique seulement ; (2) aussi après « Next turn » et « Start » ; (3) comme 2, mais après le premier déplacement ou la première attaque allemande du tour. Recommandé : 2. | **réglée** (2026-11-03, dev) : option 2 (tâche 5.8). |
+| Q116 | Pendant un combat soviétique : (1) « Run bot impulse » ne s'annule jamais, l'Undo s'arrête à l'ouverture de la feuille ; (2) l'Undo remonte avant « Run bot impulse » tant que l'impulsion n'est pas finie. Recommandé : 1. | **réglée** (2026-11-03, dev) : option 1. |
+| Q117 | Redo : (a) Ctrl+Y et Ctrl+Maj+Z / Ctrl+Y seul / Ctrl+Maj+Z seul ; (b) bouton dans la barre A et la feuille de combat / raccourci seul. Recommandé : a1, b1. | **réglée** (2026-11-03, dev) : a1, b1. |
+| Q118 | Les pas annulés (Redo) vont-ils dans la sauvegarde ? (1) non ; (2) oui, nouveau format. Recommandé : 1. | **réglée** (2026-11-03, dev) : option 1. |
 | Q58 | NKVD Operations : « as if combat occurred… Do not reduce hits in a city/town hex ». Un IP sur la pile ciblée retire-t-il un coup (et l'IP), comme en combat ? | **réglée** (2026-10-14, dev) : oui, seules town et city ne réduisent pas les coups ; l'IP prend le premier coup et disparaît (12.51), affiché sur la feuille. |
 | Q10 | La cible de front (case VP/village) et la case logistique (V/S) sont-elles indépendantes ?                                                                   | **réglée** : oui, indépendantes. N'importe quelle case peut être case logistique, indépendamment du reste. Les villages (et les town/city) peuvent être cible exclusive d'un front ou des deux ; une même case peut être à la fois cible de front et case logistique.                                                                                     |
 
@@ -651,3 +659,4 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-20** — Skill `golden-test` écrite ; tâche 4.8 faite.
 - **2026-10-20** — Tâche 5.6 ajoutée (demande du dev) : vérificateur de sauvegarde d'une partie entière.
 - **2026-10-28** — Tâche 5.7 (déploiement GitHub Pages) ajoutée et faite : dépôt public, branche `release` déployée par GitHub Actions, chemins de base, copie de `data/` et `assets/`, PDF déplacé dans `scans/` (Q111-Q114).
+- **2026-11-03** — Tâche 5.8 ajoutée et faite (Q115-Q118) : Undo limité au début de l'impulsion allemande en cours, Redo (Ctrl+Y, Ctrl+Maj+Z, boutons) ; 467 tests verts.

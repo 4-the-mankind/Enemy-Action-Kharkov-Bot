@@ -240,7 +240,8 @@ async function init() {
     }
     // No game shortcut behind the main menu.
     if (document.body.classList.contains("menu-open")) return;
-    if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) { e.preventDefault(); session.undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) { e.preventDefault(); if (e.shiftKey) session.redo(); else session.undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y")) { e.preventDefault(); session.redo(); return; }
     if (e.key === "0") view.resetView();
     else if (e.key in PAN_KEYS && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const [dx, dy] = PAN_KEYS[e.key], step = e.shiftKey ? 240 : 80;

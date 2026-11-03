@@ -1,6 +1,6 @@
 // Turn bar (§3bis A, task 4.6b) over the map: game-turn / 14 and its dates, the Soviet impulse,
 // the VP chip with the outcome label "if the VPs stay so" (18.35, Q85: grey when no check would
-// end the game, the levels in a slip on click, Q89), Kharkov's owner (slip on click), then Undo, "Run bot impulse" (ends your
+// end the game, the levels in a slip on click, Q89), Kharkov's owner (slip on click), then Undo and Redo (Q117), "Run bot impulse" (ends your
 // German impulse, D14) and "Next turn" / "End the game".
 // Under it, the tags bar (§3bis H, Q86): the state tags of the moment, and "Add event", the
 // German events only the app can play (Q77, Q87: moved here from the Bot tab).
@@ -29,6 +29,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
     <div class="tb-owner"></div>
     <div class="tb-actions">
       <button type="button" class="btn switch" data-action="undo" aria-keyshortcuts="Control+Z" title="${esc(t("page.undoHint"))}">${t("page.undo")} <span class="keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></span></button>
+      <button type="button" class="btn switch" data-action="redo" aria-keyshortcuts="Control+Y Control+Shift+Z" title="${esc(t("page.redoHint"))}">${t("page.redo")} <span class="keys"><kbd>Ctrl</kbd> + <kbd>Y</kbd></span></button>
       <button type="button" class="btn ink" data-action="impulse">${t("bot.runImpulse")}</button>
       <button type="button" class="btn switch" data-action="next-turn">${t("bot.nextTurn")}</button>
     </div>
@@ -36,6 +37,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
   const turn = bar.querySelector<HTMLElement>(".tb-turn")!, vp = bar.querySelector<HTMLElement>(".tb-vp")!;
   const kharkov = bar.querySelector<HTMLElement>(".tb-owner")!, reason = bar.querySelector<HTMLElement>(".tb-reason")!;
   const undo = bar.querySelector<HTMLButtonElement>("[data-action=undo]")!;
+  const redo = bar.querySelector<HTMLButtonElement>("[data-action=redo]")!;
   const runButton = bar.querySelector<HTMLButtonElement>("[data-action=impulse]")!;
   const nextButton = bar.querySelector<HTMLButtonElement>("[data-action=next-turn]")!;
 
@@ -54,6 +56,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
   bar.addEventListener("click", (e) => {
     const action = (e.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
     if (action === "undo") { reason.textContent = ""; session.undo(); }
+    else if (action === "redo") { reason.textContent = ""; session.redo(); }
     else if (action === "impulse") send({ type: "RunBotImpulse" });
     else if (action === "next-turn") send({ type: "NextTurn" });
   });
@@ -117,6 +120,8 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
     kharkov.innerHTML = `<span class="tb-kharkov ${owner}"${infoAttrs(infoSlip(marker, name, t("turnBar.kharkovTitle")))}>${marker}${esc(name)}</span>`;
 
     undo.disabled = !session.canUndo();
+    undo.title = t(session.canUndo() || !session.depth ? "page.undoHint" : "page.undoFloor");
+    redo.disabled = !session.canRedo();
     const lock = engine.locked(state);
     const pile = state.sovietCards?.drawPile.length ?? 0;
     // A Soviet impulse paused on a combat (4.5a): it goes on from the Combat tab.

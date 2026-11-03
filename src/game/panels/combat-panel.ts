@@ -556,6 +556,7 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession, plane:
       <ol class="steps">${steps}</ol>
       <footer class="b-foot"><div class="foot-row">` +
         `<button type="button" class="undo" data-undo aria-keyshortcuts="Control+Z" title="${esc(t("page.undoHint"))}"${session.canUndo() ? "" : " disabled"}>${t("page.undo")}</button>` +
+        `<button type="button" class="undo" data-redo aria-keyshortcuts="Control+Y Control+Shift+Z" title="${esc(t("page.redoHint"))}"${session.canRedo() ? "" : " disabled"}>${t("page.redo")}</button>` +
         (a ? `<button type="button" class="act" data-act${a.ready ? "" : " disabled"}>${esc(a.label)}</button>` : "") + `</div>` +
         (german && ["tactics", "activation", "chits", "hits"].includes(c.stage) ? `<button type="button" class="cancel-attack" data-cancel-attack>${t("combatSheet.germanAttack.cancel")}</button>` : "") +
         `<p class="combat-reason" role="status">${reason ? tx(reason) : ""}</p></footer>
@@ -590,6 +591,7 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession, plane:
       return;
     }
     if (el.closest("[data-undo]")) { reason = null; session.undo(); return; }
+    if (el.closest("[data-redo]")) { reason = null; session.redo(); return; }
     if (el.closest("[data-cancel-attack]")) { send({ type: "CancelAttack" }); return; }
     const chit = el.closest<HTMLButtonElement>("[data-chits]");
     if (chit) {

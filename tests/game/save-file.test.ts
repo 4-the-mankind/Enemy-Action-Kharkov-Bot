@@ -61,9 +61,14 @@ describe("Save and load (D16)", () => {
     loaded.restore(save.start, r.steps, r.state);
     expect(loaded.dirty).toBe(false);
     expect(loaded.depth).toBe(4);
-    loaded.undo();
-    expect(sameState(loaded.state, session.commandsSince(0).slice(0, 3).reduce((s, c) => engine.step(s, c).state, emptyState()))).toBe(true);
+    // The Undo floor comes back too (Q116): the bot's impulse is not taken back.
+    expect(loaded.undoFloor).toBe(4);
+    expect(loaded.canUndo()).toBe(false);
+    loaded.dispatch({ type: "SetVictoryPoints", vp: loaded.state.vp + 1 });
     expect(loaded.dirty).toBe(true);
+    loaded.undo();
+    expect(sameState(loaded.state, session.commandsSince(0).reduce((s, c) => engine.step(s, c).state, emptyState()))).toBe(true);
+    expect(loaded.dirty).toBe(false);
   });
 
   it("tells a save the current version does not replay the same way", async () => {
