@@ -16,6 +16,11 @@
 - **Serveur de dev : port 5173 uniquement.** Le dev ne peut ouvrir que ce port dans son navigateur ; ne pas lancer de serveur sur un autre port. Si l'instance du 5173 sert du code périmé (modification non prise en compte), l'IA peut la redémarrer (arrêter le processus `vite` en cours, puis relancer la configuration `map` de `.claude/launch.json`) pour mettre à jour la page du dev.
 - Modèle, effort et économie de tokens : `PLANNING.md` §7.
 - Git : ne commiter que sur demande du dev.
+- **Notes de version** : dans `release.md`, pas dans `PLANNING.md` (les corrections de bugs n'y vont pas).
+  - Une section par version, au nom de la version en cours (ex. `0.2.0-SNAPSHOT`) ; si le projet est encore à la version précédente, monter la version du projet.
+  - En anglais.
+  - Seulement les bugs corrigés et les améliorations : pas de décisions, d'options écartées ni de justification.
+  - Pas de référence interne (ex. « Bug 2 ») : chaque entrée décrit ce que voit le joueur.
 - **Ne JAMAIS commencer sans le « go » explicite du dev** : aucune édition de fichier (code, données, `PLANNING.md`…) ni aucun code avant ce go. Répondre d'abord à **toutes** ses questions, et reposer clairement toute question qu'il n'a pas comprise, sans trancher à sa place. Une réponse à une question n'est pas un go.
 - **Questions et choix proposés au dev** : chaque question finit par un point d'interrogation et se comprend sans relire la conversation. Elle donne, dans l'ordre :
   1. le contexte : règle citée avec son titre, situation de jeu, exemple chiffré si utile ;

@@ -44,7 +44,7 @@ kbd {
 
 /* The middle column: turn bar (A), tags bar (H), then the map. */
 .center { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100vh; }
-.map-area { position: relative; flex: 1; min-width: 0; min-height: 0; }
+.map-area { position: relative; flex: 1; min-width: 0; min-height: 0; container-type: inline-size; }
 
 /* ---------- Turn bar (A) and tags bar (H), task 4.6b ---------- */
 
@@ -427,6 +427,28 @@ body:not(.menu-open) .main-menu { display: none; }
 .start-notice p { margin: 0; font-size: 0.9rem; color: var(--slip-dim); }
 .start-notice .btn { display: block; pointer-events: auto; margin: 12px auto 0; padding: 7px 28px; font-weight: 600; color: var(--slip); background: var(--slip-ink); border-color: var(--slip-ink); }
 .start-notice .btn:hover { background: var(--feldgrau); }
+
+/* "Your turn" banner: a band across the middle of the map, faded in and out (2 s), clicks pass through. */
+.turn-banner {
+  position: absolute; top: 50%; left: 0; right: 0; z-index: 7; transform: translateY(-50%);
+  padding: 20px 16px 16px; text-align: center; pointer-events: none; opacity: 0;
+  color: var(--paper); background: rgb(38 46 41 / 0.78);
+  border-block: 2px solid var(--stab-red); backdrop-filter: blur(2px);
+}
+.turn-banner[hidden] { display: none; }
+.turn-banner.showing { animation: turn-banner 2s ease forwards; }
+.turn-banner p { margin: 0; }
+.turn-banner-title { font-size: clamp(1.4rem, 9cqi, 4rem); white-space: nowrap; font-weight: 700; line-height: 1; letter-spacing: 0.12em; text-transform: uppercase; }
+.turn-banner-sub { margin-top: 8px; font-size: clamp(0.8rem, 2.4cqi, 1.05rem); color: var(--paper-dim); letter-spacing: 0.04em; }
+@keyframes turn-banner {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.96); }
+  20% { opacity: 1; transform: translateY(-50%) scale(1); }
+  70% { opacity: 1; transform: translateY(-50%) scale(1); }
+  100% { opacity: 0; transform: translateY(-50%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes turn-banner { 0%, 90% { opacity: 1; transform: translateY(-50%); } 100% { opacity: 0; transform: translateY(-50%); } }
+}
 
 /* Loading screen (task 5.2): the same slip while a save is replayed; the start notice steps aside. */
 .load-screen progress { display: block; width: 100%; height: 8px; margin-top: 10px; accent-color: var(--stab-red); }

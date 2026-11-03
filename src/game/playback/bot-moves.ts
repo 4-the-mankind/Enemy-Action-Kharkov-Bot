@@ -55,6 +55,7 @@ export class BotMovePlayer {
   private timers: number[] = [];
   private running: Animation[] = [];
   private held: SVGGElement[] = [];
+  private readonly idleListeners: (() => void)[] = [];
   /** Moves waiting for the activation's own moves to end. */
   private waiting: { moves: BotMove[]; state: GameState } | null = null;
 
@@ -80,8 +81,15 @@ export class BotMovePlayer {
     else this.run(moves, state);
   }
 
+  /** Moves of the last step still to play or playing. */
+  get busy(): boolean { return this.waiting !== null || this.timers.length > 0; }
+
+  /** Called when the moves of a step are all played (or landed at once). */
+  onIdle(f: () => void) { this.idleListeners.push(f); }
+
   /** Lands everything at once (an undo, another step). */
   stop() {
+    const was = this.busy;
     this.waiting = null;
     this.timers.forEach(clearTimeout);
     this.timers = [];
@@ -90,6 +98,7 @@ export class BotMovePlayer {
     for (const g of this.held) { g.style.transform = ""; g.style.opacity = ""; }
     this.held = [];
     this.ghosts.innerHTML = "";
+    if (was) this.idleListeners.forEach((f) => f());
   }
 
   private counter(id: string) { return this.units.querySelector<SVGGElement>(`[data-unit="${CSS.escape(id)}"]`); }

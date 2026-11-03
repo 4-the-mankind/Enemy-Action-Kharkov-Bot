@@ -6,7 +6,7 @@ Fichier de pilotage du projet, lu par l'IA en début de session et tenu à jour 
 **Responsable** : `IA` / `Dev` (le développeur humain) / `IA+Dev`.
 **Charge IA** : léger · moyen · lourd.
 
-Mise à jour : 2026-11-03 (5.8 faite, Q117 réglée).
+Mise à jour : 2026-10-19 (5.2 faite, Q90-Q101 réglées).
 
 ---
 
@@ -359,7 +359,6 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
   - **PDF du livret** (Q111) : déplacé dans `scans/` (racine, ignoré par git) ; il reste dans l'historique git (Q114).
   - **Réglages GitHub (dev)** : *Settings → Pages → Source : GitHub Actions* ; *Settings → Environments → github-pages → Deployment branches* : autoriser `release`.
   - Vérifié avec `vite preview` (config `release-preview` de `.claude/launch.json`, port 5173) : jeu (mise en place du tour 1, 142 pions), index des unités, cartes soviétiques, aucune requête en erreur ; serveur de dev vérifié ensuite. 461 tests verts.
-- [x] **5.8** Bandeau « Your turn » à la fin de l'impulsion soviétique (demande du dev, 2026-11-03 ; Q117) — IA (Opus 5.5, moyen). **Fait (2026-11-03)**, **à vérifier par le dev** (partie neuve : Start, Run bot impulse, finir les combats) : bandeau pleine largeur au milieu de la carte (feldgrau semi-opaque, filets rouges), « YOUR TURN » en grand, ligne « Soviet impulse over » ou, pioche soviétique vide, « Soviet draw pile empty: play your last impulses (4.0 IV.3) » ; fondu d'entrée et de sortie, 2 s en tout, sans bloquer la carte. Affiché une fois les counters du bot arrivés (activation, mouvements après combat, ou Skip) ; rien pendant un combat en attente (Q117 b), en fin de partie, après Undo ou chargement. Fichiers : `panels/turn-banner.ts`, `playback/bot-moves.ts` (`busy`, `onIdle`), `main.ts`, `index.html`, `style.css` (`.map-area` en `container-type: inline-size` : le texte suit la largeur de la carte), `en.json` (`turnBanner.*`). Vérifié dans le navigateur intégré (deux combats puis fin d'impulsion ; carte étroite et large ; aucune erreur console). 461 tests verts.
 
 ### Phase 6 — Optionnel
 
@@ -496,7 +495,6 @@ Chaque zone deviendra un module de `src/game/panels/` ; `main.ts` ne fait que le
 | Q112 | Contenu du build de production : (1) page de jeu seule ; (2) page de jeu et outils units-index et soviet-cards. Recommandé : 1. | **réglée** (2026-10-28, dev) : option 2. |
 | Q113 | Où ranger le PDF du livret hors du dépôt : (1) `assets/scans/` (exclu de la copie au build) ; (2) nouveau `scans/` à la racine, ignoré par git. Recommandé : 2. | **réglée** (2026-10-28, dev) : option 2. |
 | Q114 | Le PDF reste-t-il dans l'historique git : (1) oui ; (2) réécriture de l'historique et push forcé. Pas de recommandation (choix sur les droits du livret). | **réglée** (2026-10-28, dev) : option 1. Tâche de déploiement : nouvelle 5.7 (et non 5.3), branche `release` déployée. |
-| Q117 | Signal de fin de l'impulsion soviétique : a) présentation (toast, popup, barre de tour, combinaison, ou bandeau central semi-opaque proposé par le dev) ; b) message distinct (ambre) pour un combat en attente ; c) durée. Recommandation : bandeau pleine largeur, message ambre, 3 s. | **réglée** (2026-11-03, dev) : a) bandeau pleine largeur ; b) non : rien pendant un combat en attente, le bandeau vient à la fin de l'impulsion ; c) 2 s. Tâche 5.8. |
 | Q58 | NKVD Operations : « as if combat occurred… Do not reduce hits in a city/town hex ». Un IP sur la pile ciblée retire-t-il un coup (et l'IP), comme en combat ? | **réglée** (2026-10-14, dev) : oui, seules town et city ne réduisent pas les coups ; l'IP prend le premier coup et disparaît (12.51), affiché sur la feuille. |
 | Q10 | La cible de front (case VP/village) et la case logistique (V/S) sont-elles indépendantes ?                                                                   | **réglée** : oui, indépendantes. N'importe quelle case peut être case logistique, indépendamment du reste. Les villages (et les town/city) peuvent être cible exclusive d'un front ou des deux ; une même case peut être à la fois cible de front et case logistique.                                                                                     |
 
@@ -653,4 +651,3 @@ L'effort maximal n'est utile que là où une erreur de raisonnement coûte cher 
 - **2026-10-20** — Skill `golden-test` écrite ; tâche 4.8 faite.
 - **2026-10-20** — Tâche 5.6 ajoutée (demande du dev) : vérificateur de sauvegarde d'une partie entière.
 - **2026-10-28** — Tâche 5.7 (déploiement GitHub Pages) ajoutée et faite : dépôt public, branche `release` déployée par GitHub Actions, chemins de base, copie de `data/` et `assets/`, PDF déplacé dans `scans/` (Q111-Q114).
-- **2026-11-03** — Tâche 5.8 (demande du dev, Q117) : bandeau « Your turn » à la fin de l'impulsion soviétique, après l'animation des counters ; rien pendant un combat en attente. Vérifié dans le navigateur. 461 tests verts.

@@ -29,6 +29,7 @@ import { mountLoadScreen } from "./panels/load-screen";
 import { mountMainMenu } from "./panels/main-menu";
 import { mountStartNotice } from "./panels/start-notice";
 import { mountTurnBar } from "./panels/turn-bar";
+import { mountTurnBanner } from "./panels/turn-banner";
 import { mountWhyPanel } from "./panels/why-panel";
 import { BotMovePlayer, readBotMoves } from "./playback/bot-moves";
 import { MovePlayer } from "./playback/move-player";
@@ -141,6 +142,8 @@ async function init() {
     hadCombat = has;
     combatPlane.render(state);
   });
+
+  mountTurnBanner($("turnBanner"), session, player, botMoves);
 
   session.subscribe((state, events, undone) => {
     const setUp = events.find((e) => e.type === "SetUpApplied");

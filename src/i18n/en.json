@@ -1182,6 +1182,11 @@
       "button": "Start"
     }
   },
+  "turnBanner": {
+    "title": "Your turn",
+    "impulseOver": "Soviet impulse over",
+    "pileEmpty": "Soviet draw pile empty: play your last impulses (4.0 IV.3)"
+  },
   "reminder": {
     "until": {
       "done": "From {{card}}, turn {{turn}}.",
