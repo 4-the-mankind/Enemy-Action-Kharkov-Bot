@@ -68,12 +68,15 @@ describe("Soviet attack on 1802, turn 1 (the attack found in 4.4, the combat she
 
   it("the sheet: chit situations and the German tactics that may be played", () => {
     const v = engine.combat.view(paused.state)!;
-    const holds = v.situations.filter((x) => x.applies).map((x) => x.text.key);
+    const holds = v.situations.filter((x) => x.applies).map((x) => x.text.key + (x.text.params?.ratio ? ` ${x.text.params.ratio}` : ""));
+    // 8 to 4: the ratios of the chits at 2:1 (1.5 and 2 or more, below 3 and 4).
     expect(holds).toEqual([
-      "combat.situation.aboveOne", "combat.situation.terrain.city", "combat.situation.sovietArtillery",
-      "combat.situation.defenderAdjacent", "combat.situation.large", "combat.situation.onlyDefenderArmor", "combat.situation.commandValue",
+      "combat.situation.ratioAtLeast 1.5", "combat.situation.ratioAtLeast 2", "combat.situation.ratioBelow 3", "combat.situation.ratioBelow 4",
+      "combat.situation.terrain.city", "combat.situation.artillery.attacker",
+      "combat.situation.defenderAdjacent", "combat.situation.large", "combat.situation.onlyArmor.defender", "combat.situation.commandValue",
     ]);
-    expect(v.situations.find((x) => x.text.key === "combat.situation.commandValue")!.text.params).toEqual({ value: 3 });
+    // The card's command value 3: Attacker Command 3, 4 or 5 holds.
+    expect(v.situations.find((x) => x.text.key === "combat.situation.commandValue" && x.applies)!.text.params).toEqual({ values: { list: [3, 4, 5], separator: "comma" }, value: 3 });
     expect([v.soviet, v.german]).toEqual([8, 4]);
     expectMessage(v.tactics["german-reinforce-battle"], "combat.german.no.partisans");
     expectMessage(v.tactics["german-combat-engineer"], "combat.german.no.townCity", { hex: "1802" });

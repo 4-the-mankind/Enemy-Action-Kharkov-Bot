@@ -24,6 +24,7 @@ import type { Unit } from "../core/units";
 import { dynamicKey, msg, type Message, type Param } from "../i18n/message";
 import type { Advances, GermanAdvanceContext } from "./advance";
 import type { Board } from "./board";
+import { situations as chitSituations, type ChitFacts } from "./chits";
 import type { Movement } from "./movement";
 import type { PendingRules } from "./pending";
 import { drawIndex, rollDie, shuffle } from "./random";
@@ -1642,92 +1643,54 @@ export function createCombat(data: CombatData) {
 
   // ---------------------------------------------------------------- the sheet (D18)
 
-  /** 12.41: the situations of the combat chits, which hold and which do not. */
-  function situations(state: GameState): { text: Message; applies: boolean }[] {
-    const c = state.combat;
-    if (!c || c.kind !== "sovietAttack") return [];
-    const out: { text: Message; applies: boolean }[] = [];
-    const add = (key: Parameters<typeof msg>[0], applies: boolean, params?: Record<string, Param>) =>
-      out.push({ text: msg(key, params), applies });
-    const a = sovietStrength(state, c), d = Math.max(defenseStrength(state, c), 0);
-    const odds = { attack: a, defense: d };
-    add("combat.situation.aboveThree", a >= 3 * d, odds);
-    add("combat.situation.aboveOne", a > d, odds);
-    add("combat.situation.belowTwo", a < 2 * d, odds);
-    add("combat.situation.aboveEight", a >= 8 * d, odds);
-    add("combat.situation.belowOneHalf", 2 * a < 3 * d, odds);
-    const t = terrainOf(c.target);
-    for (const k of ["clear", "broken", "woods", "town", "city"] as const) add(`combat.situation.terrain.${k}`, t === k);
+  /** 12.41 in a Soviet attack: what the combat chits look at. */
+  function sovietFacts(state: GameState, c: Combat): ChitFacts {
     const art = (n: string) => c.tactics.some((x) => x.applies && (x.tactic === "soviet-fixed-artillery" ? n === "Artillery" : x.name === n));
-    add("combat.situation.sovietAirpower", art("Airpower"));
-    add("combat.situation.sovietArtillery", art("Artillery"));
-    add("combat.situation.germanAirpower", played(c, "german-airpower-artillery"));
-    add("combat.situation.germanArtillery", played(c, "german-airpower-artillery"));
-    add("combat.situation.combatEngineers", applied(c, "soviet-combat-engineer"));
+    const german = played(c, "german-airpower-artillery");
     const neighbors = board.neighbors(c.target).filter((n) => board.areAdjacent(c.target, n.hex)).flatMap((n) => germansIn(state, n.hex))
       .filter((g) => !state.units[g].dispersed && status(state, g) === "supplied" && !(state.attackedThisImpulse ?? []).includes(g));
-    if (neighbors.length) add("combat.situation.defenderAdjacent", true, { units: neighbors.map(name) });
-    else add("combat.situation.defenderAdjacentNo", false);
     const defs = defendersIn(state, c);
-    add("combat.situation.dispersedOrUnsupplied", defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"));
     const hexes = attacks.hexesOf(state, attackersOn(state, c));
-    add("combat.situation.flank", attacks.flanked(hexes, c.target));
-    const draw = chitCount(state, c).draw;
-    add("combat.situation.large", draw >= 7, { chits: draw });
-    add("combat.situation.ipCrossfire", hasIp(state, c.target));
-    add("combat.situation.oneHex", hexes.length === 1);
-    const sovietArmor = attackersOn(state, c).some(mechanized) || applied(c, "soviet-tank-brigade");
-    const germanArmor = defs.some(mechanized) || played(c, "german-panzer-battalion");
-    add("combat.situation.onlyAttackerArmor", sovietArmor && !germanArmor);
-    add("combat.situation.onlyDefenderArmor", germanArmor && !sovietArmor);
-    add("combat.situation.commandValue", true, { value: applied(c, "soviet-intelligence") ? 5 : c.commandValue });
-    add("combat.situation.nkvd", applied(c, "soviet-nkvd"));
-    if (state.turn >= 5) add("combat.situation.notSupported", !attacks.supported(state, hexes, c.target));
-    return out;
+    return {
+      kind: "sovietAttack", turn: state.turn,
+      attack: sovietStrength(state, c), defense: Math.max(defenseStrength(state, c), 0), terrain: terrainOf(c.target),
+      airpower: { german, soviet: art("Airpower") }, artillery: { attacker: art("Artillery"), defender: german },
+      combatEngineers: applied(c, "soviet-combat-engineer"),
+      defenderAdjacent: neighbors.map(name),
+      dispersedOrUnsupplied: defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"),
+      flank: attacks.flanked(hexes, c.target), drawn: chitCount(state, c).draw, ipCrossfire: hasIp(state, c.target), oneHex: hexes.length === 1,
+      armor: { attacker: attackersOn(state, c).some(mechanized) || applied(c, "soviet-tank-brigade"), defender: defs.some(mechanized) || played(c, "german-panzer-battalion") },
+      commandValue: applied(c, "soviet-intelligence") ? 5 : c.commandValue,
+      nkvd: applied(c, "soviet-nkvd"),
+      attackNotSupported: !attacks.supported(state, hexes, c.target), defenderNotSupported: false,
+    };
   }
 
-  /** 12.41 in a German attack: the situations of the combat chits, which hold and which do not. `drawn`: chits drawn in all. */
-  function attackSituations(state: GameState, c: Combat, drawn: number): { text: Message; applies: boolean }[] {
-    const out: { text: Message; applies: boolean }[] = [];
-    const add = (key: Parameters<typeof msg>[0], applies: boolean, params?: Record<string, Param>) =>
-      out.push({ text: msg(key, params), applies });
-    const a = c.strengths?.german ?? germanAttackStrength(state, c), d = c.strengths?.soviet ?? Math.max(defenseStrength(state, c), 0);
-    const odds = { attack: a, defense: d };
-    add("combat.situation.aboveThree", a >= 3 * d, odds);
-    add("combat.situation.aboveOne", a > d, odds);
-    add("combat.situation.belowTwo", a < 2 * d, odds);
-    add("combat.situation.aboveEight", a >= 8 * d, odds);
-    add("combat.situation.belowOneHalf", 2 * a < 3 * d, odds);
-    const t = terrainOf(c.target);
-    for (const k of ["clear", "broken", "woods", "town", "city"] as const) add(`combat.situation.terrain.${k}`, t === k);
+  /** 12.41 in a German attack: what the combat chits look at. `drawn`: chits drawn in all. */
+  function germanFacts(state: GameState, c: Combat, drawn: number): ChitFacts {
     const art = (n: string) => c.tactics.some((x) => x.applies && (x.tactic === "soviet-fixed-artillery" ? n === "Artillery" : x.tactic === "soviet-airpower-artillery" && x.name === n));
-    add("combat.situation.sovietAirpower", art("Airpower"));
-    add("combat.situation.sovietArtillery", art("Artillery"));
-    add("combat.situation.germanAirpower", played(c, "german-airpower-artillery"));
-    add("combat.situation.germanArtillery", played(c, "german-airpower-artillery"));
-    add("combat.situation.combatEngineers", played(c, "german-combat-engineer"));
+    const german = played(c, "german-airpower-artillery");
     // Defender Adjacent: a Soviet unit next to the hex, supplied, undispersed, not attacked yet in this impulse; [GT 5+] both in support.
     const neighbors = board.neighbors(c.target).filter((n) => board.areAdjacent(c.target, n.hex) && rules.inSovietSupport(state, c.target) && rules.inSovietSupport(state, n.hex))
       .flatMap((n) => attacks.unitsIn(state, n.hex, "soviet"))
       .filter((s) => !inCombat(c, s) && !state.units[s].dispersed && status(state, s) === "supplied" && !(state.attackedThisImpulse ?? []).includes(s));
-    if (neighbors.length) add("combat.situation.defenderAdjacent", true, { units: neighbors.map(name) });
-    else add("combat.situation.defenderAdjacentNo", false);
     const defs = defendersIn(state, c);
-    add("combat.situation.dispersedOrUnsupplied", defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"));
     const hexes = attacks.hexesOf(state, attackersOn(state, c));
-    add("combat.situation.flank", attacks.flanked(hexes, c.target));
-    add("combat.situation.large", drawn >= 6, { chits: drawn });
-    add("combat.situation.ipCrossfire", hasIp(state, c.target));
-    add("combat.situation.oneHex", hexes.length === 1);
-    const germanArmor = attackersOn(state, c).some(mechanized) || played(c, "german-panzer-battalion");
-    const sovietArmor = defs.some(mechanized) || applied(c, "soviet-tank-brigade");
-    add("combat.situation.onlyAttackerArmor", germanArmor && !sovietArmor);
-    add("combat.situation.onlyDefenderArmor", sovietArmor && !germanArmor);
-    if (applied(c, "soviet-intelligence")) add("combat.situation.commandValueIntelligence", true);
-    else add("combat.situation.yourCommandValue", true);
-    add("combat.situation.nkvd", applied(c, "soviet-nkvd"));
-    if (state.turn >= 5) add("combat.situation.defenderNotSupported", !rules.inSovietSupport(state, c.target));
-    return out;
+    return {
+      kind: "germanAttack", turn: state.turn,
+      attack: c.strengths?.german ?? germanAttackStrength(state, c), defense: c.strengths?.soviet ?? Math.max(defenseStrength(state, c), 0),
+      terrain: terrainOf(c.target),
+      airpower: { german, soviet: art("Airpower") }, artillery: { attacker: german, defender: art("Artillery") },
+      combatEngineers: played(c, "german-combat-engineer"),
+      defenderAdjacent: neighbors.map(name),
+      dispersedOrUnsupplied: defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"),
+      flank: attacks.flanked(hexes, c.target), drawn, ipCrossfire: hasIp(state, c.target), oneHex: hexes.length === 1,
+      armor: { attacker: attackersOn(state, c).some(mechanized) || played(c, "german-panzer-battalion"), defender: defs.some(mechanized) || applied(c, "soviet-tank-brigade") },
+      // Soviet Intelligence: your command value is considered to be 1; otherwise the engine does not know your card.
+      commandValue: applied(c, "soviet-intelligence") ? 1 : null,
+      nkvd: applied(c, "soviet-nkvd"),
+      attackNotSupported: false, defenderNotSupported: !rules.inSovietSupport(state, c.target),
+    };
   }
 
   /** Step 5 on the sheet: the totals the bot would reach from these chit hits (Q44). */
@@ -1755,7 +1718,7 @@ export function createCombat(data: CombatData) {
       const atk = c.strengths?.german ?? germanAttackStrength(state, c), def = c.strengths?.soviet ?? Math.max(defenseStrength(state, c), 0);
       return {
         soviet: def, german: atk, attack: atk, defense: def, odds: roundOdds(atk, def), terrain: terrainOf(c.target), vp: board.hex(c.target).vp,
-        chits: n, situations: c.stage === "tactics" || c.stage === "activation" ? [] : attackSituations(state, c, opts.chits ?? c.drawn ?? n.min),
+        chits: n, situations: c.stage === "tactics" || c.stage === "activation" ? [] : chitSituations(germanFacts(state, c, opts.chits ?? c.drawn ?? n.min)),
         tactics: noDefenseTactics(), tacticsLock: null,
         attackTactics: Object.fromEntries(GERMAN_ATTACK_TACTICS.map((t) => [t, attackTacticLock(state, c, t)])) as Record<GermanAttackTactic, Message | null>,
         assault: c.stage === "tactics" ? assaultUnits(state, c) : [],
@@ -1770,7 +1733,7 @@ export function createCombat(data: CombatData) {
     const soviet = c.strengths?.soviet ?? sovietStrength(state, c), german = c.strengths?.german ?? Math.max(defenseStrength(state, c), 0);
     return {
       soviet, german, attack: soviet, defense: german, odds: roundOdds(soviet, german), terrain: terrainOf(c.target), vp: board.hex(c.target).vp,
-      chits: n, situations: situations(state),
+      chits: n, situations: c.kind === "sovietAttack" ? chitSituations(sovietFacts(state, c)) : [],
       tactics: Object.fromEntries(GERMAN_DEFENSE_TACTICS.map((t) => [t, tacticLock(state, c, t)])) as Record<GermanDefenseTactic, Message | null>,
       tacticsLock: tacticLock(state, c),
       attackTactics: null, assault: [],

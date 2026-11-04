@@ -1381,6 +1381,8 @@
     "unitsIndexText": "Every known unit counter with its decoded data, for checking against data/units.json (2.3)",
     "sovietCards": "Soviet cards",
     "sovietCardsText": "Each Soviet card scan beside what the bot reads from data/soviet-cards.json (4.1)",
+    "combatChits": "Combat chits",
+    "combatChitsText": "Each combat chit scan beside what the engine reads from data/combat-chits.json, tested on a combat you set (12.41)",
     "booklet": "Booklet positions (dev)",
     "cancel": "Cancel",
     "saved": "Game saved: {{file}}. Load save opens it again.",
@@ -1523,11 +1525,8 @@
       }
     },
     "situation": {
-      "aboveThree": "3:1 or more ({{attack}} to {{defense}})",
-      "aboveOne": "above 1:1 ({{attack}} to {{defense}})",
-      "belowTwo": "below 2:1 ({{attack}} to {{defense}})",
-      "aboveEight": "8:1 or more ({{attack}} to {{defense}})",
-      "belowOneHalf": "below 1.5:1 ({{attack}} to {{defense}})",
+      "ratioAtLeast": "{{ratio}}:1 or more ({{attack}} to {{defense}})",
+      "ratioBelow": "below {{ratio}}:1 ({{attack}} to {{defense}})",
       "terrain": {
         "clear": "clear",
         "broken": "broken",
@@ -1535,10 +1534,14 @@
         "town": "town",
         "city": "city"
       },
-      "sovietAirpower": "Soviet airpower",
-      "sovietArtillery": "Soviet artillery",
-      "germanAirpower": "German airpower",
-      "germanArtillery": "German artillery",
+      "airpower": {
+        "german": "German airpower",
+        "soviet": "Soviet airpower"
+      },
+      "artillery": {
+        "attacker": "attacker artillery",
+        "defender": "defender artillery"
+      },
       "combatEngineers": "combat engineers",
       "defenderAdjacent": "defender adjacent ({{units}})",
       "defenderAdjacentNo": "defender adjacent",
@@ -1547,14 +1550,19 @@
       "large": "large attack ({{chits}} chits)",
       "ipCrossfire": "IP crossfire",
       "oneHex": "one-hex attack",
-      "onlyAttackerArmor": "only attacker armor",
-      "onlyDefenderArmor": "only defender armor",
-      "commandValue": "command value {{value}}",
+      "onlyArmor": {
+        "attacker": "only attacker armor",
+        "defender": "only defender armor"
+      },
+      "commandValue": "attacker command {{values}} (card: {{value}})",
+      "yourCommandValue": "attacker command: the command value of your card",
       "nkvd": "NKVD",
-      "notSupported": "attack not supported",
-      "commandValueIntelligence": "command value 1 (Soviet Intelligence)",
-      "yourCommandValue": "command value of your card",
-      "defenderNotSupported": "defender not supported"
+      "notSupported": {
+        "attack": "attack not supported",
+        "defender": "defender not supported",
+        "soviets": "Soviets not supported"
+      },
+      "unknown": "situation not understood"
     }
   },
   "combatSheet": {
@@ -2085,6 +2093,95 @@
       "booklet": "No booklet position \"{{id}}\" in data/saves.",
       "read": "{{file}} could not be read.",
       "file": "{{file}}: {{reason}}"
+    }
+  },
+  "chitsTool": {
+    "title": "Combat chits",
+    "file": "Each chit scan beside what the engine reads from data/combat-chits.json (12.41). A face applies when any one of its conditions holds; when both faces apply, the face with P is kept. Set a combat below to see which face each chit would give.",
+    "count_one": "{{count}} chit",
+    "count_other": "{{count}} chits",
+    "test": {
+      "title": "Test a combat",
+      "kind": "Combat",
+      "sovietAttack": "Soviet attack",
+      "germanAttack": "German attack",
+      "turn": "Game-turn",
+      "attack": "Attack strength",
+      "defense": "Defense strength",
+      "terrain": "Defender's terrain",
+      "drawn": "Chits drawn",
+      "commandValue": "Attacker's command value",
+      "commandUnknown": "unknown (your card)",
+      "airpowerGerman": "German airpower",
+      "airpowerSoviet": "Soviet airpower",
+      "artilleryAttacker": "Attacker artillery",
+      "artilleryDefender": "Defender artillery",
+      "combatEngineers": "Attacker played Combat Engineers",
+      "defenderAdjacent": "Defender adjacent",
+      "dispersedOrUnsupplied": "Defenders all dispersed, unsupplied or isolated",
+      "flank": "Flank attack",
+      "ipCrossfire": "Defender in an IP",
+      "oneHex": "Attackers in one hex",
+      "armorAttacker": "Attacker has armor",
+      "armorDefender": "Defender has armor",
+      "nkvd": "NKVD applies",
+      "attackNotSupported": "All units outside Soviet support (Soviet attack)",
+      "defenderNotSupported": "Defender outside Soviet support (German attack)"
+    },
+    "front": "Front",
+    "back": "Back",
+    "dark": "darker chit (12.42)",
+    "priority": "P: this face is kept when both apply",
+    "turns": "[GT {{from}}-{{to}}]: only on game-turns {{from}} to {{to}}",
+    "anyOf": "Applies if any one holds:",
+    "hits": {
+      "attacker": "A{{n}}",
+      "defender": "D{{n}}",
+      "german": "G{{n}}",
+      "soviet": "S{{n}}",
+      "none": "no hits"
+    },
+    "state": {
+      "yes": "holds",
+      "no": "does not hold",
+      "unknown": "to check"
+    },
+    "kept": {
+      "front": "Front kept",
+      "back": "Back kept",
+      "none": "Set aside",
+      "unknown": "You check"
+    },
+    "condition": {
+      "ratioAtLeast": "attack strength at least {{ratio}} times the defense strength",
+      "ratioBelow": "attack strength less than {{ratio}} times the defense strength",
+      "terrain": "defender in a {{terrain}} hex",
+      "airpower": {
+        "german": "the German Airpower and Artillery tactic was played, attacking or defending",
+        "soviet": "a Soviet Airpower tactic applies, attacking or defending"
+      },
+      "artillery": {
+        "attacker": "the attacker applies Artillery (Soviet: Artillery, Fixed Artillery or the barrage of GT 1-2; German: Airpower and Artillery)",
+        "defender": "the defender applies Artillery (same tactics)"
+      },
+      "combatEngineers": "the attacker (only) played Combat Engineers",
+      "defenderAdjacent": "a supplied, non-dispersed unit friendly to the defender, not yet attacked this impulse, is adjacent to the defender ([GT 5+] for Soviet defenders: both in support)",
+      "dispersedOrUnsupplied": "all defending units are dispersed, out of supply or isolated",
+      "flank": "the attackers occupy at least three hexes, or two hexes not adjacent to each other; never against a town or city",
+      "large": "at least 7 chits drawn in a Soviet attack, 6 in a German attack",
+      "ipCrossfire": "the defender occupies an Improved Position",
+      "oneHex": "all the attacking units are in a single hex",
+      "onlyArmor": {
+        "attacker": "only the attacker has armor (Tank Brigade and Panzer Battalion count)",
+        "defender": "only the defender has armor (Tank Brigade and Panzer Battalion count)"
+      },
+      "commandValue": "the attacker's card has command value {{values}} (Soviet Intelligence: the Soviet value is 5, the German value 1; otherwise you check your card)",
+      "nkvd": "the Soviet NKVD tactic applies to this combat",
+      "notSupported": {
+        "attack": "[GT 5+] Soviet attack: all attacking and defending units outside Soviet support",
+        "defender": "[GT 5+] German attack: the defending Soviet units outside Soviet support",
+        "soviets": "[GT 5+] Soviet attack: all units outside Soviet support; German attack: the defenders outside Soviet support"
+      }
     }
   }
 }

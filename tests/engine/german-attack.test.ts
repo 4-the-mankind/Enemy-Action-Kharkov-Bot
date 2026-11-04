@@ -261,7 +261,12 @@ describe("The Soviet card for the defense (12.3, the aid)", () => {
     expect(r.state.improvedPositions).toEqual(["0505"]);
     // One attacker: one chit, no tactic chit.
     expect(c.chits.max).toBe(1);
-    expect(engine.combat.view(r.state, { chits: 2 })!.situations.find((x) => x.text.key === "combat.situation.commandValueIntelligence")?.applies).toBe(true);
+    // Your command value is considered to be 1: Attacker Command 1 holds, the others do not.
+    const command = engine.combat.view(r.state, { chits: 2 })!.situations.filter((x) => x.text.key === "combat.situation.commandValue");
+    expect(command.map((x) => [x.text.params, x.applies])).toEqual([
+      [{ values: { list: [1], separator: "comma" }, value: 1 }, true], [{ values: { list: [5], separator: "comma" }, value: 1 }, false],
+      [{ values: { list: [4, 5], separator: "comma" }, value: 1 }, false], [{ values: { list: [3, 4, 5], separator: "comma" }, value: 1 }, false],
+    ]);
     const h = play(engine, r.state, { type: "CombatChitsDrawn", chits: 2 }).state;
     expect(engine.combat.view(h)!.needsCommandValue).toBe(true);
     expectMessage(rejected(engine.step(h, { type: "CombatHits", german: 0, soviet: 2 })), "reject.combat.commandValue");
@@ -541,7 +546,7 @@ describe("More of the Soviet card, the chits and the situations (12.3, 12.39, 12
     const tank = declare(game({ at, pile: ["e03"] }));
     expect(tank.state.combat!.tactics.map((t) => [t.name, t.applies])).toEqual([["Tank Brigade", true]]);
     const v = engine.combat.view(tank.state)!;
-    expect(v.situations.find((s) => s.text.key === "combat.situation.onlyDefenderArmor")!.applies).toBe(true);
+    expect(v.situations.find((s) => s.text.key === "combat.situation.onlyArmor.defender")!.applies).toBe(true);
     const h = run(engine, tank.state, [{ type: "CombatChitsDrawn", chits: 3 }, { type: "CombatHits", german: 0, soviet: 1 }]).state;
     expect(h.combat!.hits!.soviet).toBe(0);
     const ac = declare(game({ at, pile: ["e07"] })).state.combat!.tactics[0];
@@ -560,7 +565,7 @@ describe("More of the Soviet card, the chits and the situations (12.3, 12.39, 12
     const holds = (chits: number) => engine.combat.view(c, { chits })!.situations.filter((x) => x.applies).map((x) => x.text.key);
     expect(holds(6)).toContain("combat.situation.large");
     expect(holds(5)).not.toContain("combat.situation.large");
-    expect(holds(5)).toEqual(expect.arrayContaining(["combat.situation.germanAirpower", "combat.situation.germanArtillery", "combat.situation.flank", "combat.situation.onlyAttackerArmor", "combat.situation.yourCommandValue"]));
+    expect(holds(5)).toEqual(expect.arrayContaining(["combat.situation.airpower.german", "combat.situation.artillery.attacker", "combat.situation.flank", "combat.situation.onlyArmor.attacker", "combat.situation.yourCommandValue"]));
     expect(engine.combat.view(c, { chits: 5 })!.situations.find((x) => x.text.key === "combat.situation.defenderAdjacent")!.text.params).toEqual({ units: ["n1"] });
   });
 
