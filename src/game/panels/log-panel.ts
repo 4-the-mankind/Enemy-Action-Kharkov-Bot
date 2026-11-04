@@ -2,7 +2,8 @@
 // with the marks of the state tags that weighed on it (task 4.6b, Q88).
 import type { Engine } from "../../engine/engine";
 import { adjustmentName, armyName, frontName, sideName } from "../../engine/names";
-import { isHex, type GameEvent, type Location } from "../../engine/types";
+import { isHex, type GameEvent, type GameState, type Location } from "../../engine/types";
+import { logPlace, type ImpulseSide } from "./log-place";
 import { msg, t, type Param } from "../../i18n/i18n";
 import { dynamicKey, type Message } from "../../i18n/message";
 import type { Decision } from "../playback/activation";
@@ -270,8 +271,10 @@ function garrisonTrace(e: Extract<GameEvent, { type: "GarrisonsPlaced" }>): stri
 }
 
 /**
- * An undo removes the lines of the step it takes back; refused commands stay (they changed nothing).
- * A click on a bot decision line shows its "Why this move" slip.
+ * The log, one turn at a time (filter above it) or all turns; each turn's impulses in panels,
+ * newest first, their lines in play order (Q130-Q133). An undo removes the lines of the step it
+ * takes back; refused commands stay (they changed nothing). A click on a bot decision line shows
+ * its "Why this move" slip.
  */
 export function mountLogPanel(root: HTMLElement, session: GameSession, onDecision: (d: Decision, line: HTMLLIElement) => void) {
   const decisions = new WeakMap<HTMLLIElement, Decision>();
@@ -285,53 +288,132 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
     const d = li && decisions.get(li);
     if (d && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onDecision(d, li); }
   });
+
+  // The turn filter: one turn, or all of them.
+  const bar = document.createElement("label");
+  bar.className = "log-filter";
+  bar.innerHTML = `<span>${t("log.filter.label")}</span><select></select>`;
+  const select = bar.querySelector("select")!;
+  root.before(bar);
+  /** The turn shown, or every turn. */
+  let shown: number | "all" = session.state.turn;
+
+  const turnGroup = (turn: number) => {
+    let group = root.querySelector<HTMLElement>(`:scope > [data-turn="${turn}"]`);
+    if (group) return group;
+    group = document.createElement("section");
+    group.className = "log-turn";
+    group.dataset.turn = String(turn);
+    group.innerHTML = `<h3 class="log-turn-head">${t("log.filter.turn", { turn })}</h3><ol class="log"></ol>`;
+    // Newest turn first.
+    const later = [...root.children].find((g) => Number((g as HTMLElement).dataset.turn) < turn);
+    root.insertBefore(group, later ?? null);
+    return group;
+  };
+  const turnList = (turn: number) => turnGroup(turn).querySelector<HTMLOListElement>(":scope > ol")!;
+  /** The panel of an impulse (Q130), created closed or open as the filter wants it. */
+  const panel = (turn: number, side: ImpulseSide, n: number) => {
+    const list = turnList(turn), key = `${side}-${n}`;
+    let li = list.querySelector<HTMLLIElement>(`:scope > [data-impulse="${key}"]`);
+    if (!li) {
+      li = document.createElement("li");
+      li.className = `log-impulse ${side}`;
+      li.dataset.impulse = key;
+      li.innerHTML = `<details${openByDefault(turn) ? " open" : ""}><summary>${t(`log.impulse.${side}`, { n })}</summary><ol class="log"></ol></details>`;
+      list.prepend(li);
+    }
+    return li;
+  };
+  /** Q133: panels open in the current turn and with all turns shown, closed in a past turn. */
+  const openByDefault = (turn: number) => shown === "all" || turn === session.state.turn;
+
+  /** The turn on screen: a new choice sets its panels open or closed (Q133); the same one keeps them as they are. */
+  let displayed: number | "all" | null = null;
+  const show = (turn: number | "all") => {
+    const reset = turn !== displayed;
+    shown = displayed = turn;
+    for (const g of root.children as HTMLCollectionOf<HTMLElement>) {
+      const n = Number(g.dataset.turn);
+      g.hidden = turn !== "all" && n !== turn;
+      g.querySelector<HTMLElement>(".log-turn-head")!.hidden = turn !== "all";
+      if (reset) for (const d of g.querySelectorAll<HTMLDetailsElement>(":scope > ol > .log-impulse > details")) d.open = openByDefault(n);
+    }
+    select.value = String(turn);
+  };
+  /** The filter's choices: all turns, then each turn with lines, newest first. */
+  const refreshFilter = () => {
+    const turns = [...root.children].map((g) => Number((g as HTMLElement).dataset.turn));
+    const current = session.state.turn;
+    select.innerHTML = `<option value="all">${t("log.filter.all")}</option>` +
+      turns.map((n) => `<option value="${n}">${t(n === current ? "log.filter.current" : "log.filter.turn", { turn: n })}</option>`).join("");
+    if (shown !== "all" && !turns.includes(shown)) shown = current;
+    show(shown);
+  };
+  select.addEventListener("change", () => show(select.value === "all" ? "all" : Number(select.value)));
+
+  /** A line outside the impulse panels, newest first, in the current turn. */
   const add = (html: string, cls = "") => {
     const li = document.createElement("li");
     li.innerHTML = html;
     li.className = cls;
-    root.prepend(li);
+    turnList(session.state.turn).prepend(li);
     return li;
   };
   /** Lines of each step that changed the state, in the order of the undo history. */
   const steps: HTMLLIElement[][] = [];
-  /** The lines of one step, newest first; refused commands' lines are not part of the step (Undo leaves them). */
-  const write = (events: GameEvent[], fresh = true): HTMLLIElement[] => {
-    const lines: HTMLLIElement[] = [];
+  /** The lines of one step; refused commands' lines are not part of the step (Undo leaves them). */
+  const write = (before: GameState, events: GameEvent[], after: GameState, fresh = true): HTMLLIElement[] => {
+    const lines: HTMLLIElement[] = [], all: HTMLLIElement[] = [];
     // A set-up adjustment is one step: its own actions are listed under it, in play order.
     // So is a Soviet impulse, and the start of a turn.
     const grouped = ["SetUpAdjustmentApplied", "SovietCardsDrawn", "TurnStarted", "GermanHitsApplied", "CombatEnded", "CombatHitsEntered"].includes(events[0]?.type);
-    let anchor: HTMLLIElement | null = null;
     for (const [i, e] of events.entries()) {
       const line = describe(e, session.engine);
       if (!line) continue;
       // The state tags that weighed on it (task 4.6b, Q88).
       const marks = tagMarks(e.tags), fold = line.html.indexOf("<details");
       const html = fold < 0 ? line.html + marks : line.html.slice(0, fold) + marks + line.html.slice(fold);
-      const cls = [line.refused && "refused", fresh && "fresh", grouped && i > 0 && "sub"].filter(Boolean).join(" ");
-      let li: HTMLLIElement;
-      if (grouped && anchor) {
-        li = document.createElement("li");
-        li.innerHTML = html;
-        li.className = cls;
-        anchor.after(li);
-      } else li = add(html, cls);
-      if (grouped) anchor = li;
+      const li = document.createElement("li");
+      li.innerHTML = html;
+      li.className = [line.refused && "refused", fresh && "fresh", grouped && i > 0 && "sub"].filter(Boolean).join(" ");
       if (e.type === "DecisionTraced") {
         decisions.set(li, e);
         li.classList.add("decision");
         li.tabIndex = 0;
         li.title = t("log.showWhy");
       }
+      all.push(li);
       if (!line.refused) lines.push(li);
     }
+    if (!all.length) return lines;
+    const at = logPlace(before, events, after);
+    if (at.impulse) {
+      // In a panel, play order (Q133 a); a panel getting a new line opens (Q133 d).
+      const p = panel(at.turn, at.impulse.side, at.impulse.n);
+      p.querySelector("ol")!.append(...all);
+      if (fresh) p.querySelector("details")!.open = true;
+    } else turnList(at.turn).prepend(...(grouped ? all : all.reverse()));
+    // A new line in a turn not shown: the filter goes to it (Q133 b, Next turn).
+    if (fresh && shown !== "all" && shown !== at.turn) shown = at.turn;
     return lines;
   };
+  /** Panels and turns left empty by an undo go. */
+  const prune = () => {
+    for (const li of root.querySelectorAll(".log-impulse")) if (!li.querySelector("details > ol > li")) li.remove();
+    for (const g of [...root.children]) if (!g.querySelector("li")) g.remove();
+  };
+
   add(t("log.newGame"));
-  session.subscribe((_, events, undo) => {
-    if (undo) { steps.pop()?.forEach((li) => li.remove()); return; }
-    const lines = write(events);
+  refreshFilter();
+  let last = session.state;
+  session.subscribe((state, events, undo) => {
+    const before = last;
+    last = state;
+    if (undo) { steps.pop()?.forEach((li) => li.remove()); prune(); refreshFilter(); return; }
+    const lines = write(before, events, state);
     // One entry per state change, even one without a line, so that Undo takes back the right lines.
     if (session.depth > steps.length) steps.push(lines);
+    refreshFilter();
   });
 
   // A loaded game (task 5.2): the log written again from the steps replayed, then the load's own lines.
@@ -339,14 +421,18 @@ export function mountLogPanel(root: HTMLElement, session: GameSession, onDecisio
   session.onRestore(() => {
     root.replaceChildren();
     steps.length = 0;
-    add(loaded?.intro ?? t("log.newGame"));
-    for (const events of session.steps()) steps.push(write(events, false));
+    shown = session.state.turn;
+    displayed = null;
+    turnList(session.start.turn).prepend(Object.assign(document.createElement("li"), { innerHTML: loaded?.intro ?? t("log.newGame") }));
+    for (const { before, events, after } of session.entries()) steps.push(write(before, events, after, false));
     for (const note of loaded?.notes ?? []) add(note, "fresh");
     loaded = null;
+    last = session.state;
+    refreshFilter();
   });
   return {
     /** A line outside the undo history (a game saved). */
-    note(html: string) { add(html, "fresh"); },
+    note(html: string) { add(html, "fresh"); refreshFilter(); },
     /** The first line and the closing lines of the log written for the next loaded game. */
     onLoad(intro: string, notes: string[]) { loaded = { intro, notes }; },
   };

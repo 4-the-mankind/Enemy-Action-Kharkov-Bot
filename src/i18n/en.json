@@ -915,6 +915,16 @@
     "rejected": "<b>Not done:</b> {{reason}}",
     "newGame": "New game. Set up turn 1 from the Units panel.",
     "showWhy": "Show why",
+    "filter": {
+      "label": "Show",
+      "all": "All turns",
+      "turn": "Turn {{turn}}",
+      "current": "Turn {{turn}} (current)"
+    },
+    "impulse": {
+      "german": "German impulse {{n}}",
+      "soviet": "Soviet impulse {{n}}"
+    },
     "attack": {
       "checked": "{{unit}} checks an attack on {{hex}} ({{soviet}} to {{german}}): {{reason}}",
       "declared": "Soviet attack on {{hex}}: {{attackers}} against {{defenders}}, {{soviet}} to {{german}}.",

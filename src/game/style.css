@@ -640,6 +640,20 @@ body:not(.menu-open) .main-menu { display: none; }
 .log > li.sub { padding: 3px 0 3px 12px; font-size: 0.85rem; border-bottom: 0; border-left: 2px solid var(--feldgrau); }
 .log > li.sub:has(+ li:not(.sub)) { margin-bottom: 0; border-bottom: 1px solid var(--feldgrau); }
 .log > li.fresh { animation: fresh 900ms ease-out; }
+/* Turn filter and impulse panels (Q130-Q133). */
+.log-filter { display: flex; align-items: center; gap: 8px; margin: 0 18px 10px 0; font-size: 0.85rem; color: var(--paper-dim); }
+.log-filter select { flex: 1; min-width: 0; font: inherit; color: var(--paper); background: var(--feldgrau-dark); border: 1px solid var(--feldgrau); border-radius: 3px; padding: 3px 6px; }
+.log-filter option { color: var(--paper); background: var(--feldgrau-dark); }
+.log-turn[hidden] { display: none; }
+.log-turn-head { margin: 14px 18px 4px 0; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper); }
+.log-turn:first-child .log-turn-head { margin-top: 0; }
+.log-turn > .log { padding-right: 18px; }
+.log .log { padding: 0; }
+.log > li.log-impulse { padding: 0; }
+.log-impulse > details > summary { cursor: pointer; padding: 6px 0; font-weight: 600; color: var(--paper); }
+.log-impulse.soviet > details > summary::marker { color: var(--stab-red); }
+.log-impulse > details > .log { padding-left: 12px; border-left: 2px solid var(--feldgrau); margin-bottom: 6px; }
+.log-impulse > details > .log > li:last-child { border-bottom: 0; }
 @keyframes fresh { from { background: rgb(232 228 211 / 0.16); } to { background: transparent; } }
 
 /* An overlay sheet. Lifted (off): pushed right, dim, ink stripe faded.

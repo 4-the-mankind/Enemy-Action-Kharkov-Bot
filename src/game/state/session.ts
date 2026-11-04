@@ -41,6 +41,11 @@ export class GameSession {
   /** The events of each state change, in order (the log rebuilt after a load). */
   steps(): readonly GameEvent[][] { return this.history.map((h) => h.events); }
 
+  /** Each state change with the states around it (the log places its lines by turn and impulse). */
+  entries(): { before: GameState; events: GameEvent[]; after: GameState }[] {
+    return this.history.map((h, i) => ({ before: h.state, events: h.events, after: this.history[i + 1]?.state ?? this.current }));
+  }
+
   /** The game changed since it was last saved or loaded (Q94: warnings before it is lost). */
   get dirty(): boolean { return this.current !== this.saved; }
 

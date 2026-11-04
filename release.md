@@ -12,6 +12,7 @@
 
 ### Improvements
 
+- **Log tab, by turn and impulse:** a "Show" list above the log picks one turn (the current turn by default) or all turns. Each German and Soviet impulse has its own panel ("German impulse 2", "Soviet impulse 2"), newest first, its lines in play order. Panels are open in the current turn and with all turns shown, closed in a past turn; a panel you closed opens again when a new line arrives in it. Next turn brings the list to the new turn.
 - **Overlays tab, map legend:** the legend now explains every mark drawn on the map, in five groups: bot moves, combat (Soviet and German attacks, retreat and advance hexes, Kampfgruppe range), supply lines, moving German units (reachable hexes, drop hex, drop refused), pointer and selection. The Printed map, Units and Fit map buttons now sit above it.
 - **Right-hand panel tabs:** the tabs now read Bot, Combat, Log, Overlays.
 - **Combat sheet, Soviet losses:** every Soviet unit hit is shown with its counter (steps lost, unit eliminated).
