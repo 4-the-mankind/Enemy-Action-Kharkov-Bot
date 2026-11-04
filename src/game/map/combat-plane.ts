@@ -1,8 +1,9 @@
 // The combat on the map (D18, task 4.5a): the hex attacked outlined and, for the bot's attacks,
 // the attackers' arrows across the hexsides, solid and slightly transparent with a white edge
 // (Q71); while the German losses are taken, the hexes open to the retreat (12.7: the only drops
-// the engine accepts, Q45). A German attack (tasks 4.5b, 5.1b) has no arrows: the hex attacked
-// keeps the thin red outline of a pinned hex (Q68); the hexes open to the advance are lit (12.8),
+// the engine accepts, Q45). A German attack (tasks 4.5b, 5.1b) has the same arrows in Prussian
+// blue (Q127); the hex attacked keeps the thin red outline of a pinned hex (Q68); the hexes open
+// to the advance are lit (12.8),
 // and the range of a Kampfgruppe while the sheet asks for its marker (Q62). No line for the
 // retreats and advances (Q70 b): the counters walk there (playback/bot-moves.ts) and the sheet
 // writes the path. Drawn from the game state only, so an undo redraws it.
@@ -98,8 +99,7 @@ export class CombatPlane {
       return hex ? `<polygon class="retreat-hex" points="${pointsAttr(hexCorners(this.data.grid, hex))}"/>` : "";
     });
     this.under.innerHTML = this.outline(c.target, `target ${side}`) + this.retreatHexes(c, state) + open.join("");
-    // Arrows for the bot's attacks only: the player knows where his units attack from (Q68).
-    this.over.innerHTML = side === "german" ? "" : `<g class="${side}${c.stage === "done" ? " faded" : ""}">${this.arrows(c, state)}</g>`;
+    this.over.innerHTML = `<g class="${side}${c.stage === "done" ? " faded" : ""}">${this.arrows(c, state)}</g>`;
   }
 
   private outline(hex: string, cls: string): string {

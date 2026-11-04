@@ -6,7 +6,8 @@
 // the rules (12.6, 12.61): the menu says why one is refused. Commands go through the engine.
 // German attack (task 5.1b, Q66): with German counters selected, a right-click on a Soviet hex
 // (on a counter or beside) puts "Attack … with n units" first, in bold; greyed with the
-// engine's reason when the attack may not be made (12.1).
+// engine's reason when the attack may not be made (12.1). Without a German selection (Q125), it
+// shows greyed with how to select the attackers, in the German impulse outside a combat.
 // Task 4.6: "Replacement step" on a German unit (16.1, Q76), greyed with the engine's reason;
 // on a hex without units, "Remove garrison" (15.3, Q74) or "Place garrison" (a correction).
 import { isHex, type SupplyMarker } from "../../engine/types";
@@ -41,13 +42,19 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
   const outside = (e: PointerEvent) => { if (!menu.contains(e.target as Node)) close(); };
   const escape = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
 
-  /** "Attack 1704 with 2 units", first and in bold, when German counters are selected and the hex is Soviet (Q66). */
+  /** "Attack 1704 with 2 units", first and in bold, on a Soviet hex (Q66); greyed with how to select the attackers when none is (Q125). */
   function attackItem(hex: string | null, lock: boolean): string {
     const state = session.state, engine = session.engine;
     if (!hex || !isHex(hex)) return "";
     const soviet = state.order.some((u) => state.units[u]?.at === hex && engine.unit(u)?.side === "soviet");
     const attackers = deps.attackers();
-    if (!soviet || !attackers.length) return "";
+    if (!soviet) return "";
+    if (!attackers.length) {
+      // Only where a German attack makes sense: the German impulse, no combat open.
+      if (lock || state.combat || state.botImpulse) return "";
+      return `<button type="button" role="menuitem" class="menu-attack" disabled>${t("menu.attackNoSelection", { hex })}</button>` +
+        `<p class="menu-lock">${t("menu.selectAttackers")}</p><div class="menu-rule" role="separator"></div>`;
+    }
     const why = engine.combat.whyNotAttack(state, attackers, hex);
     menu.dataset.hex = hex;
     return `<button type="button" role="menuitem" class="menu-attack" data-action="attack"${why || lock ? " disabled" : ""}>` +

@@ -1160,6 +1160,8 @@
     "removeIp": "Remove Improved Position",
     "attack_one": "Attack {{hex}} with {{count}} unit",
     "attack_other": "Attack {{hex}} with {{count}} units",
+    "attackNoSelection": "Attack {{hex}}",
+    "selectAttackers": "Select the attacking German units first: click a counter, Ctrl + click to add another, Shift + click to add a stack.",
     "placeGarrison": "Place a garrison",
     "removeGarrison": "Remove the garrison",
     "replacementStep": "Replacement step"

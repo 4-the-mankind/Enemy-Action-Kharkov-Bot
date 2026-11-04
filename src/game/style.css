@@ -1225,6 +1225,7 @@ body:not(.menu-open) .main-menu { display: none; }
 .combat-marks .choice { fill: rgb(192 39 45 / 0.06); stroke: var(--stab-red); stroke-width: 11; stroke-dasharray: 30 20; filter: url(#pastel); }
 .combat-marks .retreat-hex { fill: rgb(31 79 154 / 0.18); stroke: var(--prussian); stroke-width: 9; stroke-dasharray: 26 16; stroke-linejoin: round; }
 .combat-arrows .soviet { --arrow: var(--stab-red); }
+.combat-arrows .german { --arrow: var(--prussian); }
 .combat-arrows .faded { opacity: 0.45; }
 /* Solid, slightly transparent, with a white edge that reads on every color of the map (Q71). */
 .combat-arrows .arrow { fill: var(--arrow); fill-opacity: 0.8; stroke: #fff; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
