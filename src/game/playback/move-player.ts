@@ -116,20 +116,21 @@ export class MovePlayer {
   }
 
   /**
-   * Outlines the hexes of a decision: its destination in red; `stress` (the hexes set aside by
-   * the step the player points at in "Why this move") dark and dashed. The other candidates
+   * Outlines the hexes of a decision: its destination in red; `stress` (the hexes kept by the
+   * step the player points at in "Why this move") dark and dashed. The other candidates
    * are not drawn: they would cover the map around every move.
    */
   showOptions(d: Decision | null, stress: string[] = []) {
     if (!d) { this.options.innerHTML = ""; return; }
     // Hex outlines: a ring would hide under a stack. Classes: "option" (dark, dashed),
-    // "option chosen" (red, solid).
+    // "option chosen" (red, solid), "option chosen kept" (red, solid, dark inside: kept by the step), then
+    // "option edge" (dark, dashed, empty) over its red edge.
     const ring = (id: string, cls: string) => {
       const h = this.data.hexById.get(id);
       return h ? `<polygon class="${cls}" points="${hexCorners(this.data.grid, h).map((c) => `${c.x},${c.y}`).join(" ")}"/>` : "";
     };
-    // The destination last, on top; never also drawn as set aside.
-    this.options.innerHTML = stress.filter((id) => id !== d.to).map((id) => ring(id, "option")).join("") + ring(d.to, "option chosen");
+    // The destination last, on top; dashed over its red edge while the step pointed at keeps it.
+    this.options.innerHTML = stress.filter((id) => id !== d.to).map((id) => ring(id, "option")).join("") + (stress.includes(d.to) ? ring(d.to, "option chosen kept") + ring(d.to, "option edge") : ring(d.to, "option chosen"));
     for (const t of this.trails.querySelectorAll<SVGElement>(".trail")) t.classList.toggle("focus", t.dataset.unit === d.unit);
   }
 

@@ -1360,7 +1360,7 @@
     "title": "Bot moves legend",
     "trail": "Path a Soviet unit walked in the last activation. Clear trails removes it.",
     "chosen": "Current hex of the unit inspected in the bot decision details panel.",
-    "dropped": "Hexes set aside by the bot, because of a preference, a restriction or a tiebreaker."
+    "kept": "Hexes kept by the bot at the step pointed at in the bot decision details panel."
   },
   "home": {
     "title": "EA Kharkov Bot",

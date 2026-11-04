@@ -130,11 +130,13 @@ async function init() {
 
   // The Combat tab (D18): enabled only during a combat, opened when one begins, closed after it.
   let hadCombat = false;
+  // The bot's move details step aside while the Combat tab shows a combat; back on the Bot or
+  // Log tab, they are drawn again.
+  const combatShown = () => document.body.classList.toggle("combat-shown", !!session.state.combat && rail.selected() === "combat");
+  rail.onOpen(combatShown);
   session.subscribe((state, events) => {
     const has = !!state.combat;
     rail.enable("combat", has);
-    // The bot's move details step aside while a combat is on the map.
-    document.body.classList.toggle("in-combat", has);
     if (has && !hadCombat) rail.open("combat");
     else if (!has && hadCombat && rail.selected() === "combat") rail.open("bot");
     if (events.some((e) => e.type === "CombatStarted")) combatPlane.reveal(state);
@@ -142,6 +144,7 @@ async function init() {
     const declared = events.find((e) => e.type === "GermanAttackDeclared");
     if (declared) { selection.clear(); inspector?.pinHex(declared.target); }
     hadCombat = has;
+    combatShown();
     combatPlane.render(state);
   });
 

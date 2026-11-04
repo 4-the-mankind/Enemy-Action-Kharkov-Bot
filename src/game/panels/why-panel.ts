@@ -78,7 +78,7 @@ export function mountWhyPanel(root: HTMLElement, session: GameSession, player: M
   });
   const stress = (e: Event) => {
     const li = (e.target as Element).closest<HTMLElement>("[data-step]");
-    if (shown) player.showOptions(shown, li ? shown.steps[Number(li.dataset.step)].dropped : []);
+    if (shown) player.showOptions(shown, li ? shown.steps[Number(li.dataset.step)].kept : []);
   };
   root.addEventListener("pointerover", stress);
   root.addEventListener("focusin", stress);

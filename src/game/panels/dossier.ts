@@ -12,10 +12,12 @@ export function mountDossier(root: HTMLElement) {
     root.classList.toggle("folded", folded);
     tabs.forEach((t) => t.setAttribute("aria-expanded", String(!folded)));
   };
+  const listeners: ((name: string) => void)[] = [];
   const open = (name: string) => {
     tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.tab === name)));
     if (panels.length > 1) panels.forEach((p) => (p.hidden = p.dataset.tabpanel !== name));
     fold(false);
+    listeners.forEach((f) => f(name));
   };
 
   for (const t of tabs) {
@@ -36,5 +38,7 @@ export function mountDossier(root: HTMLElement) {
     tab.disabled = !on;
     if (!on && selected() === name) open(tabs[0].dataset.tab!);
   };
-  return { open, enable, selected };
+  /** Called with the tab's name each time a tab is opened. */
+  const onOpen = (f: (name: string) => void) => { listeners.push(f); };
+  return { open, enable, selected, onOpen };
 }

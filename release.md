@@ -6,6 +6,8 @@
 
 - **Combat sheet, Soviet losses:** only the unit that took the first hit had its counter; the other Soviet units hit were listed by name only.
 - **Combat sheet, decision steps:** under a Soviet reserve placement (or a loss or a tactic), the rule text of each step was squeezed into a narrow column, one word per line, beside its hexes; it now reads on full lines with the hexes after it.
+- **Bot decision details, pointing at a step:** the map outlined the hexes the step set aside, while the panel shows the hexes it kept in black; the map now outlines the hexes kept, the unit's hex with them (dark dashed edge over its red edge, dark inside).
+- **Bot decision details during a combat:** back on the Bot or Log tab while a combat is on, the map outlines the unit's hex and the hexes of the step pointed at again; they step aside only while the Combat tab is open.
 - **Bot tab, Next turn:** the card reading and the orders of the last Soviet impulse of the turn before stayed on show; the tab is now cleared when a new turn starts, as if the bot had not played yet.
 
 ### Improvements
