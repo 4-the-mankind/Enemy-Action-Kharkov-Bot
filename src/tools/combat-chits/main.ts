@@ -1,4 +1,4 @@
-// Wiring only (task 5.10): each chit scan beside what the engine reads from
+// Wiring only (task 5.10): each chit scan (assets/chits/) beside what the engine reads from
 // data/combat-chits.json, evaluated by src/engine/chits.ts on a combat the dev sets. Dev only.
 import { COMBAT_CHITS, type ChitCondition, type ChitFace, type CombatChit } from "../../core/combat-chits";
 import { faceHolds, holds, readChit, type ChitFacts } from "../../engine/chits";
@@ -71,7 +71,7 @@ function faceHtml(chit: CombatChit, side: "front" | "back", f: ChitFacts, kept: 
   const h = faceHolds(face, f);
   const conds = face.if.map((c) => `<li>${badge(holds(c, f))} ${esc(t(explain(c)))}</li>`).join("");
   return `<section class="face${kept === side ? " kept" : ""}">${title}
-    <img class="scan" src="${staticUrl(`scans/chits/${file}`)}" alt="${esc(face.printed)}" width="95" height="95" />
+    <img class="scan" src="${staticUrl(`assets/chits/${file}`)}" alt="${esc(face.printed)}" width="95" height="95" />
     <div class="reading">
       <p class="printed"><b>${esc(face.printed)}</b> · ${hits(face)}
         ${face.priority ? `<span class="p" title="${esc(t("chitsTool.priority"))}">P</span>` : ""}

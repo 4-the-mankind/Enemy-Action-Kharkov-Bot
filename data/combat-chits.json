@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Combat chit scans (scans/chits/comchit_<n>frt.png and comchit_<n>bck.png), transcribed by hand. dark: the three darker chits (12.42), green-tinted on the scans, confirmed by the dev.",
+  "source": "Combat chit scans (assets/chits/comchit_<n>frt.png and comchit_<n>bck.png), transcribed by hand. dark: the three darker chits (12.42), green-tinted on the scans, confirmed by the dev.",
   "chits": [
     { "id": 1,
       "front": {"printed": "≥4:1", "if": [{"type": "ratio", "atLeast": 4}], "hits": {"attacker": 1, "defender": 1}},

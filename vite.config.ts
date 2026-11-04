@@ -19,10 +19,11 @@ const PAGES_BASE = "/Enemy-Action-Kharkov-Bot/";
 
 /**
  * The pages read data/ and assets/ at run time (fetch, image URLs): copied beside the build,
- * without the dev-only booklet positions (data/saves/) nor the scans.
+ * without the dev-only booklet positions (data/saves/), the scans, nor the combat chit scans
+ * (assets/chits/, read by the dev-only chits tool).
  */
 function copyStaticFiles(): Plugin {
-  const skip = [page("data/saves"), page("assets/scans")];
+  const skip = [page("data/saves"), page("assets/scans"), page("assets/chits")];
   return {
     name: "copy-static-files",
     apply: "build",
