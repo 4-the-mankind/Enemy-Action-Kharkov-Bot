@@ -1547,7 +1547,7 @@
       "defenderAdjacentNo": "defender adjacent",
       "dispersedOrUnsupplied": "dispersed or unsupplied",
       "flank": "flank attack",
-      "large": "large attack ({{chits}} chits)",
+      "large": "large attack: {{chits}} needed",
       "ipCrossfire": "IP crossfire",
       "oneHex": "one-hex attack",
       "onlyArmor": {

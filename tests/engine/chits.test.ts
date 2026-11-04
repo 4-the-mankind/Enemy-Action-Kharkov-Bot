@@ -48,6 +48,9 @@ describe("Combat chit situations (12.41)", () => {
     expect(holds({ type: "large" }, facts({ drawn: 6 }))).toBe(true);
     expect(holds({ type: "large" }, facts({ kind: "sovietAttack", drawn: 6 }))).toBe(false);
     expect(holds({ type: "large" }, facts({ kind: "sovietAttack", drawn: 7 }))).toBe(true);
+    // The sheet names the chits needed, not the chits drawn.
+    expect(situationText({ type: "large" }, facts({ drawn: 3 })).params).toEqual({ chits: 6 });
+    expect(situationText({ type: "large" }, facts({ kind: "sovietAttack", drawn: 3 })).params).toEqual({ chits: 7 });
   });
 
   it("[GT 5+] Not Supported: Attack in a Soviet attack, Defender in a German one, Soviets in both", () => {

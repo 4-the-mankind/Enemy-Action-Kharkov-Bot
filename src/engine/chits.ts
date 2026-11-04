@@ -36,7 +36,8 @@ export interface ChitFacts {
 }
 
 /** Large Attack: seven chits in a Soviet attack, six in a German one (12.41). */
-export const largeAttack = (f: ChitFacts) => f.drawn >= (f.kind === "sovietAttack" ? 7 : 6);
+export const largeAttackChits = (f: ChitFacts) => (f.kind === "sovietAttack" ? 7 : 6);
+export const largeAttack = (f: ChitFacts) => f.drawn >= largeAttackChits(f);
 
 /** Whether a condition holds; null when it depends on what only the player knows (his card's command value). */
 export function holds(c: ChitCondition, f: ChitFacts): boolean | null {
@@ -134,7 +135,7 @@ export function situationText(c: ChitCondition, f: ChitFacts): Message {
     case "artillery": return msg(dynamicKey(`combat.situation.artillery.${c.side}`));
     case "onlyArmor": return msg(dynamicKey(`combat.situation.onlyArmor.${c.side}`));
     case "defenderAdjacent": return f.defenderAdjacent.length ? msg("combat.situation.defenderAdjacent", { units: f.defenderAdjacent }) : msg("combat.situation.defenderAdjacentNo");
-    case "large": return msg("combat.situation.large", { chits: f.drawn });
+    case "large": return msg("combat.situation.large", { chits: largeAttackChits(f) });
     case "commandValue": return msg("combat.situation.commandValue", { values: { list: c.values, separator: "comma" }, value: f.commandValue ?? "?" });
     case "notSupported": return msg(dynamicKey(`combat.situation.notSupported.${c.what}`));
     case "unknown": return msg("combat.situation.unknown");
