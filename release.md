@@ -5,6 +5,7 @@
 ### Fixes
 
 - **Combat sheet, Soviet losses:** only the unit that took the first hit had its counter; the other Soviet units hit were listed by name only.
+- **Combat sheet, decision steps:** under a Soviet reserve placement (or a loss or a tactic), the rule text of each step was squeezed into a narrow column, one word per line, beside its hexes; it now reads on full lines with the hexes after it.
 - **Bot tab, Next turn:** the card reading and the orders of the last Soviet impulse of the turn before stayed on show; the tab is now cleared when a new turn starts, as if the bot had not played yet.
 
 ### Improvements

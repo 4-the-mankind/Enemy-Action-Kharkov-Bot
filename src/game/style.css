@@ -1093,8 +1093,8 @@ body:not(.menu-open) .main-menu { display: none; }
 .combat-sheet .s-body h4 { margin: 10px 0 4px; font-size: 0.86rem; font-weight: 600; }
 
 .combat-sheet .lines { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
-.combat-sheet .lines li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
-.combat-sheet .lines li.plain { grid-template-columns: minmax(0, 1fr) auto; }
+.combat-sheet .lines > li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.combat-sheet .lines > li.plain { grid-template-columns: minmax(0, 1fr) auto; }
 .combat-sheet .lines img.card { width: 30px; border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); cursor: zoom-in; }
 .combat-sheet .lines img.unit { width: 30px; height: 30px; border-radius: 2px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.4); }
 .combat-sheet .lines .tag { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
