@@ -1,9 +1,9 @@
-# Task 5.7: the release branch is built and published on GitHub Pages; main is the development trunk.
+# Task 5.7: each version tag (vX.Y.Z) is built and published on GitHub Pages; main is the development trunk.
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [release]
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
