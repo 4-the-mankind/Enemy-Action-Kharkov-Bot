@@ -1357,10 +1357,35 @@
     "menu": "Menu"
   },
   "legend": {
-    "title": "Bot moves legend",
+    "title": "Map legend",
+    "group": {
+      "bot": "Bot moves",
+      "combat": "Combat",
+      "supply": "Supply",
+      "german": "Moving German units",
+      "pointer": "Pointer and selection"
+    },
     "trail": "Path a Soviet unit walked in the last activation. Clear trails removes it.",
     "chosen": "Current hex of the unit inspected in the bot decision details panel.",
-    "kept": "Hexes kept by the bot at the step pointed at in the bot decision details panel."
+    "kept": "Hexes kept by the bot at the step pointed at in the bot decision details panel.",
+    "sovietTarget": "Hex attacked by the Soviets.",
+    "targetChoice": "Hexes the Soviet attack may target: pick one on the combat sheet.",
+    "sovietArrows": "Soviet attackers, from their hexes into the hex attacked. Faded once the combat is over.",
+    "germanArrows": "German attackers, from their hexes into the hex attacked. Faded once the combat is over.",
+    "germanTarget": "Hex attacked by the Germans (the same outline as a pinned hex).",
+    "retreat": "Hexes open to the retreat, or to the German advance after combat.",
+    "kampfgruppe": "Range of the Kampfgruppe marker you are placing, darker on its hex.",
+    "supplyPath": "Supply path from the source to the units: staff red for the Soviets, Prussian blue for the Germans. Hover or pin a hex to bring its line forward and dim the others.",
+    "supplyRoute": "Supply route: the road from a road supply head to where it leaves the map.",
+    "supplyHead": "Supply head: the hex where the supply path ends.",
+    "reach": "Hexes the German units you carry may move to.",
+    "reachStrategic": "Hexes they reach only with strategic movement. Hold Alt to place them anywhere.",
+    "drop": "Hex where the units will be dropped.",
+    "dropRefused": "Drop refused: the reason shows by the pointer.",
+    "lifted": "Counter being carried.",
+    "hover": "Hex or hexside under the pointer.",
+    "pinned": "Hex or hexside pinned in the inspector.",
+    "selected": "Selected counter."
   },
   "home": {
     "title": "EA Kharkov Bot",

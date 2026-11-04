@@ -12,6 +12,8 @@
 
 ### Improvements
 
+- **Overlays tab, map legend:** the legend now explains every mark drawn on the map, in five groups: bot moves, combat (Soviet and German attacks, retreat and advance hexes, Kampfgruppe range), supply lines, moving German units (reachable hexes, drop hex, drop refused), pointer and selection. The Printed map, Units and Fit map buttons now sit above it.
+- **Right-hand panel tabs:** the tabs now read Bot, Combat, Log, Overlays.
 - **Combat sheet, Soviet losses:** every Soviet unit hit is shown with its counter (steps lost, unit eliminated).
 - **Combat sheet, 12.55 (Soviet Attacker Hit Reduction):** the note shows the calculation, e.g. "your units could absorb 4 of their 6 hits (retreat: 2 hexes, steps: 2): 4 − 2 = 2 Soviet hits".
 - **"Your turn" banner:** once the Soviet impulse is over and the bot's counters have moved, a "YOUR TURN" banner fades in and out across the middle of the map (2 s). It says when the Soviet draw pile is empty, stays away while a Soviet attack waits for its combat, and never blocks the map.

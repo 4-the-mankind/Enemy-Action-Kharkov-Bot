@@ -147,9 +147,9 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
         </button>
         <button type="button" class="folder-tab" role="tab" data-tab="bot" data-i18n="page.tab.bot"></button>
+        <button type="button" class="folder-tab combat-tab" role="tab" data-tab="combat" data-i18n="page.tab.combat" disabled></button>
         <button type="button" class="folder-tab" role="tab" data-tab="log" data-i18n="page.tab.log"></button>
         <button type="button" class="folder-tab" role="tab" data-tab="overlays" data-i18n="page.tab.overlays"></button>
-        <button type="button" class="folder-tab combat-tab" role="tab" data-tab="combat" data-i18n="page.tab.combat" disabled></button>
       </nav>
       <div class="dossier-body rail">
         <header class="panel-head">
@@ -178,17 +178,6 @@
         <section data-tabpanel="overlays" class="rail-section" data-i18n-aria-label="page.tab.overlays">
           <p class="hint" data-i18n="page.overlaysHint"></p>
           <ul id="layers" class="sheets"></ul>
-          <section class="legend" aria-labelledby="legendTitle">
-            <h2 id="legendTitle" data-i18n="legend.title"></h2>
-            <dl>
-              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polyline class="lg-trail" points="4,18 18,8 36,12" /><circle class="lg-origin" cx="4" cy="18" r="3.5" /></svg></dt>
-                <dd data-i18n="legend.trail"></dd></div>
-              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-chosen" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
-                <dd data-i18n="legend.chosen"></dd></div>
-              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-kept" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
-                <dd data-i18n="legend.kept"></dd></div>
-            </dl>
-          </section>
           <div class="view-controls">
             <button type="button" id="toggleImage" class="switch" aria-pressed="true" aria-keyshortcuts="m">
               <span data-i18n="page.printedMap"></span> <kbd>M</kbd>
@@ -198,6 +187,76 @@
             </button>
             <button type="button" id="fit" class="switch" aria-keyshortcuts="0"><span data-i18n="page.fitMap"></span> <kbd>0</kbd></button>
           </div>
+          <section class="legend" aria-labelledby="legendTitle">
+            <h2 id="legendTitle" data-i18n="legend.title"></h2>
+            <svg class="lg-defs" width="0" height="0" aria-hidden="true">
+              <filter id="lg-pastel" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="2" seed="4" result="wobble" />
+                <feDisplacementMap in="SourceGraphic" in2="wobble" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough" />
+                <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="9" result="grain" />
+                <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.15" result="tooth" />
+                <feComposite in="rough" in2="tooth" operator="in" />
+              </filter>
+              <pattern id="lg-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)"><line x1="1" y1="0" x2="1" y2="4" /></pattern>
+            </svg>
+            <h3 data-i18n="legend.group.bot"></h3>
+            <dl>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polyline class="lg-trail" points="4,18 18,8 36,12" /><circle class="lg-origin" cx="4" cy="18" r="3.5" /></svg></dt>
+                <dd data-i18n="legend.trail"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-chosen" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.chosen"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-kept" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.kept"></dd></div>
+            </dl>
+            <h3 data-i18n="legend.group.combat"></h3>
+            <dl>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-target" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.sovietTarget"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-target lg-choice" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.targetChoice"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-arrow soviet" points="4,9 24,9 24,4 37,12 24,20 24,15 4,15" /></svg></dt>
+                <dd data-i18n="legend.sovietArrows"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-arrow german" points="4,9 24,9 24,4 37,12 24,20 24,15 4,15" /></svg></dt>
+                <dd data-i18n="legend.germanArrows"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-pinned" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.germanTarget"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-retreat" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.retreat"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-kg" points="10,2 30,2 38,12 30,22 10,22 2,12" /><polygon class="lg-kg lg-kg-center" points="16,8 24,8 27,12 24,16 16,16 13,12" /></svg></dt>
+                <dd data-i18n="legend.kampfgruppe"></dd></div>
+            </dl>
+            <h3 data-i18n="legend.group.supply"></h3>
+            <dl>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><line class="lg-supply-path soviet" x1="3" y1="8" x2="37" y2="8" /><line class="lg-supply-path german" x1="3" y1="16" x2="37" y2="16" /></svg></dt>
+                <dd data-i18n="legend.supplyPath"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><line class="lg-supply-route soviet" x1="3" y1="8" x2="37" y2="8" /><line class="lg-supply-route german" x1="3" y1="16" x2="37" y2="16" /></svg></dt>
+                <dd data-i18n="legend.supplyRoute"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-supply-head" points="11,3 29,3 36.5,12 29,21 11,21 3.5,12" /><circle class="lg-supply-dot" cx="20" cy="12" r="3.5" /></svg></dt>
+                <dd data-i18n="legend.supplyHead"></dd></div>
+            </dl>
+            <h3 data-i18n="legend.group.german"></h3>
+            <dl>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-reach" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.reach"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-reach-strategic" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.reachStrategic"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-drop" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.drop"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-drop refused" points="10,2 30,2 38,12 30,22 10,22 2,12" /></svg></dt>
+                <dd data-i18n="legend.dropRefused"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><rect class="lg-counter lg-lifted" x="11" y="3" width="18" height="18" rx="2" /></svg></dt>
+                <dd data-i18n="legend.lifted"></dd></div>
+            </dl>
+            <h3 data-i18n="legend.group.pointer"></h3>
+            <dl>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-hover" points="10,2 30,2 38,12 30,22 10,22 2,12" /><line class="lg-hover-side" x1="30" y1="2" x2="38" y2="12" /></svg></dt>
+                <dd data-i18n="legend.hover"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><polygon class="lg-pinned" points="10,2 30,2 38,12 30,22 10,22 2,12" /><line class="lg-pinned-side" x1="30" y1="2" x2="38" y2="12" /></svg></dt>
+                <dd data-i18n="legend.pinned"></dd></div>
+              <div><dt><svg viewBox="0 0 40 24" aria-hidden="true"><rect class="lg-counter lg-selected" x="11" y="3" width="18" height="18" rx="2" /></svg></dt>
+                <dd data-i18n="legend.selected"></dd></div>
+            </dl>
+          </section>
         </section>
 
         <p id="status" class="status" role="status"></p>

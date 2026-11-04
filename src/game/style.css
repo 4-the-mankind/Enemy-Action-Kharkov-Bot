@@ -658,6 +658,36 @@ body:not(.menu-open) .main-menu { display: none; }
 .lg-origin { fill: var(--paper); stroke: var(--stab-red); stroke-width: 1.8; }
 .lg-chosen { fill: rgb(192 39 45 / 0.12); stroke: var(--stab-red); stroke-width: 2.2; stroke-linejoin: round; }
 .lg-kept { fill: rgb(38 46 41 / 0.08); stroke: var(--line); stroke-width: 1.4; stroke-dasharray: 4 2.6; stroke-linejoin: round; }
+.legend h3 { margin: 14px 0 6px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-dim); }
+.legend h2 + .lg-defs + h3 { margin-top: 0; }
+.lg-defs { position: absolute; }
+.lg-target { fill: rgb(192 39 45 / 0.10); stroke: var(--stab-red); stroke-width: 3; stroke-linejoin: round; filter: url(#lg-pastel); }
+.lg-target.lg-choice { fill: rgb(192 39 45 / 0.06); stroke-width: 2.6; stroke-dasharray: 6 4; }
+.lg-arrow { fill-opacity: 0.8; stroke: #fff; stroke-width: 1; stroke-linejoin: round; }
+.lg-arrow.soviet { fill: var(--stab-red); }
+.lg-arrow.german { fill: var(--prussian); }
+.lg-pinned { fill: none; stroke: var(--stab-red); stroke-width: 1.2; }
+.lg-pinned-side { stroke: var(--stab-red); stroke-width: 2.6; stroke-linecap: round; }
+.lg-retreat { fill: rgb(31 79 154 / 0.18); stroke: var(--prussian); stroke-width: 2; stroke-dasharray: 5 3; stroke-linejoin: round; }
+.lg-kg { fill: rgb(31 79 154 / 0.07); stroke: var(--prussian); stroke-width: 1.4; stroke-dasharray: 2.5 2.5; }
+.lg-kg.lg-kg-center { fill: rgb(31 79 154 / 0.22); }
+.lg-supply-path, .lg-supply-route { stroke-linecap: round; }
+.lg-supply-path { stroke-width: 3; stroke-dasharray: 4 3.3; }
+.lg-supply-route { stroke-width: 1.4; }
+.lg-supply-path.soviet, .lg-supply-route.soviet { stroke: var(--stab-red); }
+.lg-supply-path.german, .lg-supply-route.german { stroke: var(--prussian); }
+.lg-supply-head { fill: rgb(192 39 45 / 0.10); stroke: var(--stab-red); stroke-width: 1.8; stroke-linejoin: round; }
+.lg-supply-dot { fill: var(--stab-red); stroke: var(--paper); stroke-width: 1; }
+.lg-reach { fill: rgb(31 79 154 / 0.17); stroke: none; }
+.lg-reach-strategic { fill: url(#lg-hatch); stroke: none; }
+#lg-hatch line { stroke: rgb(31 79 154 / 0.42); stroke-width: 1.4; }
+.lg-drop { fill: rgb(38 46 41 / 0.1); stroke: var(--line); stroke-width: 1.2; }
+.lg-drop.refused { fill: rgb(192 39 45 / 0.15); stroke: var(--stab-red); }
+.lg-hover { fill: rgb(38 46 41 / 0.08); stroke: var(--line); stroke-width: 1; }
+.lg-hover-side { stroke: var(--line); stroke-width: 2.6; stroke-linecap: round; opacity: 0.8; }
+.lg-counter { fill: #8b8f78; }
+.lg-lifted { opacity: 0.25; }
+.lg-selected { stroke: #fff; stroke-width: 1.4; filter: drop-shadow(0 0 0.6px rgb(0 0 0 / 0.9)); }
 .sheet {
   --ink: var(--paper);
   width: 100%;
@@ -1246,8 +1276,9 @@ body.combat-shown .bot-options { display: none; }
 .reach.off { display: none; }
 .drop-label small { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
 
-/* A German attack: its sheet hemmed in Prussian blue. On the map no arrows (Q68, task 5.1b):
-   the hex attacked keeps the outline of a pinned hex, thin and staff red, until the combat ends. */
+/* A German attack: its sheet hemmed in Prussian blue. On the map the Soviet attack's arrows in
+   Prussian blue (Q127); the hex attacked keeps the outline of a pinned hex, thin and staff red,
+   until the combat ends (Q68). */
 .combat-sheet.german { --hem: var(--prussian); }
 .combat-sheet.german .current .n { box-shadow: 0 0 0 3px rgb(31 79 154 / 0.22); }
 .combat-marks .target.german { fill: none; stroke: var(--stab-red); stroke-width: 3; vector-effect: non-scaling-stroke; filter: none; }
