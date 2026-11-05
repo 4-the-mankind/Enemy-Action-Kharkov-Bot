@@ -183,6 +183,38 @@ describe("Your tactics in an attack (12.3, the aid)", () => {
   });
 });
 
+describe("The IP of a hex whose units all attack (14.24)", () => {
+  const engine = world({ units: [ger("g1", 3), ger("g2", 2), ger("g3", 2), sov("s1", "10")] });
+
+  it("removed at the declaration when all the units of the hex attack; back with CancelAttack", () => {
+    const s0 = game({ at: { g1: "0506", s1: "0505" }, extra: { improvedPositions: ["0506"] } });
+    const r = run(engine, s0, [{ type: "DeclareAttack", target: "0505", attackers: ["g1"] }]);
+    expect(r.state.improvedPositions).toEqual([]);
+    const [ip] = of(r.events, "ImprovedPositionSet");
+    expect(ip).toMatchObject({ hex: "0506", placed: false, rule: "14.24" });
+    expectMessage(ip.reason!, "ip.why.allAttack");
+    expect(engine.step(r.state, { type: "CancelAttack" }).state).toEqual(s0);
+  });
+
+  it("kept when a unit of the hex does not attack", () => {
+    const s0 = game({ at: { g1: "0506", g2: "0506", s1: "0505" }, extra: { improvedPositions: ["0506"] } });
+    const r = run(engine, s0, [{ type: "DeclareAttack", target: "0505", attackers: ["g1"] }]);
+    expect(r.state.improvedPositions).toEqual(["0506"]);
+    expect(of(r.events, "ImprovedPositionSet")).toEqual([]);
+  });
+
+  it("removed when Assault Coordination or Reinforce Battle brings all the units of the hex", () => {
+    const s0 = game({ at: { g1: "0506", g2: "0405", g3: "0605", s1: "0505" }, extra: { improvedPositions: ["0405"] } });
+    const a = run(engine, s0, [{ type: "DeclareAttack", target: "0505", attackers: ["g1"] }, { type: "CombatTactics", tactics: ["german-assault-coordination"] }]);
+    expect(a.state.improvedPositions).toEqual([]);
+    expect(of(a.events, "ImprovedPositionSet")).toMatchObject([{ hex: "0405", placed: false, rule: "14.24" }]);
+    // A stack already next to the hex joins by a drop on its own hex.
+    const b = run(engine, s0, [{ type: "DeclareAttack", target: "0505", attackers: ["g1", "g3"] }, { type: "MoveUnits", units: ["g2"], to: "0405" }]);
+    expect(b.state.combat!.reinforcing).toEqual(["g2"]);
+    expect(b.state.improvedPositions).toEqual([]);
+  });
+});
+
 describe("The Soviet card for the defense (12.3, the aid)", () => {
   const engine = world({
     units: [ger("g1", 3), ger("g2", 3), ger("g3", 3), ger("g4", 3), sov("s1", "10"), sov("i1", "05", { steps: 1 }), sov("r1", "03"), sov("r2", "02")],
@@ -273,6 +305,20 @@ describe("The Soviet card for the defense (12.3, the aid)", () => {
     const done = play(engine, h, { type: "CombatHits", german: 0, soviet: 3, commandValue: 2 }).state;
     expect(done.combat!.hits!.sovietAdjustments.map((a) => [a.text.key, a.value])).toEqual([["combat.adj.ip", -1], ["combat.adj.sovietIntelligence", -1]]);
     expect(done.combat!.germanCommandValue).toBe(2);
+  });
+
+  it("Intelligence (E04): the IPs removed by the units your tactics brought come back (14.24, Q63)", () => {
+    const s0 = game({ at: { g1: "0506", g4: "0405", s1: "0505", g2: "0508", g3: "0806" }, pile: ["e04"], extra: { improvedPositions: ["0405", "0508"] } });
+    const r = run(engine, s0, [
+      { type: "DeclareAttack", target: "0505", attackers: ["g1"] },
+      { type: "MoveUnits", units: ["g2"], to: "0605" },
+      { type: "CombatTactics", tactics: ["german-assault-coordination", "german-reinforce-battle"] },
+    ]);
+    expect(r.state.combat!.attackers).toEqual(["g1"]);
+    expect([...r.state.improvedPositions!].sort()).toEqual(["0405", "0508"]);
+    const back = of(r.events, "ImprovedPositionSet").filter((e) => e.placed);
+    expect(back.map((e) => e.hex).sort()).toEqual(["0405", "0508"]);
+    for (const e of back) expectMessage(e.reason!, "ip.why.attackersCancelled");
   });
 
   it("Re-use (E10, 12.32): the card goes back into the pile, shuffled, at the end of the combat", () => {

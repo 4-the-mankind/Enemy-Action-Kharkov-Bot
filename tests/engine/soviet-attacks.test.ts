@@ -400,6 +400,16 @@ describe("Improved Positions (9.7, 14.2)", () => {
     const kept = play(w, { at: { ...at, x: "0504" }, extra: { improvedPositions: ["0504"] } }, { units: ["a", "b", "c"] });
     expect(kept.state.improvedPositions).toEqual(["0504"]);
   });
+
+  it("removed when Assault Coordination brings all the units of its hex into the attack (14.24)", () => {
+    const w = { units: [sov("a", "01", { combatValue: 10 }), sov("n", "02", { armyOrCorps: "1G" }), ger("g", 4)] };
+    const r = play(w, { at: { a: "0504", n: "0404", g: "0505" }, extra: { improvedPositions: ["0404"] } }, { units: ["a"] }, "e07");
+    expect(r.state.combat!.joined).toEqual(["n"]);
+    expect(r.state.improvedPositions).toEqual([]);
+    const [ip] = of(r.events, "ImprovedPositionSet");
+    expect(ip).toMatchObject({ hex: "0404", placed: false, rule: "14.24" });
+    expectMessage(ip.reason, "ip.why.allAttack");
+  });
 });
 
 describe("Undisperse (step 7, 12.9)", () => {

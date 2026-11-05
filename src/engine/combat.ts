@@ -309,6 +309,7 @@ export function createCombat(data: CombatData) {
       for (const u of units) c.from[u] = state.units[u].at;
       c.attackers = [...c.attackers, ...units];
       c.joined = [...c.joined, ...units];
+      state = dropAttackerIps(state, c.attackers, events);
     } else if (t.tactic === "soviet-reinforce-battle") {
       const r = reinforce(state, act, c);
       state = r.state;
@@ -317,6 +318,7 @@ export function createCombat(data: CombatData) {
       for (const u of r.units) c.from[u] = state.units[u].at;
       c.attackers = [...c.attackers, ...r.units];
       c.joined = [...c.joined, ...r.units];
+      state = dropAttackerIps(state, c.attackers, events);
     } else if (t.tactic === "soviet-combat-engineer" && hasIp(state, c.target)) {
       const r = data.setImprovedPosition(state, c.target, false);
       state = r.state;
@@ -445,13 +447,23 @@ export function createCombat(data: CombatData) {
     };
     const n = chitCount(state, c);
     c.chits = { min: n.min, max: n.max };
-    return {
-      state: { ...state, combat: c },
-      events: [
-        { type: "GermanAttackDeclared", target, attackers: ids, defenders, german: germanAttackStrength(state, c), soviet: Math.max(defenseStrength(state, c), 0) },
-        { type: "CombatStarted", combat: c },
-      ],
-    };
+    const events: GameEvent[] = [
+      { type: "GermanAttackDeclared", target, attackers: ids, defenders, german: germanAttackStrength(state, c), soviet: Math.max(defenseStrength(state, c), 0) },
+    ];
+    state = dropAttackerIps(state, ids, events);
+    events.push({ type: "CombatStarted", combat: c });
+    return { state: { ...state, combat: c }, events };
+  }
+
+  /** 14.24: the IP of a hex whose units all attack is removed at once. */
+  function dropAttackerIps(state: GameState, attackers: string[], events: GameEvent[]): GameState {
+    for (const hex of new Set(attackers.filter((a) => onMap(state, a)).map((a) => state.units[a].at))) {
+      if (!hasIp(state, hex) || !attacks.unitsIn(state, hex, sideOf(attackers[0])).every((u) => attackers.includes(u))) continue;
+      const r = data.setImprovedPosition(state, hex, false);
+      state = r.state;
+      events.push(...r.events.map((e) => (e.type === "ImprovedPositionSet" ? { ...e, rule: "14.24", reason: msg("ip.why.allAttack") } : e)));
+    }
+    return state;
   }
 
   /**
@@ -506,6 +518,7 @@ export function createCombat(data: CombatData) {
     const playedEvent: GameEvent = { type: "GermanTacticsPlayed", target: c.target, tactics: unique };
     if (next.joined.length) playedEvent.joined = next.joined;
     const events: GameEvent[] = [playedEvent];
+    if (joined.length) state = dropAttackerIps(state, next.attackers, events);
     // Combat Engineer: the defenders' IP is removed before the combat (the aid).
     if (unique.includes("german-combat-engineer") && hasIp(state, c.target)) {
       const r = data.setImprovedPosition(state, c.target, false);
@@ -545,7 +558,9 @@ export function createCombat(data: CombatData) {
     for (const id of ids) next.from[id] = to;
     const n = chitCount(r.state, next);
     next.chits = { min: n.min, max: n.max };
-    return { state: { ...r.state, combat: next }, events: r.events };
+    const events = [...r.events];
+    const state2 = dropAttackerIps(r.state, next.attackers, events);
+    return { state: { ...state2, combat: next }, events };
   }
 
   // ---- Step 3: the Soviet card for the defense (12.3, 12.39)
@@ -679,6 +694,8 @@ export function createCombat(data: CombatData) {
 
   /** Soviet Intelligence in defense (Q63): the German tactics cancelled, the units they brought out of the attack, the Reinforce Battle stack back. */
   function cancelGermanTactics(state: GameState, c: Combat, cancelled: string[], events: GameEvent[]): GameState {
+    // Hexes where the units brought by the tactics may have removed an IP (14.24).
+    const left = new Set([...c.joined.filter((id) => onMap(state, id)).map((id) => state.units[id].at), ...(c.reinforceFrom ? [c.reinforceFrom] : [])]);
     const back = c.reinforcing.filter((id) => c.reinforceFrom && state.units[id].at !== c.reinforceFrom);
     if (back.length) {
       const r = data.move(state, back, c.reinforceFrom!);
@@ -691,6 +708,14 @@ export function createCombat(data: CombatData) {
     c.joined = [];
     c.reinforcing = [];
     delete c.reinforceFrom;
+    // Their IPs come back where the units left are not all attackers (Q63: as if the card had not been played).
+    for (const hex of left) {
+      const here = germansIn(state, hex);
+      if (!c.before?.improvedPositions?.includes(hex) || hasIp(state, hex) || !here.length || here.every((u) => c.attackers.includes(u))) continue;
+      const r = data.setImprovedPosition(state, hex, true);
+      state = r.state;
+      events.push(...r.events.map((e) => (e.type === "ImprovedPositionSet" ? { ...e, rule: "14.24", reason: msg("ip.why.attackersCancelled") } : e)));
+    }
     // The IP your Combat Engineer removed comes back.
     if (cancelled.includes("german-combat-engineer") && c.before?.improvedPositions?.includes(c.target) && !hasIp(state, c.target)) {
       const r = data.setImprovedPosition(state, c.target, true);

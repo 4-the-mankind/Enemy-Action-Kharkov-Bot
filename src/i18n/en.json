@@ -550,6 +550,7 @@
       "germanEngineers": "your Combat Engineer tactic",
       "germanEngineersAttack": "your Combat Engineer removes it",
       "engineersCancelled": "your Combat Engineer is cancelled: the IP comes back",
+      "attackersCancelled": "the units your tactics brought leave the attack: the IP comes back",
       "sovietEngineersDefense": "Soviet Combat Engineer"
     }
   },
