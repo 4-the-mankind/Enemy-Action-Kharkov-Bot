@@ -102,6 +102,7 @@ Then the Soviet units move one after the other. **Replay all moves** plays the w
 <img width="400" alt="05-bot-impulse" src="https://github.com/user-attachments/assets/edf235de-d784-4f7f-bf7d-7fccbaaf0e40" />
 
 In the Bot tab, **click a unit** (1) to see why it moved there: the method, then each preference and tie-break with the hexes it kept. **Point at a step** (2) and the map outlines the hexes it kept.
+![Uploading 05b-decision.png…]()
 
 <!-- MEDIA 05b-decision.png -->
 
