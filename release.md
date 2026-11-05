@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- **German combat tactics, Airpower and Artillery:** they are now two tactics, each with its own checkbox on the combat sheet. Before, a single "Airpower and Artillery" tactic counted as both, so a combat chit naming Artillery applied when only Airpower was played, and the reverse.
 - **Counter menu, Place Improved Position:** the option is now greyed where no Improved Position may go: a town or city hex, or a hex whose units are all dispersed, out of supply or isolated (or, from Game-turn 5, Soviet units outside Soviet support). A unit stacked with an eligible unit may still receive one. Before, clicking it in a town or city did nothing, and it placed one on ineligible units.
 
 ### Improvements

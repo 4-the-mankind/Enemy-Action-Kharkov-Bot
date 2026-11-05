@@ -281,7 +281,7 @@ export function mountCombatPanel(root: HTMLElement, session: GameSession, plane:
     if (!x.applies) return [t("combatSheet.tactics.noBenefit", { why: x.reason ?? msg("combatSheet.sum.none") })];
     const terrain = engine.combat.view(session.state)?.terrain ?? "clear";
     switch (x.tactic) {
-      case "soviet-airpower-artillery": return [t("combatSheet.defense.effect.chits", { name: x.name })];
+      case "soviet-airpower": case "soviet-artillery": return [t("combatSheet.defense.effect.chits", { name: x.name })];
       case "soviet-fixed-artillery": return [t("combatSheet.defense.effect.chits", { name: "Artillery" })];
       case "soviet-nkvd": return [t("combatSheet.defense.effect.nkvd")];
       case "soviet-partisans":

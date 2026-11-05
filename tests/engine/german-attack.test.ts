@@ -249,11 +249,11 @@ describe("The Soviet card for the defense (12.3, the aid)", () => {
     const r = run(engine, s0, [
       { type: "DeclareAttack", target: "0505", attackers: ["g1"] },
       { type: "MoveUnits", units: ["g2"], to: "0605" },
-      { type: "CombatTactics", tactics: ["german-assault-coordination", "german-combat-engineer", "german-reinforce-battle", "german-airpower-artillery"] },
+      { type: "CombatTactics", tactics: ["german-assault-coordination", "german-combat-engineer", "german-reinforce-battle", "german-airpower", "german-artillery"] },
     ]);
     const c = r.state.combat!;
     expect(c.tactics[0]).toMatchObject({ name: "Intelligence", applies: true });
-    expect(c.tactics[0].cancelled).toEqual(["german-assault-coordination", "german-combat-engineer", "german-reinforce-battle", "german-airpower-artillery"]);
+    expect(c.tactics[0].cancelled).toEqual(["german-assault-coordination", "german-combat-engineer", "german-reinforce-battle", "german-airpower", "german-artillery"]);
     expect(c.attackers).toEqual(["g1"]);
     expect(c.joined).toEqual([]);
     // The Reinforce Battle stack is back in its hex; the IP back on the Soviets.
@@ -561,12 +561,24 @@ describe("More of the Soviet card, the chits and the situations (12.3, 12.39, 12
 
   it("the situations: the chits declared make a large attack (6 or more); Defender Adjacent names the Soviet neighbours", () => {
     const s = play(engine, game({ at: { ...at, n1: "0504" }, pile: [] }), { type: "DeclareAttack", target: "0505", attackers: ["g1", "g2", "g3"] }).state;
-    const c = play(engine, s, { type: "CombatTactics", tactics: ["german-airpower-artillery", "german-intelligence", "german-panzer-battalion"] }).state;
+    const c = play(engine, s, { type: "CombatTactics", tactics: ["german-airpower", "german-artillery", "german-intelligence", "german-panzer-battalion"] }).state;
     const holds = (chits: number) => engine.combat.view(c, { chits })!.situations.filter((x) => x.applies).map((x) => x.text.key);
     expect(holds(6)).toContain("combat.situation.large");
     expect(holds(5)).not.toContain("combat.situation.large");
     expect(holds(5)).toEqual(expect.arrayContaining(["combat.situation.airpower.german", "combat.situation.artillery.attacker", "combat.situation.flank", "combat.situation.onlyArmor.attacker", "combat.situation.yourCommandValue"]));
     expect(engine.combat.view(c, { chits: 5 })!.situations.find((x) => x.text.key === "combat.situation.defenderAdjacent")!.text.params).toEqual({ units: ["n1"] });
+  });
+
+  it("Airpower and Artillery: two tactics, each its own chit condition (Q137)", () => {
+    const s = play(engine, game({ at, pile: [] }), { type: "DeclareAttack", target: "0505", attackers: ["g1", "g2"] }).state;
+    const holds = (tactic: string) => {
+      const c = play(engine, s, { type: "CombatTactics", tactics: [tactic] }).state;
+      return engine.combat.view(c, { chits: 3 })!.situations.filter((x) => x.applies).map((x) => x.text.key);
+    };
+    expect(holds("german-airpower")).toContain("combat.situation.airpower.german");
+    expect(holds("german-airpower")).not.toContain("combat.situation.artillery.attacker");
+    expect(holds("german-artillery")).toContain("combat.situation.artillery.attacker");
+    expect(holds("german-artillery")).not.toContain("combat.situation.airpower.german");
   });
 
   it("STAVKA (E22) on turn 7: removed from the game at the clean-up (8.2, Q27)", () => {

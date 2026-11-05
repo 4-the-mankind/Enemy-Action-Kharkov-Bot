@@ -85,7 +85,8 @@
       "south": "south"
     },
     "tactic": {
-      "german-airpower-artillery": "Airpower and Artillery",
+      "german-airpower": "Airpower",
+      "german-artillery": "Artillery",
       "german-battlefield-replacements": "Battlefield Replacements",
       "german-combat-engineer": "Combat Engineer",
       "german-intelligence": "Intelligence",
@@ -2195,11 +2196,11 @@
       "ratioBelow": "attack strength less than {{ratio}} times the defense strength",
       "terrain": "defender in a {{terrain}} hex",
       "airpower": {
-        "german": "the German Airpower and Artillery tactic was played, attacking or defending",
+        "german": "the German Airpower tactic was played, attacking or defending",
         "soviet": "a Soviet Airpower tactic applies, attacking or defending"
       },
       "artillery": {
-        "attacker": "the attacker applies Artillery (Soviet: Artillery, Fixed Artillery or the barrage of GT 1-2; German: Airpower and Artillery)",
+        "attacker": "the attacker applies Artillery (Soviet: Artillery, Fixed Artillery or the barrage of GT 1-2; German: Artillery)",
         "defender": "the defender applies Artillery (same tactics)"
       },
       "combatEngineers": "the attacker (only) played Combat Engineers",

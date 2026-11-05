@@ -9,7 +9,7 @@
         { "kind": "event", "event": "soviet-command-delay", "turns": "1-3", "text": "Event: Command Delay" },
         { "kind": "event", "event": "soviet-air-supply", "turns": "4-7", "text": "Event: Air Supply" }
       ],
-      "tactics": [{ "name": "Artillery", "tactic": "soviet-airpower-artillery" }],
+      "tactics": [{ "name": "Artillery", "tactic": "soviet-artillery" }],
       "reuse": true
     },
     {
@@ -20,7 +20,7 @@
         { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
       ],
       "tactics": [
-        { "name": "Airpower", "tactic": "soviet-airpower-artillery" },
+        { "name": "Airpower", "tactic": "soviet-airpower" },
         { "name": "Partisans", "tactic": "soviet-partisans" }
       ],
       "reuse": false
@@ -56,7 +56,7 @@
       ],
       "tactics": [
         { "name": "Reinforce Battle", "tactic": "soviet-reinforce-battle" },
-        { "name": "Artillery", "tactic": "soviet-airpower-artillery" }
+        { "name": "Artillery", "tactic": "soviet-artillery" }
       ],
       "reuse": false
     },
@@ -89,7 +89,7 @@
         { "kind": "activateArmy", "army": "69", "text": "Activate all units in Army" },
         { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
       ],
-      "tactics": [{ "name": "Airpower", "tactic": "soviet-airpower-artillery" }],
+      "tactics": [{ "name": "Airpower", "tactic": "soviet-airpower" }],
       "reuse": false
     },
     {
@@ -148,7 +148,7 @@
         { "kind": "activateArmy", "army": "40", "text": "Activate all units in Army" },
         { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
       ],
-      "tactics": [{ "name": "Artillery", "tactic": "soviet-airpower-artillery" }],
+      "tactics": [{ "name": "Artillery", "tactic": "soviet-artillery" }],
       "reuse": false
     },
     {
@@ -215,8 +215,8 @@
         { "kind": "event", "event": "soviet-forward-support", "turns": "5+", "text": "Event: Forward Support" }
       ],
       "tactics": [
-        { "name": "Artillery", "tactic": "soviet-airpower-artillery" },
-        { "name": "Airpower", "tactic": "soviet-airpower-artillery" }
+        { "name": "Artillery", "tactic": "soviet-artillery" },
+        { "name": "Airpower", "tactic": "soviet-airpower" }
       ],
       "reuse": false
     },
@@ -244,7 +244,7 @@
       ],
       "tactics": [
         { "name": "Intelligence", "tactic": "soviet-intelligence" },
-        { "name": "Airpower", "tactic": "soviet-airpower-artillery" },
+        { "name": "Airpower", "tactic": "soviet-airpower" },
         { "name": "Reinforce Battle", "tactic": "soviet-reinforce-battle" }
       ],
       "reuse": false,

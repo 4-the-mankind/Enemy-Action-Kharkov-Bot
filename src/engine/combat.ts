@@ -39,7 +39,7 @@ import {
 
 /** German combat tactics that may aid a defense (data/combat-tactics.json; Assault Coordination is for attacks only). */
 export const GERMAN_DEFENSE_TACTICS = [
-  "german-airpower-artillery", "german-battlefield-replacements", "german-combat-engineer", "german-intelligence",
+  "german-airpower", "german-artillery", "german-battlefield-replacements", "german-combat-engineer", "german-intelligence",
   "german-panzer-battalion", "german-pull-out", "german-screen", "german-reinforce-battle",
 ] as const;
 export type GermanDefenseTactic = (typeof GERMAN_DEFENSE_TACTICS)[number];
@@ -49,7 +49,7 @@ export type GermanDefenseTactic = (typeof GERMAN_DEFENSE_TACTICS)[number];
  * Battlefield Replacements, Pull Out and Screen are for the defense).
  */
 export const GERMAN_ATTACK_TACTICS = [
-  "german-airpower-artillery", "german-assault-coordination", "german-combat-engineer", "german-intelligence",
+  "german-airpower", "german-artillery", "german-assault-coordination", "german-combat-engineer", "german-intelligence",
   "german-panzer-battalion", "german-reinforce-battle",
 ] as const;
 export type GermanAttackTactic = (typeof GERMAN_ATTACK_TACTICS)[number];
@@ -246,7 +246,7 @@ export function createCombat(data: CombatData) {
     switch (t.tactic) {
       case "soviet-partisans": return msg("combat.tactic.no.partisans");
       case "soviet-fixed-artillery": return msg(state.turn <= 2 && attacks.inBarrageZone(c.target) ? "combat.tactic.no.barrage" : "combat.tactic.no.far");
-      case "soviet-airpower-artillery": return msg("combat.tactic.no.barrage");
+      case "soviet-artillery": return msg("combat.tactic.no.barrage");
       case "soviet-reinforce-battle": return msg("combat.tactic.no.reinforce");
       case "soviet-nkvd": return msg("combat.tactic.no.stavka");
       case "soviet-combat-engineer": return msg("combat.tactic.no.townCity");
@@ -355,7 +355,7 @@ export function createCombat(data: CombatData) {
     const supported = attacks.supported(state, attacks.hexesOf(state, c.attackers), c.target);
     // Known in advance and counted from step 1 (Q42), only in an attack in support (13.52).
     if (supported && state.turn <= 2 && attacks.inBarrageZone(c.target))
-      c.tactics.push({ source: "barrage", tactic: "soviet-airpower-artillery", name: "Artillery", chits: 1, applies: true });
+      c.tactics.push({ source: "barrage", tactic: "soviet-artillery", name: "Artillery", chits: 1, applies: true });
     if (supported && act.nkvd) c.tactics.push({ source: "stavka", tactic: "soviet-nkvd", name: "NKVD", chits: 1, applies: true });
     if (overwhelming(state, c)) c.noCard = msg("combat.noCard.overwhelming");
     else if (!supported) c.noCard = msg("combat.noCard.unsupported");
@@ -708,8 +708,8 @@ export function createCombat(data: CombatData) {
       const entry: CombatTactic = { source: "card", card: id, tactic: t.tactic, name: t.name, chits: 0, applies: true };
       const no = (why: Message) => { entry.applies = false; entry.reason = why; };
       switch (t.tactic) {
-        case "soviet-airpower-artillery":
-          if (t.name === "Artillery" && barrage) no(msg("combat.tactic.no.barrageZone"));
+        case "soviet-artillery":
+          if (barrage) no(msg("combat.tactic.no.barrageZone"));
           break;
         case "soviet-fixed-artillery":
           if (!attacks.fixedArtilleryApplies(state, c.target)) no(msg(barrage ? "combat.tactic.no.barrageZone" : "combat.tactic.no.far"));
@@ -1645,8 +1645,8 @@ export function createCombat(data: CombatData) {
 
   /** 12.41 in a Soviet attack: what the combat chits look at. */
   function sovietFacts(state: GameState, c: Combat): ChitFacts {
-    const art = (n: string) => c.tactics.some((x) => x.applies && (x.tactic === "soviet-fixed-artillery" ? n === "Artillery" : x.name === n));
-    const german = played(c, "german-airpower-artillery");
+    const soviet = (...ids: string[]) => c.tactics.some((x) => x.applies && ids.includes(x.tactic));
+    const german = (id: GermanDefenseTactic) => played(c, id);
     const neighbors = board.neighbors(c.target).filter((n) => board.areAdjacent(c.target, n.hex)).flatMap((n) => germansIn(state, n.hex))
       .filter((g) => !state.units[g].dispersed && status(state, g) === "supplied" && !(state.attackedThisImpulse ?? []).includes(g));
     const defs = defendersIn(state, c);
@@ -1654,7 +1654,8 @@ export function createCombat(data: CombatData) {
     return {
       kind: "sovietAttack", turn: state.turn,
       attack: sovietStrength(state, c), defense: Math.max(defenseStrength(state, c), 0), terrain: terrainOf(c.target),
-      airpower: { german, soviet: art("Airpower") }, artillery: { attacker: art("Artillery"), defender: german },
+      airpower: { german: german("german-airpower"), soviet: soviet("soviet-airpower") },
+      artillery: { attacker: soviet("soviet-artillery", "soviet-fixed-artillery"), defender: german("german-artillery") },
       combatEngineers: applied(c, "soviet-combat-engineer"),
       defenderAdjacent: neighbors.map(name),
       dispersedOrUnsupplied: defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"),
@@ -1668,8 +1669,8 @@ export function createCombat(data: CombatData) {
 
   /** 12.41 in a German attack: what the combat chits look at. `drawn`: chits drawn in all. */
   function germanFacts(state: GameState, c: Combat, drawn: number): ChitFacts {
-    const art = (n: string) => c.tactics.some((x) => x.applies && (x.tactic === "soviet-fixed-artillery" ? n === "Artillery" : x.tactic === "soviet-airpower-artillery" && x.name === n));
-    const german = played(c, "german-airpower-artillery");
+    const soviet = (...ids: string[]) => c.tactics.some((x) => x.applies && ids.includes(x.tactic));
+    const german = (id: GermanAttackTactic) => played(c, id);
     // Defender Adjacent: a Soviet unit next to the hex, supplied, undispersed, not attacked yet in this impulse; [GT 5+] both in support.
     const neighbors = board.neighbors(c.target).filter((n) => board.areAdjacent(c.target, n.hex) && rules.inSovietSupport(state, c.target) && rules.inSovietSupport(state, n.hex))
       .flatMap((n) => attacks.unitsIn(state, n.hex, "soviet"))
@@ -1680,7 +1681,8 @@ export function createCombat(data: CombatData) {
       kind: "germanAttack", turn: state.turn,
       attack: c.strengths?.german ?? germanAttackStrength(state, c), defense: c.strengths?.soviet ?? Math.max(defenseStrength(state, c), 0),
       terrain: terrainOf(c.target),
-      airpower: { german, soviet: art("Airpower") }, artillery: { attacker: german, defender: art("Artillery") },
+      airpower: { german: german("german-airpower"), soviet: soviet("soviet-airpower") },
+      artillery: { attacker: german("german-artillery"), defender: soviet("soviet-artillery", "soviet-fixed-artillery") },
       combatEngineers: played(c, "german-combat-engineer"),
       defenderAdjacent: neighbors.map(name),
       dispersedOrUnsupplied: defs.length > 0 && defs.every((x) => state.units[x].dispersed || status(state, x) !== "supplied"),

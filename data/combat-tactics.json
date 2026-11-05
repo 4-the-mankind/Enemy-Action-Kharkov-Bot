@@ -1,12 +1,18 @@
 {
   "version": 1,
-  "source": "Player aid 'Combat Tactics' (assets/scans/combat tactics.png). Text verbatim; game-turn badges written as [GT n] like docs/rules-german-solo.md.",
+  "source": "Player aid 'Combat Tactics' (assets/scans/combat tactics.png). Text verbatim, except Airpower and Artillery: printed as one tactic, two tactics with the same effect (Q137). Game-turn badges written as [GT n] like docs/rules-german-solo.md.",
   "tactics": [
     {
-      "id": "german-airpower-artillery",
+      "id": "german-airpower",
       "side": "german",
-      "name": "Airpower and Artillery",
-      "text": "Airpower and Artillery aid the attacker or defender, each time the tactic is named on a drawn combat chit."
+      "name": "Airpower",
+      "text": "Airpower aids the attacker or defender, each time the tactic is named on a drawn combat chit."
+    },
+    {
+      "id": "german-artillery",
+      "side": "german",
+      "name": "Artillery",
+      "text": "Artillery aids the attacker or defender, each time the tactic is named on a drawn combat chit."
     },
     {
       "id": "german-assault-coordination",
@@ -62,10 +68,16 @@
       "text": "Select one active or inactive stack that did not move or attack in the current activation that could reach the combat in a single move to participate in the combat. The selected units must be supplied, undispersed and in the same army as a unit in the combat. A defending unit adjacent to an active enemy unit can't reinforce. A reinforcing attacking unit/stack moves adjacent to the hex under attack if not already there, and may split up. A reinforcing defending unit/stack moves into the hex with the defending units. Obey stacking limits."
     },
     {
-      "id": "soviet-airpower-artillery",
+      "id": "soviet-airpower",
       "side": "soviet",
-      "name": "Airpower and Artillery",
-      "text": "Airpower and Artillery aid when attacking or defending, each time the tactic is named on a drawn combat chit.",
+      "name": "Airpower",
+      "text": "Airpower aids when attacking or defending, each time the tactic is named on a drawn combat chit."
+    },
+    {
+      "id": "soviet-artillery",
+      "side": "soviet",
+      "name": "Artillery",
+      "text": "Artillery aids when attacking or defending, each time the tactic is named on a drawn combat chit.",
       "restriction": "[GT 1-2] Artillery does not apply in the Artillery Barrage zone."
     },
     {

@@ -323,7 +323,7 @@ export function createSovietAttacks({ board, movement, unit, rules, card, far, m
   function tacticApplies(state: GameState, act: SovietActivation, t: CardTactic, target: string, inAttack: string[]): boolean {
     const barrage = state.turn <= 2 && inBarrageZone(target);
     switch (t.tactic) {
-      case "soviet-airpower-artillery": return t.name !== "Artillery" || !barrage;
+      case "soviet-artillery": return !barrage;
       case "soviet-fixed-artillery": return fixedArtilleryApplies(state, target);
       case "soviet-partisans": return terrainOf(target) === "woods" || isTownOrCity(target);
       case "soviet-reinforce-battle": return reinforcements(state, act, target, inAttack).length > 0;
