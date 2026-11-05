@@ -101,6 +101,8 @@ export interface Engine {
   readonly germanMoves: Pick<GermanMoves, "checked" | "reach">;
   /** Why the player may not give this German unit a replacement step (16, Q76), or null. */
   whyNotReplace(state: GameState, unitId: string): Message | null;
+  /** Why an Improved Position may not be placed in this hex (14.22), or null. */
+  whyNotImprovedPosition(state: GameState, hex: string): Message | null;
   /** Why a garrison marker may not be placed (or removed) there by hand (15, Q74), or null. */
   whyNotGarrison(state: GameState, hex: string, placed: boolean): Message | null;
   /** Why the player may not play this German event now (Q77), or null; Air Interdiction names the marker's hex. */
@@ -738,7 +740,25 @@ export function createEngine(data: EngineData): Engine {
     return { state: { ...state, forwardSupport: unique }, events: [{ type: "ForwardSupportSet", hexes: unique }] };
   }
 
-  // 14.2: an IP marker on a hex with units, never in a town or city (14.22).
+  /**
+   * Why an IP marker may not be placed in this hex (14.22), or null: a town or city, no unit,
+   * or no eligible unit (all dispersed, out of supply or isolated, [GT 5+] Soviet units outside
+   * Soviet support). A hex that already has one is not refused: placing it again does nothing.
+   */
+  function whyNotImprovedPosition(state: GameState, hex: string): Message | null {
+    if (!data.board.isPlayable(hex)) return msg("reject.notPlayable", { hex });
+    const t = data.board.hex(hex).terrain;
+    if (t === "town" || t === "city") return msg("reject.ipTownCity", { hex });
+    const here = Object.keys(state.units).filter((id) => state.units[id].at === hex);
+    if (!here.length) return msg("reject.ipNoUnit", { hex });
+    const eligible = (id: string) => !state.units[id].dispersed && rules.supplyStatus(state, id) === "supplied"
+      && (byId.get(id)?.side !== "soviet" || rules.inSovietSupport(state, hex));
+    return here.some(eligible) ? null : msg("reject.ipUnfit", { hex });
+  }
+
+  // 14.2: an IP marker on a hex with units, never in a town or city (14.22). The player's
+  // command also checks the units of the hex (whyNotImprovedPosition); the combat sheet and the
+  // bot check their own conditions first.
   function setImprovedPosition(state: GameState, hex: string, placed: boolean): StepResult {
     if (!data.board.isPlayable(hex)) return reject(state, "SetImprovedPosition", msg("reject.notPlayable", { hex }));
     const ips = state.improvedPositions ?? [];
@@ -904,8 +924,10 @@ export function createEngine(data: EngineData): Engine {
         return setSupplyStatus(state, command.units, command.status);
       case "SetForwardSupport":
         return setForwardSupport(state, command.hexes);
-      case "SetImprovedPosition":
-        return setImprovedPosition(state, command.hex, command.placed);
+      case "SetImprovedPosition": {
+        const why = command.placed && !state.improvedPositions?.includes(command.hex) ? whyNotImprovedPosition(state, command.hex) : null;
+        return why ? reject(state, "SetImprovedPosition", why) : setImprovedPosition(state, command.hex, command.placed);
+      }
       case "ActivateFormation":
         return activateFormation(state, command.army);
       case "DeclareAttack":
@@ -966,6 +988,7 @@ export function createEngine(data: EngineData): Engine {
     germanMoves: { checked: germanMoves.checked, reach: germanMoves.reach },
     whyNotReplace: (state, id) => locked(state) ?? replacements.whyNotGerman(state, id),
     whyNotGarrison: (state, hex, placed) => locked(state) ?? whyNotGarrison(state, hex, placed),
+    whyNotImprovedPosition: (state, hex) => locked(state) ?? whyNotImprovedPosition(state, hex),
     whyNotGermanEvent: (state, event, hex) => locked(state) ?? germanEvents.whyNot(state, event, hex),
     whyNotDrop,
     unit: (id) => byId.get(id),

@@ -1,6 +1,6 @@
 // Counter context menu (L, §3bis), on a right-click on a counter of the map or a row of the
 // inspector stack: Remove step (the counter flips), Eliminate (last step only), Dispersed
-// marker on or off, Improved Position of its hex (14.2), supply marker (13.2: Air Resupply
+// marker on or off, Improved Position of its hex (14.2; greyed where 14.22 forbids one), supply marker (13.2: Air Resupply
 // 13.4, corrections; task 4.3b). Outside combat it is a manual correction; it also records
 // the reductions of a set-up adjustment (2.4). In a combat (4.5a), a unit's step losses follow
 // the rules (12.6, 12.61): the menu says why one is refused. Commands go through the engine.
@@ -119,7 +119,7 @@ export function createCounterMenu(session: GameSession, deps: CounterMenuDeps): 
       item("eliminate", "menu.eliminate", last && !combat, last ? undefined : "menu.onlyLastStep") +
       (lostStep ? item("replace", "menu.replacementStep", !replace) + (replace ? `<p class="menu-lock">${t(replace)}</p>` : "") : "") +
       item("disperse", s.dispersed ? "menu.removeDispersed" : "menu.placeDispersed", onMap, onMap ? undefined : "menu.onlyOnMap") +
-      item("ip", ip ? "menu.removeIp" : "menu.placeIp", onMap, onMap ? undefined : "menu.onlyOnMap") +
+      item("ip", ip ? "menu.removeIp" : "menu.placeIp", onMap && (ip || !engine.whyNotImprovedPosition(state, s.at)), onMap ? undefined : "menu.onlyOnMap") +
       `<div class="menu-group" role="group" aria-label="${t("menu.supplyMarker")}"><div class="menu-sep">${t("menu.supplyMarker")}</div>` +
       SUPPLY.map((status) => {
         const current = (state.supply?.[id] ?? "supplied") === status;

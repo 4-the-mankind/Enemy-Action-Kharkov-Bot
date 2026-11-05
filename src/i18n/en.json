@@ -152,6 +152,7 @@
     "noBotImpulse": "No Soviet impulse is waiting for a combat.",
     "ipTownCity": "{{hex}} is a town or city: no Improved Position there (14.22).",
     "ipNoUnit": "No unit in {{hex}} to hold an Improved Position.",
+    "ipUnfit": "No unit in {{hex}} may hold an Improved Position: dispersed, out of supply, isolated or outside Soviet support (14.22).",
     "combat": {
       "badHits": "Enter whole numbers of hits.",
       "chooseFirst": "Choose on the combat sheet how your units take their hits first.",

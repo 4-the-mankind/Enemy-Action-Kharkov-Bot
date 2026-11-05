@@ -360,6 +360,35 @@ describe("Improved Positions (9.7, 14.2)", () => {
     expect(left.state.improvedPositions).toEqual([]);
   });
 
+  it("placed by the player only where a unit is eligible: not dispersed, supplied, [GT 5+] Soviet in support (14.22)", () => {
+    const w = {
+      units: [sov("a", "01"), sov("b", "02"), ger("g"), ger("h"), ger("i"), ger("j")],
+      hexes: { "0303": { terrain: "city" as const }, "0404": { lineWest: "east" as const }, "0405": { lineWest: "west" as const } },
+    };
+    const engine = world(w);
+    const refused = (s: GameState, hex: string) => {
+      const why = engine.whyNotImprovedPosition(s, hex);
+      expect(engine.step(s, { type: "SetImprovedPosition", hex, placed: true }).events[0]).toMatchObject({ type: "CommandRejected", reason: why });
+      return why;
+    };
+    // Each German unit alone: dispersed, out of supply, isolated.
+    const alone = position({ at: { g: "0101", h: "0102", i: "0103", j: "0303", a: "0404", b: "0405" }, dispersed: ["g"], supply: { h: "outOfSupply", i: "isolated" } });
+    for (const hex of ["0101", "0102", "0103"]) expectMessage(refused(alone, hex), "reject.ipUnfit", { hex });
+    expectMessage(engine.whyNotImprovedPosition(alone, "0303"), "reject.ipTownCity", { hex: "0303" });
+    // Stacked with an eligible unit: allowed.
+    const stacked = position({ at: { g: "0101", h: "0101", i: "0101", j: "0101", a: "0404", b: "0405" }, dispersed: ["g"], supply: { h: "outOfSupply", i: "isolated" } });
+    expect(engine.whyNotImprovedPosition(stacked, "0101")).toBeNull();
+    expect(engine.step(stacked, { type: "SetImprovedPosition", hex: "0101", placed: true }).state.improvedPositions).toEqual(["0101"]);
+    // Soviet units: all hexes in support before GT 5; on GT 5, 0405 is west of the support line.
+    expect(engine.whyNotImprovedPosition(alone, "0405")).toBeNull();
+    const gt5 = { ...alone, turn: 5 };
+    expect(engine.whyNotImprovedPosition(gt5, "0404")).toBeNull();
+    expectMessage(refused(gt5, "0405"), "reject.ipUnfit", { hex: "0405" });
+    // Removing one is always allowed.
+    const removed = engine.step({ ...gt5, improvedPositions: ["0405"] }, { type: "SetImprovedPosition", hex: "0405", placed: false });
+    expect(removed.state.improvedPositions).toEqual([]);
+  });
+
   it("removed when all the units in its hex attack (14.24)", () => {
     const w = { units: [sov("a", "01"), sov("b", "02"), sov("c", "03"), sov("x", "20", { armyOrCorps: "1G" }), ger("g", 3)] };
     const at = { a: "0504", b: "0404", c: "0604", g: "0505" };

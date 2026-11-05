@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.3.0-SNAPSHOT
+
+### Fixes
+
+- **Counter menu, Place Improved Position:** the option is now greyed where no Improved Position may go: a town or city hex, or a hex whose units are all dispersed, out of supply or isolated (or, from Game-turn 5, Soviet units outside Soviet support). A unit stacked with an eligible unit may still receive one. Before, clicking it in a town or city did nothing, and it placed one on ineligible units.
+
 ## 0.2.0
 
 ### Fixes
