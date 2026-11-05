@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.3.0-SNAPSHOT
+## 0.3.0
 
 ### Fixes
 
