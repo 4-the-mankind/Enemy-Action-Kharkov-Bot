@@ -59,7 +59,8 @@ function readImpulse(events: GameEvent[], depth: number, before?: Reading): Read
   return { depth, drawn, blocks };
 }
 
-export function mountBotPanel(parts: Parts, session: GameSession, player: MovePlayer, why: ReturnType<typeof mountWhyPanel>) {
+/** `fitMap` frames the whole map (Fit map, key 0): once as a new activation starts moving. */
+export function mountBotPanel(parts: Parts, session: GameSession, player: MovePlayer, why: ReturnType<typeof mountWhyPanel>, fitMap: () => void) {
   const engine = session.engine;
   const cards = engine.sovietCards;
   /** The activation on show, and the undo depth that takes it back. */
@@ -280,6 +281,8 @@ export function mountBotPanel(parts: Parts, session: GameSession, player: MovePl
       picked = false;
       why.place(null);
       why.show(null);
+      // Q136: the whole map in view as the bot starts moving; a zoom or pan after that is kept (Replay all keeps the view).
+      fitMap();
       playCurrent();
     } else if (current && (session.depth < current.depth || impulse || newTurn)) {
       // The activation was undone (or a new position loaded, or an impulse without one): its trails and slip go too.

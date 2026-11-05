@@ -6,6 +6,10 @@
 
 - **Counter menu, Place Improved Position:** the option is now greyed where no Improved Position may go: a town or city hex, or a hex whose units are all dispersed, out of supply or isolated (or, from Game-turn 5, Soviet units outside Soviet support). A unit stacked with an eligible unit may still receive one. Before, clicking it in a town or city did nothing, and it placed one on ineligible units.
 
+### Improvements
+
+- **Bot moves:** the map is fitted to the window (as with Fit map, key 0) when a new bot activation starts moving. Zooming or panning while the units move is kept until the end; Replay all moves keeps your view.
+
 ## 0.2.0
 
 ### Fixes

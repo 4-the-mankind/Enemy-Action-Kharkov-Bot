@@ -117,7 +117,7 @@ async function init() {
   });
   player.onPlaying((playing) => supply.setHeld(playing));
   const why = mountWhyPanel($("why"), session, player);
-  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why);
+  const bot = mountBotPanel({ deck: $("deck"), activate: $("activate"), reading: $("reading"), orders: $("orders"), status: $("bot") }, session, player, why, () => view.resetView());
   mountStartNotice($("startNotice"), session, setUpTurn1);
   mountReminders($("reminders"), session);
   mountGameEnd($("gameEnd"), session, game.calendar);
