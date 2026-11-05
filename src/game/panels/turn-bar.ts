@@ -1,6 +1,7 @@
 // Turn bar (§3bis A, task 4.6b) over the map: game-turn / 14 and its dates, the Soviet impulse,
 // the VP chip with the outcome label "if the VPs stay so" (18.35, Q85: grey when no check would
-// end the game, the levels in a slip on click, Q89), Kharkov's owner (slip on click), then Undo and Redo (Q117), "Run bot impulse" (ends your
+// end the game, the levels in a slip on click, Q89), the Soviet support line and operational
+// limit in use (13.51, 9.8; Q139-Q141: greyed before their game-turn, a slip on click), Kharkov's owner (slip on click), then Undo and Redo (Q117), "Run bot impulse" (ends your
 // German impulse, D14) and "Next turn" / "End the game", both waiting while the supply notice is open (Q119).
 // Under it, the tags bar (§3bis H, Q86): the state tags of the moment, and "Add event", the
 // German events only the app can play (Q77, Q87: moved here from the Bot tab).
@@ -13,7 +14,7 @@ import type { GameSession } from "../state/session";
 import { resultName } from "./log-panel";
 import { infoAttrs, mountInfoPop } from "./info-pop";
 import type { SupplyNotice } from "./supply-notice";
-import { infoSlip, tagChip } from "./tag-chip";
+import { infoSlip, tagChip, tagIcon } from "./tag-chip";
 import { msg, t } from "../../i18n/i18n";
 import { staticUrl } from "../../ui/static-url";
 
@@ -27,6 +28,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
   mountInfoPop();
   bar.innerHTML = `<div class="tb-turn"></div>
     <div class="tb-vp"></div>
+    <div class="tb-lines" role="group" aria-label="${esc(t("turnBar.lines"))}"></div>
     <div class="tb-owner"></div>
     <div class="tb-actions">
       <button type="button" class="btn switch" data-action="undo" aria-keyshortcuts="Control+Z" title="${esc(t("page.undoHint"))}">${t("page.undo")} <span class="keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></span></button>
@@ -36,6 +38,7 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
     </div>
     <p class="tb-reason" role="status"></p>`;
   const turn = bar.querySelector<HTMLElement>(".tb-turn")!, vp = bar.querySelector<HTMLElement>(".tb-vp")!;
+  const lines = bar.querySelector<HTMLElement>(".tb-lines")!;
   const kharkov = bar.querySelector<HTMLElement>(".tb-owner")!, reason = bar.querySelector<HTMLElement>(".tb-reason")!;
   const undo = bar.querySelector<HTMLButtonElement>("[data-action=undo]")!;
   const redo = bar.querySelector<HTMLButtonElement>("[data-action=redo]")!;
@@ -115,6 +118,11 @@ export function mountTurnBar(bar: HTMLElement, tagsBar: HTMLElement, session: Ga
     turn.innerHTML = `<b>${t("turnBar.turn", { turn: state.turn, last: LAST_TURN })}</b>` +
       (space ? `<small>${esc(space.dates)}</small>` : "") + `<span class="tb-phase">${phase}</span>`;
     vp.innerHTML = `<span class="vp-chip" title="${esc(t("turnBar.vpTitle"))}">${t("turnBar.vp", { vp: state.vp })}</span>${outlookLabel(state)}`;
+    lines.innerHTML = engine.lines(state).map((l) => {
+      const foot = `${t("tag.slipRule", { rule: l.rule })} · ${t(l.until)}`;
+      return `<span class="tb-line ${l.id}${l.active ? "" : " off"}"${infoAttrs(infoSlip(tagIcon(l.id), t(l.name), t(l.effect), foot))}>` +
+        `${tagIcon(l.id)}${esc(t(l.name))}</span>`;
+    }).join("");
     const owner = engine.kharkov(state);
     const marker = `<img src="${staticUrl("assets/counters/others/")}${owner === "soviet" ? "marker-sovietownership26.png" : "marker-germanownership.png"}" alt="">`;
     const name = t("turnBar.kharkov", { side: sideName(owner) });

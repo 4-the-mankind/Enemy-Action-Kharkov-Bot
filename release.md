@@ -10,6 +10,7 @@
 
 ### Improvements
 
+- **Turn bar, Soviet lines:** the Soviet support line and the operational limit in use are shown next to the VPs, greyed before they apply (game-turns 5 and 6). A click explains each line, which line applies at which VP level, and from when. They no longer show in the conditions bar under it.
 - **Bot moves:** the map is fitted to the window (as with Fit map, key 0) when a new bot activation starts moving. Zooming or panning while the units move is kept until the end; Replay all moves keeps your view.
 
 ## 0.2.0

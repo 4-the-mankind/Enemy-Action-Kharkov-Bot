@@ -1,12 +1,13 @@
 // State tags (§3bis H, task 4.6b, Q86): the conditions the bot reads, read from the game state
-// (ground 18.33-18.34, support 13.51 and Forward Support 13.53, operational limit 9.8, Soviet
-// desperation 9.22, OKW Expedites, STAVKA out of play 8.2 / 18.34). And the tags each event
+// (ground 18.33-18.34, Forward Support 13.53, Soviet desperation 9.22, OKW Expedites, STAVKA out
+// of play 8.2 / 18.34); the support line 13.51 and the operational limit 9.8 are shown in the
+// turn bar instead, in effect or not yet (lines, Q139-Q141). And the tags each event
 // cites (Q88): tagEvents marks the events, the "Why this move" steps and the skipped methods
 // whose messages come from a tagged rule, plus the events that are about a tag themselves.
 import { msg, type Message, type MessageKey } from "../i18n/message";
 import { frontName } from "./names";
 import type { PendingRules } from "./pending";
-import type { DecisionStep, GameEvent, GameState, ObjectiveFront, SkippedMethod, StateTag, TagId } from "./types";
+import type { DecisionStep, GameEvent, GameState, LineStatus, ObjectiveFront, SkippedMethod, StateTag, TagId } from "./types";
 import { MAX_FORWARD_SUPPORT } from "./types";
 
 /** 8.2: STAVKA, out of play from Game-turn 7 (18.34: at once in heavy mud). */
@@ -102,6 +103,35 @@ export function tagEvents(events: GameEvent[]): GameEvent[] {
 export function createTags(rules: PendingRules) {
   const turnOnly = (turn: number) => msg("tag.until.turn", { turn });
 
+  /**
+   * The Soviet lines of the turn bar (Q139-Q141), always shown: greyed before their game-turn.
+   * The support line and the operational limit are no state tags any more (Q139: no chip twice).
+   */
+  function lines(state: GameState): LineStatus[] {
+    const withoutObjective = FRONTS.filter((f) => !state.objectives[f]);
+    // 13.51: the support line [GT 5+]; from GT 8, set in the Supply Phase by the VPs.
+    const line = rules.supportLine(state);
+    const support: LineStatus = line
+      ? {
+        id: "support", active: true, name: msg(`tag.support.name.${line}`), effect: msg("tag.support.effect"), rule: "13.51",
+        until: state.turn < 8 ? msg("tag.until.turn7") : state.supportLine ? turnOnly(state.turn) : msg("tag.until.supplyPhase"),
+      }
+      : { id: "support", active: false, name: msg("tag.support.name.none"), effect: msg("tag.support.effectInactive"), rule: "13.5", until: msg("tag.until.fromTurn", { turn: 5 }) };
+    // 9.8 [GT 6+]: far with 21 VPs or more, near otherwise; for the fronts without an objective
+    // marker, in effect even while no front is subject (Q141).
+    const limit = rules.operationalLimit(state);
+    const operationalLimit: LineStatus = limit
+      ? {
+        id: "operationalLimit", active: true, name: msg(`tag.operationalLimit.name.${limit}`),
+        effect: withoutObjective.length
+          ? msg("tag.operationalLimit.effect", { fronts: withoutObjective.map(frontName) })
+          : msg("tag.operationalLimit.effectNone"),
+        rule: "9.8", until: msg(limit === "far" ? "tag.until.vpAtLeast" : "tag.until.vpAtMost", { vp: limit === "far" ? 21 : 20 }),
+      }
+      : { id: "operationalLimit", active: false, name: msg("tag.operationalLimit.name.none"), effect: msg("tag.operationalLimit.effectInactive"), rule: "9.8", until: msg("tag.until.fromTurn", { turn: 6 }) };
+    return [support, operationalLimit];
+  }
+
   /** The state tags of the moment, in the order of the bar (Q86). */
   function tags(state: GameState): StateTag[] {
     const out: StateTag[] = [];
@@ -112,29 +142,12 @@ export function createTags(rules: PendingRules) {
       const g = rules.ground(state);
       out.push({ id: g, name: msg(`tag.${g}.name`), effect: msg(`tag.${g}.effect`), rule: g === "frozen" ? "18.33" : "18.34", until: turnOnly(state.turn) });
     }
-    // 13.51: the support line [GT 5+]; from GT 8, set in the Supply Phase by the VPs.
-    if (state.turn >= 5) {
-      const line = state.turn < 8 ? "west" : state.supportLine ?? (vp >= 21 ? "west" : "east");
-      const until = state.turn < 8 ? msg("tag.until.turn7") : state.supportLine ? turnOnly(state.turn) : msg("tag.until.supplyPhase");
-      out.push({ id: "support", name: msg(`tag.support.name.${line}`), effect: msg("tag.support.effect"), rule: "13.51", until });
-    }
     // 13.53: Forward Support markers, off the map at the end of the turn (13.54).
     const markers = state.forwardSupport ?? [];
     if (markers.length) {
       out.push({
         id: "forwardSupport", name: msg("tag.forwardSupport.name", { count: markers.length, max: MAX_FORWARD_SUPPORT }),
         effect: msg("tag.forwardSupport.effect", { hexes: markers }), rule: "13.53", until: turnOnly(state.turn),
-      });
-    }
-    // 9.8 [GT 6+]: far with 21 VPs or more, near otherwise; for the fronts without an objective marker.
-    const limit = rules.operationalLimit(state);
-    if (limit) {
-      out.push({
-        id: "operationalLimit", name: msg(`tag.operationalLimit.name.${limit}`),
-        effect: withoutObjective.length
-          ? msg("tag.operationalLimit.effect", { fronts: withoutObjective.map(frontName) })
-          : msg("tag.operationalLimit.effectNone"),
-        rule: "9.8", until: msg(limit === "far" ? "tag.until.vpAtLeast" : "tag.until.vpAtMost", { vp: limit === "far" ? 21 : 20 }),
       });
     }
     // 9.22: Soviet desperation, for the fronts that move by 9.22.
@@ -157,5 +170,5 @@ export function createTags(rules: PendingRules) {
     return out;
   }
 
-  return { tags };
+  return { tags, lines };
 }

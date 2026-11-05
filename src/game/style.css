@@ -66,6 +66,12 @@ kbd {
 .outlook.draw { color: #2b1d00; background: #e0b048; }
 .outlook.goesOn, .outlook.none { color: var(--paper-dim); background: rgb(232 228 211 / 0.1); font-weight: 500; }
 .outlook.final { outline: 1px solid currentColor; outline-offset: 1px; }
+/* The Soviet lines in use (13.51, 9.8; Q139-Q141): greyed before their game-turn. */
+.tb-lines { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.tb-line { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; white-space: nowrap; cursor: help; }
+.tb-line .tag-glyph { width: 20px; height: 20px; flex: none; }
+.tb-line.off { color: var(--paper-dim); opacity: 0.6; }
+.tb-line.off .tag-glyph { filter: grayscale(1); }
 .tb-kharkov { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: help; }
 .tb-kharkov img { width: 22px; height: 22px; border-radius: 2px; }
 .tb-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }

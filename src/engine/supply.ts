@@ -47,6 +47,8 @@ export interface SupplyRules {
   whyNoSupply(state: GameState, side: Side, hex: string): Message | null;
   /** 13.51, 13.53: the hex is in Soviet support. */
   inSovietSupport(state: GameState, hex: string): boolean;
+  /** 13.51: the Soviet support line in use, or null when every hex is in support (GT 1-4). */
+  supportLine(state: GameState): SupportLine | null;
   /** 9.8: the line in use, or null when the entire map is within the limit (GT 1-5). */
   operationalLimit(state: GameState): OperationalLimit | null;
   /**
@@ -249,10 +251,14 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     if (state.turn < 5) return true; // 13.5: prior to GT 5, all hexes are in support
     // 13.53: within five hexes of a Forward Support marker, through any terrain and units.
     if (state.forwardSupport?.some((m) => board.hexCount(m, hex) <= FORWARD_SUPPORT_RANGE)) return true;
+    return board.lineSide(supportLine(state) === "west" ? "lineWest" : "lineArtillery", hex) === "east";
+  }
+
+  function supportLine(state: GameState): SupportLine | null {
+    if (state.turn < 5) return null; // 13.5: prior to GT 5, all hexes are in support
     // 13.51: west line on GT 5-7; from GT 8, the line set in the Supply Phase by the VP at
     // the start of the turn (21 or more: west), the current VP until the phase is played.
-    const line: SupportLine = state.turn < 8 ? "west" : state.supportLine ?? (state.vp >= 21 ? "west" : "east");
-    return board.lineSide(line === "west" ? "lineWest" : "lineArtillery", hex) === "east";
+    return state.turn < 8 ? "west" : state.supportLine ?? (state.vp >= 21 ? "west" : "east");
   }
 
   function operationalLimit(state: GameState): OperationalLimit | null {
@@ -279,6 +285,7 @@ export function createSupply({ board, unit, garrisonAt }: SupplyData): SupplyRul
     },
     whyNoSupply,
     inSovietSupport,
+    supportLine,
     operationalLimit,
     beyondOperationalLimit(state, front, hex) {
       const limit = operationalLimit(state);

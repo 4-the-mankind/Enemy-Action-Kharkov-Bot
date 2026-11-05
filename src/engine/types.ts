@@ -117,6 +117,12 @@ export type TagId = "frozen" | "lightMud" | "heavyMud" | "support" | "forwardSup
 export interface StateTag { id: TagId; name: Message; effect: Message; rule: string; until: Message }
 
 /**
+ * A Soviet line shown in the turn bar next to the VPs (Q139-Q141): the support line (13.51) and
+ * the operational limit (9.8), not yet in effect before their game-turn (`active` false).
+ */
+export interface LineStatus extends StateTag { id: "support" | "operationalLimit"; active: boolean }
+
+/**
  * What the victory check of the current game-turn would give if the VPs stay as they are
  * (18.35, Q85): no check this turn (before GT 4, heavy mud), or its outcome with the levels.
  */

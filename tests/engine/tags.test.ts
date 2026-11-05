@@ -3,7 +3,7 @@ import { parseSovietCards } from "../../src/core/soviet-cards";
 import { parseUnits } from "../../src/core/units";
 import { createEngine } from "../../src/engine/engine";
 import { tagEvents } from "../../src/engine/tags";
-import { emptyState, type GameEvent, type GameState, type StateTag, type TagId } from "../../src/engine/types";
+import { emptyState, type GameEvent, type GameState, type LineStatus, type StateTag, type TagId } from "../../src/engine/types";
 import type { CalendarSpace } from "../../src/engine/victory";
 import { msg } from "../../src/i18n/message";
 import { expectMessage } from "../i18n/expect-message";
@@ -23,34 +23,6 @@ describe("State tags (§3bis H, Q86)", () => {
   // position() keeps the Southwest objective marker on the map: the Voronezh Front has none.
   const at = (turn: number, vp: number, extra: Partial<GameState> = {}) => position({ at: {}, turn, extra: { vp, ...pile(), ...extra } });
 
-  it("none before Game-turn 5; the west support line on GT 5-7", () => {
-    expect(engine.tags(at(4, 20))).toEqual([]);
-    const s = tag(engine.tags(at(5, 20)), "support");
-    expect(s.rule).toBe("13.51");
-    expectMessage(s.name, "tag.support.name.west", {});
-    expectMessage(s.until, "tag.until.turn7", {});
-  });
-
-  it("[GT 8+] the support line set in the Supply Phase, or by the VPs until then (13.51)", () => {
-    const before = tag(engine.tags(at(8, 20)), "support");
-    expectMessage(before.name, "tag.support.name.east", {});
-    expectMessage(before.until, "tag.until.supplyPhase", {});
-    const set = tag(engine.tags(at(8, 20, { supportLine: "west" })), "support");
-    expectMessage(set.name, "tag.support.name.west", {});
-    expectMessage(set.until, "tag.until.turn", { turn: 8 });
-  });
-
-  it("[GT 6+] operational limit, near or far by the VPs, for the fronts without objective marker (9.8)", () => {
-    expect(ids(engine.tags(at(5, 20)))).not.toContain("operationalLimit");
-    const near = tag(engine.tags(at(6, 20)), "operationalLimit");
-    expectMessage(near.name, "tag.operationalLimit.name.near", {});
-    expectMessage(near.effect, "tag.operationalLimit.effect", { fronts: [msg("names.front.voronezh")] });
-    expectMessage(near.until, "tag.until.vpAtMost", { vp: 20 });
-    const far = tag(engine.tags(at(6, 21, { objectives: { voronezh: { at: "0101", face: "west" }, southwest: { at: "0910", face: "west" } } })), "operationalLimit");
-    expectMessage(far.name, "tag.operationalLimit.name.far", {});
-    expectMessage(far.effect, "tag.operationalLimit.effectNone", {});
-  });
-
   it("Soviet desperation below 19 VPs, for the fronts moving by 9.22", () => {
     expect(ids(engine.tags(at(5, 19)))).not.toContain("desperation");
     expect(ids(engine.tags(at(4, 18)))).not.toContain("desperation");
@@ -64,13 +36,62 @@ describe("State tags (§3bis H, Q86)", () => {
       ground: { turns: { 7: "lightMud" }, aside: [] }, forwardSupport: ["0505", "0707"],
       sovietCards: { drawPile: [], removed: ["e22"], lastDrawn: [], seed: 7 },
     });
-    expect(ids(engine.tags(s))).toEqual(["lightMud", "support", "forwardSupport", "operationalLimit", "stavkaRemoved"]);
+    expect(ids(engine.tags(s))).toEqual(["lightMud", "forwardSupport", "stavkaRemoved"]);
     expect(tag(engine.tags(s), "lightMud").rule).toBe("18.34");
     expectMessage(tag(engine.tags(s), "forwardSupport").name, "tag.forwardSupport.name", { count: 2, max: 2 });
     expect(tag(engine.tags(s), "stavkaRemoved").rule).toBe("8.2");
     expect(tag(engine.tags({ ...s, ground: { turns: { 7: "heavyMud" }, aside: [] } }), "stavkaRemoved").rule).toBe("18.34");
     expect(ids(engine.tags(at(4, 20, { okwExpedites: true })))).toEqual(["okwExpedites"]);
     expect(ids(engine.tags(at(5, 20, { okwExpedites: true })))).not.toContain("okwExpedites");
+  });
+});
+
+describe("Soviet lines of the turn bar (13.51, 9.8; Q139-Q141)", () => {
+  const engine = world({ units: [] });
+  const at = (turn: number, vp: number, extra: Partial<GameState> = {}) => position({ at: {}, turn, extra: { vp, ...pile(), ...extra } });
+  const line = (state: GameState, id: LineStatus["id"]) => engine.lines(state).find((l) => l.id === id)!;
+
+  it("no chip twice: the support line and the operational limit are no state tags (Q139)", () => {
+    expect(ids(engine.tags(at(8, 20)))).not.toContain("support");
+    expect(ids(engine.tags(at(8, 20)))).not.toContain("operationalLimit");
+    expect(engine.lines(at(1, 20)).map((l) => l.id)).toEqual(["support", "operationalLimit"]);
+  });
+
+  it("support: greyed before Game-turn 5, then the west line on GT 5-7", () => {
+    const off = line(at(4, 20), "support");
+    expect(off.active).toBe(false);
+    expectMessage(off.name, "tag.support.name.none", {});
+    expectMessage(off.until, "tag.until.fromTurn", { turn: 5 });
+    const s = line(at(5, 20), "support");
+    expect(s.active).toBe(true);
+    expect(s.rule).toBe("13.51");
+    expectMessage(s.name, "tag.support.name.west", {});
+    expectMessage(s.until, "tag.until.turn7", {});
+  });
+
+  it("[GT 8+] the support line set in the Supply Phase, or by the VPs until then (13.51)", () => {
+    const before = line(at(8, 20), "support");
+    expectMessage(before.name, "tag.support.name.east", {});
+    expectMessage(before.until, "tag.until.supplyPhase", {});
+    const set = line(at(8, 20, { supportLine: "west" }), "support");
+    expectMessage(set.name, "tag.support.name.west", {});
+    expectMessage(set.until, "tag.until.turn", { turn: 8 });
+  });
+
+  it("operational limit: greyed before Game-turn 6, then near or far by the VPs, active even with no front subject (9.8, Q141)", () => {
+    const off = line(at(5, 20), "operationalLimit");
+    expect(off.active).toBe(false);
+    expectMessage(off.name, "tag.operationalLimit.name.none", {});
+    expectMessage(off.until, "tag.until.fromTurn", { turn: 6 });
+    const near = line(at(6, 20), "operationalLimit");
+    expect(near.active).toBe(true);
+    expectMessage(near.name, "tag.operationalLimit.name.near", {});
+    expectMessage(near.effect, "tag.operationalLimit.effect", { fronts: [msg("names.front.voronezh")] });
+    expectMessage(near.until, "tag.until.vpAtMost", { vp: 20 });
+    const far = line(at(6, 21, { objectives: { voronezh: { at: "0101", face: "west" }, southwest: { at: "0910", face: "west" } } }), "operationalLimit");
+    expect(far.active).toBe(true);
+    expectMessage(far.name, "tag.operationalLimit.name.far", {});
+    expectMessage(far.effect, "tag.operationalLimit.effectNone", {});
   });
 });
 

@@ -1984,6 +1984,7 @@
     "vp": "VP <b>{{vp}}</b>",
     "vpTitle": "Soviet victory points (17.1).",
     "kharkov": "Kharkov: {{side}}",
+    "lines": "Soviet support line and operational limit",
     "kharkovTitle": "Owner of Kharkov (14.1): a German victory needs it German-owned (18.35).",
     "level": {
       "strategic": "strategic",
@@ -2016,7 +2017,8 @@
       "vpAtMost": "While {{vp}} VP or fewer",
       "vpBelow": "While below {{vp}} VP",
       "turnStart": "Until game-turn {{turn}} starts",
-      "game": "Rest of the game"
+      "game": "Rest of the game",
+      "fromTurn": "From game-turn {{turn}}"
     },
     "frozen": {
       "name": "Frozen",
@@ -2039,11 +2041,13 @@
     "support": {
       "name": {
         "west": "Support: west line",
-        "east": "Support: east line"
+        "east": "Support: east line",
+        "none": "Support: whole map"
       },
       "short": "support",
-      "effect": "Soviet units east of the line are in support. Unsupported Soviet attacks and defenses get no combat tactics; unsupported units get no replacements or IP.",
-      "hint": "Soviet support (13.51-13.52): no combat tactics, replacements or IP outside support."
+      "effect": "Hexes east of the support line, or within five hexes of a Forward Support marker, are in Soviet support. Unsupported Soviet attacks and defenses get no combat tactics; unsupported units get no replacements or Improved Positions. West line on game-turns 5-7; from game-turn 8, west line with 21 VP or more at the start of the turn, east line (the artillery line) otherwise, set in the Supply Phase.",
+      "hint": "Soviet support (13.51-13.52): no combat tactics, replacements or IP outside support.",
+      "effectInactive": "Every hex is in Soviet support until game-turn 4. From game-turn 5, Soviet units west of the support line in use (and not near a Forward Support marker) lose combat tactics, replacements and Improved Positions. West line on game-turns 5-7; from game-turn 8, west line with 21 VP or more at the start of the turn, east line (the artillery line) otherwise, set in the Supply Phase."
     },
     "forwardSupport": {
       "name": "Forward Support {{count}}/{{max}}",
@@ -2054,12 +2058,14 @@
     "operationalLimit": {
       "name": {
         "near": "Operational limit: near",
-        "far": "Operational limit: far"
+        "far": "Operational limit: far",
+        "none": "Operational limit: none"
       },
       "short": "operational limit",
-      "effect": "Units of the fronts without objective marker ({{fronts}}) are held back beyond the line in their movement methods and placements.",
-      "effectNone": "No front is subject yet: both front objective markers are on the map.",
-      "hint": "Soviet operational limit (9.8): units of a front without objective marker are held back beyond the line."
+      "effect": "Units of the fronts without objective marker ({{fronts}}) are held back beyond the line in their movement methods and placements. Far line with 21 VP or more, near line (the west support line) with 20 VP or fewer, changing at once when the VPs do. No effect on supply or support.",
+      "effectNone": "No front is subject yet: both front objective markers are on the map. Far line with 21 VP or more, near line (the west support line) with 20 VP or fewer, changing at once when the VPs do. No effect on supply or support.",
+      "hint": "Soviet operational limit (9.8): units of a front without objective marker are held back beyond the line.",
+      "effectInactive": "The entire map is within the Soviet operational limit until game-turn 5. From game-turn 6, units of a front whose objective marker is removed are held back beyond the line in use in their movement methods and placements. Far line with 21 VP or more, near line (the west support line) with 20 VP or fewer, changing at once when the VPs do. No effect on supply or support."
     },
     "desperation": {
       "name": "Soviet desperation",

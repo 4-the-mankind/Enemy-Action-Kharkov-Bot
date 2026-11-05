@@ -27,7 +27,7 @@ import { createTags, tagEvents } from "./tags";
 import { createVictory, KHARKOV, LAST_TURN, type CalendarSpace } from "./victory";
 import {
   emptyState, isHex, MAX_FORWARD_SUPPORT, SOVIET_CARDS, type Actor, type Command, type Face, type GameEvent, type GameResult,
-  type GameState, type GermanSurrender, type Location, type ObjectiveFace, type ObjectiveFront, type Outlook, type Reminder, type StackMove, type StateTag, type StepResult,
+  type GameState, type GermanSurrender, type LineStatus, type Location, type ObjectiveFace, type ObjectiveFront, type Outlook, type Reminder, type StackMove, type StateTag, type StepResult,
   type SupplyMarker,
 } from "./types";
 
@@ -115,6 +115,8 @@ export interface Engine {
   whyNotDrop(state: GameState, units: string[], to: Location, free?: boolean): Message | null;
   /** The state tags of the moment (§3bis H, task 4.6b): the conditions the bot reads. */
   tags(state: GameState): StateTag[];
+  /** The support line and the operational limit, in effect or not yet (13.51, 9.8; Q139-Q141). */
+  lines(state: GameState): LineStatus[];
   /** What the victory check of this game-turn would give if the VPs stay as they are (18.35, Q85). */
   outlook(state: GameState): Outlook;
   /** Owner of Kharkov (18.35). */
@@ -993,6 +995,7 @@ export function createEngine(data: EngineData): Engine {
     whyNotDrop,
     unit: (id) => byId.get(id),
     tags: stateTags.tags,
+    lines: stateTags.lines,
     outlook: (state) => victory.outlook(state, space(state.turn)),
     kharkov: (state) => (movement.townOwner(state, KHARKOV) === "soviet" ? "soviet" : "german"),
   };
