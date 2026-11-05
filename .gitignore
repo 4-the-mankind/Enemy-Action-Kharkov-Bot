@@ -20,3 +20,6 @@ scans/
 
 # throwaway UI mockups (served by the dev server, never committed)
 mockups/
+
+# Promotional poster (local only)
+docs/promo/
