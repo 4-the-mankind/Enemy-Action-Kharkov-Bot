@@ -1,3 +1,4 @@
+<img width="2160" height="2700" alt="00-poster" src="https://github.com/user-attachments/assets/ed0d27ea-67c8-44c4-8357-16d3195c9d86" />
 <!-- MEDIA 00-poster.png -->
 
 # EA Kharkov Bot
@@ -48,6 +49,7 @@ The map and the counters are optional. The app shows the whole situation on its 
 - **Combat, guided.** A combat sheet walks you through the 9 steps of a combat: reserves, tactics, chits, hits, losses, retreats and advances.
 - **Supply, checked.** The German and Soviet supply lines are drawn on the map, and the Supply Phase is done for you.
 - **The whole campaign.** Set-up adjustments, reinforcements, events, ground conditions, victory points and the end-of-game check.
+<img width="720" height="450" alt="gif-soviet-move" src="https://github.com/user-attachments/assets/f6224d98-0a81-4888-96f0-e75b2ce92492" />
 
 <!-- MEDIA gif-soviet-move.gif -->
 
@@ -56,18 +58,22 @@ The map and the counters are optional. The app shows the whole situation on its 
 ## How to start a game
 
 **1. Open the menu and click Start.**
+<img width="1240" height="740" alt="01-start" src="https://github.com/user-attachments/assets/35b7fa83-8c0e-4449-9246-7f0a2b7bc0a4" />
 
 <!-- MEDIA 01-start.png -->
 
 **2. Click Set up turn 1.** The counters go to their start hexes, the turn 1 units to their reserve box and the later units to the calendar of reinforcements.
+<img width="1040" height="420" alt="02-setup" src="https://github.com/user-attachments/assets/559b3b8b-93e9-4434-b7be-b2906bd90c99" />
 
 <!-- MEDIA 02-setup.png -->
 
 **3. Pick the set-up adjustment, then click Start.** Roll the die or pick a row of the table (1). The bot plays the outcome of the Soviet initial assault. When you're done, click Start (2) and your first German impulse begins.
+<img width="1120" height="900" alt="03-adjustment" src="https://github.com/user-attachments/assets/592b84dc-6ed8-4b86-a0c8-486d4c90f2e7" />
 
 <!-- MEDIA 03-adjustment.png -->
 
 ## What the header shows
+<img width="2320" height="276" alt="04-header" src="https://github.com/user-attachments/assets/54208438-6475-45e0-ad6b-2dd5af4174ba" />
 
 <!-- MEDIA 04-header.png -->
 
@@ -90,70 +96,84 @@ Click any item of the top line to read what it means and which rule applies.
 ## Playing a Soviet impulse
 
 Play your German impulse on the map: hold a counter to pick it up, drag it and drop it on its new hex. The app checks the move. When you're done, **click Run bot impulse**. You don't need to end your impulse in any other way.
+<img width="1120" height="400" alt="05a-run-impulse" src="https://github.com/user-attachments/assets/50cabc5c-da1e-4b2e-8299-e3d2102f0a6f" />
 
 <!-- MEDIA 05a-run-impulse.png -->
 
 The bot draws its cards. The Bot tab shows the card that commands, the auxiliary card and the orders read from them.
+<img width="390" height="230" alt="gif-card-draw" src="https://github.com/user-attachments/assets/17abe83c-10c7-49bc-b9ce-c0ce1785da16" />
 
 <!-- MEDIA gif-card-draw.gif -->
 
 Then the Soviet units move one after the other. In the Bot tab, click a unit to see why it moved there: the method, the hexes kept at each step, the tie-break. **Replay all moves** plays the whole activation again, and **Clear trails** wipes the red trails off the map.
+<img width="800" height="1440" alt="05-bot-impulse" src="https://github.com/user-attachments/assets/edf235de-d784-4f7f-bf7d-7fccbaaf0e40" />
 
 <!-- MEDIA 05-bot-impulse.png -->
 
 ## Attacking as the Germans
 
 **1. Select your attacking units.** Click a counter (1), then Ctrl + click to add another one (2). Shift + click adds a whole stack.
+<img width="760" height="460" alt="06-attack-select" src="https://github.com/user-attachments/assets/7023d027-217b-4488-b46a-39aa9ba099c3" />
 
 <!-- MEDIA 06-attack-select.png -->
 
 **2. Right-click the Soviet hex and choose Attack.**
+<img width="1040" height="840" alt="07-attack-menu" src="https://github.com/user-attachments/assets/021e6bc8-feea-4d98-a2c8-4a8b98ddd02f" />
 
 <!-- MEDIA 07-attack-menu.png -->
 
 **3. Follow the combat sheet.** It opens in the Combat tab. Tick the tactic cards you play from your hand, then go on step by step: the Soviet card, the chits you draw from the bowl, the hits printed on the chits you keep, the losses, the retreats and your advance. The bot plays the Soviet side of each step.
+<img width="800" height="1680" alt="08-attack-sheet" src="https://github.com/user-attachments/assets/326308c6-71de-44c0-90b4-c0ce2f8ac83c" />
 
 <!-- MEDIA 08-attack-sheet.png -->
 
 ## Defending against a Soviet attack
 
 When the bot attacks, the combat sheet opens by itself. The bot has already chosen its reserves and tactics. Tick the tactic cards you play from your hand, or click **Continue without tactics**, then follow the steps as in your own attacks.
+<img width="800" height="1760" alt="09-defend" src="https://github.com/user-attachments/assets/d6adf79f-2560-4748-99a6-967cce931bb9" />
 
 <!-- MEDIA 09-defend.png -->
 
 ## Checking supply
 
 **Click German supply (G)** to draw the supply line of every German unit, or **Soviet supply (S)** for the Soviet units. The lines run from each unit to its supply source. Point at a hex to see the line of the units in it.
+<img width="1560" height="940" alt="10-supply" src="https://github.com/user-attachments/assets/ea4149ba-73ee-44a7-a629-7c18c7ee3ea0" />
 
 <!-- MEDIA 10-supply.png -->
+<img width="720" height="450" alt="gif-german-supply" src="https://github.com/user-attachments/assets/5383c718-9e73-4507-bd77-820c27c15403" />
 
 <!-- MEDIA gif-german-supply.gif -->
 
 ## Next turn and the Supply Phase
 
 At the end of the game-turn, **click Next turn**. A notice lists what the Supply Phase did, one step after the other: Soviet garrisons placed, supply markers gained or removed, surrenders, and the support line and objectives removed when they apply. Click **Continue to command phase** to start the new turn.
+<img width="1040" height="560" alt="11-next-turn" src="https://github.com/user-attachments/assets/5e06720f-f3f3-46ed-b3e3-68f461415af0" />
 
 <!-- MEDIA 11-next-turn.png -->
 
 ## The counter menu
 
 **Right-click a counter** (1) to remove a step, eliminate it, place or remove a Dispersed marker, place an Improved Position, set its supply marker (In supply, Out of Supply, Isolated) or place a garrison. Options that don't apply are greyed out.
+<img width="760" height="840" alt="12-counter-menu" src="https://github.com/user-attachments/assets/fb3605b2-7eff-4a0f-936b-decb70fcab39" />
 
 <!-- MEDIA 12-counter-menu.png -->
 
 ## German events
 
 **Click Add event** to play a German event card: STAVKA Confused, OKW Expedites or Air Interdiction. The app applies its effect.
+<img width="800" height="600" alt="13-events" src="https://github.com/user-attachments/assets/d1891515-78c3-4e2c-84d7-8f525369f02b" />
 
 <!-- MEDIA 13-events.png -->
 
 ## Log and map overlays
 
 **The Log tab** keeps every action of the game, by turn and by impulse. Use the **Show** list to see one turn or all of them.
+<img width="800" height="1520" alt="14-log" src="https://github.com/user-attachments/assets/c43f45a6-47cc-4072-a4a3-f87c2dbb7599" />
 
 <!-- MEDIA 14-log.png -->
 
 **The Overlays tab** lays data sheets on the map, so you can see what the bot reads from it: hex grid, hex numbers, terrain, roads and rivers, movement arrows, objectives, support and limit lines, map edges and supply. It also has the map legend. Above the map, **Hide units (U)** clears the counters away so you can read the map underneath.
+<img width="1960" height="1400" alt="15-overlays" src="https://github.com/user-attachments/assets/3ebf60c7-30f7-47c8-bbb3-20cd8803fd50" />
 
 <!-- MEDIA 15-overlays.png -->
 
@@ -162,6 +182,7 @@ At the end of the game-turn, **click Next turn**. A notice lists what the Supply
 - **Menu → Save game** downloads your game as a file. **Menu → Load save** opens it again, with its whole log and undo history.
 - Nothing is kept in your browser: save before you close or reload the page. The app asks you first if the game has changed since your last save.
 - **Undo** (Ctrl + Z) takes back your last action and **Redo** (Ctrl + Y) plays it again. Undo stops at the start of your German impulse: the bot's impulse can't be undone.
+<img width="1240" height="740" alt="16-save" src="https://github.com/user-attachments/assets/bbcf04db-4f47-4124-8908-1c94bcbf2348" />
 
 <!-- MEDIA 16-save.png -->
 
